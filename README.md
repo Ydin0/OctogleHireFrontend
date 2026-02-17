@@ -1,5 +1,25 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Authentication (Clerk)
+
+1. Copy `.env.local.example` to `.env.local`.
+2. Add your Clerk keys:
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+   - `CLERK_SECRET_KEY`
+3. Install dependencies:
+
+```bash
+npm install
+```
+
+### Auth Routes
+
+- Developer sign in: `/auth/developers/sign-in`
+- Developer sign up: `/auth/developers/sign-up`
+- Company sign in: `/auth/companies/sign-in`
+- Company sign up: `/auth/companies/sign-up`
+- Role selection: `/login`
+
 ## Getting Started
 
 First, run the development server:
