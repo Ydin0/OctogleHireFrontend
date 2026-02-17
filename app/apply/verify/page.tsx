@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSignIn } from "@clerk/nextjs";
@@ -38,7 +38,7 @@ const resolveClerkError = (error: unknown): string => {
   return "Unable to verify your account right now. Please try again.";
 };
 
-export default function ApplyVerifyPage() {
+function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isLoaded, signIn, setActive } = useSignIn();
@@ -214,5 +214,13 @@ export default function ApplyVerifyPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ApplyVerifyPage() {
+  return (
+    <Suspense>
+      <VerifyContent />
+    </Suspense>
   );
 }
