@@ -21,30 +21,36 @@ export const metadata: Metadata = {
   description: "Track the status of your OctogleHire developer application.",
 };
 
-const timeline = [
+type TimelineStatus = "completed" | "active" | "upcoming";
+
+const timeline: {
+  label: string;
+  status: TimelineStatus;
+  icon: typeof MessageSquare;
+}[] = [
   {
     label: "HR Communication Round",
-    status: "active" as const,
+    status: "active",
     icon: MessageSquare,
   },
   {
     label: "AI Technical Examination",
-    status: "upcoming" as const,
+    status: "upcoming",
     icon: Search,
   },
   {
     label: "Tech Lead Human Interview",
-    status: "upcoming" as const,
+    status: "upcoming",
     icon: UserCheck,
   },
   {
     label: "Background & Previous Company Checks",
-    status: "upcoming" as const,
+    status: "upcoming",
     icon: Clock,
   },
   {
     label: "Approved",
-    status: "upcoming" as const,
+    status: "upcoming",
     icon: Rocket,
   },
 ];
