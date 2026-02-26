@@ -135,7 +135,7 @@ const buildApplicationFormData = (
   formData.append("secondarySkills", values.secondarySkills ?? "");
   formData.append("certifications", values.certifications ?? "");
   formData.append("linkedinUrl", values.linkedinUrl);
-  formData.append("githubUrl", values.githubUrl);
+  formData.append("githubUrl", values.githubUrl ?? "");
   formData.append("portfolioUrl", values.portfolioUrl ?? "");
   formData.append("engagementType", JSON.stringify(values.engagementType));
 

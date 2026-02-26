@@ -30,7 +30,7 @@ export async function fetchPublicDevelopers(
 
     const response = await fetch(url, {
       method: "GET",
-      cache: "no-store",
+      next: { revalidate: 30 },
     });
 
     if (!response.ok) return null;
@@ -51,7 +51,7 @@ export async function fetchPublicDeveloper(
       `${apiBaseUrl}/api/public/developers/${encodeURIComponent(slug)}`,
       {
         method: "GET",
-        cache: "no-store",
+        next: { revalidate: 60 },
       },
     );
 

@@ -4,14 +4,13 @@ import * as runtime from "react/jsx-runtime";
 import Image from "next/image";
 
 const sharedComponents = {
-  img: ({ src, alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => (
+  img: ({ src, alt }: React.ImgHTMLAttributes<HTMLImageElement>) => (
     <Image
-      src={src ?? ""}
+      src={typeof src === "string" ? src : ""}
       alt={alt ?? ""}
       width={800}
       height={450}
       className="rounded-lg"
-      {...(props as Record<string, unknown>)}
     />
   ),
 };

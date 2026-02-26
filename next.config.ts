@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  compress: true,
   images: {
     remotePatterns: [
       {
@@ -11,7 +13,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cdn.simpleicons.org",
       },
+      {
+        protocol: "https",
+        hostname: "deifkwefumgah.cloudfront.net",
+      },
     ],
+    formats: ["image/avif", "image/webp"],
   },
 };
 

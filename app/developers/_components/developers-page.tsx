@@ -198,6 +198,7 @@ const DevelopersPage = () => {
       return true;
     });
   }, [
+    developers,
     searchQuery,
     selectedStacks,
     selectedCountries,
