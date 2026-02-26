@@ -196,7 +196,7 @@ const ApplyForm = () => {
   const router = useRouter();
   const skipToForm = typeof window !== "undefined" && window.location.hash === "#apply-form";
   const [heroPhase, setHeroPhase] = useState(!skipToForm);
-  const [importPhase, setImportPhase] = useState(!skipToForm);
+  const [importPhase, setImportPhase] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
