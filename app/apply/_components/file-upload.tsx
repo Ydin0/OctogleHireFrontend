@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Upload, X, FileText, ImageIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -27,6 +27,17 @@ const FileUpload = ({
   const [preview, setPreview] = useState<string | null>(null);
 
   const isImage = accept.startsWith("image/") || accept.includes("image/");
+
+  // Generate preview when value is set externally (e.g. LinkedIn import)
+  useEffect(() => {
+    if (value && isImage && value.type.startsWith("image/") && !preview) {
+      const reader = new FileReader();
+      reader.onload = (e) => setPreview(e.target?.result as string);
+      reader.readAsDataURL(value);
+    } else if (!value) {
+      setPreview(null);
+    }
+  }, [value, isImage, preview]);
 
   const handleFile = useCallback(
     (file: File | null) => {

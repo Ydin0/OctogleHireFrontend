@@ -72,7 +72,7 @@ const CompanyOverviewPage = () => {
 
             <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
               <Button variant="outline" className="gap-2" asChild>
-                <Link href="/developers">
+                <Link href="/marketplace">
                   <Search className="size-4" />
                   Browse Talent
                 </Link>

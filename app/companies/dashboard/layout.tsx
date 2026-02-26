@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { DashboardShell } from "./_components/dashboard-shell";
-import { resolveDashboardPath } from "@/lib/auth/account-type";
+import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
+import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 
 export const metadata: Metadata = {
   title: "Company Dashboard | OctogleHire",
@@ -16,14 +17,15 @@ export default async function CompanyDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId, orgId } = await auth();
+  const { userId, getToken } = await auth();
 
   if (!userId) {
     redirect("/login");
   }
 
-  const user = await currentUser();
-  const destination = resolveDashboardPath({ user, orgId });
+  const token = await getToken();
+  const { accountType, orgId } = await fetchUserRole(token);
+  const destination = resolveDashboardPathFromRole(accountType, orgId);
 
   if (destination !== "/companies/dashboard") {
     redirect(destination);

@@ -1,0 +1,146 @@
+---
+title: "Technical Interviews Are Broken — Here's What Works Instead"
+description: "Traditional technical interviews fail to predict developer performance. Here's why the standard approach doesn't work and what high-performing engineering teams are doing differently."
+date: 2026-02-16
+author: "OctogleHire Team"
+image: "https://images.unsplash.com/photo-1758520144437-f068ecaf0d83?w=1200&h=630&fit=crop&q=80"
+tags: ["Hiring", "Interviews", "Engineering"]
+published: true
+---
+
+The technical interview is the most consequential and least effective part of the hiring process. Companies spend millions on recruiting infrastructure, employer branding, and sourcing pipelines — then evaluate candidates through a process that has weak correlation with actual job performance.
+
+The evidence is not ambiguous. Google's own internal research found that performance in their technical interviews had essentially no predictive power for on-the-job success. They changed their process. Most companies have not.
+
+If you are still asking candidates to reverse linked lists on a whiteboard, this post is for you.
+
+## Why traditional technical interviews fail
+
+### They test the wrong skills
+
+The canonical technical interview — a timed algorithmic challenge on a whiteboard or in a shared editor — tests a candidate's ability to recall and implement data structure manipulations under artificial pressure.
+
+This skill is almost entirely uncorrelated with the daily work of building software. A senior engineer who has spent 10 years building distributed payment systems may struggle to implement a trie from memory. A fresh bootcamp graduate who spent two months on LeetCode may breeze through it.
+
+Which one would you rather have on your team?
+
+### They disadvantage experienced engineers
+
+The developers who are best at their jobs are also the ones who have the least time to prepare for interviews. A staff engineer managing a critical production system does not have 40 hours to grind algorithm problems. A mid-level engineer between jobs does.
+
+The traditional interview format systematically selects for availability and preparation time rather than capability.
+
+### They create false negatives at scale
+
+For every developer who fails your algorithm interview but would have been an excellent hire, you have generated a false negative — a real cost measured in extended hiring timelines, team productivity gaps, and the opportunity cost of the person you could have had.
+
+Conservative estimates suggest that traditional technical interviews produce false negative rates between 30-50%. That means you are rejecting roughly a third of the qualified candidates who enter your process.
+
+### They do not test for remote collaboration
+
+Most technical interviews evaluate a candidate in isolation. Can they solve this problem alone, silently, under time pressure? But modern software engineering — especially in [remote-first teams](/blog/why-engineering-teams-are-going-remote) — is fundamentally collaborative.
+
+What you actually need to know:
+
+- Can this person give and receive code review feedback constructively?
+- Can they explain their technical decisions in writing?
+- Do they ask clarifying questions or make assumptions silently?
+- Can they pair program effectively through a screen?
+
+A whiteboard interview tells you none of this.
+
+## What works instead
+
+### Work sample tests on real codebases
+
+Instead of abstract algorithm challenges, give candidates a task that mirrors actual work:
+
+- Add a feature to an existing, realistic codebase
+- Fix a bug using production-like logs and error traces
+- Refactor a module with clear code quality issues
+
+The codebase should be small enough to understand in 15-20 minutes but realistic enough to test judgment. Include a README, existing tests, and a clear spec. Time-box it to 90 minutes maximum.
+
+This approach tests what you actually care about: can this person read existing code, understand a system, and make a meaningful contribution?
+
+### System design conversations (not interrogations)
+
+Replace the "design Twitter in 45 minutes" interrogation with a collaborative design conversation:
+
+1. Present a realistic problem from your actual domain
+2. Let the candidate ask clarifying questions (this is the most informative part)
+3. Work through the design together, probing trade-offs as they arise
+4. Focus on how they reason, not whether they hit specific predetermined answers
+
+A good system design conversation reveals depth of experience, communication style, and the ability to navigate ambiguity — all critical in remote roles.
+
+### Collaborative code review
+
+Give the candidate a pull request to review. A real one (anonymized). Ask them to provide written feedback as they would for a teammate.
+
+This exercise surfaces:
+
+- **Technical depth** — do they catch subtle issues?
+- **Communication tone** — are they constructive or adversarial?
+- **Prioritization** — do they distinguish between blocking issues and nits?
+- **Collaboration instinct** — do they explain the reasoning behind suggestions?
+
+Code review is something engineers do multiple times per day. It is a far more valid assessment of daily capability than implementing Dijkstra's algorithm.
+
+### Pair programming sessions
+
+Twenty minutes of pair programming reveals more about a candidate than two hours of solo coding. You observe:
+
+- How they navigate an unfamiliar codebase
+- Whether they communicate their thought process
+- How they respond when stuck
+- Whether they incorporate suggestions or dismiss them
+- Their debugging instincts and tool fluency
+
+The pair programming partner should be someone from the actual team — not a professional interviewer. The goal is to simulate a normal working interaction.
+
+## Structuring a modern interview process
+
+Here is the interview structure we recommend — and what we use in [our own vetting process](/blog/inside-our-vetting-process):
+
+**Stage 1: Async work sample** (90 minutes of candidate time)
+A realistic task completed on their own schedule within a 48-hour window. Evaluated by two reviewers using a structured rubric.
+
+**Stage 2: Live technical conversation** (60 minutes)
+- 20 minutes: system design discussion
+- 20 minutes: code review exercise
+- 20 minutes: pair programming
+
+**Stage 3: Team and values alignment** (30 minutes)
+Not culture fit. Working style alignment. How do they handle disagreements? What feedback do they want from their manager? What does a productive week look like for them?
+
+Total candidate time: approximately 3 hours. Total process duration: 7-10 days.
+
+This is fast enough to compete for top talent and thorough enough to make confident decisions.
+
+## Evaluating without bias
+
+Every interview stage should be scored independently using a predefined rubric before any group discussion. This prevents:
+
+- **Anchoring** — where one interviewer's strong opinion influences everyone else
+- **Halo effect** — where a strong performance in one area inflates scores in others
+- **Similarity bias** — where interviewers favor candidates who remind them of themselves
+
+The rubric should score specific, observable behaviors — not vague impressions. "Strong problem-solving skills" is not a useful rubric item. "Broke the problem into 3+ sub-problems before writing code" is.
+
+## The business case
+
+Companies that modernize their technical interview process see measurable improvements:
+
+- **Shorter time-to-hire** because fewer false negatives mean fewer pipeline restarts
+- **Higher offer acceptance rates** because candidates prefer respectful, relevant processes
+- **Lower regretted attrition** because the interview actually predicted job performance
+- **Stronger employer brand** because word travels fast in developer communities
+
+The cost of redesigning your interview process is trivial compared to the cost of a single bad hire or a quarter spent trying to fill a role that candidates keep declining.
+
+---
+
+Interviews should be a mutual evaluation, not a hazing ritual. The companies that understand this hire better people, faster.
+
+[See how OctogleHire's vetting process works](/blog/inside-our-vetting-process) or [start hiring pre-vetted developers](/companies/signup).

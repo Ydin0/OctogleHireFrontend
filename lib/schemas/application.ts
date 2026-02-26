@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PROFESSIONAL_TITLE_OPTIONS } from "@/lib/data/professional-titles";
 
 export const personalInfoSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -14,7 +15,13 @@ export const personalInfoSchema = z.object({
 });
 
 export const professionalInfoSchema = z.object({
-  professionalTitle: z.string().min(2, "Professional title is required"),
+  professionalTitle: z
+    .string()
+    .min(2, "Professional title is required")
+    .refine(
+      (val) => PROFESSIONAL_TITLE_OPTIONS.includes(val),
+      "Please select a title from the list",
+    ),
   yearsOfExperience: z.coerce
     .number()
     .min(0, "Must be 0 or more")
@@ -22,7 +29,9 @@ export const professionalInfoSchema = z.object({
   bio: z
     .string()
     .min(50, "Bio must be at least 50 characters")
-    .max(500, "Bio must be 500 characters or less"),
+    .max(2000, "Bio must be 2000 characters or less"),
+  salaryCurrency: z.string().min(1, "Currency is required"),
+  salaryAmount: z.coerce.number().min(0, "Must be 0 or more"),
 });
 
 export const workExperienceSchema = z.object({
@@ -32,6 +41,7 @@ export const workExperienceSchema = z.object({
   endDate: z.string().optional(),
   description: z.string().optional(),
   current: z.boolean().default(false),
+  companyLogoUrl: z.string().optional(),
 });
 
 export const workExperienceListSchema = z.object({
@@ -44,6 +54,7 @@ export const educationSchema = z.object({
   grade: z.string().optional(),
   startYear: z.string().optional(),
   endYear: z.string().optional(),
+  institutionLogoUrl: z.string().optional(),
 });
 
 export const educationListSchema = z.object({
@@ -68,12 +79,14 @@ export const linksSchema = z.object({
       "Must be a LinkedIn URL",
     ),
   githubUrl: z
-    .string()
-    .url("Please enter a valid URL")
-    .refine(
-      (url) => url.includes("github.com"),
-      "Must be a GitHub URL",
-    ),
+    .union([
+      z.string().url("Please enter a valid URL").refine(
+        (url) => url.includes("github.com"),
+        "Must be a GitHub URL",
+      ),
+      z.literal(""),
+    ])
+    .optional(),
   portfolioUrl: z
     .union([z.string().url("Please enter a valid URL"), z.literal("")])
     .optional(),

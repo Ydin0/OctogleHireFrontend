@@ -8,6 +8,9 @@ export const companyInfoSchema = z.object({
   companyWebsite: z
     .union([z.string().url("Please enter a valid URL"), z.literal("")])
     .optional(),
+  linkedinUrl: z
+    .union([z.string().url("Please enter a valid LinkedIn URL"), z.literal("")])
+    .optional(),
 });
 
 export const requirementsSchema = z.object({

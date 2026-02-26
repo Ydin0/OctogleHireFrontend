@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext, useFieldArray } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { GraduationCap, Plus, Trash2 } from "lucide-react";
 
 import type { Application } from "@/lib/schemas/application";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ const StepEducation = () => {
   const {
     register,
     control,
+    watch,
     formState: { errors },
   } = useFormContext<Application>();
 
@@ -27,6 +28,7 @@ const StepEducation = () => {
       grade: "",
       startYear: "",
       endYear: "",
+      institutionLogoUrl: "",
     });
   };
 
@@ -42,6 +44,7 @@ const StepEducation = () => {
 
       {fields.map((field, index) => {
         const fieldErrors = errors.education?.[index];
+        const logoUrl = watch(`education.${index}.institutionLogoUrl`);
 
         return (
           <div
@@ -49,9 +52,22 @@ const StepEducation = () => {
             className="space-y-3 rounded-lg border p-4"
           >
             <div className="flex items-start justify-between">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Education {index + 1}
-              </span>
+              <div className="flex items-center gap-2">
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt=""
+                    className="size-6 rounded object-contain"
+                  />
+                ) : (
+                  <div className="flex size-6 items-center justify-center rounded bg-muted">
+                    <GraduationCap className="size-3.5 text-muted-foreground" />
+                  </div>
+                )}
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Education {index + 1}
+                </span>
+              </div>
               <Button
                 type="button"
                 variant="ghost"

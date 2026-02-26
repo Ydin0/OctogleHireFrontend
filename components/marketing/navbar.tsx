@@ -2,22 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 
 import {
-  Book,
   Briefcase,
-  Code,
   FileText,
-  Globe,
-  GraduationCap,
   Menu,
   Rocket,
-  Shield,
-  Users,
-  Zap,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 
 import {
   Accordion,
@@ -57,36 +52,24 @@ interface NavbarProps {
 
 const menu: MenuItem[] = [
   {
-    title: "How It Works",
-    url: "#how-it-works",
+    title: "Marketplace",
+    url: "/marketplace",
   },
   {
     title: "For Companies",
     url: "/companies/signup",
     items: [
       {
-        title: "Hire Developers",
-        description: "Find pre-vetted engineers matched to your needs",
-        icon: <Users className="size-5 shrink-0" />,
-        url: "/companies/signup",
-      },
-      {
-        title: "Enterprise Solutions",
-        description: "Scalable hiring for large teams and organizations",
+        title: "Why OctogleHire",
+        description: "See how our platform helps you hire top engineering talent",
         icon: <Briefcase className="size-5 shrink-0" />,
-        url: "#",
+        url: "/",
       },
       {
-        title: "Compliance & Payments",
-        description: "Handle contracts and payments in 150+ countries",
-        icon: <Shield className="size-5 shrink-0" />,
-        url: "#",
-      },
-      {
-        title: "Success Stories",
-        description: "See how companies built world-class teams",
+        title: "Start Hiring",
+        description: "Sign up and post your first role in minutes",
         icon: <Rocket className="size-5 shrink-0" />,
-        url: "#",
+        url: "/companies/signup",
       },
     ],
   },
@@ -98,45 +81,19 @@ const menu: MenuItem[] = [
         title: "Why Join OctogleHire",
         description: "See how our developer network helps you land better roles",
         icon: <Rocket className="size-5 shrink-0" />,
-        url: "/developers/join",
+        url: "/apply",
       },
       {
         title: "Apply as a Developer",
         description: "Join our network of pre-vetted engineers",
         icon: <FileText className="size-5 shrink-0" />,
-        url: "/apply",
-      },
-      {
-        title: "Developer Dashboard",
-        description: "Manage your profile, status, and engagements",
-        icon: <Briefcase className="size-5 shrink-0" />,
-        url: "/developers/dashboard",
-      },
-      {
-        title: "Find Work",
-        description: "Browse opportunities from top global companies",
-        icon: <Code className="size-5 shrink-0" />,
-        url: "/developers",
-      },
-      {
-        title: "Skill Assessment",
-        description: "Showcase your abilities with verified assessments",
-        icon: <Zap className="size-5 shrink-0" />,
-        url: "#",
-      },
-      {
-        title: "Career Resources",
-        description: "Guides, tips, and tools to advance your career",
-        icon: <GraduationCap className="size-5 shrink-0" />,
-        url: "#",
-      },
-      {
-        title: "Developer Community",
-        description: "Connect with a global network of engineers",
-        icon: <Book className="size-5 shrink-0" />,
-        url: "#",
+        url: "/apply#apply-form",
       },
     ],
+  },
+  {
+    title: "Blog",
+    url: "/blog",
   },
   {
     title: "Compare",
@@ -149,6 +106,7 @@ const menu: MenuItem[] = [
 ];
 
 const Navbar = ({ className }: NavbarProps) => {
+  const { isSignedIn } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -184,11 +142,8 @@ const Navbar = ({ className }: NavbarProps) => {
         <nav className="hidden items-center justify-between lg:flex">
           <div className="flex items-center gap-6">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <Globe className="size-6" />
-              <span className="text-lg font-semibold tracking-tighter">
-                OctogleHire
-              </span>
+            <Link href="/" className="flex items-center">
+              <Logo width={130} height={30} />
             </Link>
             <div className="flex items-center">
               <NavigationMenu viewport={false}>
@@ -200,12 +155,20 @@ const Navbar = ({ className }: NavbarProps) => {
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/login">Sign In</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link href="/companies/signup">Start Hiring</Link>
-            </Button>
+            {isSignedIn ? (
+              <Button asChild size="sm">
+                <Link href="/auth/after-sign-in">Dashboard</Link>
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button asChild size="sm">
+                  <Link href="/companies/signup">Start Hiring</Link>
+                </Button>
+              </>
+            )}
           </div>
         </nav>
 
@@ -213,11 +176,8 @@ const Navbar = ({ className }: NavbarProps) => {
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <Globe className="size-6" />
-              <span className="text-lg font-semibold tracking-tighter">
-                OctogleHire
-              </span>
+            <Link href="/" className="flex items-center">
+              <Logo width={130} height={30} />
             </Link>
             <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -230,11 +190,8 @@ const Navbar = ({ className }: NavbarProps) => {
               <SheetContent className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle>
-                    <Link href="/" className="flex items-center gap-2">
-                      <Globe className="size-6" />
-                      <span className="text-lg font-semibold tracking-tighter">
-                        OctogleHire
-                      </span>
+                    <Link href="/" className="flex items-center">
+                      <Logo width={130} height={30} />
                     </Link>
                   </SheetTitle>
                 </SheetHeader>
@@ -248,12 +205,20 @@ const Navbar = ({ className }: NavbarProps) => {
                   </Accordion>
 
                   <div className="flex flex-col gap-3">
-                    <Button asChild variant="outline">
-                      <Link href="/login">Sign In</Link>
-                    </Button>
-                    <Button asChild>
-                      <Link href="/companies/signup">Start Hiring</Link>
-                    </Button>
+                    {isSignedIn ? (
+                      <Button asChild>
+                        <Link href="/auth/after-sign-in">Dashboard</Link>
+                      </Button>
+                    ) : (
+                      <>
+                        <Button asChild variant="outline">
+                          <Link href="/login">Sign In</Link>
+                        </Button>
+                        <Button asChild>
+                          <Link href="/companies/signup">Start Hiring</Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </SheetContent>

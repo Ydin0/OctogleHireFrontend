@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
 import { developers } from "@/lib/data/developers";
+import { fetchPublicDeveloper } from "@/lib/api/public-developers";
 import { DeveloperProfile } from "./_components/developer-profile";
 
 export function generateStaticParams() {
@@ -16,7 +17,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const developer = developers.find((d) => d.id === slug);
+
+  // Try API first, fall back to static
+  const apiDeveloper = await fetchPublicDeveloper(slug);
+  const developer = apiDeveloper ?? developers.find((d) => d.id === slug);
 
   if (!developer) {
     return { title: "Developer Not Found | OctogleHire" };
@@ -34,7 +38,10 @@ export default async function DeveloperProfileRoute({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const developer = developers.find((d) => d.id === slug);
+
+  // Try API first, fall back to static data
+  const apiDeveloper = await fetchPublicDeveloper(slug);
+  const developer = apiDeveloper ?? developers.find((d) => d.id === slug);
 
   if (!developer) {
     notFound();

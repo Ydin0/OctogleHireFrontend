@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 
+import { StandaloneHeader } from "@/components/shared/standalone-header";
 import { SignInForm } from "./_components/sign-in-form";
 
 export default async function LoginPage() {
@@ -13,7 +14,8 @@ export default async function LoginPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto flex min-h-screen items-center justify-center px-6 py-12">
+      <StandaloneHeader action={{ label: "Apply as Developer", href: "/apply" }} />
+      <div className="container mx-auto flex min-h-[calc(100vh-57px)] items-center justify-center px-6 py-12">
         <div className="w-full max-w-md space-y-6">
           <section className="space-y-4 text-center">
             <p className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-xs font-mono uppercase tracking-[0.08em] text-sky-700 dark:border-pulse/30 dark:bg-pulse/10 dark:text-pulse">

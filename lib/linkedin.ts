@@ -1,4 +1,5 @@
 import { MARKETPLACE_TECH_STACK_OPTIONS } from "@/lib/data/developers";
+import { PROFESSIONAL_TITLE_OPTIONS } from "@/lib/data/professional-titles";
 import type {
   Application,
   WorkExperience,
@@ -17,6 +18,9 @@ export interface ApifyExperience {
   description?: string;
   location?: string;
   jobStillWorking?: boolean;
+  logo?: string;
+  companyLogo?: string;
+  _companyLogoR2Url?: string;
 }
 
 export interface ApifyEducation {
@@ -27,6 +31,9 @@ export interface ApifyEducation {
     startedOn?: { year?: number };
     endedOn?: { year?: number };
   };
+  logo?: string;
+  schoolLogo?: string;
+  _institutionLogoR2Url?: string;
 }
 
 export interface ApifySkill {
@@ -143,6 +150,7 @@ const mapExperience = (exp: ApifyExperience[]): WorkExperience[] =>
       endDate: e.jobStillWorking ? "" : formatApifyDate(e.jobEndedOn),
       description: e.description || "",
       current: e.jobStillWorking ?? (!e.jobEndedOn),
+      companyLogoUrl: e._companyLogoR2Url || e.logo || e.companyLogo || "",
     }));
 
 const mapEducation = (edu: ApifyEducation[]): Education[] =>
@@ -154,7 +162,31 @@ const mapEducation = (edu: ApifyEducation[]): Education[] =>
       grade: e.grade || "",
       startYear: e.period?.startedOn?.year?.toString() ?? "",
       endYear: e.period?.endedOn?.year?.toString() ?? "",
+      institutionLogoUrl: e._institutionLogoR2Url || e.logo || e.schoolLogo || "",
     }));
+
+const normalizedTitleOptions = PROFESSIONAL_TITLE_OPTIONS.map((t) => ({
+  original: t,
+  lower: t.toLowerCase(),
+}));
+
+/** Try to match a LinkedIn headline to a curated title. Returns undefined if no match. */
+const matchHeadlineToTitle = (
+  headline: string | undefined,
+): string | undefined => {
+  if (!headline) return undefined;
+  const lower = headline.toLowerCase();
+
+  // Exact match
+  const exact = normalizedTitleOptions.find((t) => t.lower === lower);
+  if (exact) return exact.original;
+
+  // Headline contains a known title (e.g. "Senior Full-Stack Developer at Acme")
+  const contained = normalizedTitleOptions.find((t) => lower.includes(t.lower));
+  if (contained) return contained.original;
+
+  return undefined;
+};
 
 export type LinkedInFormValues = Partial<Application>;
 
@@ -168,8 +200,8 @@ export function mapProfileToFormValues(
 
   return {
     fullName: fullName || undefined,
-    bio: profile.about ? profile.about.slice(0, 500) : undefined,
-    professionalTitle: profile.headline || undefined,
+    bio: profile.about ? profile.about.slice(0, 2000) : undefined,
+    professionalTitle: matchHeadlineToTitle(profile.headline),
     locationCity: profile.addressWithoutCountry || undefined,
     locationState: profile.addressCountryOnly || undefined,
     linkedinUrl,

@@ -24,7 +24,22 @@ const ProfileWorkHistory = ({ developer }: ProfileWorkHistoryProps) => {
               <div className="flex gap-4">
                 {/* Company logo */}
                 <div className="hidden shrink-0 sm:block">
-                  {item.companyDomain ? (
+                  {item.companyLogoUrl ? (
+                    <img
+                      src={item.companyLogoUrl}
+                      alt={item.company}
+                      className="size-10 rounded-lg border border-border object-contain p-1"
+                      onError={(e) => {
+                        const el = e.target as HTMLImageElement;
+                        if (item.companyDomain) {
+                          el.src = `https://www.google.com/s2/favicons?domain=${item.companyDomain}&sz=128`;
+                          el.onerror = () => { el.style.display = "none"; };
+                        } else {
+                          el.style.display = "none";
+                        }
+                      }}
+                    />
+                  ) : item.companyDomain ? (
                     <img
                       src={`https://www.google.com/s2/favicons?domain=${item.companyDomain}&sz=128`}
                       alt={item.company}

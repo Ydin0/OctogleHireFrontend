@@ -142,10 +142,7 @@ export default function CompanySignupStatusPage() {
 
             <div className="mt-10 flex flex-wrap justify-center gap-3">
               <Button asChild variant="outline">
-                <Link href="/developers">Browse Developers</Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/companies/dashboard">Open Dashboard</Link>
+                <Link href="/marketplace">Browse Developers</Link>
               </Button>
               <Button asChild>
                 <Link href="/">Back to Home</Link>

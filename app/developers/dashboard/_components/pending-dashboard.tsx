@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import { Circle, Clock3, FileText } from "lucide-react";
+import { Circle, Clock3, FileText, Globe, LogOut } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
 
 import type { ApplicationTimelineItem } from "@/lib/developer-application";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const getInitials = (name: string) =>
   name
@@ -33,6 +37,8 @@ const PendingDashboard = ({
   status,
   timeline,
 }: PendingDashboardProps) => {
+  const { signOut } = useClerk();
+
   const statusLabel = status
     .split("_")
     .map((part) => part[0]?.toUpperCase() + part.slice(1))
@@ -40,6 +46,35 @@ const PendingDashboard = ({
 
   return (
     <main className="min-h-screen bg-background">
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur">
+        <div className="mx-auto flex items-center justify-between px-6 py-3">
+          <Link href="/" className="flex items-center gap-2 text-foreground transition-colors hover:text-foreground/80">
+            <Globe className="size-5" />
+            <span className="text-sm font-semibold">OctogleHire</span>
+          </Link>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Avatar className="size-7 border border-pulse/30">
+                <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
+                <AvatarFallback className="text-[10px]">{getInitials(displayName)}</AvatarFallback>
+              </Avatar>
+              <span className="hidden text-sm font-medium sm:inline">{displayName}</span>
+            </div>
+            <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground hover:text-foreground"
+              onClick={() => signOut({ redirectUrl: "/" })}
+            >
+              <LogOut className="size-4" />
+              <span className="sr-only">Sign out</span>
+            </Button>
+          </div>
+        </div>
+      </header>
+
       <div className="container mx-auto max-w-3xl px-6 py-10">
         <Card className="border-pulse/30 bg-gradient-to-br from-card to-pulse/5">
           <CardHeader>

@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { SlidersHorizontal } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { SlidersHorizontal, Lock } from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,10 +23,12 @@ import {
 } from "@/components/ui/sheet";
 import {
   COUNTRY_OPTIONS,
-  developers,
+  developers as staticDevelopers,
   JOB_TITLE_OPTIONS,
   MARKETPLACE_TECH_STACK_OPTIONS,
+  type Developer,
 } from "@/lib/data/developers";
+import { fetchPublicDevelopers } from "@/lib/api/public-developers";
 import { DeveloperGrid } from "./developer-grid";
 import { FiltersSidebar } from "./filters-sidebar";
 import { NoResults } from "./no-results";
@@ -72,6 +76,9 @@ function normalizeTitleForMatch(value: string): string {
 }
 
 const DevelopersPage = () => {
+  const { isSignedIn } = useAuth();
+  const [developers, setDevelopers] = useState<Developer[]>(staticDevelopers);
+  const [apiLoaded, setApiLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStacks, setSelectedStacks] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -81,6 +88,23 @@ const DevelopersPage = () => {
   const [availableOnly, setAvailableOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // Fetch live developers from API
+  useEffect(() => {
+    const load = async () => {
+      const params = isSignedIn
+        ? { limit: 100 }
+        : { featured: true, limit: 9 };
+      const result = await fetchPublicDevelopers(params);
+      if (result && result.developers.length > 0) {
+        setDevelopers(result.developers);
+        setApiLoaded(true);
+      }
+    };
+    load();
+  }, [isSignedIn]);
+
+  const showUnlockCta = !isSignedIn && apiLoaded;
 
   const countries = COUNTRY_OPTIONS;
   const titles = JOB_TITLE_OPTIONS;
@@ -377,36 +401,57 @@ const DevelopersPage = () => {
               <>
                 <DeveloperGrid developers={paginatedDevelopers} />
 
-                <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    Page {clampedCurrentPage} of {totalPages}
-                  </p>
-
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-pulse/30 hover:bg-pulse/10"
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.max(1, prev - 1))
-                      }
-                      disabled={clampedCurrentPage <= 1}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="border-pulse/30 hover:bg-pulse/10"
-                      onClick={() =>
-                        setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                      }
-                      disabled={clampedCurrentPage >= totalPages}
-                    >
-                      Next
+                {showUnlockCta && (
+                  <div className="mt-10 rounded-2xl border border-border bg-card p-8 text-center">
+                    <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted">
+                      <Lock className="size-5 text-muted-foreground" />
+                    </div>
+                    <h3 className="mt-4 text-lg font-semibold">
+                      Unlock the Full Marketplace
+                    </h3>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Sign up as a company to browse all pre-vetted developers, filter by tech stack, and hire instantly.
+                    </p>
+                    <Button className="mt-5" asChild>
+                      <Link href="/auth/companies/sign-up">
+                        Get Started
+                      </Link>
                     </Button>
                   </div>
-                </div>
+                )}
+
+                {!showUnlockCta && (
+                  <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-sm text-muted-foreground">
+                      Page {clampedCurrentPage} of {totalPages}
+                    </p>
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-pulse/30 hover:bg-pulse/10"
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.max(1, prev - 1))
+                        }
+                        disabled={clampedCurrentPage <= 1}
+                      >
+                        Previous
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="border-pulse/30 hover:bg-pulse/10"
+                        onClick={() =>
+                          setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                        }
+                        disabled={clampedCurrentPage >= totalPages}
+                      >
+                        Next
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <NoResults onClearFilters={clearFilters} />

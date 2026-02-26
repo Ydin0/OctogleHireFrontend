@@ -3,9 +3,10 @@
 import { FormEvent, Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSignIn } from "@clerk/nextjs";
+import { useAuth, useSignIn, useSignUp } from "@clerk/nextjs";
 import { AlertCircle, Loader2, Mail } from "lucide-react";
 
+import { StandaloneHeader } from "@/components/shared/standalone-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,8 +20,14 @@ const resolveClerkError = (error: unknown): string => {
     Array.isArray((error as { errors?: unknown[] }).errors)
   ) {
     const firstError = (error as { errors: Array<Record<string, unknown>> }).errors[0];
+    const code = firstError?.code;
     const longMessage = firstError?.longMessage;
     const message = firstError?.message;
+
+    // Suppress "already signed in" — we handle it in the UI
+    if (code === "session_exists") {
+      return "You're already signed in.";
+    }
 
     if (typeof longMessage === "string" && longMessage.length > 0) {
       return longMessage;
@@ -38,48 +45,128 @@ const resolveClerkError = (error: unknown): string => {
   return "Unable to verify your account right now. Please try again.";
 };
 
+const isClerkErrorCode = (error: unknown, code: string): boolean => {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "errors" in error &&
+    Array.isArray((error as { errors?: unknown[] }).errors)
+  ) {
+    return (error as { errors: Array<Record<string, unknown>> }).errors.some(
+      (e) => e.code === code
+    );
+  }
+  return false;
+};
+
+type VerifyMode = "signup" | "signin";
+
 function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoaded, signIn, setActive } = useSignIn();
+  const { isSignedIn } = useAuth();
+  const { isLoaded: isSignInLoaded, signIn, setActive: setSignInActive } = useSignIn();
+  const { isLoaded: isSignUpLoaded, signUp, setActive: setSignUpActive } = useSignUp();
 
   const [code, setCode] = useState("");
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<VerifyMode>("signup");
+
+  const isLoaded = isSignInLoaded && isSignUpLoaded;
 
   const email = useMemo(
     () => searchParams.get("email")?.trim() ?? "",
     [searchParams]
   );
 
+  // If the user is already signed in, show a redirect option
+  if (isSignedIn) {
+    return (
+      <main className="min-h-screen bg-background">
+        <StandaloneHeader action={{ label: "Sign In", href: "/login" }} />
+        <div className="container mx-auto flex min-h-[calc(100vh-57px)] items-center justify-center px-6 py-12">
+          <div className="w-full max-w-md space-y-6">
+            <section className="space-y-4 text-center">
+              <p className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-mono uppercase tracking-[0.08em] text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-400">
+                <Mail className="size-3.5" />
+                Already Signed In
+              </p>
+              <h1 className="text-3xl font-semibold tracking-tight">
+                You&apos;re already authenticated
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Your application has been submitted. You can go to your dashboard now.
+              </p>
+            </section>
+            <Card className="border-pulse/25 bg-card/95 shadow-sm">
+              <CardContent className="pt-6 space-y-3">
+                <Button
+                  className="w-full"
+                  onClick={() => router.replace("/auth/after-sign-in")}
+                >
+                  Go to Dashboard
+                </Button>
+                <p className="text-center text-xs text-muted-foreground">
+                  Or return{" "}
+                  <Link href="/" className="text-pulse hover:underline">
+                    home
+                  </Link>
+                  .
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   const sendCode = async () => {
-    if (!isLoaded || !signIn || !email || isSendingCode) return;
+    if (!isLoaded || !signUp || !signIn || !email || isSendingCode) return;
 
     setIsSendingCode(true);
     setError(null);
 
     try {
-      const attempt = await signIn.create({ identifier: email });
-      const emailFactor = attempt.supportedFirstFactors?.find(
-        (factor) => factor.strategy === "email_code"
-      );
-
-      if (!emailFactor || !("emailAddressId" in emailFactor)) {
-        throw new Error(
-          "Email OTP is not available for this account. Ask admin to enable email verification."
-        );
-      }
-
-      await signIn.prepareFirstFactor({
-        strategy: "email_code",
-        emailAddressId: emailFactor.emailAddressId,
-      });
-
+      // Try signUp first — creates a new Clerk account for the developer
+      await signUp.create({ emailAddress: email });
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      setMode("signup");
       setIsCodeSent(true);
-    } catch (sendError) {
-      setError(resolveClerkError(sendError));
+    } catch (signUpError) {
+      // If the email already has a Clerk account, fall back to signIn
+      if (
+        isClerkErrorCode(signUpError, "form_identifier_exists") ||
+        isClerkErrorCode(signUpError, "form_email_address_exists")
+      ) {
+        try {
+          const attempt = await signIn.create({ identifier: email });
+          const emailFactor = attempt.supportedFirstFactors?.find(
+            (factor) => factor.strategy === "email_code"
+          );
+
+          if (!emailFactor || !("emailAddressId" in emailFactor)) {
+            throw new Error(
+              "Email OTP is not available for this account. Ask admin to enable email verification."
+            );
+          }
+
+          await signIn.prepareFirstFactor({
+            strategy: "email_code",
+            emailAddressId: emailFactor.emailAddressId,
+          });
+
+          setMode("signin");
+          setIsCodeSent(true);
+        } catch (signInError) {
+          setError(resolveClerkError(signInError));
+        }
+      } else {
+        setError(resolveClerkError(signUpError));
+      }
     } finally {
       setIsSendingCode(false);
     }
@@ -88,23 +175,37 @@ function VerifyContent() {
   const verifyCode = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!isLoaded || !signIn || !setActive || isVerifying) return;
+    if (!isLoaded || !signUp || !signIn || isVerifying) return;
 
     setIsVerifying(true);
     setError(null);
 
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "email_code",
-        code: code.trim(),
-      });
+      if (mode === "signup") {
+        const result = await signUp.attemptEmailAddressVerification({
+          code: code.trim(),
+        });
 
-      if (result.status !== "complete" || !result.createdSessionId) {
-        throw new Error("Verification incomplete. Please try a new code.");
+        if (result.status !== "complete" || !result.createdSessionId) {
+          throw new Error("Verification incomplete. Please try a new code.");
+        }
+
+        await setSignUpActive!({ session: result.createdSessionId });
+      } else {
+        const result = await signIn.attemptFirstFactor({
+          strategy: "email_code",
+          code: code.trim(),
+        });
+
+        if (result.status !== "complete" || !result.createdSessionId) {
+          throw new Error("Verification incomplete. Please try a new code.");
+        }
+
+        await setSignInActive!({ session: result.createdSessionId });
       }
 
-      await setActive({ session: result.createdSessionId });
-      router.replace("/developers/dashboard");
+      // Route through after-sign-in to resolve the correct dashboard
+      router.replace("/auth/after-sign-in");
       router.refresh();
     } catch (verifyError) {
       setError(resolveClerkError(verifyError));
@@ -115,7 +216,8 @@ function VerifyContent() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="container mx-auto flex min-h-screen items-center justify-center px-6 py-12">
+      <StandaloneHeader action={{ label: "Sign In", href: "/login" }} />
+      <div className="container mx-auto flex min-h-[calc(100vh-57px)] items-center justify-center px-6 py-12">
         <div className="w-full max-w-md space-y-6">
           <section className="space-y-4 text-center">
             <p className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-xs font-mono uppercase tracking-[0.08em] text-sky-700 dark:border-pulse/30 dark:bg-pulse/10 dark:text-pulse">

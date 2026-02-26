@@ -102,28 +102,23 @@ const Cta = ({ className }: CtaProps) => {
               </Button>
             </div>
           </div>
-          <div className="hidden xl:block">
-            <div className="absolute top-0 right-0 h-[28rem] w-[36.875rem]">
-              <div className="absolute top-0 right-0 aspect-[1.15] w-[12rem] opacity-60">
-                <img
-                  src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/photos/fabian-centeno-njeVb6E3XB8-unsplash.jpg"
-                  alt=""
-                  className="size-full object-cover object-center"
-                />
+          <div className="hidden xl:flex items-center justify-center">
+            <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+              <div className="rounded-lg border border-white/10 bg-white/5 p-6 text-center">
+                <p className="text-3xl font-semibold font-mono text-pulse">150+</p>
+                <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Countries</p>
               </div>
-              <div className="absolute top-36 right-0 z-10 aspect-[0.709248555] w-[14rem] overflow-hidden rounded-tl-md">
-                <img
-                  src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/photos/jason-goodman-ZJlfUi5rTDU-unsplash.jpg"
-                  alt=""
-                  className="size-full object-cover object-center"
-                />
+              <div className="rounded-lg border border-white/10 bg-white/5 p-6 text-center">
+                <p className="text-3xl font-semibold font-mono text-pulse">10K+</p>
+                <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Developers</p>
               </div>
-              <div className="absolute top-44 right-0 aspect-[1.353211009] w-[36.875rem] overflow-hidden rounded-tl-2xl opacity-25">
-                <img
-                  src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/photos/redd-f-5U_28ojjgms-unsplash.jpg"
-                  alt=""
-                  className="size-full object-cover object-center"
-                />
+              <div className="rounded-lg border border-white/10 bg-white/5 p-6 text-center">
+                <p className="text-3xl font-semibold font-mono text-pulse">48h</p>
+                <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Delivery</p>
+              </div>
+              <div className="rounded-lg border border-white/10 bg-white/5 p-6 text-center">
+                <p className="text-3xl font-semibold font-mono text-pulse">Top 3%</p>
+                <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Engineers</p>
               </div>
             </div>
           </div>

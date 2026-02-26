@@ -93,6 +93,14 @@ const StepReview = ({ onEditStep }: StepReviewProps) => {
           label="Years of Experience"
           value={data.yearsOfExperience?.toString()}
         />
+        <div>
+          <p className="text-xs text-muted-foreground">Salary</p>
+          <p className="font-mono text-sm">
+            {data.salaryCurrency && data.salaryAmount != null
+              ? `${data.salaryCurrency} ${data.salaryAmount.toLocaleString()}/mo`
+              : "—"}
+          </p>
+        </div>
       </div>
       <ReviewField label="Bio" value={data.bio} />
 

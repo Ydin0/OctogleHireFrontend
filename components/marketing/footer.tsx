@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Globe } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/logo";
 
 import { Globe as GlobeViz } from "@/components/ui/globe";
 import { Separator } from "@/components/ui/separator";
@@ -22,7 +22,7 @@ const sections = [
     links: [
       { name: "About Us", href: "#" },
       { name: "Careers", href: "#" },
-      { name: "Blog", href: "#" },
+      { name: "Blog", href: "/blog" },
       { name: "Press", href: "#" },
     ],
   },
@@ -50,11 +50,8 @@ const Footer = ({ className }: FooterProps) => {
           <div className="flex flex-col items-center justify-between gap-6 lg:flex-row">
             <div className="lg:max-w-md">
               <div className="flex items-center justify-start gap-2">
-                <Link href="/" className="flex items-center gap-2">
-                  <Globe className="size-6" />
-                  <h2 className="text-xl font-semibold tracking-tight">
-                    OctogleHire
-                  </h2>
+                <Link href="/" className="flex items-center">
+                  <Logo width={140} height={32} />
                 </Link>
               </div>
               <p className="mt-4 text-left text-sm text-muted-foreground">

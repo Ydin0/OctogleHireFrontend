@@ -6,7 +6,10 @@ type ClerkUserLike = {
   privateMetadata?: MetadataRecord;
 };
 
-type DashboardPath = "/developers/dashboard" | "/companies/dashboard";
+type DashboardPath =
+  | "/developers/dashboard"
+  | "/companies/dashboard"
+  | "/admin/dashboard";
 
 const toNormalizedString = (value: unknown): string | null => {
   if (typeof value !== "string") return null;
@@ -32,6 +35,10 @@ const readMetadataValue = (
 const parseAccountType = (value: string | null): DashboardPath | null => {
   if (!value) return null;
 
+  if (value.includes("admin") || value.includes("superadmin")) {
+    return "/admin/dashboard";
+  }
+
   if (
     value.includes("company") ||
     value.includes("client") ||
@@ -50,6 +57,14 @@ const parseAccountType = (value: string | null): DashboardPath | null => {
   }
 
   return null;
+};
+
+export const resolveDashboardPathFromRole = (
+  accountType: string | null,
+  orgId?: string | null,
+): DashboardPath => {
+  if (orgId) return "/companies/dashboard";
+  return parseAccountType(accountType) ?? "/developers/dashboard";
 };
 
 export const resolveDashboardPath = (params: {

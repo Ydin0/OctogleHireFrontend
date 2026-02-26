@@ -36,7 +36,10 @@ const StepLinks = () => {
       </Field>
 
       <Field>
-        <FieldLabel htmlFor="githubUrl">GitHub Profile</FieldLabel>
+        <FieldLabel htmlFor="githubUrl">
+          GitHub Profile
+          <span className="ml-1 text-xs font-normal text-muted-foreground">(optional)</span>
+        </FieldLabel>
         <div className="relative">
           <Github className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -73,43 +76,23 @@ const StepLinks = () => {
         </div>
       </Field>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field>
-          <FieldLabel>Resume / CV (PDF)</FieldLabel>
-          <Controller
-            name="resumeFile"
-            control={control}
-            render={({ field }) => (
-              <FileUpload
-                accept="application/pdf"
-                maxSize={5}
-                label="Drop resume or click"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.resumeFile?.message}
-              />
-            )}
-          />
-        </Field>
-
-        <Field>
-          <FieldLabel>Profile Photo</FieldLabel>
-          <Controller
-            name="profilePhoto"
-            control={control}
-            render={({ field }) => (
-              <FileUpload
-                accept="image/jpeg,image/png,image/webp"
-                maxSize={2}
-                label="Drop photo or click"
-                value={field.value}
-                onChange={field.onChange}
-                error={errors.profilePhoto?.message}
-              />
-            )}
-          />
-        </Field>
-      </div>
+      <Field>
+        <FieldLabel>Resume / CV (PDF)</FieldLabel>
+        <Controller
+          name="resumeFile"
+          control={control}
+          render={({ field }) => (
+            <FileUpload
+              accept="application/pdf"
+              maxSize={5}
+              label="Drop resume or click"
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.resumeFile?.message}
+            />
+          )}
+        />
+      </Field>
     </div>
   );
 };

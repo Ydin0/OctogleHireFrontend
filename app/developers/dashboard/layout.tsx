@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 
 import { DashboardShell } from "./_components/dashboard-shell";
 import { PendingDashboard } from "./_components/pending-dashboard";
-import { resolveDashboardPath } from "@/lib/auth/account-type";
+import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
+import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 import {
   buildDefaultTimeline,
   fetchDeveloperApplicationStatus,
@@ -21,24 +22,25 @@ export default async function DeveloperDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId, orgId, getToken } = await auth();
+  const { userId, getToken } = await auth();
 
   if (!userId) {
     redirect("/login");
   }
 
-  const user = await currentUser();
-  const destination = resolveDashboardPath({ user, orgId });
+  const token = await getToken();
+  const { accountType, orgId } = await fetchUserRole(token);
+  const destination = resolveDashboardPathFromRole(accountType, orgId);
 
   if (destination !== "/developers/dashboard") {
     redirect(destination);
   }
 
-  const token = await getToken();
   const applicationStatus = await fetchDeveloperApplicationStatus(token);
   const isApproved = applicationStatus?.approved ?? false;
 
   if (!isApproved) {
+    const user = await currentUser();
     return (
       <PendingDashboard
         displayName={user?.firstName ?? user?.username ?? "Developer"}

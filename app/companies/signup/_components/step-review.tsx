@@ -72,8 +72,15 @@ const StepReview = ({ onEditStep }: StepReviewProps) => {
         <ReviewField label="Business Email" value={data.businessEmail} />
         <ReviewField label="Phone" value={data.phone} />
       </div>
-      {data.companyWebsite && (
-        <ReviewField label="Company Website" value={data.companyWebsite} />
+      {(data.companyWebsite || data.linkedinUrl) && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {data.companyWebsite && (
+            <ReviewField label="Company Website" value={data.companyWebsite} />
+          )}
+          {data.linkedinUrl && (
+            <ReviewField label="Company LinkedIn" value={data.linkedinUrl} />
+          )}
+        </div>
       )}
 
       <Separator />

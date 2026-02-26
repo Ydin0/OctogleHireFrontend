@@ -19,6 +19,7 @@ export const APPLICATION_PIPELINE_LABELS = [
   "AI Technical Examination",
   "Tech Lead Human Interview",
   "Background & Previous Company Checks",
+  "Offer Review",
   "Approved",
 ] as const;
 

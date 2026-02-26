@@ -83,6 +83,24 @@ const StepCompanyInfo = () => {
           )}
         </Field>
       </div>
+
+      <Field>
+        <FieldLabel htmlFor="linkedinUrl">
+          Company LinkedIn
+          <span className="ml-1 text-xs font-normal text-muted-foreground">
+            (optional)
+          </span>
+        </FieldLabel>
+        <Input
+          id="linkedinUrl"
+          type="url"
+          placeholder="https://linkedin.com/company/acme"
+          {...register("linkedinUrl")}
+        />
+        {errors.linkedinUrl && (
+          <FieldError>{errors.linkedinUrl.message}</FieldError>
+        )}
+      </Field>
     </div>
   );
 };

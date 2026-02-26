@@ -7,11 +7,13 @@ import {
   FolderKanban,
   Globe2,
   Layers,
+  LogOut,
   Rocket,
   ShieldCheck,
   UserCircle2,
   Wallet,
 } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
 
 import {
   currentDeveloper,
@@ -34,6 +36,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const sidebarItems = [
@@ -75,12 +78,17 @@ const isItemActive = (pathname: string, href: string) => {
 
 const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
+  const { signOut } = useClerk();
 
   return (
     <div className="min-h-screen bg-background font-sans normal-case tracking-normal">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur">
         <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 px-6 py-3">
           <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center text-foreground transition-colors hover:text-foreground/80">
+              <Logo width={110} height={26} />
+            </Link>
+            <span className="text-border">|</span>
             <Avatar className="size-10 border border-pulse/30">
               <AvatarImage src={currentDeveloper.avatar} alt={currentDeveloper.name} />
               <AvatarFallback>{getInitials(currentDeveloper.name)}</AvatarFallback>
@@ -95,6 +103,15 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 text-muted-foreground hover:text-foreground"
+              onClick={() => signOut({ redirectUrl: "/" })}
+            >
+              <LogOut className="size-4" />
+              <span className="sr-only">Sign out</span>
+            </Button>
             <Button asChild size="sm" variant="outline" className="gap-2">
               <Link href={`/developers/${currentDeveloper.id}`}>
                 <ShieldCheck className="size-4" />

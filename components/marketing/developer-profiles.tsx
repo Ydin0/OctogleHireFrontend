@@ -1,12 +1,14 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import AutoScroll from "embla-carousel-auto-scroll";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-import { developers } from "@/lib/data/developers";
+import { developers as staticDevelopers, type Developer } from "@/lib/data/developers";
+import { fetchPublicDevelopers } from "@/lib/api/public-developers";
 import { DeveloperSearchCard } from "@/app/developers/_components/developer-search-card";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +22,19 @@ interface DeveloperProfilesProps {
 }
 
 const DeveloperProfiles = ({ className }: DeveloperProfilesProps) => {
-  const topDevelopers = developers.slice(0, 8);
+  const [topDevelopers, setTopDevelopers] = useState<Developer[]>(
+    staticDevelopers.slice(0, 8),
+  );
+
+  useEffect(() => {
+    const load = async () => {
+      const result = await fetchPublicDevelopers({ featured: true, limit: 8 });
+      if (result && result.developers.length > 0) {
+        setTopDevelopers(result.developers);
+      }
+    };
+    load();
+  }, []);
 
   return (
     <section className={cn("py-32", className)}>
@@ -60,7 +74,7 @@ const DeveloperProfiles = ({ className }: DeveloperProfilesProps) => {
 
       <div className="container mx-auto mt-10 flex justify-center px-6">
         <Button variant="outline" className="gap-2" asChild>
-          <Link href="/developers">
+          <Link href="/marketplace">
             Browse All Developers
             <ArrowRight className="size-4" />
           </Link>

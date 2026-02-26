@@ -203,8 +203,8 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                     alt="Application screening process"
                     className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
                   />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-primary/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-background">
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
                     <div className="flex flex-col gap-1.5">
                       <p className="text-4xl font-medium lg:text-5xl">
                         10,000+
@@ -232,8 +232,8 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                     alt="Technical assessment"
                     className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
                   />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-primary/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-background">
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
                     <div className="flex flex-col gap-1.5">
                       <p className="text-4xl font-medium lg:text-5xl">5 hrs</p>
                       <p className="font-medium">
@@ -259,8 +259,8 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                     alt="Live technical interview"
                     className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
                   />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-primary/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-background">
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
                     <div className="flex flex-col gap-1.5">
                       <p className="text-4xl font-medium lg:text-5xl">2</p>
                       <p className="font-medium">rounds of live evaluation</p>
@@ -278,12 +278,12 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
               >
                 <div className="relative">
                   <img
-                    src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/photos/annie-spratt-hCb3lIB8L8E-unsplash.jpg"
-                    alt="Reference and background check"
+                    src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1920&q=100"
+                    alt="Reference and background verification"
                     className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
                   />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-primary/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-background">
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
                     <div className="flex flex-col gap-1.5">
                       <p className="text-4xl font-medium lg:text-5xl">100%</p>
                       <p className="font-medium">references verified</p>
@@ -303,12 +303,12 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
               >
                 <div className="relative">
                   <img
-                    src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/photos/annie-spratt-MChSQHxGZrQ-unsplash.jpg"
+                    src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=100"
                     alt="Approved and matched with companies"
                     className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
                   />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-primary/80 via-transparent to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-background">
+                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
                     <div className="flex flex-col gap-1.5">
                       <p className="text-4xl font-medium lg:text-5xl">48hrs</p>
                       <p className="font-medium">

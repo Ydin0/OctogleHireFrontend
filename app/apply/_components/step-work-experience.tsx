@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormContext, useFieldArray } from "react-hook-form";
-import { Plus, Trash2 } from "lucide-react";
+import { Building2, Plus, Trash2 } from "lucide-react";
 
 import type { Application } from "@/lib/schemas/application";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,7 @@ const StepWorkExperience = () => {
       endDate: "",
       description: "",
       current: false,
+      companyLogoUrl: "",
     });
   };
 
@@ -47,6 +48,7 @@ const StepWorkExperience = () => {
 
       {fields.map((field, index) => {
         const isCurrent = watch(`workExperience.${index}.current`);
+        const logoUrl = watch(`workExperience.${index}.companyLogoUrl`);
         const fieldErrors = errors.workExperience?.[index];
 
         return (
@@ -55,9 +57,22 @@ const StepWorkExperience = () => {
             className="space-y-3 rounded-lg border p-4"
           >
             <div className="flex items-start justify-between">
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Experience {index + 1}
-              </span>
+              <div className="flex items-center gap-2">
+                {logoUrl ? (
+                  <img
+                    src={logoUrl}
+                    alt=""
+                    className="size-6 rounded object-contain"
+                  />
+                ) : (
+                  <div className="flex size-6 items-center justify-center rounded bg-muted">
+                    <Building2 className="size-3.5 text-muted-foreground" />
+                  </div>
+                )}
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Experience {index + 1}
+                </span>
+              </div>
               <Button
                 type="button"
                 variant="ghost"

@@ -10,6 +10,7 @@ import { ArrowLeft, ArrowRight, Globe, Send, X } from "lucide-react";
 import { applicationSchema, type Application } from "@/lib/schemas/application";
 import type { LinkedInFormValues, ApifyProfile } from "@/lib/linkedin";
 import { Button } from "@/components/ui/button";
+import { ApplyHero } from "./apply-hero";
 import { LinkedInImport } from "./linkedin-import";
 import { StepPersonal } from "./step-personal";
 import { StepProfessional } from "./step-professional";
@@ -40,6 +41,9 @@ const stepFields: Record<number, (keyof Application)[]> = {
     "professionalTitle",
     "yearsOfExperience",
     "bio",
+    "salaryCurrency",
+    "salaryAmount",
+    "profilePhoto",
   ],
   1: ["workExperience"],
   2: ["education"],
@@ -49,7 +53,6 @@ const stepFields: Record<number, (keyof Application)[]> = {
     "githubUrl",
     "portfolioUrl",
     "resumeFile",
-    "profilePhoto",
   ],
   5: ["engagementType", "availability", "englishProficiency"],
 };
@@ -120,6 +123,12 @@ const buildApplicationFormData = (
   }
 
   formData.append("bio", values.bio);
+  formData.append("salaryCurrency", values.salaryCurrency);
+
+  if (typeof values.salaryAmount === "number") {
+    formData.append("salaryAmount", String(values.salaryAmount));
+  }
+
   formData.append("workExperience", JSON.stringify(values.workExperience ?? []));
   formData.append("education", JSON.stringify(values.education ?? []));
   formData.append("primaryStack", JSON.stringify(values.primaryStack));
@@ -138,14 +147,13 @@ const buildApplicationFormData = (
     formData.append("englishProficiency", values.englishProficiency);
   }
 
-  if (params.includeFiles) {
-    if (values.resumeFile) {
-      formData.append("resumeFile", values.resumeFile);
-    }
+  // Profile photo is on step 0, always include when available
+  if (values.profilePhoto) {
+    formData.append("profilePhoto", values.profilePhoto);
+  }
 
-    if (values.profilePhoto) {
-      formData.append("profilePhoto", values.profilePhoto);
-    }
+  if (params.includeFiles && values.resumeFile) {
+    formData.append("resumeFile", values.resumeFile);
   }
 
   return formData;
@@ -186,7 +194,9 @@ const readErrorMessage = async (response: Response): Promise<string> => {
 
 const ApplyForm = () => {
   const router = useRouter();
-  const [importPhase, setImportPhase] = useState(true);
+  const skipToForm = typeof window !== "undefined" && window.location.hash === "#apply-form";
+  const [heroPhase, setHeroPhase] = useState(!skipToForm);
+  const [importPhase, setImportPhase] = useState(!skipToForm);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -211,6 +221,8 @@ const ApplyForm = () => {
       professionalTitle: "",
       yearsOfExperience: undefined as unknown as number,
       bio: "",
+      salaryCurrency: "",
+      salaryAmount: undefined as unknown as number,
       workExperience: [],
       education: [],
       primaryStack: [],
@@ -239,13 +251,16 @@ const ApplyForm = () => {
       }
     }
 
-    // Auto-import profile photo from R2 if backend provided a URL
+    // Auto-import profile photo via backend proxy to avoid CORS issues
     const photoUrl =
       (profile._profilePhotoR2Url as string | undefined) ??
+      (profile.profilePicHighQuality as string | undefined) ??
+      (profile.profilePic as string | undefined) ??
       (profile.profilePicture as string | undefined);
     if (photoUrl && typeof photoUrl === "string" && photoUrl.startsWith("http")) {
       try {
-        const response = await fetch(photoUrl);
+        const proxyUrl = `${apiBaseUrl}/api/public/linkedin/image-proxy?url=${encodeURIComponent(photoUrl)}`;
+        const response = await fetch(proxyUrl);
         if (response.ok) {
           const blob = await response.blob();
           const extension = blob.type === "image/png" ? ".png" : ".jpg";
@@ -380,6 +395,11 @@ const ApplyForm = () => {
       setIsSubmitting(false);
     }
   });
+
+  // Show hero landing phase
+  if (heroPhase) {
+    return <ApplyHero onStart={() => setHeroPhase(false)} />;
+  }
 
   // Show LinkedIn import phase
   if (importPhase) {

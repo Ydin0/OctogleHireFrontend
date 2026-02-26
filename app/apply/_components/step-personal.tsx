@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFormContext, useWatch } from "react-hook-form";
+import { useFormContext, useWatch, Controller } from "react-hook-form";
 
 import type { Application } from "@/lib/schemas/application";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/geo";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { FileUpload } from "./file-upload";
 
 const MAX_SUGGESTIONS = 12;
 
@@ -89,7 +90,22 @@ const StepPersonal = () => {
     control,
     setValue,
     formState: { errors },
+    watch,
   } = useFormContext<Application>();
+  const profilePhotoValue = watch("profilePhoto");
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!profilePhotoValue) {
+      setPhotoPreviewUrl(null);
+      return;
+    }
+    if (profilePhotoValue instanceof File) {
+      const url = URL.createObjectURL(profilePhotoValue);
+      setPhotoPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [profilePhotoValue]);
   const countryValue = useWatch({ control, name: "locationState" });
   const cityValue = useWatch({ control, name: "locationCity" });
   const phoneValue = useWatch({ control, name: "phone" });
@@ -207,6 +223,33 @@ const StepPersonal = () => {
 
   return (
     <div className="space-y-4">
+      <Field>
+        <FieldLabel>Profile Photo</FieldLabel>
+        <div className="flex items-center gap-4">
+          {photoPreviewUrl && (
+            <img
+              src={photoPreviewUrl}
+              alt="Profile preview"
+              className="size-16 rounded-full object-cover border"
+            />
+          )}
+          <Controller
+            name="profilePhoto"
+            control={control}
+            render={({ field }) => (
+              <FileUpload
+                accept="image/jpeg,image/png,image/webp"
+                maxSize={2}
+                label="Drop photo or click"
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.profilePhoto?.message}
+              />
+            )}
+          />
+        </div>
+      </Field>
+
       <Field>
         <FieldLabel htmlFor="fullName">Full Name</FieldLabel>
         <Input

@@ -5,6 +5,7 @@ export interface WorkHistoryItem {
   description: string;
   techUsed: string[];
   companyDomain?: string;
+  companyLogoUrl?: string;
 }
 
 export interface Review {
@@ -21,6 +22,7 @@ export interface Education {
   degree: string;
   field: string;
   year: string;
+  institutionLogoUrl?: string;
 }
 
 export interface Award {

@@ -7,8 +7,6 @@ import { ArrowRight, Globe, Linkedin, Loader2, X } from "lucide-react";
 import {
   fetchLinkedInProfile,
   mapProfileToFormValues,
-  cacheLinkedInData,
-  getCachedLinkedInData,
   type LinkedInFormValues,
   type ApifyProfile,
 } from "@/lib/linkedin";
@@ -44,20 +42,12 @@ const LinkedInImport = ({ onImport, onSkip }: LinkedInImportProps) => {
       return;
     }
 
-    // Check sessionStorage cache
-    const cached = getCachedLinkedInData();
-    if (cached && cached.linkedinUrl === url && cached.fullName) {
-      onImport(cached, {} as ApifyProfile);
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
       const profile = await fetchLinkedInProfile(url);
       const values = mapProfileToFormValues(profile, url);
-      cacheLinkedInData(values);
       onImport(values, profile);
     } catch (err) {
       setError(
