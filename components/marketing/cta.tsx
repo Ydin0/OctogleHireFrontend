@@ -109,7 +109,7 @@ const Cta = ({ className }: CtaProps) => {
                 <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Countries</p>
               </div>
               <div className="rounded-lg border border-white/10 bg-white/5 p-6 text-center">
-                <p className="text-3xl font-semibold font-mono text-pulse">10K+</p>
+                <p className="text-3xl font-semibold font-mono text-pulse">1,000+</p>
                 <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Developers</p>
               </div>
               <div className="rounded-lg border border-white/10 bg-white/5 p-6 text-center">

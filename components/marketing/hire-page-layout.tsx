@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowRight,
   CheckCircle,
@@ -16,20 +18,18 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { techToSlug, roleToSlug, countryToSlug } from "@/lib/seo-data";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -68,15 +68,15 @@ const BENEFIT_ICONS: LucideIcon[] = [Shield, Zap, Globe, Scale, Users, Clock];
 
 const stats = [
   { value: 150, suffix: "+", label: "Countries" },
-  { value: 1, suffix: "%", prefix: "Top ", label: "Talent" },
-  { value: 5, suffix: "-Day", label: "Avg Match" },
+  { value: 3, suffix: "%", prefix: "Top ", label: "Talent" },
+  { value: 48, suffix: "h", label: "First Match" },
   { value: 60, suffix: "%", label: "Cost Savings" },
 ];
 
 const faqs = [
   {
     q: "How are developers vetted on OctogleHire?",
-    a: "Every developer goes through a rigorous 5-stage process: application review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only the top 1% of applicants are approved.",
+    a: "Every developer goes through a rigorous 5-stage process: application review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only the top 3% of applicants are approved.",
   },
   {
     q: "How fast can I get matched with a developer?",
@@ -245,13 +245,16 @@ function AnimatedStat({
   }, [value]);
 
   return (
-    <div ref={ref} className="flex flex-col items-center text-center">
-      <span className="text-pulse text-4xl font-semibold tracking-tight lg:text-5xl">
+    <div
+      ref={ref}
+      className="rounded-2xl border border-border bg-background p-5 text-center"
+    >
+      <span className="text-pulse text-3xl font-semibold tracking-tight font-mono lg:text-4xl">
         {prefix}
         {display}
         {suffix}
       </span>
-      <span className="mt-2 text-sm text-muted-foreground">{label}</span>
+      <span className="mt-2 block text-sm text-muted-foreground">{label}</span>
     </div>
   );
 }
@@ -600,8 +603,65 @@ function FaqAccordion() {
 // ---------------------------------------------------------------------------
 
 function HeroForm() {
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedName, setSubmittedName] = useState("");
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CompanyLead>({
+    resolver: zodResolver(companyLeadSchema),
+    mode: "onTouched",
+  });
+
+  const onSubmit = async (data: CompanyLead) => {
+    setApiError(null);
+    try {
+      const res = await fetch(`${API_BASE_URL}/company-enquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { message?: string };
+        setApiError(body.message ?? "Something went wrong. Please try again.");
+        return;
+      }
+
+      setSubmittedName(data.contactName.split(" ")[0]);
+      setSubmitted(true);
+    } catch {
+      setApiError("Unable to connect. Please check your connection and try again.");
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-in fade-in duration-500">
+        <div className="flex flex-col items-center text-center space-y-4 py-6">
+          <CheckCircle className="size-10 text-pulse" />
+          <h3 className="text-lg font-semibold">
+            Thanks {submittedName}!
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            We&apos;ll match you with vetted developers within 48 hours.
+          </p>
+          <Button asChild variant="outline" className="rounded-full gap-2">
+            <Link href="/marketplace">
+              Browse Developers
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 space-y-4 shadow-sm">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center gap-2">
         <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
         <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
@@ -609,47 +669,77 @@ function HeroForm() {
         </span>
       </div>
 
-      <div className="space-y-3">
-        <Input
-          type="email"
-          placeholder="Work email"
-          className="h-11 rounded-lg"
-        />
-        <Select>
-          <SelectTrigger className="h-11 w-full rounded-lg">
-            <SelectValue placeholder="What role do you need?" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="frontend">Frontend Developer</SelectItem>
-            <SelectItem value="backend">Backend Developer</SelectItem>
-            <SelectItem value="fullstack">Full-Stack Developer</SelectItem>
-            <SelectItem value="mobile">Mobile Developer</SelectItem>
-            <SelectItem value="devops">DevOps Engineer</SelectItem>
-            <SelectItem value="data">Data Engineer</SelectItem>
-            <SelectItem value="other">Other</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select>
-          <SelectTrigger className="h-11 w-full rounded-lg">
-            <SelectValue placeholder="Company size" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1-10">1\u201310 employees</SelectItem>
-            <SelectItem value="11-50">11\u201350 employees</SelectItem>
-            <SelectItem value="51-200">51\u2013200 employees</SelectItem>
-            <SelectItem value="201-1000">201\u20131,000 employees</SelectItem>
-            <SelectItem value="1000+">1,000+ employees</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button asChild size="lg" className="w-full rounded-full gap-2">
-          <Link href="/companies/signup">
-            Get Matched
-            <ArrowRight className="size-4 -rotate-45" />
-          </Link>
-        </Button>
-      </div>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-4 space-y-3">
+        <Field>
+          <FieldLabel htmlFor="hero-contactName">Full Name</FieldLabel>
+          <Input
+            id="hero-contactName"
+            placeholder="Jane Smith"
+            className="h-11 rounded-lg"
+            {...register("contactName")}
+          />
+          {errors.contactName && (
+            <FieldError>{errors.contactName.message}</FieldError>
+          )}
+        </Field>
 
-      <p className="text-center text-xs text-muted-foreground">
+        <Field>
+          <FieldLabel htmlFor="hero-companyName">Company Name</FieldLabel>
+          <Input
+            id="hero-companyName"
+            placeholder="Acme Labs"
+            className="h-11 rounded-lg"
+            {...register("companyName")}
+          />
+          {errors.companyName && (
+            <FieldError>{errors.companyName.message}</FieldError>
+          )}
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="hero-email">Work Email</FieldLabel>
+          <Input
+            id="hero-email"
+            type="email"
+            placeholder="jane@acme.com"
+            className="h-11 rounded-lg"
+            {...register("email")}
+          />
+          {errors.email && (
+            <FieldError>{errors.email.message}</FieldError>
+          )}
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="hero-phone">Phone Number</FieldLabel>
+          <Input
+            id="hero-phone"
+            type="tel"
+            placeholder="+1 (555) 000-0000"
+            className="h-11 rounded-lg"
+            {...register("phone")}
+          />
+          {errors.phone && (
+            <FieldError>{errors.phone.message}</FieldError>
+          )}
+        </Field>
+
+        {apiError && (
+          <p className="text-sm text-destructive">{apiError}</p>
+        )}
+
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full rounded-full gap-2"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Submitting..." : "Get Matched"}
+          {!isSubmitting && <ArrowRight className="size-4" />}
+        </Button>
+      </form>
+
+      <p className="mt-4 text-center text-xs text-muted-foreground">
         No fees until you hire. Cancel anytime.
       </p>
     </div>
@@ -754,7 +844,7 @@ export function HirePageLayout({
         {/* ── 2. Stats strip with count-up animation ───────────── */}
         <section className="bg-muted/50 py-16">
           <div className="container mx-auto px-6">
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               {stats.map((stat) => (
                 <AnimatedStat
                   key={stat.label}
@@ -853,7 +943,7 @@ export function HirePageLayout({
                   </span>
                 </div>
                 <h3 className="text-3xl font-medium tracking-tight">
-                  Only the <span className="text-pulse">top 1%</span> make the
+                  Only the <span className="text-pulse">top 3%</span> make the
                   cut
                 </h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -1001,7 +1091,7 @@ export function HirePageLayout({
                 </p>
                 <ul className="grid max-w-lg grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
                   {[
-                    { icon: Shield, text: "Pre-vetted top 1% engineers" },
+                    { icon: Shield, text: "Pre-vetted top 3% engineers" },
                     { icon: Globe, text: "Talent from 150+ countries" },
                     { icon: Scale, text: "Compliance & payroll handled" },
                     { icon: Zap, text: "48-hour candidate delivery" },
@@ -1044,9 +1134,9 @@ export function HirePageLayout({
                 <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
                   {[
                     { value: "150+", label: "Countries" },
-                    { value: "10K+", label: "Developers" },
+                    { value: "1,000+", label: "Developers" },
                     { value: "48h", label: "Delivery" },
-                    { value: "Top 1%", label: "Engineers" },
+                    { value: "Top 3%", label: "Engineers" },
                   ].map((s) => (
                     <div
                       key={s.label}

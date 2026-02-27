@@ -12,11 +12,11 @@ interface FaqProps {
 const faqs = [
   {
     q: "How long does it take to hire a developer through OctogleHire?",
-    a: "Most companies receive 3–5 vetted candidate profiles within 48 hours of posting a role. From there, the average time to make an offer is 5–7 days — compared to 6–12 weeks using traditional recruitment agencies.",
+    a: "Most companies receive 3–5 vetted candidate profiles within 48 hours of posting a role. From there, the average time to signed contract is 5 business days — compared to 6–12 weeks using traditional recruitment agencies.",
   },
   {
     q: "How are developers vetted on OctogleHire?",
-    a: "Every developer goes through a rigorous 5-stage process: application review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only the top 5% of applicants are approved to join the network.",
+    a: "Every developer goes through a rigorous 5-stage process: application review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only the top 3% of applicants are approved to join the network.",
   },
   {
     q: "What types of roles can I post?",

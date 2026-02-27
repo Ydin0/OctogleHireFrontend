@@ -23,7 +23,7 @@ const SearchHeader = ({ searchQuery, onSearchChange }: SearchHeaderProps) => {
           Find Your Next <span className="text-pulse">Developer</span>
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Browse 50,000+ pre-vetted engineers. Filter by tech stack, country,
+          Browse 1,000+ pre-vetted engineers. Filter by tech stack, country,
           title, rate, and experience.
         </p>
       </div>

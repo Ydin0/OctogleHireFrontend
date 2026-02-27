@@ -199,7 +199,7 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
               >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
-                    <p className="font-mono text-4xl font-medium lg:text-5xl">10,000+</p>
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">1,000+</p>
                     <p className="text-sm text-muted-foreground">applications reviewed monthly</p>
                   </div>
                   <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">

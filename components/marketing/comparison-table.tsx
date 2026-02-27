@@ -60,7 +60,7 @@ const octogle = {
   tagline: "Best of both worlds",
   traits: [
     { label: "Vetting", value: "5-stage technical vetting" },
-    { label: "Talent Quality", value: "Top 5% — verified" },
+    { label: "Talent Quality", value: "Top 3% — verified" },
     { label: "Time to Hire", value: "48 hours average" },
     { label: "Pricing", value: "Competitive & transparent" },
     { label: "Compliance", value: "Fully managed globally" },

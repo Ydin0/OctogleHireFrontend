@@ -5,9 +5,9 @@ interface StatsSectionProps {
 }
 
 const stats = [
-  { value: "50,000+", label: "Vetted Developers" },
+  { value: "1,000+", label: "Vetted Developers" },
   { value: "150+", label: "Countries" },
-  { value: "2,500+", label: "Companies Served" },
+  { value: "500+", label: "Companies Served" },
   { value: "48hrs", label: "Average Time to Hire" },
 ];
 

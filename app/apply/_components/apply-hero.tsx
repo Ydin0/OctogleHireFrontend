@@ -238,7 +238,7 @@ const ctaList = [
 const faqs = [
   {
     q: "What does the vetting process involve?",
-    a: "Every application goes through 5 stages: profile review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only the top 5% of applicants are approved.",
+    a: "Every application goes through 5 stages: profile review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only the top 3% of applicants are approved.",
   },
   {
     q: "How long until I start receiving role matches?",

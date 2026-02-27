@@ -19,7 +19,7 @@ const benefits = [
     icon: Shield,
     title: "Pre-Vetted Talent",
     description:
-      "Every developer passes a rigorous 5-stage vetting process. Only the top 5% of applicants make it into our network.",
+      "Every developer passes a rigorous 5-stage vetting process. Only the top 3% of applicants make it into our network.",
   },
   {
     icon: Globe,

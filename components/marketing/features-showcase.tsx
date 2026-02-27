@@ -418,7 +418,7 @@ const FeaturesShowcase = ({ className }: FeaturesShowcaseProps) => {
               Hire with total confidence — every time
             </h3>
             <p className="text-muted-foreground">
-              Our 5-stage vetting process means only the top 5% of applicants
+              Our 5-stage vetting process means only the top 3% of applicants
               join the network. Every developer on your shortlist has been
               technically assessed, interviewed, and background-checked —
               before they ever reach you.
