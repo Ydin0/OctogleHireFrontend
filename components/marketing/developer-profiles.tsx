@@ -37,20 +37,31 @@ const DeveloperProfiles = ({ className }: DeveloperProfilesProps) => {
   }, []);
 
   return (
-    <section className={cn("py-32", className)}>
-      <div className="container mx-auto px-6">
-        <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 text-center">
-          <h2 className="mb-2 text-4xl font-semibold tracking-tight lg:text-5xl">
-            Meet Our <span className="text-pulse">Top Developers</span>
-          </h2>
-          <p className="mb-8 max-w-2xl text-muted-foreground">
-            Browse pre-vetted engineers ready to join your team. Transparent
-            rates — hire hourly, weekly, or monthly.
-          </p>
+    <section className={cn("py-24", className)}>
+      <div className="container mx-auto px-6 mb-12">
+        <div className="flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-3">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              The Network
+            </span>
+            <h2 className="text-4xl font-medium tracking-tight lg:text-5xl">
+              Meet our top developers
+            </h2>
+            <p className="max-w-xl text-muted-foreground">
+              Browse pre-vetted Indian engineers ready to join your team.
+              Transparent rates — hire hourly, weekly, or monthly.
+            </p>
+          </div>
+          <Button variant="outline" className="gap-2 rounded-full shrink-0" asChild>
+            <Link href="/marketplace">
+              Browse All Developers
+              <ArrowRight className="size-4" />
+            </Link>
+          </Button>
         </div>
       </div>
 
-      {/* Full-width carousel with edge fades */}
+      {/* Full-width auto-scroll carousel with edge fades */}
       <div className="relative">
         <Carousel
           plugins={[AutoScroll({ playOnInit: true, speed: 0.8 })]}
@@ -68,17 +79,8 @@ const DeveloperProfiles = ({ className }: DeveloperProfilesProps) => {
             ))}
           </CarouselContent>
         </Carousel>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent" />
-      </div>
-
-      <div className="container mx-auto mt-10 flex justify-center px-6">
-        <Button variant="outline" className="gap-2" asChild>
-          <Link href="/marketplace">
-            Browse All Developers
-            <ArrowRight className="size-4" />
-          </Link>
-        </Button>
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-linear-to-r from-background to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-linear-to-l from-background to-transparent" />
       </div>
     </section>
   );

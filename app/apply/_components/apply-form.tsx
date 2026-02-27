@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useForm, FormProvider } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { ArrowLeft, ArrowRight, Globe, Send, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Send } from "lucide-react";
 
 import { applicationSchema, type Application } from "@/lib/schemas/application";
 import type { LinkedInFormValues, ApifyProfile } from "@/lib/linkedin";
 import { Button } from "@/components/ui/button";
+import { Navbar } from "@/components/marketing/navbar";
 import { ApplyHero } from "./apply-hero";
 import { LinkedInImport } from "./linkedin-import";
 import { StepPersonal } from "./step-personal";
@@ -415,127 +415,122 @@ const ApplyForm = () => {
   const progressPercent = ((currentStep + 1) / STEPS.length) * 100;
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={handleSubmit} className="flex h-dvh flex-col">
-        {/* Top bar */}
-        <header className="shrink-0 border-b">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-4">
-            <Link href="/" className="flex items-center gap-2">
-              <Globe className="size-6" />
-              <span className="text-lg font-semibold tracking-tighter">
-                OctogleHire
-              </span>
-            </Link>
+    <>
+      <Navbar />
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit} className="flex min-h-[calc(100dvh-4rem)] flex-col">
+          {/* Step header */}
+          <div className="border-b border-border">
+            <div className="container mx-auto px-6">
+              <div className="flex items-center justify-between py-5">
+                <div>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Step {currentStep + 1} of {STEPS.length}
+                  </span>
+                  <h2 className="mt-1 text-lg font-semibold">
+                    {stepMeta[currentStep].title}
+                  </h2>
+                </div>
 
-            <div className="flex items-center gap-5">
-              <nav className="hidden items-center gap-3 sm:flex">
-                {STEPS.map((step, i) => (
-                  <button
-                    key={step.label}
-                    type="button"
-                    disabled={i > currentStep}
-                    onClick={() => i <= currentStep && goToStep(i)}
-                    className={`whitespace-nowrap font-mono text-[10px] uppercase tracking-wider transition-colors ${
-                      i === currentStep
-                        ? "text-foreground"
-                        : i < currentStep
-                          ? "cursor-pointer text-muted-foreground hover:text-foreground"
-                          : "text-muted-foreground/30"
-                    }`}
-                  >
-                    {step.label}
-                  </button>
-                ))}
-              </nav>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:hidden">
-                Step {currentStep + 1}/{STEPS.length}
-              </span>
-
-              <Link
-                href="/"
-                className="flex size-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <X className="size-4" />
-              </Link>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div className="h-0.5 bg-muted">
-            <div
-              className="h-0.5 bg-pulse transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </header>
-
-        {/* Scrollable form content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-2xl px-6 py-8">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold">
-                {stepMeta[currentStep].title}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {stepMeta[currentStep].description}
-              </p>
-            </div>
-
-            {currentStep === 0 && (
-              <div className="space-y-4">
-                <StepPersonal />
-                <StepProfessional />
+                <nav className="hidden items-center gap-3 sm:flex">
+                  {STEPS.map((step, i) => (
+                    <button
+                      key={step.label}
+                      type="button"
+                      disabled={i > currentStep}
+                      onClick={() => i <= currentStep && goToStep(i)}
+                      className={`whitespace-nowrap font-mono text-[10px] uppercase tracking-wider transition-colors ${
+                        i === currentStep
+                          ? "text-foreground"
+                          : i < currentStep
+                            ? "cursor-pointer text-muted-foreground hover:text-foreground"
+                            : "text-muted-foreground/30"
+                      }`}
+                    >
+                      {step.label}
+                    </button>
+                  ))}
+                </nav>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground sm:hidden">
+                  {currentStep + 1}/{STEPS.length}
+                </span>
               </div>
-            )}
-            {currentStep === 1 && <StepWorkExperience />}
-            {currentStep === 2 && <StepEducation />}
-            {currentStep === 3 && <StepTechStack />}
-            {currentStep === 4 && <StepLinks />}
-            {currentStep === 5 && <StepPreferences />}
-            {currentStep === 6 && <StepReview onEditStep={goToStep} />}
-          </div>
-        </div>
-
-        {/* Pinned bottom navigation */}
-        <div className="shrink-0 border-t bg-background">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-6 py-3">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleBack}
-              disabled={currentStep === 0 || isSubmitting}
-              className="gap-2"
-            >
-              <ArrowLeft className="size-4" />
-              Back
-            </Button>
-
-            <div className="min-h-5 flex-1 px-4 text-center">
-              {submitError ? (
-                <p className="text-sm text-destructive">{submitError}</p>
-              ) : null}
             </div>
 
-            {isLastStep ? (
-              <Button type="submit" className="gap-2" disabled={isSubmitting}>
-                {isSubmitting ? "Submitting..." : "Submit"}
-                <Send className="size-4" />
-              </Button>
-            ) : (
+            {/* Progress bar */}
+            <div className="h-0.5 bg-muted">
+              <div
+                className="h-0.5 bg-pulse transition-all duration-300"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Form content */}
+          <div className="flex-1">
+            <div className="container mx-auto px-6 py-12">
+              <div className="mx-auto max-w-2xl">
+                <p className="mb-8 text-sm text-muted-foreground">
+                  {stepMeta[currentStep].description}
+                </p>
+
+                {currentStep === 0 && (
+                  <div className="space-y-4">
+                    <StepPersonal />
+                    <StepProfessional />
+                  </div>
+                )}
+                {currentStep === 1 && <StepWorkExperience />}
+                {currentStep === 2 && <StepEducation />}
+                {currentStep === 3 && <StepTechStack />}
+                {currentStep === 4 && <StepLinks />}
+                {currentStep === 5 && <StepPreferences />}
+                {currentStep === 6 && <StepReview onEditStep={goToStep} />}
+              </div>
+            </div>
+          </div>
+
+          {/* Sticky bottom navigation */}
+          <div className="sticky bottom-0 border-t border-border bg-background/80 backdrop-blur-md">
+            <div className="container mx-auto flex items-center justify-between px-6 py-4">
               <Button
                 type="button"
-                onClick={handleNext}
-                disabled={isSubmitting}
-                className="gap-2"
+                variant="ghost"
+                onClick={handleBack}
+                disabled={currentStep === 0 || isSubmitting}
+                className="gap-2 rounded-full"
               >
-                Continue
-                <ArrowRight className="size-4" />
+                <ArrowLeft className="size-4" />
+                Back
               </Button>
-            )}
+
+              <div className="min-h-5 flex-1 px-4 text-center">
+                {submitError ? (
+                  <p className="text-sm text-destructive">{submitError}</p>
+                ) : null}
+              </div>
+
+              {isLastStep ? (
+                <Button type="submit" className="gap-2 rounded-full" disabled={isSubmitting}>
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                  <Send className="size-4" />
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={isSubmitting}
+                  className="gap-2 rounded-full"
+                >
+                  Continue
+                  <ArrowRight className="size-4" />
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      </form>
-    </FormProvider>
+        </form>
+      </FormProvider>
+    </>
   );
 };
 

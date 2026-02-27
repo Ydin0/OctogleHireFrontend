@@ -6,11 +6,19 @@ import { Footer } from "@/components/marketing/footer";
 import { PostCard } from "@/components/blog/post-card";
 import { TagFilter } from "@/components/blog/tag-filter";
 import { getPublishedPosts, getAllTags } from "@/lib/blog";
+import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Blog — OctogleHire",
+  title: "Blog",
   description:
     "Insights on remote hiring, engineering teams, and the future of global talent.",
+  keywords: [
+    "remote hiring blog",
+    "engineering team building",
+    "hire developers tips",
+    "global talent insights",
+  ],
+  alternates: { canonical: absoluteUrl("/blog") },
 };
 
 interface BlogPageProps {
@@ -24,6 +32,18 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const posts = tag
     ? allPosts.filter((post) => post.tags.includes(tag))
     : allPosts;
+
+  const jsonLd = buildJsonLd({
+    "@type": "CollectionPage",
+    name: "OctogleHire Blog",
+    description:
+      "Insights on remote hiring, engineering teams, and the future of global talent.",
+    url: absoluteUrl("/blog"),
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+    },
+  });
 
   return (
     <>
@@ -61,6 +81,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         )}
       </main>
       <Footer />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
     </>
   );
 }

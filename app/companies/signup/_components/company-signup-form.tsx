@@ -1,149 +1,139 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Script from "next/script";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm } from "react-hook-form";
-import { ArrowLeft, ArrowRight, Send } from "lucide-react";
 
-import {
-  companyEnquirySchema,
-  type CompanyEnquiry,
-} from "@/lib/schemas/company-enquiry";
-import { StepIndicator } from "@/components/shared/step-indicator";
+import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { StepCompanyInfo } from "./step-company-info";
-import { StepNeeds } from "./step-needs";
-import { StepPreferences } from "./step-preferences";
-import { StepReview } from "./step-review";
 
-const STEPS = [
-  { label: "Company" },
-  { label: "Needs" },
-  { label: "Preferences" },
-  { label: "Review" },
-];
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
-const stepFields: Record<number, (keyof CompanyEnquiry)[]> = {
-  0: ["companyName", "contactName", "businessEmail", "phone", "companyWebsite"],
-  1: ["projectDescription"],
-  2: ["preferredEngagementType", "estimatedStartDate", "heardAbout"],
-};
+const CALENDLY_URL = "https://calendly.com/yaseen-octogle/30min";
 
-const stepMeta = [
-  {
-    title: "Company Information",
-    description: "Share your business contact details so our team can reach you.",
-  },
-  {
-    title: "Project Needs",
-    description: "Tell us what role or project support you need.",
-  },
-  {
-    title: "Hiring Preferences",
-    description: "Set your preferred engagement model and timeline.",
-  },
-  {
-    title: "Review & Submit",
-    description: "Confirm your enquiry details before submitting.",
-  },
-];
+type View = "form" | "calendly";
 
 const CompanySignupForm = () => {
-  const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [view, setView] = useState<View>("form");
+  const [contactName, setContactName] = useState("");
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  const methods = useForm<CompanyEnquiry>({
-    resolver: zodResolver(companyEnquirySchema),
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<CompanyLead>({
+    resolver: zodResolver(companyLeadSchema),
     mode: "onTouched",
-    defaultValues: {
-      companyName: "",
-      contactName: "",
-      businessEmail: "",
-      phone: "",
-      companyWebsite: "",
-      projectDescription: "",
-      preferredEngagementType: undefined as unknown as CompanyEnquiry["preferredEngagementType"],
-      estimatedStartDate: "",
-      heardAbout: undefined as unknown as CompanyEnquiry["heardAbout"],
-    },
   });
 
-  const goToStep = (step: number) => {
-    setCurrentStep(step);
-  };
+  const onSubmit = async (data: CompanyLead) => {
+    setApiError(null);
+    try {
+      const res = await fetch(`${API_BASE_URL}/company-enquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-  const handleNext = async () => {
-    if (currentStep >= STEPS.length - 1) return;
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { message?: string };
+        setApiError(body.message ?? "Something went wrong. Please try again.");
+        return;
+      }
 
-    const fields = stepFields[currentStep];
-    const valid = await methods.trigger(fields);
-
-    if (!valid) return;
-
-    setCurrentStep((prev) => prev + 1);
-  };
-
-  const handleBack = () => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
+      setContactName(data.contactName);
+      setView("calendly");
+    } catch {
+      setApiError("Unable to connect. Please check your connection and try again.");
     }
   };
 
-  const handleSubmit = methods.handleSubmit(() => {
-    router.push("/companies/signup/status");
-  });
-
-  const isLastStep = currentStep === STEPS.length - 1;
+  if (view === "calendly") {
+    return (
+      <div className="animate-in fade-in duration-500">
+        <p className="mb-4 text-sm text-muted-foreground">
+          Thanks {contactName} — pick a time that works for you.
+        </p>
+        <div
+          className="calendly-inline-widget"
+          data-url={CALENDLY_URL}
+          style={{ minWidth: "100%", height: "650px" }}
+        />
+        <Script
+          src="https://assets.calendly.com/assets/external/widget.js"
+          strategy="lazyOnload"
+        />
+      </div>
+    );
+  }
 
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={handleSubmit}>
-        <div className="mx-auto mt-10 max-w-2xl">
-          <StepIndicator steps={STEPS} currentStep={currentStep} />
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="animate-in fade-in duration-300">
+      <div className="space-y-4">
+        <Field>
+          <FieldLabel htmlFor="contactName">Full Name</FieldLabel>
+          <Input
+            id="contactName"
+            placeholder="Jane Smith"
+            {...register("contactName")}
+          />
+          {errors.contactName && (
+            <FieldError>{errors.contactName.message}</FieldError>
+          )}
+        </Field>
 
-          <Card className="mt-8 p-6">
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold">{stepMeta[currentStep].title}</h2>
-              <p className="text-sm text-muted-foreground">
-                {stepMeta[currentStep].description}
-              </p>
-            </div>
+        <Field>
+          <FieldLabel htmlFor="companyName">Company Name</FieldLabel>
+          <Input
+            id="companyName"
+            placeholder="Acme Labs"
+            {...register("companyName")}
+          />
+          {errors.companyName && (
+            <FieldError>{errors.companyName.message}</FieldError>
+          )}
+        </Field>
 
-            {currentStep === 0 && <StepCompanyInfo />}
-            {currentStep === 1 && <StepNeeds />}
-            {currentStep === 2 && <StepPreferences />}
-            {currentStep === 3 && <StepReview onEditStep={goToStep} />}
+        <Field>
+          <FieldLabel htmlFor="email">Work Email</FieldLabel>
+          <Input
+            id="email"
+            type="email"
+            placeholder="jane@acme.com"
+            {...register("email")}
+          />
+          {errors.email && (
+            <FieldError>{errors.email.message}</FieldError>
+          )}
+        </Field>
 
-            <div className="mt-8 flex items-center justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBack}
-                disabled={currentStep === 0}
-                className="gap-2"
-              >
-                <ArrowLeft className="size-4" />
-                Back
-              </Button>
+        <Field>
+          <FieldLabel htmlFor="phone">Mobile Number</FieldLabel>
+          <Input
+            id="phone"
+            type="tel"
+            placeholder="+1 (555) 000-0000"
+            {...register("phone")}
+          />
+          {errors.phone && (
+            <FieldError>{errors.phone.message}</FieldError>
+          )}
+        </Field>
 
-              {isLastStep ? (
-                <Button type="submit" className="gap-2">
-                  Submit Enquiry
-                  <Send className="size-4" />
-                </Button>
-              ) : (
-                <Button type="button" onClick={handleNext} className="gap-2">
-                  Next
-                  <ArrowRight className="size-4" />
-                </Button>
-              )}
-            </div>
-          </Card>
-        </div>
-      </form>
-    </FormProvider>
+        {apiError && (
+          <p className="text-sm text-destructive">{apiError}</p>
+        )}
+
+        <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
+          {isSubmitting ? "Submitting..." : "Book a Call →"}
+        </Button>
+      </div>
+    </form>
   );
 };
 

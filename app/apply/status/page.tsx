@@ -12,7 +12,6 @@ import {
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 
@@ -97,20 +96,23 @@ export default function StatusPage() {
           <div className="mx-auto max-w-2xl">
             {/* Header */}
             <div className="flex flex-col items-center text-center">
-              <div className="flex size-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-500/10">
-                <CheckCircle className="size-8 text-green-600" />
+              <div className="flex size-16 items-center justify-center rounded-full bg-pulse/10">
+                <CheckCircle className="size-8 text-pulse" />
               </div>
-              <h1 className="mt-6 text-3xl font-semibold lg:text-4xl">
+              <span className="mt-6 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Application Status
+              </span>
+              <h1 className="mt-3 text-4xl font-medium tracking-tight lg:text-5xl">
                 Application Submitted
               </h1>
-              <p className="mt-2 max-w-md text-muted-foreground">
+              <p className="mt-4 max-w-md text-muted-foreground">
                 Thank you for applying! We&apos;ll review your application
                 within 48 hours.
               </p>
             </div>
 
             {/* Timeline */}
-            <Card className="mt-10 p-6">
+            <div className="mt-10 rounded-3xl border border-border bg-muted/30 p-6">
               <div className="space-y-0">
                 {timeline.map((item, index) => (
                   <div key={item.label} className="flex gap-4">
@@ -164,11 +166,14 @@ export default function StatusPage() {
                   </div>
                 ))}
               </div>
-            </Card>
+            </div>
 
             {/* What happens next */}
-            <div className="mt-10">
-              <h2 className="text-lg font-semibold">What happens next?</h2>
+            <div className="mt-12">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Next Steps
+              </span>
+              <h2 className="mt-2 text-lg font-semibold">What happens next?</h2>
               <div className="mt-4 space-y-4">
                 {nextSteps.map((step) => (
                   <div key={step.title} className="flex gap-4">
@@ -187,8 +192,8 @@ export default function StatusPage() {
             </div>
 
             {/* Back button */}
-            <div className="mt-10 flex justify-center">
-              <Button asChild variant="outline">
+            <div className="mt-12 flex justify-center">
+              <Button asChild variant="outline" className="rounded-full">
                 <Link href="/">Back to Home</Link>
               </Button>
             </div>

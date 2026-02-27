@@ -7,6 +7,7 @@ import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { MDXContent } from "@/components/blog/mdx-content";
 import { getPublishedPosts, getPostBySlug } from "@/lib/blog";
+import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
@@ -25,8 +26,9 @@ export async function generateMetadata({
   if (!post) return {};
 
   return {
-    title: `${post.title} — OctogleHire`,
+    title: post.title,
     description: post.description,
+    alternates: { canonical: absoluteUrl(`/blog/${slug}`) },
     openGraph: {
       title: post.title,
       description: post.description,
@@ -34,6 +36,7 @@ export async function generateMetadata({
       publishedTime: post.date,
       authors: [post.author],
       images: [{ url: post.image, width: 1200, height: 630 }],
+      tags: post.tags,
     },
     twitter: {
       card: "summary_large_image",
@@ -49,8 +52,7 @@ export default async function PostPage({ params }: PostPageProps) {
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
-  const jsonLd = {
-    "@context": "https://schema.org",
+  const blogPostingJsonLd = buildJsonLd({
     "@type": "BlogPosting",
     headline: post.title,
     description: post.description,
@@ -62,9 +64,35 @@ export default async function PostPage({ params }: PostPageProps) {
     },
     publisher: {
       "@type": "Organization",
-      name: "OctogleHire",
+      name: SITE_NAME,
     },
-  };
+    mainEntityOfPage: absoluteUrl(`/blog/${slug}`),
+    keywords: post.tags.join(", "),
+  });
+
+  const breadcrumbJsonLd = buildJsonLd({
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: absoluteUrl("/"),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: absoluteUrl("/blog"),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: absoluteUrl(`/blog/${slug}`),
+      },
+    ],
+  });
 
   return (
     <>
@@ -140,10 +168,13 @@ export default async function PostPage({ params }: PostPageProps) {
       </main>
       <Footer />
 
-      {/* JSON-LD */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={blogPostingJsonLd}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={breadcrumbJsonLd}
       />
     </>
   );

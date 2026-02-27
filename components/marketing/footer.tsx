@@ -1,36 +1,59 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
-
-import { Globe as GlobeViz } from "@/components/ui/globe";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
 const sections = [
   {
     title: "Platform",
     links: [
+      { name: "Marketplace", href: "/marketplace" },
       { name: "How It Works", href: "#how-it-works" },
-      { name: "Pricing", href: "#" },
+      { name: "Pricing", href: "#pricing" },
       { name: "For Companies", href: "/companies/signup" },
-      { name: "For Developers", href: "/developers/join" },
-      { name: "Assessments", href: "#" },
+      { name: "For Developers", href: "/apply" },
+    ],
+  },
+  {
+    title: "Hire by Technology",
+    links: [
+      { name: "React Developers", href: "/hire/react-developers" },
+      { name: "Python Developers", href: "/hire/python-developers" },
+      { name: "Node.js Developers", href: "/hire/node-js-developers" },
+      { name: "TypeScript Developers", href: "/hire/typescript-developers" },
+      { name: "Go Developers", href: "/hire/go-developers" },
+      { name: "Java Developers", href: "/hire/java-developers" },
+      { name: "Next.js Developers", href: "/hire/next-js-developers" },
+      { name: "Angular Developers", href: "/hire/angular-developers" },
+      { name: "AWS Developers", href: "/hire/aws-developers" },
+      { name: "Flutter Developers", href: "/hire/flutter-developers" },
+    ],
+  },
+  {
+    title: "Hire by Country",
+    links: [
+      { name: "Developers in India", href: "/hire/developers-in/india" },
+      { name: "Developers in Brazil", href: "/hire/developers-in/brazil" },
+      { name: "Developers in Poland", href: "/hire/developers-in/poland" },
+      { name: "Developers in Ukraine", href: "/hire/developers-in/ukraine" },
+      { name: "Developers in Argentina", href: "/hire/developers-in/argentina" },
     ],
   },
   {
     title: "Company",
     links: [
       { name: "About Us", href: "#" },
-      { name: "Careers", href: "#" },
       { name: "Blog", href: "/blog" },
-      { name: "Press", href: "#" },
+      { name: "Careers", href: "#" },
+      { name: "Contact", href: "#" },
     ],
   },
   {
-    title: "Resources",
+    title: "Legal",
     links: [
-      { name: "Help Center", href: "#" },
-      { name: "Contact Us", href: "#" },
       { name: "Privacy Policy", href: "#" },
       { name: "Terms of Service", href: "#" },
     ],
@@ -45,31 +68,65 @@ const Footer = ({ className }: FooterProps) => {
   return (
     <section className={cn("", className)}>
       <div className="container mx-auto px-6">
-        <footer>
+        {/* CTA top block */}
+        <div className="rounded-3xl border border-border bg-muted/30 p-10 md:p-16 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-4 max-w-xl">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Get started
+            </span>
+            <h2 className="text-4xl font-medium tracking-tight lg:text-5xl">
+              Don&apos;t hire
+              <br />
+              harder. Hire
+              <br />
+              <span className="text-pulse">smarter.</span>
+            </h2>
+            <p className="text-muted-foreground">
+              OctogleHire helps you find pre-vetted Indian engineers, reduce
+              hiring costs by up to 60%, and onboard in days — not months.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 shrink-0">
+            <Button asChild size="lg" className="rounded-full gap-2">
+              <a href="/companies/signup">
+                Start Hiring
+                <ArrowRight className="size-4" />
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-full">
+              <a href="/apply">Apply as a Developer</a>
+            </Button>
+          </div>
+        </div>
+
+        {/* Links row */}
+        <footer className="pb-16">
           <Separator className="my-14" />
-          <div className="flex flex-col items-center justify-between gap-6 lg:flex-row">
-            <div className="lg:max-w-md">
-              <div className="flex items-center justify-start gap-2">
-                <Link href="/" className="flex items-center">
-                  <Logo width={140} height={32} />
-                </Link>
-              </div>
-              <p className="mt-4 text-left text-sm text-muted-foreground">
-                The global talent platform connecting companies with pre-vetted,
-                world-class developers from 150+ countries. Build your dream
-                engineering team in days, not months.
+          <div className="flex flex-col items-start justify-between gap-10 lg:flex-row">
+            <div className="max-w-xs space-y-4">
+              <Link href="/">
+                <Logo width={140} height={32} />
+              </Link>
+              <p className="text-sm text-muted-foreground">
+                The global talent platform for pre-vetted Indian developers.
+                Build world-class engineering teams in days, not months.
               </p>
             </div>
-            <div className="mt-8 flex w-full flex-wrap justify-between gap-12 lg:mt-0 lg:w-fit">
-              {sections.map((section, sectionIdx) => (
-                <div key={sectionIdx} className="mb-4">
-                  <h3 className="mb-4 text-xs font-mono uppercase tracking-[0.08em]">
+            <div className="flex flex-wrap gap-12">
+              {sections.map((section) => (
+                <div key={section.title}>
+                  <h3 className="mb-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {section.title}
                   </h3>
-                  <ul className="space-y-2 text-sm font-mono uppercase tracking-[0.08em] text-muted-foreground">
-                    {section.links.map((link, linkIdx) => (
-                      <li key={linkIdx} className="hover:text-primary">
-                        <a href={link.href}>{link.name}</a>
+                  <ul className="space-y-2.5">
+                    {section.links.map((link) => (
+                      <li key={link.name}>
+                        <a
+                          href={link.href}
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {link.name}
+                        </a>
                       </li>
                     ))}
                   </ul>
@@ -77,9 +134,10 @@ const Footer = ({ className }: FooterProps) => {
               ))}
             </div>
           </div>
-          <div className="relative mt-4 h-56 overflow-hidden lg:h-[22rem]">
-            <GlobeViz className="absolute top-[4.75rem] md:top-20 md:scale-[1.2] lg:top-24 lg:scale-[1.4]" />
-          </div>
+          <Separator className="my-10" />
+          <p className="text-xs text-muted-foreground">
+            OctogleHire 2026. All Rights Reserved.
+          </p>
         </footer>
       </div>
     </section>

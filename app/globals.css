@@ -51,8 +51,13 @@
   --radius-4xl: calc(var(--radius) + 16px);
   --animate-progress-fill: progress-fill 5s linear forwards;
   @keyframes progress-fill {
-    from { width: 0%; }
-    to { width: 100%; }
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  --animate-scroll-x: scrollX 20s linear infinite;
+  @keyframes scrollX {
+    from { transform: translateX(0); }
+    to { transform: translateX(-33.333%); }
   }
   --animate-orbit: orbit calc(var(--duration)*1s) linear infinite;
   @keyframes orbit {

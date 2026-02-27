@@ -71,7 +71,7 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                     {isActive && (
                       <div
                         key={animKey}
-                        className="h-full rounded-full bg-pulse animate-progress-fill"
+                        className="h-full w-full origin-left rounded-full bg-pulse animate-progress-fill will-change-transform"
                         onAnimationEnd={advance}
                       />
                     )}
@@ -197,28 +197,14 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                 value="screening"
                 className="animate-in duration-300 fade-in"
               >
-                <div className="relative">
-                  <img
-                    src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/photos/annie-spratt-hCb3lIB8L8E-unsplash.jpg"
-                    alt="Application screening process"
-                    className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
-                  />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">
-                        10,000+
-                      </p>
-                      <p className="font-medium">
-                        applications reviewed monthly
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">
-                        Top 3%
-                      </p>
-                      <p className="font-medium">acceptance rate</p>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">10,000+</p>
+                    <p className="text-sm text-muted-foreground">applications reviewed monthly</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">Top 3%</p>
+                    <p className="text-sm text-muted-foreground">acceptance rate</p>
                   </div>
                 </div>
               </TabsContent>
@@ -226,26 +212,14 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                 value="assessment"
                 className="animate-in duration-300 fade-in"
               >
-                <div className="relative">
-                  <img
-                    src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/photos/annie-spratt-MChSQHxGZrQ-unsplash.jpg"
-                    alt="Technical assessment"
-                    className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
-                  />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">5 hrs</p>
-                      <p className="font-medium">
-                        average assessment completion
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">20+</p>
-                      <p className="font-medium">
-                        stack-specific challenge tracks
-                      </p>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">5 hrs</p>
+                    <p className="text-sm text-muted-foreground">average assessment completion</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">20+</p>
+                    <p className="text-sm text-muted-foreground">stack-specific challenge tracks</p>
                   </div>
                 </div>
               </TabsContent>
@@ -253,22 +227,14 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                 value="interview"
                 className="animate-in duration-300 fade-in"
               >
-                <div className="relative">
-                  <img
-                    src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/photos/annie-spratt-AkftcHujUmk-unsplash.jpg"
-                    alt="Live technical interview"
-                    className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
-                  />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">2</p>
-                      <p className="font-medium">rounds of live evaluation</p>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">90min</p>
-                      <p className="font-medium">system design deep-dive</p>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">2</p>
+                    <p className="text-sm text-muted-foreground">rounds of live evaluation</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">90min</p>
+                    <p className="text-sm text-muted-foreground">system design deep-dive</p>
                   </div>
                 </div>
               </TabsContent>
@@ -276,24 +242,14 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                 value="background"
                 className="animate-in duration-300 fade-in"
               >
-                <div className="relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=1920&q=100"
-                    alt="Reference and background verification"
-                    className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
-                  />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">100%</p>
-                      <p className="font-medium">references verified</p>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">3+</p>
-                      <p className="font-medium">
-                        professional references contacted
-                      </p>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">100%</p>
+                    <p className="text-sm text-muted-foreground">references verified</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">3+</p>
+                    <p className="text-sm text-muted-foreground">professional references contacted</p>
                   </div>
                 </div>
               </TabsContent>
@@ -301,24 +257,14 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                 value="approved"
                 className="animate-in duration-300 fade-in"
               >
-                <div className="relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=100"
-                    alt="Approved and matched with companies"
-                    className="h-[440px] w-full rounded-3xl object-cover lg:h-[540px]"
-                  />
-                  <div className="absolute inset-0 rounded-3xl bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 flex flex-col justify-center gap-8 p-6 text-white">
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">48hrs</p>
-                      <p className="font-medium">
-                        average time to first match
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <p className="text-4xl font-medium lg:text-5xl">150+</p>
-                      <p className="font-medium">countries in our network</p>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">48hrs</p>
+                    <p className="text-sm text-muted-foreground">average time to first match</p>
+                  </div>
+                  <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">150+</p>
+                    <p className="text-sm text-muted-foreground">countries in our network</p>
                   </div>
                 </div>
               </TabsContent>

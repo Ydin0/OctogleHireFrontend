@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { DM_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION } from "@/lib/seo";
 import "./globals.css";
 
 const volksans = localFont({
@@ -48,9 +49,36 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OctogleHire — Hire Top Global Developer Talent",
-  description:
-    "Connect with pre-vetted, world-class engineers from 150+ countries. Build your dream team in days, not months with OctogleHire.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "OctogleHire — Hire Top Global Developer Talent",
+    template: "%s — OctogleHire",
+  },
+  description: DEFAULT_DESCRIPTION,
+  keywords: [
+    "hire developers",
+    "remote engineers",
+    "pre-vetted developers",
+    "global talent",
+    "hire remote developers",
+    "software engineers for hire",
+    "hire Indian developers",
+    "offshore development",
+    "engineering talent platform",
+    "OctogleHire",
+  ],
+  openGraph: {
+    siteName: SITE_NAME,
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@octoglehire",
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
 };
 
 export default function RootLayout({

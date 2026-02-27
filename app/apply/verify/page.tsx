@@ -6,11 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth, useSignIn, useSignUp } from "@clerk/nextjs";
 import { AlertCircle, Loader2, Mail } from "lucide-react";
 
-import { StandaloneHeader } from "@/components/shared/standalone-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Navbar } from "@/components/marketing/navbar";
 
 const resolveClerkError = (error: unknown): string => {
   if (
@@ -85,42 +84,42 @@ function VerifyContent() {
   // If the user is already signed in, show a redirect option
   if (isSignedIn) {
     return (
-      <main className="min-h-screen bg-background">
-        <StandaloneHeader action={{ label: "Sign In", href: "/login" }} />
-        <div className="container mx-auto flex min-h-[calc(100vh-57px)] items-center justify-center px-6 py-12">
-          <div className="w-full max-w-md space-y-6">
-            <section className="space-y-4 text-center">
-              <p className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-mono uppercase tracking-[0.08em] text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-400">
-                <Mail className="size-3.5" />
+      <>
+        <Navbar />
+        <section className="flex min-h-[calc(100dvh-4rem)] items-center justify-center py-12">
+          <div className="container mx-auto px-6">
+            <div className="mx-auto max-w-md space-y-6 text-center">
+              <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted">
+                <Mail className="size-6" />
+              </div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Already Signed In
-              </p>
-              <h1 className="text-3xl font-semibold tracking-tight">
+              </span>
+              <h1 className="text-lg font-semibold">
                 You&apos;re already authenticated
               </h1>
               <p className="text-sm text-muted-foreground">
                 Your application has been submitted. You can go to your dashboard now.
               </p>
-            </section>
-            <Card className="border-pulse/25 bg-card/95 shadow-sm">
-              <CardContent className="pt-6 space-y-3">
+              <div className="space-y-3 pt-2">
                 <Button
-                  className="w-full"
+                  className="w-full rounded-full"
                   onClick={() => router.replace("/auth/after-sign-in")}
                 >
                   Go to Dashboard
                 </Button>
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground">
                   Or return{" "}
-                  <Link href="/" className="text-pulse hover:underline">
+                  <Link href="/" className="text-foreground hover:underline">
                     home
                   </Link>
                   .
                 </p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
-        </div>
-      </main>
+        </section>
+      </>
     );
   }
 
@@ -215,30 +214,31 @@ function VerifyContent() {
   };
 
   return (
-    <main className="min-h-screen bg-background">
-      <StandaloneHeader action={{ label: "Sign In", href: "/login" }} />
-      <div className="container mx-auto flex min-h-[calc(100vh-57px)] items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md space-y-6">
-          <section className="space-y-4 text-center">
-            <p className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-xs font-mono uppercase tracking-[0.08em] text-sky-700 dark:border-pulse/30 dark:bg-pulse/10 dark:text-pulse">
-              <Mail className="size-3.5" />
-              Verify Access
-            </p>
-            <h1 className="text-3xl font-semibold tracking-tight">Verify your email</h1>
-            <p className="text-sm text-muted-foreground">
-              We&apos;ll send a one-time passcode to <strong>{email || "your email"}</strong>.
-            </p>
-          </section>
+    <>
+      <Navbar />
+      <section className="flex min-h-[calc(100dvh-4rem)] items-center justify-center py-12">
+        <div className="container mx-auto px-6">
+          <div className="mx-auto max-w-md space-y-8">
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
+                <Mail className="size-6" />
+              </div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Verify Access
+              </span>
+              <h1 className="mt-3 text-lg font-semibold">Verify your email</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                We&apos;ll send a one-time passcode to <strong>{email || "your email"}</strong>.
+              </p>
+            </div>
 
-          <Card className="border-pulse/25 bg-card/95 shadow-sm">
-            <CardHeader>
-              <CardTitle>Developer Access Confirmation</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <div className="rounded-2xl border border-border p-6 space-y-4">
+              <p className="text-sm font-semibold">Developer Access Confirmation</p>
+
               {!isCodeSent ? (
                 <Button
                   type="button"
-                  className="w-full"
+                  className="w-full rounded-full"
                   onClick={sendCode}
                   disabled={!email || isSendingCode || !isLoaded}
                 >
@@ -269,7 +269,7 @@ function VerifyContent() {
 
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full rounded-full"
                     disabled={!isLoaded || isVerifying || code.trim().length < 4}
                   >
                     {isVerifying ? (
@@ -285,7 +285,7 @@ function VerifyContent() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="w-full"
+                    className="w-full rounded-full"
                     onClick={sendCode}
                     disabled={!isLoaded || isSendingCode}
                   >
@@ -295,27 +295,27 @@ function VerifyContent() {
               )}
 
               {error ? (
-                <div className="rounded-md border border-red-500/30 bg-red-500/10 p-3 text-sm">
-                  <div className="flex items-center gap-2 font-medium text-red-600">
+                <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm">
+                  <div className="flex items-center gap-2 font-medium text-destructive">
                     <AlertCircle className="size-4" />
                     Verification failed
                   </div>
-                  <p className="mt-1 text-red-700 dark:text-red-300">{error}</p>
+                  <p className="mt-1 text-destructive/80">{error}</p>
                 </div>
               ) : null}
 
               <p className="text-center text-xs text-muted-foreground">
                 Didn&apos;t apply yet?{" "}
-                <Link href="/apply" className="text-pulse hover:underline">
+                <Link href="/apply" className="text-foreground hover:underline">
                   Submit your developer application
                 </Link>
                 .
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
-      </div>
-    </main>
+      </section>
+    </>
   );
 }
 
