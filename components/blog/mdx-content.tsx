@@ -2,6 +2,7 @@
 
 import * as runtime from "react/jsx-runtime";
 import Image from "next/image";
+import { InlineCta } from "@/components/blog/inline-cta";
 
 const sharedComponents = {
   img: ({ src, alt }: React.ImgHTMLAttributes<HTMLImageElement>) => (
@@ -13,6 +14,7 @@ const sharedComponents = {
       className="rounded-lg"
     />
   ),
+  InlineCta,
 };
 
 const useMDXComponent = (code: string) => {

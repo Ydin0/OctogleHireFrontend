@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import localFont from "next/font/local";
 import { DM_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { AIReferralTracker } from "@/components/analytics/ai-referral-tracker";
 import { SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION } from "@/lib/seo";
 import "./globals.css";
 
@@ -91,6 +94,7 @@ export default function RootLayout({
       <body
         className={`${volksans.variable} ${dmMono.variable} antialiased`}
       >
+        <GoogleAnalytics />
         <ClerkProvider signInUrl="/login">
           <ThemeProvider
             attribute="class"
@@ -99,6 +103,9 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Suspense>
+              <AIReferralTracker />
+            </Suspense>
           </ThemeProvider>
         </ClerkProvider>
       </body>

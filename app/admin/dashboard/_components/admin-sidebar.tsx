@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Bot,
   Building2,
   Layers,
   LogOut,
@@ -24,6 +25,7 @@ const navItems = [
   { href: "/admin/dashboard/applicants", label: "Applicants", icon: Users },
   { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
   { href: "/admin/dashboard/team", label: "Team", icon: Shield },
+  { href: "/admin/dashboard/aeo", label: "AEO Monitoring", icon: Bot },
 ] as const;
 
 const isItemActive = (pathname: string, href: string) => {
