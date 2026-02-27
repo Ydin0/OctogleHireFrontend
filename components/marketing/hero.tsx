@@ -53,7 +53,7 @@ const Hero = ({ className }: HeroProps) => {
 
         {/* Description */}
         <p className="mx-auto mt-8 max-w-xl text-center text-base text-muted-foreground sm:text-lg">
-          OctogleHire delivers pre-vetted senior engineers from 150+ countries
+          OctogleHire delivers pre-vetted engineers from 30+ countries
           at 40–60% below US/UK rates. Receive 3–5 curated profiles within 48
           hours — no recruitment fees, no long-term lock-in.
         </p>
