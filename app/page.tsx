@@ -5,11 +5,11 @@ import { Hero } from "@/components/marketing/hero";
 import { FeaturesShowcase } from "@/components/marketing/features-showcase";
 import { DeveloperProfiles } from "@/components/marketing/developer-profiles";
 import { HowItWorks } from "@/components/marketing/how-it-works";
+import { SavingsComparison } from "@/components/marketing/savings-comparison";
 import { HiringCalculator } from "@/components/marketing/hiring-calculator";
 import { DeveloperSpecializations } from "@/components/marketing/developer-specializations";
 import { Benefits } from "@/components/marketing/benefits";
 import { ComparisonTable } from "@/components/marketing/comparison-table";
-import { Testimonials } from "@/components/marketing/testimonials";
 import { Pricing } from "@/components/marketing/pricing";
 import { Faq } from "@/components/marketing/faq";
 import { Footer } from "@/components/marketing/footer";
@@ -18,14 +18,16 @@ import { SITE_URL, SITE_NAME, buildJsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "OctogleHire — Hire Top Global Developer Talent",
   description:
-    "Connect with pre-vetted, world-class engineers from 150+ countries. Build your dream team in days, not months with OctogleHire.",
+    "Connect with pre-vetted, world-class engineers from 30+ countries at up to 60% less than UK & US rates. Build your dream team in days, not months.",
   keywords: [
     "hire developers",
     "hire remote developers",
     "pre-vetted engineers",
     "global developer talent",
     "remote software engineers",
-    "hire Indian developers",
+    "affordable developers",
+    "hire remote developers cheap",
+    "developer cost comparison",
     "offshore development team",
   ],
   alternates: {
@@ -68,11 +70,11 @@ export default function Home() {
       <FeaturesShowcase />
       <DeveloperProfiles />
       <HowItWorks />
+      <SavingsComparison />
       <HiringCalculator />
       <DeveloperSpecializations />
       <Benefits />
       <ComparisonTable />
-      <Testimonials />
       <Pricing />
       <Faq />
       <Footer />

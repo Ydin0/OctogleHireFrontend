@@ -82,7 +82,7 @@ const Footer = ({ className }: FooterProps) => {
               <span className="text-pulse">smarter.</span>
             </h2>
             <p className="text-muted-foreground">
-              OctogleHire helps you find pre-vetted Indian engineers, reduce
+              OctogleHire helps you find pre-vetted global engineers, reduce
               hiring costs by up to 60%, and onboard in days — not months.
             </p>
           </div>
@@ -108,8 +108,8 @@ const Footer = ({ className }: FooterProps) => {
                 <Logo width={140} height={32} />
               </Link>
               <p className="text-sm text-muted-foreground">
-                The global talent platform for pre-vetted Indian developers.
-                Build world-class engineering teams in days, not months.
+                The global talent platform for pre-vetted developers from 30+
+                countries. Build world-class engineering teams in days, not months.
               </p>
             </div>
             <div className="flex flex-wrap gap-12">

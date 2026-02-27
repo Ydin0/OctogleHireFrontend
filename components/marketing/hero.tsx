@@ -2,6 +2,7 @@
 
 import AutoScroll from "embla-carousel-auto-scroll";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 import { cn } from "@/lib/utils";
@@ -11,24 +12,22 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { REGIONAL_COUNTRIES, countryToSlug } from "@/lib/seo-data";
 
 interface HeroProps {
   className?: string;
 }
 
-const logos = [
-  { id: "l1", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-1.svg", h: "h-6" },
-  { id: "l2", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-2.svg", h: "h-6" },
-  { id: "l3", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-3.svg", h: "h-6" },
-  { id: "l4", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-4.svg", h: "h-6" },
-  { id: "l5", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-5.svg", h: "h-5" },
-  { id: "l6", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-6.svg", h: "h-6" },
-  { id: "l7", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-7.svg", h: "h-6" },
-  { id: "l8", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/astro-wordmark.svg", h: "h-6" },
-];
+const EXPENSIVE_MARKETS = new Set([
+  "GB", "US", "CA", "DE", "FR", "NL", "IT", "AU",
+]);
+
+const hireFromCountries = REGIONAL_COUNTRIES.filter(
+  (c) => !EXPENSIVE_MARKETS.has(c.isoCode),
+);
 
 const Hero = ({ className }: HeroProps) => {
-  const allLogos = [...logos, ...logos];
+  const allCountries = [...hireFromCountries, ...hireFromCountries];
 
   return (
     <section className={cn("pt-20 pb-0", className)}>
@@ -45,18 +44,17 @@ const Hero = ({ className }: HeroProps) => {
 
         {/* Headline */}
         <h1 className="mt-8 text-center text-5xl font-medium tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
-          India&apos;s Best
+          World-Class Developers,
           <br />
-          Developers,
+          Fraction of the
           <br />
-          <span className="text-pulse">Verified.</span>
+          <span className="text-pulse">Cost.</span>
         </h1>
 
         {/* Description */}
         <p className="mx-auto mt-8 max-w-xl text-center text-base text-muted-foreground sm:text-lg">
-          Connect with pre-vetted, world-class Indian engineers from every
-          specialisation. Build your dream team in days, not months — at a
-          fraction of the cost.
+          Access pre-vetted engineers from 30+ countries at up to 60% less
+          than UK &amp; US rates. Build your dream team in days, not months.
         </p>
 
         {/* CTAs */}
@@ -72,31 +70,40 @@ const Hero = ({ className }: HeroProps) => {
           </Button>
         </div>
 
-        {/* Trusted by */}
+        {/* Hire from 30+ countries */}
         <p className="mt-16 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Trusted by teams at
+          Hire from 30+ countries
         </p>
       </div>
 
-      {/* Logo carousel — full width */}
+      {/* Country flag carousel — full width */}
       <div className="relative mt-6 pb-20">
         <Carousel
-          plugins={[AutoScroll({ playOnInit: true, speed: 0.6 })]}
+          plugins={[AutoScroll({ playOnInit: true, speed: 0.4, stopOnInteraction: false })]}
           opts={{ loop: true, align: "start" }}
         >
           <CarouselContent className="ml-0">
-            {allLogos.map((logo, i) => (
+            {allCountries.map((country, i) => (
               <CarouselItem
-                key={`${logo.id}-${i}`}
-                className="basis-1/3 pl-0 pr-10 sm:basis-1/4 md:basis-1/5 lg:basis-1/7 xl:basis-1/8"
+                key={`${country.isoCode}-${i}`}
+                className="basis-1/4 pl-0 pr-4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8 xl:basis-1/10"
               >
-                <div className="flex h-12 items-center justify-center opacity-30">
+                <Link
+                  href={`/hire/developers-in/${countryToSlug(country.name)}`}
+                  className="flex flex-col items-center gap-2 group"
+                >
                   <img
-                    src={logo.src}
-                    alt=""
-                    className={cn("w-auto", logo.h)}
+                    src={`https://flagcdn.com/w40/${country.isoCode.toLowerCase()}.png`}
+                    srcSet={`https://flagcdn.com/w80/${country.isoCode.toLowerCase()}.png 2x`}
+                    alt={country.name}
+                    className="h-8 w-auto rounded-sm shadow-sm transition-transform group-hover:scale-110"
+                    width={40}
+                    height={27}
                   />
-                </div>
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
+                    {country.name}
+                  </span>
+                </Link>
               </CarouselItem>
             ))}
           </CarouselContent>

@@ -11,41 +11,257 @@ interface HiringCalculatorProps {
   className?: string;
 }
 
+const ROLES = [
+  "Frontend Engineer",
+  "Full-Stack Engineer",
+  "Backend Engineer",
+  "DevOps Engineer",
+] as const;
+
+const EXPERIENCE_LEVELS = [
+  { key: "junior", label: "Junior", years: "1–2 yrs" },
+  { key: "mid", label: "Mid-Level", years: "3–5 yrs" },
+  { key: "senior", label: "Senior", years: "6+ yrs" },
+] as const;
+
+const MARKETS = ["US", "UK", "Germany", "Australia"] as const;
+
+type Role = (typeof ROLES)[number];
+type Experience = (typeof EXPERIENCE_LEVELS)[number]["key"];
+type Market = (typeof MARKETS)[number];
+
+// Rates based on 2025 market data (Glassdoor, Arc, DistantJob, Flexiple)
+// Local = typical employed monthly cost in that market
+// OctogleHire = offshore pre-vetted talent via platform
+const RATE_DATA: Record<
+  Role,
+  Record<Experience, Record<Market, { local: number; octogle: number }>>
+> = {
+  "Frontend Engineer": {
+    junior: {
+      US: { local: 6500, octogle: 2000 },
+      UK: { local: 4800, octogle: 1800 },
+      Germany: { local: 4500, octogle: 1700 },
+      Australia: { local: 5200, octogle: 1900 },
+    },
+    mid: {
+      US: { local: 9500, octogle: 3200 },
+      UK: { local: 7500, octogle: 2800 },
+      Germany: { local: 7000, octogle: 2600 },
+      Australia: { local: 8000, octogle: 3000 },
+    },
+    senior: {
+      US: { local: 12500, octogle: 4500 },
+      UK: { local: 9500, octogle: 3800 },
+      Germany: { local: 8500, octogle: 3500 },
+      Australia: { local: 10000, octogle: 4000 },
+    },
+  },
+  "Full-Stack Engineer": {
+    junior: {
+      US: { local: 6000, octogle: 1900 },
+      UK: { local: 4500, octogle: 1700 },
+      Germany: { local: 4200, octogle: 1600 },
+      Australia: { local: 5000, octogle: 1800 },
+    },
+    mid: {
+      US: { local: 9000, octogle: 3000 },
+      UK: { local: 7000, octogle: 2600 },
+      Germany: { local: 6500, octogle: 2400 },
+      Australia: { local: 7500, octogle: 2800 },
+    },
+    senior: {
+      US: { local: 12000, octogle: 4200 },
+      UK: { local: 9000, octogle: 3500 },
+      Germany: { local: 8000, octogle: 3200 },
+      Australia: { local: 9500, octogle: 3800 },
+    },
+  },
+  "Backend Engineer": {
+    junior: {
+      US: { local: 6200, octogle: 1800 },
+      UK: { local: 4600, octogle: 1600 },
+      Germany: { local: 4300, octogle: 1500 },
+      Australia: { local: 5000, octogle: 1700 },
+    },
+    mid: {
+      US: { local: 9200, octogle: 3000 },
+      UK: { local: 7200, octogle: 2600 },
+      Germany: { local: 6800, octogle: 2400 },
+      Australia: { local: 7800, octogle: 2800 },
+    },
+    senior: {
+      US: { local: 12500, octogle: 4300 },
+      UK: { local: 9200, octogle: 3600 },
+      Germany: { local: 8500, octogle: 3300 },
+      Australia: { local: 10000, octogle: 3900 },
+    },
+  },
+  "DevOps Engineer": {
+    junior: {
+      US: { local: 6800, octogle: 2100 },
+      UK: { local: 5000, octogle: 1900 },
+      Germany: { local: 4800, octogle: 1800 },
+      Australia: { local: 5500, octogle: 2000 },
+    },
+    mid: {
+      US: { local: 10000, octogle: 3400 },
+      UK: { local: 8000, octogle: 3000 },
+      Germany: { local: 7500, octogle: 2800 },
+      Australia: { local: 8500, octogle: 3200 },
+    },
+    senior: {
+      US: { local: 13500, octogle: 4800 },
+      UK: { local: 10000, octogle: 4000 },
+      Germany: { local: 9500, octogle: 3700 },
+      Australia: { local: 11000, octogle: 4300 },
+    },
+  },
+};
+
+const MARKET_FLAGS: Record<Market, string> = {
+  US: "us",
+  UK: "gb",
+  Germany: "de",
+  Australia: "au",
+};
+
 const HiringCalculator = ({ className }: HiringCalculatorProps) => {
+  const [role, setRole] = useState<Role>("Frontend Engineer");
+  const [experience, setExperience] = useState<Experience>("mid");
+  const [market, setMarket] = useState<Market>("US");
   const [teamSize, setTeamSize] = useState([3]);
-  const [monthsUnfilled, setMonthsUnfilled] = useState([2]);
-  const [monthlySalary, setMonthlySalary] = useState([8000]);
 
-  const results = useMemo(() => {
-    const lostProductivity = teamSize[0] * monthsUnfilled[0] * monthlySalary[0];
-    const recruitmentCost = monthlySalary[0] * 3;
-    const total = lostProductivity + recruitmentCost;
-    const savings = Math.round(total * 0.7);
-    return { lostProductivity, recruitmentCost, total, savings };
-  }, [teamSize, monthsUnfilled, monthlySalary]);
+  const rates = RATE_DATA[role][experience][market];
+  const savingsPercent = Math.round(
+    ((rates.local - rates.octogle) / rates.local) * 100,
+  );
+  const monthlySavings = rates.local - rates.octogle;
 
-  const fmt = (n: number) =>
-    n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`;
+  const annualSavings = useMemo(
+    () => teamSize[0] * monthlySavings * 12,
+    [teamSize, monthlySavings],
+  );
+
+  const fmt = (n: number) => `$${n.toLocaleString()}`;
 
   return (
     <section className={cn("py-24 container mx-auto px-6", className)}>
       {/* Header */}
-      <div className="mb-12 flex flex-col gap-4">
+      <div className="mb-10 flex flex-col gap-4">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Calculator
         </span>
         <h2 className="max-w-2xl text-4xl font-medium tracking-tight lg:text-5xl">
-          Quantify the cost
-          of slow hiring
+          Quantify your savings
         </h2>
       </div>
 
-      <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-muted/30 p-8 md:p-12">
-        <div className="space-y-10">
-          {/* Slider 1: Open roles */}
+      <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-muted/30 p-8 md:p-10">
+        <div className="space-y-8">
+          {/* Role selector */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Role</label>
+            <div className="flex flex-wrap gap-2">
+              {ROLES.map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setRole(r)}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-medium transition-colors",
+                    r === role
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-background text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Experience */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Experience</label>
+            <div className="flex flex-wrap gap-2">
+              {EXPERIENCE_LEVELS.map((lvl) => (
+                <button
+                  key={lvl.key}
+                  onClick={() => setExperience(lvl.key)}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
+                    lvl.key === experience
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-background text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {lvl.label} ({lvl.years})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Market */}
+          <div className="space-y-3">
+            <label className="text-sm font-medium">Compare against</label>
+            <div className="flex flex-wrap gap-2">
+              {MARKETS.map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMarket(m)}
+                  className={cn(
+                    "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
+                    m === market
+                      ? "border-foreground bg-foreground text-background"
+                      : "border-border bg-background text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  <img
+                    src={`https://flagcdn.com/w20/${MARKET_FLAGS[m]}.png`}
+                    alt=""
+                    className="h-3.5 w-auto rounded-sm"
+                    width={20}
+                    height={14}
+                  />
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Rate comparison */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="rounded-2xl border border-border bg-background p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Typical {market} rate
+              </p>
+              <p className="mt-2 font-mono text-3xl font-semibold tracking-tight lg:text-4xl">
+                {fmt(rates.local)}
+                <span className="text-base text-muted-foreground">/mo</span>
+              </p>
+            </div>
+            <div className="rounded-2xl border border-pulse bg-background p-5">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                OctogleHire rate
+              </p>
+              <p className="mt-2 font-mono text-3xl font-semibold tracking-tight text-pulse lg:text-4xl">
+                {fmt(rates.octogle)}
+                <span className="text-base text-muted-foreground">/mo</span>
+              </p>
+            </div>
+          </div>
+
+          <p className="text-center text-lg font-semibold">
+            You save {savingsPercent}%{" "}
+            <span className="text-muted-foreground font-normal">
+              ({fmt(monthlySavings)}/mo per developer)
+            </span>
+          </p>
+
+          {/* Team size slider */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Open engineering roles</label>
+              <label className="text-sm font-medium">How many developers?</label>
               <span className="font-mono text-sm font-semibold">{teamSize[0]}</span>
             </div>
             <Slider
@@ -56,70 +272,19 @@ const HiringCalculator = ({ className }: HiringCalculatorProps) => {
               step={1}
               className="w-full"
             />
-            <p className="text-xs text-muted-foreground">
-              Number of unfilled developer positions right now
-            </p>
           </div>
 
-          {/* Slider 2: Months unfilled */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Average months each role stays open</label>
-              <span className="font-mono text-sm font-semibold">{monthsUnfilled[0]} mo</span>
-            </div>
-            <Slider
-              value={monthsUnfilled}
-              onValueChange={setMonthsUnfilled}
-              min={1}
-              max={12}
-              step={1}
-              className="w-full"
-            />
-            <p className="text-xs text-muted-foreground">
-              Time from posting to hire using your current process
-            </p>
-          </div>
-
-          {/* Slider 3: Monthly salary */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Average monthly developer salary</label>
-              <span className="font-mono text-sm font-semibold">${monthlySalary[0].toLocaleString()}</span>
-            </div>
-            <Slider
-              value={monthlySalary}
-              onValueChange={setMonthlySalary}
-              min={2000}
-              max={25000}
-              step={500}
-              className="w-full"
-            />
-          </div>
-
-          {/* Result */}
+          {/* Annual savings result */}
           <div className="rounded-2xl border border-border bg-background p-6 space-y-4">
-            <p className="text-2xl font-medium leading-snug">
-              You&apos;re losing{" "}
-              <span className="font-mono font-semibold text-foreground">
-                {fmt(results.lostProductivity)}
-              </span>{" "}
-              in lost productivity — plus{" "}
-              <span className="font-mono font-semibold text-foreground">
-                {fmt(results.recruitmentCost)}
-              </span>{" "}
-              in recruitment costs.
+            <p className="text-sm text-muted-foreground">
+              Annual savings with {teamSize[0]} developer{teamSize[0] > 1 ? "s" : ""}
             </p>
-            <p className="text-muted-foreground text-sm">
-              OctogleHire could save you{" "}
-              <span className="font-mono font-semibold text-foreground">
-                {fmt(results.savings)}
-              </span>{" "}
-              by filling your roles in 48 hours at a fraction of traditional
-              agency fees.
+            <p className="font-mono text-4xl font-semibold tracking-tight lg:text-5xl">
+              {fmt(annualSavings)}
             </p>
             <Button asChild className="w-full rounded-full gap-2" size="lg">
               <a href="/companies/signup">
-                Fill Your Roles Now
+                Start Saving Now
                 <ArrowRight className="size-4" />
               </a>
             </Button>
