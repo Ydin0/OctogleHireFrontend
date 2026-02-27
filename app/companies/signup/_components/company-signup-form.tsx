@@ -82,9 +82,11 @@ const CompanySignupForm = () => {
             placeholder="Jane Smith"
             {...register("contactName")}
           />
-          {errors.contactName && (
-            <FieldError>{errors.contactName.message}</FieldError>
-          )}
+          <div className="min-h-5">
+            {errors.contactName && (
+              <FieldError>{errors.contactName.message}</FieldError>
+            )}
+          </div>
         </Field>
 
         <Field>
@@ -94,9 +96,11 @@ const CompanySignupForm = () => {
             placeholder="Acme Labs"
             {...register("companyName")}
           />
-          {errors.companyName && (
-            <FieldError>{errors.companyName.message}</FieldError>
-          )}
+          <div className="min-h-5">
+            {errors.companyName && (
+              <FieldError>{errors.companyName.message}</FieldError>
+            )}
+          </div>
         </Field>
 
         <Field>
@@ -107,9 +111,11 @@ const CompanySignupForm = () => {
             placeholder="jane@acme.com"
             {...register("email")}
           />
-          {errors.email && (
-            <FieldError>{errors.email.message}</FieldError>
-          )}
+          <div className="min-h-5">
+            {errors.email && (
+              <FieldError>{errors.email.message}</FieldError>
+            )}
+          </div>
         </Field>
 
         <Field>
@@ -120,9 +126,11 @@ const CompanySignupForm = () => {
             placeholder="+1 (555) 000-0000"
             {...register("phone")}
           />
-          {errors.phone && (
-            <FieldError>{errors.phone.message}</FieldError>
-          )}
+          <div className="min-h-5">
+            {errors.phone && (
+              <FieldError>{errors.phone.message}</FieldError>
+            )}
+          </div>
         </Field>
 
         {apiError && (

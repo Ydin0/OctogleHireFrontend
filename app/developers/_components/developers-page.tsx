@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { SlidersHorizontal, Lock } from "lucide-react";
-import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { SlidersHorizontal } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,8 +29,15 @@ import {
 import { fetchPublicDevelopers } from "@/lib/api/public-developers";
 import { DeveloperGrid } from "./developer-grid";
 import { FiltersSidebar } from "./filters-sidebar";
+import { LeadCaptureDialog } from "./lead-capture-dialog";
 import { NoResults } from "./no-results";
 import { SearchHeader } from "./search-header";
+
+const PUBLIC_VISIBLE = 6;
+const LOCKED_COUNT = 3;
+const FAKE_TOTAL_PAGES = 50;
+const FAKE_DEVELOPER_COUNT = "1,200+";
+const DISPLAY_VISIBLE = 9;
 
 function matchesExperienceRange(
   years: number,
@@ -59,8 +64,6 @@ type SortOption =
   | "hourly-asc"
   | "hourly-desc";
 
-const PAGE_SIZE = 9;
-
 function getCountryFromLocation(location: string): string {
   const parts = location.split(",").map((part) => part.trim());
   return parts[parts.length - 1] ?? location;
@@ -76,9 +79,7 @@ function normalizeTitleForMatch(value: string): string {
 }
 
 const DevelopersPage = () => {
-  const { isSignedIn } = useAuth();
   const [developers, setDevelopers] = useState<Developer[]>(staticDevelopers);
-  const [apiLoaded, setApiLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStacks, setSelectedStacks] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
@@ -87,24 +88,25 @@ const DevelopersPage = () => {
   const [experienceRanges, setExperienceRanges] = useState<string[]>([]);
   const [availableOnly, setAvailableOnly] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("relevance");
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // Fetch live developers from API
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogTrigger, setDialogTrigger] = useState<
+    "locked-profile" | "pagination"
+  >("locked-profile");
+
+  // Fetch live developers from API — always public/featured
   useEffect(() => {
     const load = async () => {
-      const params = isSignedIn
-        ? { limit: 100 }
-        : { featured: true, limit: 9 };
-      const result = await fetchPublicDevelopers(params);
+      const result = await fetchPublicDevelopers({
+        featured: true,
+        limit: 9,
+      });
       if (result && result.developers.length > 0) {
         setDevelopers(result.developers);
-        setApiLoaded(true);
       }
     };
     load();
-  }, [isSignedIn]);
-
-  const showUnlockCta = !isSignedIn && apiLoaded;
+  }, []);
 
   const countries = COUNTRY_OPTIONS;
   const titles = JOB_TITLE_OPTIONS;
@@ -130,7 +132,6 @@ const DevelopersPage = () => {
 
   const filteredDevelopers = useMemo(() => {
     return developers.filter((dev) => {
-      // Text search
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const searchable = [
@@ -148,7 +149,6 @@ const DevelopersPage = () => {
         }
       }
 
-      // Stack filter: AND logic
       if (selectedStacks.length > 0) {
         const hasAll = selectedStacks.every((stack) =>
           dev.skills.includes(stack)
@@ -156,7 +156,6 @@ const DevelopersPage = () => {
         if (!hasAll) return false;
       }
 
-      // Country filter
       if (selectedCountries.length > 0) {
         const country = getCountryFromLocation(dev.location);
         if (!selectedCountries.includes(country)) {
@@ -164,7 +163,6 @@ const DevelopersPage = () => {
         }
       }
 
-      // Role/title filter
       if (selectedTitles.length > 0) {
         const normalizedRole = dev.role.toLowerCase();
         const normalizedRoleForMatch = normalizeTitleForMatch(dev.role);
@@ -177,12 +175,10 @@ const DevelopersPage = () => {
         }
       }
 
-      // Rate filter
       if (dev.hourlyRate < rateRange[0] || dev.hourlyRate > rateRange[1]) {
         return false;
       }
 
-      // Experience filter: OR logic across selected ranges
       if (experienceRanges.length > 0) {
         const matchesAny = experienceRanges.some((range) =>
           matchesExperienceRange(dev.yearsOfExperience, range)
@@ -190,7 +186,6 @@ const DevelopersPage = () => {
         if (!matchesAny) return false;
       }
 
-      // Availability filter
       if (availableOnly && !dev.isOnline) {
         return false;
       }
@@ -231,16 +226,17 @@ const DevelopersPage = () => {
     return next;
   }, [filteredDevelopers, sortBy]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedDevelopers.length / PAGE_SIZE));
-  const clampedCurrentPage = Math.min(currentPage, totalPages);
+  const showLocked = sortedDevelopers.length >= PUBLIC_VISIBLE;
+  const visibleDevelopers = showLocked
+    ? sortedDevelopers.slice(0, PUBLIC_VISIBLE)
+    : sortedDevelopers;
 
-  const paginatedDevelopers = useMemo(() => {
-    const start = (clampedCurrentPage - 1) * PAGE_SIZE;
-    return sortedDevelopers.slice(start, start + PAGE_SIZE);
-  }, [sortedDevelopers, clampedCurrentPage]);
+  const openDialog = (trigger: "locked-profile" | "pagination") => {
+    setDialogTrigger(trigger);
+    setDialogOpen(true);
+  };
 
   const toggleStack = (stack: string) => {
-    setCurrentPage(1);
     setSelectedStacks((prev) =>
       prev.includes(stack)
         ? prev.filter((s) => s !== stack)
@@ -249,7 +245,6 @@ const DevelopersPage = () => {
   };
 
   const toggleCountry = (country: string) => {
-    setCurrentPage(1);
     setSelectedCountries((prev) =>
       prev.includes(country)
         ? prev.filter((item) => item !== country)
@@ -258,7 +253,6 @@ const DevelopersPage = () => {
   };
 
   const toggleTitle = (title: string) => {
-    setCurrentPage(1);
     setSelectedTitles((prev) =>
       prev.includes(title)
         ? prev.filter((item) => item !== title)
@@ -267,7 +261,6 @@ const DevelopersPage = () => {
   };
 
   const toggleExperience = (range: string) => {
-    setCurrentPage(1);
     setExperienceRanges((prev) =>
       prev.includes(range)
         ? prev.filter((r) => r !== range)
@@ -276,7 +269,6 @@ const DevelopersPage = () => {
   };
 
   const clearFilters = () => {
-    setCurrentPage(1);
     setSearchQuery("");
     setSelectedStacks([]);
     setSelectedCountries([]);
@@ -288,22 +280,18 @@ const DevelopersPage = () => {
   };
 
   const handleSearchChange = (value: string) => {
-    setCurrentPage(1);
     setSearchQuery(value);
   };
 
   const handleRateChange = (value: [number, number]) => {
-    setCurrentPage(1);
     setRateRange(value);
   };
 
   const handleAvailableChange = (value: boolean) => {
-    setCurrentPage(1);
     setAvailableOnly(value);
   };
 
   const handleSortChange = (value: string) => {
-    setCurrentPage(1);
     setSortBy(value as SortOption);
   };
 
@@ -366,7 +354,7 @@ const DevelopersPage = () => {
           </Sheet>
 
           <p className="rounded-full border border-pulse/25 bg-pulse/5 px-3 py-1 text-sm text-muted-foreground ml-auto">
-            Showing {sortedDevelopers.length} of {developers.length}{" "}
+            Showing {DISPLAY_VISIBLE} of {FAKE_DEVELOPER_COUNT}{" "}
             developers
           </p>
         </div>
@@ -400,59 +388,37 @@ const DevelopersPage = () => {
           <main className="flex-1 min-w-0">
             {sortedDevelopers.length > 0 ? (
               <>
-                <DeveloperGrid developers={paginatedDevelopers} />
+                <DeveloperGrid
+                  developers={visibleDevelopers}
+                  lockedCount={showLocked ? LOCKED_COUNT : 0}
+                  onUnlockClick={() => openDialog("locked-profile")}
+                />
 
-                {showUnlockCta && (
-                  <div className="mt-10 rounded-2xl border border-border bg-card p-8 text-center">
-                    <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-muted">
-                      <Lock className="size-5 text-muted-foreground" />
-                    </div>
-                    <h3 className="mt-4 text-lg font-semibold">
-                      Unlock the Full Marketplace
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      Sign up as a company to browse all pre-vetted developers, filter by tech stack, and hire instantly.
-                    </p>
-                    <Button className="mt-5" asChild>
-                      <Link href="/auth/companies/sign-up">
-                        Get Started
-                      </Link>
+                {/* Fake pagination bar */}
+                <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-sm text-muted-foreground">
+                    Page 1 of {FAKE_TOTAL_PAGES}
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-pulse/30 hover:bg-pulse/10"
+                      disabled
+                    >
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="border-pulse/30 hover:bg-pulse/10"
+                      onClick={() => openDialog("pagination")}
+                    >
+                      Next
                     </Button>
                   </div>
-                )}
-
-                {!showUnlockCta && (
-                  <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-sm text-muted-foreground">
-                      Page {clampedCurrentPage} of {totalPages}
-                    </p>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-pulse/30 hover:bg-pulse/10"
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.max(1, prev - 1))
-                        }
-                        disabled={clampedCurrentPage <= 1}
-                      >
-                        Previous
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-pulse/30 hover:bg-pulse/10"
-                        onClick={() =>
-                          setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-                        }
-                        disabled={clampedCurrentPage >= totalPages}
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                </div>
               </>
             ) : (
               <NoResults onClearFilters={clearFilters} />
@@ -460,6 +426,12 @@ const DevelopersPage = () => {
           </main>
         </div>
       </div>
+
+      <LeadCaptureDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        trigger={dialogTrigger}
+      />
     </section>
   );
 };
