@@ -45,17 +45,15 @@ const sections = [
   {
     title: "Company",
     links: [
-      { name: "About Us", href: "#" },
       { name: "Blog", href: "/blog" },
-      { name: "Careers", href: "#" },
-      { name: "Contact", href: "#" },
+      { name: "Contact", href: "mailto:hello@octoglehire.com" },
     ],
   },
   {
     title: "Legal",
     links: [
-      { name: "Privacy Policy", href: "#" },
-      { name: "Terms of Service", href: "#" },
+      { name: "Privacy Policy", href: "/privacy" },
+      { name: "Terms of Service", href: "/terms" },
     ],
   },
 ];

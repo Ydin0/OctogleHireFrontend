@@ -9,6 +9,7 @@ import { SavingsComparison } from "@/components/marketing/savings-comparison";
 import { HiringCalculator } from "@/components/marketing/hiring-calculator";
 import { DeveloperSpecializations } from "@/components/marketing/developer-specializations";
 import { Benefits } from "@/components/marketing/benefits";
+import { PlatformStats } from "@/components/marketing/platform-stats";
 import { ComparisonTable } from "@/components/marketing/comparison-table";
 import { Pricing } from "@/components/marketing/pricing";
 import { Faq } from "@/components/marketing/faq";
@@ -33,6 +34,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
   },
+  openGraph: {
+    title: "OctogleHire — Hire Top Global Developer Talent",
+    description:
+      "Connect with pre-vetted, world-class engineers from 30+ countries at up to 60% less than UK & US rates.",
+    url: SITE_URL,
+  },
 };
 
 export default function Home() {
@@ -47,6 +54,12 @@ export default function Home() {
       "https://twitter.com/octoglehire",
       "https://linkedin.com/company/octoglehire",
     ],
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: "300",
+      bestRating: "5",
+    },
   });
 
   const websiteJsonLd = buildJsonLd({
@@ -74,6 +87,7 @@ export default function Home() {
       <HiringCalculator />
       <DeveloperSpecializations />
       <Benefits />
+      <PlatformStats />
       <ComparisonTable />
       <Pricing />
       <Faq />

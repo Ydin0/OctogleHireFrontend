@@ -6,7 +6,9 @@ import { notFound } from "next/navigation";
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { MDXContent } from "@/components/blog/mdx-content";
-import { getPublishedPosts, getPostBySlug } from "@/lib/blog";
+import { AuthorCard } from "@/components/blog/author-card";
+import { SourcesSection } from "@/components/blog/sources-section";
+import { getPublishedPosts, getPostBySlug, getPostAuthor } from "@/lib/blog";
 import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
 
 interface PostPageProps {
@@ -52,22 +54,44 @@ export default async function PostPage({ params }: PostPageProps) {
   const post = getPostBySlug(slug);
   if (!post) notFound();
 
+  const author = getPostAuthor(post);
+  const isNamedAuthor = author.slug !== "octoglehire-team";
+
   const blogPostingJsonLd = buildJsonLd({
     "@type": "BlogPosting",
     headline: post.title,
     description: post.description,
     image: post.image,
     datePublished: post.date,
-    author: {
-      "@type": "Organization",
-      name: post.author,
-    },
+    dateModified: post.date,
+    author: isNamedAuthor
+      ? {
+          "@type": "Person",
+          name: author.name,
+          url: author.social.linkedin,
+          image: absoluteUrl(author.avatar),
+          jobTitle: author.title,
+        }
+      : {
+          "@type": "Organization",
+          name: author.name,
+        },
     publisher: {
       "@type": "Organization",
       name: SITE_NAME,
     },
     mainEntityOfPage: absoluteUrl(`/blog/${slug}`),
     keywords: post.tags.join(", "),
+    ...(post.sources && post.sources.length > 0
+      ? {
+          citation: post.sources.map((s) => ({
+            "@type": "CreativeWork",
+            name: s.title,
+            url: s.url,
+            ...(s.publisher ? { publisher: { "@type": "Organization", name: s.publisher } } : {}),
+          })),
+        }
+      : {}),
   });
 
   const breadcrumbJsonLd = buildJsonLd({
@@ -131,8 +155,15 @@ export default async function PostPage({ params }: PostPageProps) {
               {post.description}
             </p>
             <div className="mt-4 flex items-center gap-2">
+              <Image
+                src={author.avatar}
+                alt={author.name}
+                width={24}
+                height={24}
+                className="size-6 rounded-full object-cover ring-1 ring-border"
+              />
               <span className="text-sm text-muted-foreground">
-                By {post.author}
+                {author.name}
               </span>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -164,6 +195,12 @@ export default async function PostPage({ params }: PostPageProps) {
           <div className="prose prose-neutral dark:prose-invert max-w-none">
             <MDXContent code={post.body} />
           </div>
+
+          {/* Sources */}
+          {post.sources && <SourcesSection sources={post.sources} />}
+
+          {/* Author */}
+          <AuthorCard author={author} />
         </article>
       </main>
       <Footer />

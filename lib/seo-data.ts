@@ -204,6 +204,48 @@ export function getCountryBenefits(country: string) {
   ];
 }
 
+export function getDevTechBenefits(tech: string) {
+  return [
+    {
+      title: "Work on Real Products",
+      description: `Join teams shipping production ${tech} applications to real users — not outsourced maintenance work.`,
+    },
+    {
+      title: "Above-Market Compensation",
+      description: `${tech} developers on OctogleHire earn 40–60% above typical local market rates, with full rate transparency before any interview.`,
+    },
+    {
+      title: "Apply Once, Get Matched",
+      description: `Submit your ${tech} profile once and receive curated role matches from vetted companies — no repetitive applications.`,
+    },
+    {
+      title: "Zero Admin Overhead",
+      description: `Contracts, invoicing, payroll, and compliance for your ${tech} engagements are fully managed by OctogleHire.`,
+    },
+  ];
+}
+
+export function getDevRoleBenefits(role: string) {
+  return [
+    {
+      title: "Roles That Match Your Skills",
+      description: `Get matched to ${role} positions that fit your experience level, preferred stack, and working style.`,
+    },
+    {
+      title: "Transparent Rates",
+      description: `Every ${role} opportunity on OctogleHire includes full rate disclosure before you commit to any interview.`,
+    },
+    {
+      title: "Global Companies, Remote-First",
+      description: `Work as a ${role} for companies in the US, UK, EU, and Australia — fully remote, no relocation required.`,
+    },
+    {
+      title: "Contracts & Compliance Handled",
+      description: `OctogleHire manages all contracts, payroll, and compliance for your ${role} engagements end-to-end.`,
+    },
+  ];
+}
+
 export function getRelatedTechnologies(currentTech: string) {
   const techCategories: Record<string, string[]> = {
     frontend: ["React", "Vue.js", "Angular", "Next.js", "Svelte", "TypeScript"],

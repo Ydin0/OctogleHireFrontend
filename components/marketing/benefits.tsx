@@ -19,37 +19,37 @@ const benefits = [
     icon: Shield,
     title: "Pre-Vetted Talent",
     description:
-      "Every developer passes a rigorous 5-stage vetting process. Only the top 3% of applicants make it into our network.",
+      "Only 3% of applicants pass our 5-stage vetting — technical assessment, live interview, and background check. 1,000+ engineers are active in the network today.",
   },
   {
     icon: Globe,
-    title: "Global Indian Network",
+    title: "150+ Countries Covered",
     description:
-      "Access India's deepest pool of engineering talent — every timezone, every major city, every specialisation covered.",
+      "Access engineers across 150+ countries with 4–6 hours of timezone overlap guaranteed. Every major tech hub, every specialisation covered.",
   },
   {
     icon: Zap,
     title: "48-Hour Placement",
     description:
-      "Post a role and receive 3–5 hand-picked candidate profiles within 48 hours. Hire faster than any agency.",
+      "Post a role and receive 3–5 hand-picked, vetted profiles within 48 hours. That's 10x faster than the 6–12 week agency average.",
   },
   {
     icon: Scale,
     title: "Compliance Handled",
     description:
-      "Contracts, payroll, tax, and local employment law — fully managed. We act as Employer of Record in 150+ countries.",
+      "Contracts, payroll, tax, and local employment law — fully managed across 150+ countries. We act as Employer of Record so you get a single invoice.",
   },
   {
     icon: Users,
     title: "Dedicated Account Manager",
     description:
-      "A human account manager handles your onboarding, manages replacements, and ensures every hire is a success.",
+      "A human account manager supports 300+ companies on the platform — handling onboarding, replacements, and ongoing success.",
   },
   {
     icon: Clock,
     title: "Flexible Engagements",
     description:
-      "Hire hourly, weekly, monthly, or full-time. Scale up or down with no long-term lock-in or cancellation fees.",
+      "Hire hourly, weekly, monthly, or full-time. 94% of placements extend beyond 6 months — but there's no lock-in or cancellation fees.",
   },
 ];
 
@@ -62,8 +62,7 @@ const Benefits = ({ className }: BenefitsProps) => {
           Benefits
         </span>
         <h2 className="max-w-2xl text-4xl font-medium tracking-tight lg:text-5xl">
-          Let your team focus
-          on what matters most
+          300+ companies hire faster, cheaper, and better
         </h2>
       </div>
 

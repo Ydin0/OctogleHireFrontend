@@ -89,6 +89,26 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     }));
 
+  // /apply/[slug] — technology pages (developer-facing SEO)
+  const applyTechPages: MetadataRoute.Sitemap = getAllTechSlugs().map(
+    (slug) => ({
+      url: `${SITE_URL}/apply/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }),
+  );
+
+  // /apply/[slug] — role pages (developer-facing SEO)
+  const applyRolePages: MetadataRoute.Sitemap = getAllRoleSlugs().map(
+    (slug) => ({
+      url: `${SITE_URL}/apply/${slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    }),
+  );
+
   return [
     ...staticPages,
     ...blogEntries,
@@ -96,5 +116,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...rolePages,
     ...countryPages,
     ...techCountryPages,
+    ...applyTechPages,
+    ...applyRolePages,
   ];
 }

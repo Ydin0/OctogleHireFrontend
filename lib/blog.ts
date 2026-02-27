@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { resolveAuthor, type Author } from "@/lib/data/authors";
+
 const postsPath = path.join(process.cwd(), ".velite", "posts.json");
 const posts: Post[] = JSON.parse(fs.readFileSync(postsPath, "utf-8"));
 
@@ -15,6 +17,11 @@ export interface Post {
   slug: string;
   body: string;
   readingTime: number;
+  sources?: { title: string; url: string; publisher?: string }[];
+}
+
+export function getPostAuthor(post: Post): Author {
+  return resolveAuthor(post.author);
 }
 
 export function getPublishedPosts(): Post[] {

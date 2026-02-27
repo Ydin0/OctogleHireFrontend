@@ -365,15 +365,15 @@ const stepContent: Record<
     num: "01",
     title: "Tell us what you need",
     description:
-      "Describe your role, tech stack, timeline, and budget. Takes less than 5 minutes. No lengthy intake forms or calls required.",
+      "Describe your role, tech stack, timeline, and budget in under 5 minutes. We match against 1,000+ pre-vetted engineers across 40+ stacks. No lengthy intake forms or calls required.",
     cta: "Post a Role Free",
     href: "/companies/signup",
   },
   match: {
     num: "02",
-    title: "Receive vetted profiles within 48 hours",
+    title: "Receive 3–5 vetted profiles within 48 hours",
     description:
-      "Our team hand-picks 3–5 pre-vetted developer profiles matched to your exact requirements. Review skills, rates, availability, and previous work.",
+      "Within 48 hours, receive 3–5 pre-vetted profiles matched to your exact requirements. Every candidate has passed our 5-stage process (3% acceptance rate). Review skills, rates, and availability.",
     cta: "See Sample Profiles",
     href: "/marketplace",
   },
@@ -381,7 +381,7 @@ const stepContent: Record<
     num: "03",
     title: "Interview, select, and onboard instantly",
     description:
-      "Interview your shortlist, choose your hire, and we handle everything else — contracts, compliance, and payments across 150+ countries.",
+      "Interview your shortlist and choose your hire. We handle contracts, compliance, and payroll across 150+ countries. Most companies go from brief to signed contract in under 5 business days.",
     cta: "Start Hiring Today",
     href: "/companies/signup",
   },

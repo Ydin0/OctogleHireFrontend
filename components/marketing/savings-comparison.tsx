@@ -256,6 +256,10 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
           />
         ))}
       </div>
+
+      <p className="mt-6 text-center text-[10px] text-muted-foreground">
+        Based on 2024–2025 hiring data across 300+ placements
+      </p>
     </section>
   );
 };

@@ -238,23 +238,23 @@ const HiringCalculator = ({ className }: HiringCalculatorProps) => {
           </div>
 
           {/* Rate comparison */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-2xl border border-border bg-background p-5">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="rounded-2xl border border-border bg-background p-4 sm:p-5 min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 Typical {market} rate
               </p>
-              <p className="mt-2 font-mono text-3xl font-semibold tracking-tight lg:text-4xl">
+              <p className="mt-2 font-mono text-xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
                 {fmt(rates.local)}
-                <span className="text-base text-muted-foreground">/mo</span>
+                <span className="text-xs sm:text-base text-muted-foreground">/mo</span>
               </p>
             </div>
-            <div className="rounded-2xl border border-pulse bg-background p-5">
+            <div className="rounded-2xl border border-pulse bg-background p-4 sm:p-5 min-w-0">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 OctogleHire rate
               </p>
-              <p className="mt-2 font-mono text-3xl font-semibold tracking-tight text-pulse lg:text-4xl">
+              <p className="mt-2 font-mono text-xl font-semibold tracking-tight text-pulse sm:text-3xl lg:text-4xl">
                 {fmt(rates.octogle)}
-                <span className="text-base text-muted-foreground">/mo</span>
+                <span className="text-xs sm:text-base text-muted-foreground">/mo</span>
               </p>
             </div>
           </div>
@@ -287,7 +287,7 @@ const HiringCalculator = ({ className }: HiringCalculatorProps) => {
             <p className="text-sm text-muted-foreground">
               Annual savings with {teamSize[0]} developer{teamSize[0] > 1 ? "s" : ""}
             </p>
-            <p className="font-mono text-4xl font-semibold tracking-tight lg:text-5xl">
+            <p className="font-mono text-2xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
               {fmt(annualSavings)}
             </p>
             <Button asChild className="w-full rounded-full gap-2" size="lg">

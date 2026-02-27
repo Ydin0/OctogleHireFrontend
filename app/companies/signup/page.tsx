@@ -1,14 +1,28 @@
 import type { Metadata } from "next";
 import { Check } from "lucide-react";
+import { SITE_URL } from "@/lib/seo";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Navbar } from "@/components/marketing/navbar";
 import { CompanySignupForm } from "./_components/company-signup-form";
 
 export const metadata: Metadata = {
-  title: "Book a Discovery Call | OctogleHire",
+  title: "Book a Discovery Call",
   description:
     "Tell us about your hiring needs and we'll match you with pre-vetted engineers in 48 hours.",
+  keywords: [
+    "hire developers",
+    "book hiring call",
+    "remote engineering team",
+    "pre-vetted developers",
+  ],
+  alternates: { canonical: `${SITE_URL}/companies/signup` },
+  openGraph: {
+    title: "Book a Discovery Call — OctogleHire",
+    description:
+      "Tell us about your hiring needs and we'll match you with pre-vetted engineers in 48 hours.",
+    url: `${SITE_URL}/companies/signup`,
+  },
 };
 
 const benefits = [

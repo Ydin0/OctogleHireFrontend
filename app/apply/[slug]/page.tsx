@@ -1,23 +1,21 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { HirePageLayout } from "@/components/marketing/hire-page-layout";
+import { ApplyPageLayout } from "@/components/marketing/apply-page-layout";
 import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
-import { hireFaqs } from "@/lib/data/hire-faqs";
+import { devFaqs } from "@/lib/data/apply-shared";
 import {
   slugToTech,
   slugToRole,
   getAllTechSlugs,
   getAllRoleSlugs,
-  getTechBenefits,
+  getDevTechBenefits,
+  getDevRoleBenefits,
   getRelatedTechnologies,
   getRelatedRoles,
   techToSlug,
   roleToSlug,
 } from "@/lib/seo-data";
-
-// FAQ data — shared across hire pages
-const HIRE_FAQS = hireFaqs;
 
 // ---------------------------------------------------------------------------
 // Static params — generate all tech + role slugs
@@ -55,43 +53,43 @@ export async function generateMetadata({
   if (resolved.type === "tech") {
     const tech = resolved.name;
     return {
-      title: `Hire Top ${tech} Developers`,
-      description: `Hire pre-vetted ${tech} developers from OctogleHire. Access elite remote ${tech} engineers, start in days, and save up to 60% on hiring costs.`,
+      title: `Remote ${tech} Developer Jobs`,
+      description: `Find remote ${tech} developer jobs through OctogleHire. Apply once, get matched with top companies, and earn above local market rates.`,
       keywords: [
-        `hire ${tech} developers`,
-        `remote ${tech} engineers`,
-        `${tech} developer for hire`,
-        `${tech} freelancer`,
-        `${tech} contractor`,
+        `remote ${tech} developer jobs`,
+        `freelance ${tech} engineer`,
+        `${tech} developer work`,
+        `${tech} remote jobs`,
+        `${tech} contractor jobs`,
       ],
-      alternates: { canonical: absoluteUrl(`/hire/${slug}`) },
+      alternates: { canonical: absoluteUrl(`/apply/${slug}`) },
       openGraph: {
         type: "website",
         siteName: SITE_NAME,
-        title: `Hire Top ${tech} Developers — ${SITE_NAME}`,
-        description: `Access pre-vetted ${tech} engineers ready to join your team in days.`,
-        url: absoluteUrl(`/hire/${slug}`),
+        title: `Remote ${tech} Developer Jobs — ${SITE_NAME}`,
+        description: `Apply once and get matched with top ${tech} roles at global companies.`,
+        url: absoluteUrl(`/apply/${slug}`),
       },
     };
   }
 
   const role = resolved.name;
   return {
-    title: `Hire a ${role}`,
-    description: `Hire a pre-vetted ${role} from OctogleHire. Find elite remote talent, start in days, and save up to 60% on hiring costs.`,
+    title: `${role} — Remote & Freelance`,
+    description: `Apply for remote ${role} positions on OctogleHire. One application, curated role matches, and above-market compensation.`,
     keywords: [
-      `hire ${role}`,
-      `remote ${role}`,
-      `${role} for hire`,
+      `remote ${role} jobs`,
       `freelance ${role}`,
+      `${role} remote work`,
+      `${role} contract jobs`,
     ],
-    alternates: { canonical: absoluteUrl(`/hire/${slug}`) },
+    alternates: { canonical: absoluteUrl(`/apply/${slug}`) },
     openGraph: {
       type: "website",
       siteName: SITE_NAME,
-      title: `Hire a ${role} — ${SITE_NAME}`,
-      description: `Access pre-vetted ${role} professionals ready to join your team in days.`,
-      url: absoluteUrl(`/hire/${slug}`),
+      title: `${role} — Remote & Freelance — ${SITE_NAME}`,
+      description: `Apply once and get matched with ${role} roles at vetted companies worldwide.`,
+      url: absoluteUrl(`/apply/${slug}`),
     },
   };
 }
@@ -100,7 +98,7 @@ export async function generateMetadata({
 // Page
 // ---------------------------------------------------------------------------
 
-export default async function HireSlugPage({ params }: PageProps) {
+export default async function ApplySlugPage({ params }: PageProps) {
   const { slug } = await params;
   const resolved = resolveSlug(slug);
   if (!resolved) notFound();
@@ -117,23 +115,23 @@ export default async function HireSlugPage({ params }: PageProps) {
 // ---------------------------------------------------------------------------
 
 function TechPage({ tech, slug }: { tech: string; slug: string }) {
-  const benefits = getTechBenefits(tech);
+  const benefits = getDevTechBenefits(tech);
   const related = getRelatedTechnologies(tech);
 
   const jsonLd = buildJsonLd({
-    "@type": "Service",
-    name: `Hire ${tech} Developers`,
-    description: `Access pre-vetted ${tech} engineers through OctogleHire's global talent platform.`,
+    "@type": "WebPage",
+    name: `Remote ${tech} Developer Jobs`,
+    description: `Find remote ${tech} developer positions through OctogleHire's global talent platform.`,
     provider: {
       "@type": "Organization",
       name: SITE_NAME,
     },
-    url: absoluteUrl(`/hire/${slug}`),
+    url: absoluteUrl(`/apply/${slug}`),
   });
 
   const faqJsonLd = buildJsonLd({
     "@type": "FAQPage",
-    mainEntity: HIRE_FAQS.map((faq) => ({
+    mainEntity: devFaqs.map((faq) => ({
       "@type": "Question",
       name: faq.q,
       acceptedAnswer: {
@@ -147,20 +145,21 @@ function TechPage({ tech, slug }: { tech: string; slug: string }) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: `Hire ${tech} Developers`, item: absoluteUrl(`/hire/${slug}`) },
+      { "@type": "ListItem", position: 2, name: "Apply", item: absoluteUrl("/apply") },
+      { "@type": "ListItem", position: 3, name: `${tech} Developer Jobs`, item: absoluteUrl(`/apply/${slug}`) },
     ],
   });
 
   return (
     <>
-      <HirePageLayout
-        label={`Hire ${tech} Developers`}
-        title={`Hire Top ${tech} Developers`}
+      <ApplyPageLayout
+        label={`${tech} Developer Jobs`}
+        title={`Remote ${tech} Developer Jobs`}
         titleAccent={tech}
-        description={`OctogleHire connects you with top-3%, pre-vetted ${tech} engineers from 150+ countries. Receive 3–5 matched profiles within 48 hours at 40–60% below market rates — no recruitment fees.`}
+        description={`Join the top 3% of ${tech} engineers on OctogleHire. Get matched with 300+ vetted companies within 48 hours, earn 40–60% above local rates, and let us handle contracts and compliance across 150+ countries.`}
         benefits={benefits}
         techCrossLinks={related}
-        applySlug={slug}
+        hireSlug={slug}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       <script type="application/ld+json" dangerouslySetInnerHTML={faqJsonLd} />
@@ -174,41 +173,23 @@ function TechPage({ tech, slug }: { tech: string; slug: string }) {
 // ---------------------------------------------------------------------------
 
 function RolePage({ role, slug }: { role: string; slug: string }) {
-  const benefits = [
-    {
-      title: "Rigorous Vetting",
-      description: `Every ${role} on OctogleHire passes multi-stage technical and communication assessments before joining our talent pool.`,
-    },
-    {
-      title: "Fast Matching",
-      description: `Get matched with a qualified ${role} in days. No lengthy recruitment cycles or agency fees.`,
-    },
-    {
-      title: "Global Talent, Local Quality",
-      description: `Our ${role} professionals come from 150+ countries and bring diverse perspectives and world-class skills to your team.`,
-    },
-    {
-      title: "Risk-Free Engagement",
-      description: `Start with a trial period. If the ${role} isn't the right fit, you pay nothing.`,
-    },
-  ];
-
+  const benefits = getDevRoleBenefits(role);
   const relatedRoles = getRelatedRoles(role);
 
   const jsonLd = buildJsonLd({
-    "@type": "Service",
-    name: `Hire a ${role}`,
-    description: `Access pre-vetted ${role} professionals through OctogleHire's global talent platform.`,
+    "@type": "WebPage",
+    name: `${role} — Remote & Freelance`,
+    description: `Apply for remote ${role} positions through OctogleHire's global talent platform.`,
     provider: {
       "@type": "Organization",
       name: SITE_NAME,
     },
-    url: absoluteUrl(`/hire/${slug}`),
+    url: absoluteUrl(`/apply/${slug}`),
   });
 
   const faqJsonLd = buildJsonLd({
     "@type": "FAQPage",
-    mainEntity: HIRE_FAQS.map((faq) => ({
+    mainEntity: devFaqs.map((faq) => ({
       "@type": "Question",
       name: faq.q,
       acceptedAnswer: {
@@ -222,20 +203,21 @@ function RolePage({ role, slug }: { role: string; slug: string }) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
-      { "@type": "ListItem", position: 2, name: `Hire a ${role}`, item: absoluteUrl(`/hire/${slug}`) },
+      { "@type": "ListItem", position: 2, name: "Apply", item: absoluteUrl("/apply") },
+      { "@type": "ListItem", position: 3, name: `${role} Jobs`, item: absoluteUrl(`/apply/${slug}`) },
     ],
   });
 
   return (
     <>
-      <HirePageLayout
-        label={`Hire a ${role}`}
-        title={`Hire a ${role}`}
+      <ApplyPageLayout
+        label={`${role} Jobs`}
+        title={`${role} — Remote & Freelance`}
         titleAccent={role}
-        description={`OctogleHire connects you with top-3%, pre-vetted ${role} professionals from 150+ countries. Receive 3–5 matched profiles within 48 hours at 40–60% below market rates — no recruitment fees.`}
+        description={`Join the top 3% of ${role} professionals on OctogleHire. Get matched with 300+ vetted companies within 48 hours, earn 40–60% above local rates, and let us handle contracts and compliance.`}
         benefits={benefits}
         roleCrossLinks={relatedRoles}
-        applySlug={slug}
+        hireSlug={slug}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
       <script type="application/ld+json" dangerouslySetInnerHTML={faqJsonLd} />

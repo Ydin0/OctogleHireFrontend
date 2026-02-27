@@ -21,6 +21,15 @@ export default defineConfig({
           author: s.string(),
           image: s.string(),
           tags: s.array(s.string()).default([]),
+          sources: s
+            .array(
+              s.object({
+                title: s.string(),
+                url: s.string(),
+                publisher: s.string().optional(),
+              }),
+            )
+            .default([]),
           published: s.boolean().default(true),
           slug: s.path(),
           body: s.mdx(),

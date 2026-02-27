@@ -1,0 +1,48 @@
+# OctogleHire
+
+> The global talent platform for hiring pre-vetted software developers from 150+ countries.
+
+OctogleHire connects companies with elite, rigorously vetted remote engineers — reducing hiring costs by up to 60% while delivering world-class talent in days, not months.
+
+## For Companies
+
+- Access a curated network of the top 3% of developer applicants
+- Receive matched candidate profiles within 48 hours
+- All contracts, payroll, IP agreements, and tax compliance handled end-to-end
+- Risk-free trial period on every placement
+- Transparent monthly rates with no hidden markups or recruitment fees
+
+## For Developers
+
+- Apply once and get matched with multiple global opportunities
+- Earn above local market rates working with international companies
+- Fully remote positions with vetted, remote-first companies
+- Contracts and compliance managed — focus on your craft
+- Specialisations include React, Python, Node.js, TypeScript, Go, Java, Next.js, Angular, AWS, Flutter, and more
+
+## Key Pages
+
+- Homepage: https://octoglehire.com
+- Marketplace: https://octoglehire.com/marketplace
+- For Companies: https://octoglehire.com/companies/signup
+- For Developers: https://octoglehire.com/apply
+- Blog: https://octoglehire.com/blog
+
+## Hiring Pages
+
+Technology-specific hiring pages are available at https://octoglehire.com/hire/{technology}-developers (e.g., /hire/react-developers, /hire/python-developers).
+
+Role-specific hiring pages are available at https://octoglehire.com/hire/{role} (e.g., /hire/frontend-developer, /hire/backend-developer).
+
+Country-specific pages are available at https://octoglehire.com/hire/developers-in/{country} (e.g., /hire/developers-in/india, /hire/developers-in/brazil).
+
+## Developer Apply Pages
+
+Technology-specific apply pages at https://octoglehire.com/apply/{technology}-developers.
+Role-specific apply pages at https://octoglehire.com/apply/{role}.
+
+## Contact
+
+Website: https://octoglehire.com
+Twitter: https://twitter.com/octoglehire
+LinkedIn: https://linkedin.com/company/octoglehire

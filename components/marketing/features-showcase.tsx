@@ -347,8 +347,7 @@ const FeaturesShowcase = ({ className }: FeaturesShowcaseProps) => {
           Introducing OctogleHire
         </span>
         <h2 className="max-w-2xl text-4xl font-medium tracking-tight lg:text-5xl xl:text-6xl">
-          The talent platform built to
-          match, vet, and deliver at scale
+          1,000+ engineers vetted through a 5-stage process with a 3% acceptance rate
         </h2>
       </div>
 

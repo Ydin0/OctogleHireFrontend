@@ -29,6 +29,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { techToSlug, roleToSlug, countryToSlug } from "@/lib/seo-data";
+import { hireFaqs } from "@/lib/data/hire-faqs";
+import { HireComparison } from "@/components/marketing/hire-comparison";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -57,6 +59,7 @@ interface HirePageLayoutProps {
   techCrossLinks?: string[];
   countryCrossLinks?: string[];
   roleCrossLinks?: string[];
+  applySlug?: string;
   children?: React.ReactNode;
 }
 
@@ -75,28 +78,7 @@ const stats = [
   { value: 60, suffix: "%", label: "Cost Savings" },
 ];
 
-const faqs = [
-  {
-    q: "How quickly can I hire a developer?",
-    a: "You'll receive 3–5 vetted candidate profiles within 48 hours of your discovery call. Most companies go from first intro to signed contract in under 5 business days.",
-  },
-  {
-    q: "How are developers vetted?",
-    a: "Every developer passes a 5-stage process: application screening, stack-specific technical assessment, live system design interview, soft-skills evaluation, and reference checks. Only the top 3% of applicants make it into our network.",
-  },
-  {
-    q: "How much does it cost?",
-    a: "OctogleHire developers typically cost 40–60% less than hiring locally. There are no upfront fees — you only pay when you hire. We offer transparent monthly rates with no hidden markups or recruitment commissions.",
-  },
-  {
-    q: "What if a developer isn't the right fit?",
-    a: "Every placement includes a risk-free guarantee period. If a developer doesn't meet your expectations, we'll find a replacement at no additional cost and manage the transition for you.",
-  },
-  {
-    q: "Do you handle contracts and compliance?",
-    a: "Yes. We manage all contracts, IP agreements, payroll, and tax compliance end-to-end. You get a single invoice — no need to set up foreign entities or navigate international employment law.",
-  },
-];
+const faqs = hireFaqs;
 
 const testimonials = [
   {
@@ -790,9 +772,13 @@ export function HirePageLayout({
   techCrossLinks,
   countryCrossLinks,
   roleCrossLinks,
+  applySlug,
   children,
 }: HirePageLayoutProps) {
   const allCrossLinks: CrossLink[] = [
+    ...(applySlug
+      ? [{ label: "Apply for this role", href: `/apply/${applySlug}` }]
+      : []),
     ...(crossLinks ?? []),
     ...(techCrossLinks ?? []).map((tech) => ({
       label: `Hire ${tech} Developers`,
@@ -911,12 +897,12 @@ export function HirePageLayout({
               </div>
               <div className="space-y-2 px-2">
                 <h3 className="text-lg font-semibold">
-                  Your Matches, Delivered in 48 Hours
+                  3–5 Vetted Profiles in 48 Hours
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Post a role and receive 3&ndash;5 curated, vetted profiles
-                  within 48 hours. Review skills, rates, availability, and
-                  previous work.
+                  Post a role and receive 3&ndash;5 curated profiles from our
+                  1,000+ engineer network within 48 hours. Every match has
+                  passed a 5-stage vetting process with a 3% acceptance rate.
                 </p>
               </div>
             </div>
@@ -983,8 +969,9 @@ export function HirePageLayout({
                   cut
                 </h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Our 5-stage vetting process means every developer on your
-                  shortlist has been technically assessed, interviewed, and
+                  Our 5-stage vetting process screens over 1,000 applicants
+                  annually to maintain a 3% acceptance rate. Every developer on
+                  your shortlist has been technically assessed, interviewed, and
                   background-checked &mdash; before they ever reach you.
                 </p>
                 <ul className="space-y-3">
@@ -1048,6 +1035,9 @@ export function HirePageLayout({
             })}
           </div>
         </section>
+
+        {/* ── 4b. Comparison table ──────────────────────────────── */}
+        <HireComparison />
 
         {/* ── 5. Social proof — testimonial carousel ───────────── */}
         <section className="container mx-auto px-6 pb-24">
@@ -1122,8 +1112,8 @@ export function HirePageLayout({
                   </span>
                 </h2>
                 <p className="text-lg text-white/70">
-                  Get matched with pre-vetted engineers in days, not months. No
-                  recruitment fees, no long-term contracts.
+                  Join 300+ companies hiring pre-vetted engineers in days, not
+                  months. No recruitment fees, no long-term contracts.
                 </p>
                 <ul className="grid max-w-lg grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
                   {[

@@ -53,8 +53,9 @@ const Hero = ({ className }: HeroProps) => {
 
         {/* Description */}
         <p className="mx-auto mt-8 max-w-xl text-center text-base text-muted-foreground sm:text-lg">
-          Access pre-vetted engineers from 30+ countries at up to 60% less
-          than UK &amp; US rates. Build your dream team in days, not months.
+          OctogleHire delivers pre-vetted senior engineers from 150+ countries
+          at 40–60% below US/UK rates. Receive 3–5 curated profiles within 48
+          hours — no recruitment fees, no long-term lock-in.
         </p>
 
         {/* CTAs */}
@@ -70,8 +71,12 @@ const Hero = ({ className }: HeroProps) => {
           </Button>
         </div>
 
+        <p className="mt-6 text-center text-[10px] text-muted-foreground">
+          Based on 2024–2025 hiring data across 300+ placements
+        </p>
+
         {/* Hire from 30+ countries */}
-        <p className="mt-16 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="mt-10 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Hire from 30+ countries
         </p>
       </div>

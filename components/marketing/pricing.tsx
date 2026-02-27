@@ -42,9 +42,9 @@ const Pricing = ({ className }: PricingProps) => {
             Start for free.
           </h2>
           <p className="mt-4 text-base text-muted-foreground leading-relaxed">
-            Post a role and receive vetted candidates at zero cost.
-            <br />
-            You only pay a monthly rate once your developer starts.
+            Zero upfront fees. OctogleHire developers cost 40–60% less than
+            equivalent local hires. You only pay a transparent monthly rate
+            once your developer starts — no placement fees, no markups.
           </p>
         </div>
 

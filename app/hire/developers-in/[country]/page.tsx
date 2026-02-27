@@ -99,7 +99,7 @@ export default async function CountryHirePage({ params }: PageProps) {
         label={`Developers in ${country}`}
         title={`Hire Top Developers in ${country}`}
         titleAccent={country}
-        description={`Access a curated pool of pre-vetted software engineers based in ${country}. OctogleHire handles vetting, matching, and onboarding so you can build your team in days.`}
+        description={`OctogleHire delivers top-3%, pre-vetted engineers based in ${country} at 40–60% below US/UK rates. Receive 3–5 matched profiles within 48 hours — compliance across 150+ countries fully managed.`}
         benefits={benefits}
         crossLinks={topTechLinks}
         countryCrossLinks={otherCountries}
