@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import AutoScroll from "embla-carousel-auto-scroll";
 import {
@@ -34,47 +33,21 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { OrbitingCircles } from "@/components/ui/orbiting-circles";
-import { Rating } from "@/components/shadcnblocks/rating";
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { EarningsCalculator } from "@/app/developers/join/_components/earnings-calculator";
+import { REGIONAL_COUNTRIES } from "@/lib/seo-data";
 
 interface ApplyHeroProps {
   onStart: () => void;
 }
 
-// ── Orbiting circles ──────────────────────────────────────────────────────────
-const circle1Images = [
-  "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=face",
-];
-const circle2Images = [
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face",
-];
-const circle3Images = [
-  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=200&h=200&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=face",
-  "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&h=200&fit=crop&crop=face",
-];
+// ── Developer source countries for flag carousel ─────────────────────────────
+const EXPENSIVE_MARKETS = new Set(["GB", "US", "CA", "DE", "FR", "NL", "IT", "AU"]);
+const devCountries = REGIONAL_COUNTRIES.filter((c) => !EXPENSIVE_MARKETS.has(c.isoCode));
+const allCountries = [...devCountries, ...devCountries];
 
 // ── Logo carousel ─────────────────────────────────────────────────────────────
-const logos = [
-  { id: "l1", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-1.svg", h: "h-6" },
-  { id: "l2", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-2.svg", h: "h-6" },
-  { id: "l3", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-3.svg", h: "h-6" },
-  { id: "l4", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-4.svg", h: "h-6" },
-  { id: "l5", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-5.svg", h: "h-5" },
-  { id: "l6", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-6.svg", h: "h-6" },
-  { id: "l7", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-7.svg", h: "h-6" },
-  { id: "l8", src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/astro-wordmark.svg", h: "h-6" },
-];
-
 // ── Bento data ────────────────────────────────────────────────────────────────
 const DI = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
 
@@ -86,8 +59,8 @@ const rateRoles = [
       { label: "Node.js", icon: `${DI}/nodejs/nodejs-original.svg` },
       { label: "TypeScript", icon: `${DI}/typescript/typescript-original.svg` },
     ],
-    ourRate: 65,
-    localRate: 30,
+    uplift: 28,
+    type: "Full-Time",
   },
   {
     title: "Backend Engineer",
@@ -96,8 +69,8 @@ const rateRoles = [
       { label: "Django", icon: `${DI}/django/django-plain.svg` },
       { label: "PostgreSQL", icon: `${DI}/postgresql/postgresql-original.svg` },
     ],
-    ourRate: 55,
-    localRate: 24,
+    uplift: 22,
+    type: "Monthly",
   },
   {
     title: "DevOps Engineer",
@@ -106,15 +79,15 @@ const rateRoles = [
       { label: "Kubernetes", icon: `${DI}/kubernetes/kubernetes-original.svg` },
       { label: "Terraform", icon: `${DI}/terraform/terraform-original.svg` },
     ],
-    ourRate: 70,
-    localRate: 33,
+    uplift: 25,
+    type: "Hourly",
   },
 ];
 
 const opportunities = [
-  { company: "Vercel", role: "Senior Full-Stack", rate: "$65/hr", match: "98%", logo: "https://assets.vercel.com/image/upload/front/favicon/vercel/60x60.png" },
-  { company: "Stripe", role: "Backend Engineer", rate: "$60/hr", match: "94%", logo: "https://images.stripeassets.com/fzn2n1nzq965/HTTOloNPhisV9P4hlMPNA/cacf1bb88b9fc492dfad34378d844280/Stripe_icon_-_square.svg" },
-  { company: "Linear", role: "ML Engineer", rate: "$75/hr", match: "91%", logo: "https://linear.app/static/apple-touch-icon.png" },
+  { company: "Vercel", role: "Senior Full-Stack", type: "Full-Time", match: "98%", logo: "https://assets.vercel.com/image/upload/front/favicon/vercel/60x60.png" },
+  { company: "Stripe", role: "Backend Engineer", type: "Part-Time", match: "94%", logo: "https://images.stripeassets.com/fzn2n1nzq965/HTTOloNPhisV9P4hlMPNA/cacf1bb88b9fc492dfad34378d844280/Stripe_icon_-_square.svg" },
+  { company: "Linear", role: "ML Engineer", type: "Hourly", match: "91%", logo: "https://linear.app/static/apple-touch-icon.png" },
 ];
 
 const JOURNEY_STEPS = [
@@ -141,6 +114,14 @@ const roleTracks = [
     title: "Own features end-to-end",
     summary: "Best fit for engineers who can move from UI to APIs and ship fast with product teams.",
     focus: ["React / Next.js delivery", "API + DB ownership", "System thinking"],
+    stack: [
+      { label: "React", icon: `${DI}/react/react-original.svg` },
+      { label: "Next.js", icon: `${DI}/nextjs/nextjs-original.svg` },
+      { label: "TypeScript", icon: `${DI}/typescript/typescript-original.svg` },
+      { label: "Node.js", icon: `${DI}/nodejs/nodejs-original.svg` },
+      { label: "PostgreSQL", icon: `${DI}/postgresql/postgresql-original.svg` },
+      { label: "Tailwind", icon: `${DI}/tailwindcss/tailwindcss-original.svg` },
+    ],
   },
   {
     icon: Code,
@@ -148,6 +129,14 @@ const roleTracks = [
     title: "Build scalable core systems",
     summary: "For engineers who enjoy architecture, reliability, and high-throughput service design.",
     focus: ["Distributed systems", "Cloud + observability", "Performance tuning"],
+    stack: [
+      { label: "Python", icon: `${DI}/python/python-original.svg` },
+      { label: "Go", icon: `${DI}/go/go-original.svg` },
+      { label: "Java", icon: `${DI}/java/java-original.svg` },
+      { label: "Node.js", icon: `${DI}/nodejs/nodejs-original.svg` },
+      { label: "PostgreSQL", icon: `${DI}/postgresql/postgresql-original.svg` },
+      { label: "Redis", icon: `${DI}/redis/redis-original.svg` },
+    ],
   },
   {
     icon: Brain,
@@ -155,6 +144,13 @@ const roleTracks = [
     title: "Ship applied AI products",
     summary: "Work on LLM pipelines, data infrastructure, and production machine learning systems.",
     focus: ["LLM integrations", "Data modeling", "Evaluation frameworks"],
+    stack: [
+      { label: "Python", icon: `${DI}/python/python-original.svg` },
+      { label: "PyTorch", icon: `${DI}/pytorch/pytorch-original.svg` },
+      { label: "TensorFlow", icon: `${DI}/tensorflow/tensorflow-original.svg` },
+      { label: "Pandas", icon: `${DI}/pandas/pandas-original.svg` },
+      { label: "Jupyter", icon: `${DI}/jupyter/jupyter-original.svg` },
+    ],
   },
   {
     icon: Smartphone,
@@ -162,6 +158,13 @@ const roleTracks = [
     title: "Build product experiences people keep",
     summary: "Own modern mobile app development with fast release loops and meaningful user impact.",
     focus: ["React Native / Swift / Kotlin", "Performance + UX polish", "App store lifecycle"],
+    stack: [
+      { label: "React Native", icon: `${DI}/react/react-original.svg` },
+      { label: "Swift", icon: `${DI}/swift/swift-original.svg` },
+      { label: "Kotlin", icon: `${DI}/kotlin/kotlin-original.svg` },
+      { label: "Flutter", icon: `${DI}/flutter/flutter-original.svg` },
+      { label: "TypeScript", icon: `${DI}/typescript/typescript-original.svg` },
+    ],
   },
 ];
 
@@ -194,33 +197,48 @@ const devBenefits = [
   },
   {
     icon: Clock,
-    title: "Flexible Engagements",
-    description: "Hourly, contract, or full-time. Build the working arrangement that suits your life, not the other way around.",
+    title: "Hourly, Monthly, or Annual Contracts",
+    description: "Choose the engagement model that fits you — from short-term hourly projects to stable annual contracts with experience letters provided.",
   },
 ];
 
 // ── Testimonials ──────────────────────────────────────────────────────────────
 const testimonials = [
   {
-    name: "Aisha M.",
-    title: "Senior Backend Engineer",
-    quote: "I stopped mass-applying and got two strong interview loops in my first week after approval.",
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face",
+    name: "Pratteek Shaurya",
+    title: "Software Engineer",
+    quote: "Applied once, started my first client project within two weeks.",
+    image: "https://media.licdn.com/dms/image/v2/D4D03AQHq-t4Dd0zoug/profile-displayphoto-shrink_800_800/B4DZSdNblZGcAc-/0/1737804331792?e=1773878400&v=beta&t=aio0pJ_ARRaiXzF5qA0cneSDRLIBrJJyTs2ImdiyADI",
   },
   {
-    name: "Mateo R.",
-    title: "Full-Stack Developer",
-    quote: "The role briefs were clear, compensation was transparent, and the process respected my time.",
-    rating: 4.8,
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
+    name: "Anil Wadghule",
+    title: "Solutions Architect",
+    quote: "They matched me with a project that actually needed my Elixir expertise.",
+    image: "https://media.licdn.com/dms/image/v2/C4E03AQGQaEZ5cwQnpA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1641360584592?e=1773878400&v=beta&t=lvIRhWnRA7GHoOmIY2_y7ZoYK1gpq1DYulFP8UqoODk",
   },
   {
-    name: "Nina K.",
-    title: "ML Engineer",
-    quote: "I joined for contract work and ended up in a long-term, high-impact AI product team.",
-    rating: 5,
-    image: "https://images.unsplash.com/photo-1542204625-de293a2f3d29?w=400&h=400&fit=crop&crop=face",
+    name: "Mahindra Danane",
+    title: "Software Engineer",
+    quote: "I get to work with international teams I wouldn't have had access to otherwise.",
+    image: "https://media.licdn.com/dms/image/v2/D4D03AQFEoQR7Nvvv9g/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1729739461690?e=1773878400&v=beta&t=jbwJDsgsH73JA3MF1gjqqHMVHdZoibZsSojf6ZlqZN0",
+  },
+  {
+    name: "Prasanna Wagh",
+    title: "Fullstack Developer",
+    quote: "As a junior, getting access to global clients felt impossible — until OctogleHire.",
+    image: "https://media.licdn.com/dms/image/v2/D4D03AQGXvk1r3zg35Q/profile-displayphoto-crop_800_800/B4DZpvFnA8IkAI-/0/1762800335197?e=1773878400&v=beta&t=HIEcMS-LgRWHo6cWNalpP4EwqfYhD-e-FIDVDX3xdfw",
+  },
+  {
+    name: "Yash Chavan",
+    title: "Frontend Developer",
+    quote: "Compensation was transparent and I started building from day one.",
+    image: "https://media.licdn.com/dms/image/v2/D4D03AQF0dQB7XJcuwg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1709399954775?e=1773878400&v=beta&t=CAorsQS2n78aS4UgQ5LBDmnWVJmDtPT42a7jkvkk3r8",
+  },
+  {
+    name: "Neha Shirsat",
+    title: "QA Engineer",
+    quote: "The onboarding was seamless — I was writing production code within my first week.",
+    image: "https://media.licdn.com/dms/image/v2/D4D03AQEyX_RPVHe7PA/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1696576746610?e=1773878400&v=beta&t=nx0WhyC1gZv9LZgpi46cZ1SCEpYKAQP9Jbk75D2wK7k",
   },
 ];
 
@@ -276,14 +294,13 @@ const RateShowcase = () => {
   }, []);
 
   const role = rateRoles[idx];
-  const uplift = Math.round(((role.ourRate - role.localRate) / role.localRate) * 100);
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-sm">
       <div key={key} className="space-y-4 animate-in fade-in duration-300">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">{role.title}</p>
-          <Badge variant="secondary" className="font-mono text-[10px]">+{uplift}% vs local</Badge>
+          <Badge variant="secondary" className="text-[10px]">{role.type}</Badge>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {role.tags.map((tag) => (
@@ -294,15 +311,10 @@ const RateShowcase = () => {
             </Badge>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-muted/60 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Local market</p>
-            <p className="mt-1 font-mono text-lg font-medium text-muted-foreground line-through decoration-muted-foreground/40">${role.localRate}/hr</p>
-          </div>
-          <div className="rounded-lg border border-border bg-muted/20 p-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">OctogleHire</p>
-            <p className="mt-1 font-mono text-lg font-semibold text-pulse">${role.ourRate}/hr</p>
-          </div>
+        <div className="rounded-lg border border-pulse bg-pulse/5 p-4 text-center">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Earnings uplift</p>
+          <p className="mt-1 font-mono text-2xl font-semibold text-pulse">+{role.uplift}%</p>
+          <p className="mt-0.5 text-[10px] text-muted-foreground">above local market rate</p>
         </div>
       </div>
       <div className="flex justify-center gap-1.5">
@@ -365,7 +377,7 @@ const OpportunityFeed = () => {
                 <p className="text-[10px] text-muted-foreground">{o.role}</p>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-xs font-mono font-medium">{o.rate}</p>
+                <p className="text-xs font-mono font-medium">{o.type}</p>
                 <p className="text-[10px] font-mono text-pulse">{o.match} match</p>
               </div>
             </div>
@@ -430,16 +442,43 @@ const profileStack = [
   { label: "Node.js", icon: `${DI}/nodejs/nodejs-original.svg` },
 ];
 
-const ProfileMockup = () => (
-  <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-    <p className="text-sm font-semibold">Developer Profile</p>
-    <div className="space-y-3">
-      <div className="rounded-lg bg-muted px-4 py-3">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Full name</p>
-        <p className="text-sm font-medium">Arjun Kumar</p>
+const ENGAGEMENT_TYPES = [
+  { label: "Hourly", description: "Flexible, project-based" },
+  { label: "Part-Time", description: "20 hrs/week" },
+  { label: "Full-Time", description: "Stable, long-term" },
+] as const;
+
+const ProfileMockup = () => {
+  const [activeEngagement, setActiveEngagement] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setActiveEngagement((i) => (i + 1) % ENGAGEMENT_TYPES.length), 2400);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+      <div className="flex items-center justify-between border-b border-border pb-4">
+        <p className="text-sm font-semibold">Developer Profile</p>
+        <Badge variant="outline" className="text-[10px] border-pulse/30 text-pulse animate-in fade-in">
+          Verified
+        </Badge>
       </div>
-      <div className="rounded-lg bg-muted px-4 py-3">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Tech stack</p>
+
+      {/* Avatar + name */}
+      <div className="flex items-center gap-3">
+        <div className="flex size-11 items-center justify-center rounded-full bg-muted ring-2 ring-border">
+          <span className="text-sm font-semibold">AK</span>
+        </div>
+        <div>
+          <p className="text-sm font-semibold">Arjun Kumar</p>
+          <p className="text-xs text-muted-foreground">Full-Stack Engineer · India</p>
+        </div>
+      </div>
+
+      {/* Tech stack */}
+      <div className="rounded-lg bg-muted/50 px-4 py-3">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Tech stack</p>
         <div className="flex flex-wrap gap-1.5">
           {profileStack.map((s) => (
             <Badge key={s.label} variant="secondary" className="text-[10px] gap-1.5 px-2 py-0.5">
@@ -450,55 +489,158 @@ const ProfileMockup = () => (
           ))}
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg bg-muted px-4 py-3">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Experience</p>
-          <p className="text-sm font-medium">6 years</p>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="rounded-lg bg-muted/50 p-3 text-center">
+          <p className="font-mono text-lg font-semibold">6</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Years</p>
         </div>
-        <div className="rounded-lg bg-muted px-4 py-3">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Rate</p>
-          <p className="text-sm font-mono font-medium">$65/hr</p>
+        <div className="rounded-lg bg-muted/50 p-3 text-center">
+          <p className="font-mono text-lg font-semibold">12</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Projects</p>
+        </div>
+        <div className="rounded-lg bg-muted/50 p-3 text-center">
+          <p className="font-mono text-lg font-semibold text-pulse">98%</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Score</p>
+        </div>
+      </div>
+
+      {/* Engagement type — animated cycling */}
+      <div className="space-y-2">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Preferred arrangement</p>
+        <div className="flex gap-2">
+          {ENGAGEMENT_TYPES.map((type, i) => (
+            <div
+              key={type.label}
+              className={cn(
+                "flex-1 rounded-lg border p-2.5 text-center transition-all duration-500",
+                i === activeEngagement
+                  ? "border-pulse bg-pulse/5 scale-[1.02]"
+                  : "border-border bg-muted/30 opacity-50",
+              )}
+            >
+              <p className={cn("text-xs font-semibold transition-colors duration-500", i === activeEngagement ? "text-pulse" : "text-muted-foreground")}>{type.label}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{type.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Button className="w-full rounded-full" size="sm">Submit Application</Button>
+    </div>
+  );
+};
+
+const REVIEW_STEPS = [
+  { step: "Application received", day: "Day 1" },
+  { step: "Technical assessment", day: "Day 3" },
+  { step: "Experience verification", day: "Day 7" },
+  { step: "Final approval", day: "Day 10" },
+  { step: "First role match", day: "Day 14" },
+];
+
+const ReviewMockup = () => {
+  const [completedCount, setCompletedCount] = useState(0);
+
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout>;
+    if (completedCount >= REVIEW_STEPS.length) {
+      t = setTimeout(() => setCompletedCount(0), 2000);
+    } else {
+      t = setTimeout(() => setCompletedCount((c) => c + 1), completedCount === 0 ? 800 : 600);
+    }
+    return () => clearTimeout(t);
+  }, [completedCount]);
+
+  const allDone = completedCount >= REVIEW_STEPS.length;
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+      <div className="flex items-center justify-between border-b border-border pb-4">
+        <p className="text-sm font-semibold">Application Review</p>
+        <Badge
+          variant="outline"
+          className={cn(
+            "text-[10px] transition-all duration-500",
+            allDone ? "border-pulse/30 text-pulse" : "text-muted-foreground",
+          )}
+        >
+          {allDone ? "Approved" : "In Progress"}
+        </Badge>
+      </div>
+
+      {/* Progress bar */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+          <span>Progress</span>
+          <span className="font-mono">{Math.min(completedCount, REVIEW_STEPS.length)}/{REVIEW_STEPS.length}</span>
+        </div>
+        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-pulse transition-all duration-500 ease-out"
+            style={{ width: `${(Math.min(completedCount, REVIEW_STEPS.length) / REVIEW_STEPS.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Steps */}
+      <div className="space-y-1.5">
+        {REVIEW_STEPS.map(({ step, day }, i) => {
+          const isDone = i < completedCount;
+          const isActive = i === completedCount;
+          return (
+            <div
+              key={step}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-4 py-2.5 transition-all duration-400",
+                isDone ? "bg-pulse/8" : isActive ? "bg-muted border border-border" : "bg-muted/30",
+              )}
+            >
+              <div className={cn(
+                "size-5 shrink-0 rounded-full flex items-center justify-center transition-all duration-400",
+                isDone ? "bg-pulse" : isActive ? "border-2 border-pulse animate-pulse" : "border-2 border-border",
+              )}>
+                {isDone && (
+                  <svg viewBox="0 0 8 8" className="size-2.5 fill-none stroke-background animate-in fade-in zoom-in duration-300" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1.5 4l2 2 3-3" />
+                  </svg>
+                )}
+              </div>
+              <span className={cn("text-sm flex-1 transition-colors duration-400", isDone ? "font-medium" : isActive ? "font-medium" : "text-muted-foreground")}>{step}</span>
+              <span className={cn(
+                "font-mono text-[10px] uppercase tracking-wider transition-all duration-400",
+                isDone ? "text-pulse" : isActive ? "text-muted-foreground" : "text-muted-foreground/40",
+              )}>
+                {isDone ? "Done" : day}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Timeline */}
+      <div className="rounded-xl border border-border bg-muted/40 p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground">Average timeline</p>
+            <p className="mt-0.5 font-mono text-2xl font-semibold">2 weeks</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">From application to</p>
+            <p className="mt-0.5 text-sm font-semibold text-pulse">first role match</p>
+          </div>
         </div>
       </div>
     </div>
-    <Button className="w-full rounded-full" size="sm">Submit Application</Button>
-  </div>
-);
-
-const ReviewMockup = () => (
-  <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-    <div className="flex items-center justify-between">
-      <p className="text-sm font-semibold">Application Review</p>
-      <Badge variant="outline" className="text-[10px]">In Progress</Badge>
-    </div>
-    <div className="space-y-2">
-      {[
-        { step: "Application received", done: true, active: false },
-        { step: "Technical review", done: true, active: false },
-        { step: "Experience verification", done: false, active: true },
-        { step: "Final approval", done: false, active: false },
-      ].map(({ step, done, active }) => (
-        <div key={step} className={cn("flex items-center gap-3 rounded-lg px-4 py-2.5 transition-colors",
-          done ? "bg-pulse/10" : active ? "bg-muted border border-border" : "bg-muted/50")}>
-          <div className={cn("size-2 rounded-full shrink-0", done ? "bg-pulse" : active ? "bg-foreground animate-pulse" : "bg-border")} />
-          <span className={cn("text-sm", !done && !active && "text-muted-foreground")}>{step}</span>
-          {done && <span className="ml-auto text-[10px] font-mono text-pulse uppercase tracking-wider">Done</span>}
-          {active && <span className="ml-auto text-[10px] font-mono text-muted-foreground uppercase tracking-wider">Active</span>}
-        </div>
-      ))}
-    </div>
-    <div className="rounded-xl border bg-muted/40 p-4 text-center">
-      <p className="text-xs text-muted-foreground">Expected response</p>
-      <p className="mt-1 font-mono text-3xl font-semibold">48h</p>
-    </div>
-  </div>
-);
+  );
+};
 
 const RoleMatchMockup = () => {
   const roles = [
-    { company: "Vercel", role: "Senior Full-Stack", rate: "$65/hr", score: "98%", logo: "https://assets.vercel.com/image/upload/front/favicon/vercel/60x60.png" },
-    { company: "Stripe", role: "Backend Engineer", rate: "$60/hr", score: "94%", logo: "https://images.stripeassets.com/fzn2n1nzq965/HTTOloNPhisV9P4hlMPNA/cacf1bb88b9fc492dfad34378d844280/Stripe_icon_-_square.svg" },
-    { company: "Linear", role: "ML Engineer", rate: "$75/hr", score: "91%", logo: "https://linear.app/static/apple-touch-icon.png" },
+    { company: "Vercel", role: "Senior Full-Stack", rate: "Full-Time", score: "98%", logo: "https://assets.vercel.com/image/upload/front/favicon/vercel/60x60.png" },
+    { company: "Stripe", role: "Backend Engineer", rate: "Part-Time", score: "94%", logo: "https://images.stripeassets.com/fzn2n1nzq965/HTTOloNPhisV9P4hlMPNA/cacf1bb88b9fc492dfad34378d844280/Stripe_icon_-_square.svg" },
+    { company: "Linear", role: "ML Engineer", rate: "Hourly", score: "91%", logo: "https://linear.app/static/apple-touch-icon.png" },
   ];
   return (
     <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
@@ -517,7 +659,7 @@ const RoleMatchMockup = () => {
             <p className="text-xs text-muted-foreground">{r.role}</p>
           </div>
           <div className="text-right shrink-0">
-            <p className="font-mono text-sm font-medium">{r.rate}</p>
+            <p className="text-sm font-medium">{r.rate}</p>
             <p className="font-mono text-[10px] font-semibold text-pulse">{r.score} match</p>
           </div>
         </div>
@@ -636,100 +778,87 @@ const DevFaq = () => {
 
 // ── Main component ────────────────────────────────────────────────────────────
 const ApplyHero = ({ onStart }: ApplyHeroProps) => {
-  const allLogos = [...logos, ...logos];
-
   return (
     <>
       <Navbar />
 
       {/* ── 1. Hero ── */}
-      <section className="pt-8 pb-0">
+      <section className="pt-20 pb-0">
         <div className="container mx-auto px-6">
-          <div className="relative">
-            <div className="flex w-full items-center justify-center">
-              {/* Center overlay */}
-              <div className="absolute z-99 flex h-full w-full flex-col items-center justify-center gap-4">
-                <div className="pointer-events-none absolute inset-y-0 top-1/2 left-1/2 h-1/3 w-full max-w-2xl -translate-x-1/2 -translate-y-1/2 bg-background blur-2xl" />
-
-                <Button variant="secondary" className="group relative z-10 flex w-fit items-center justify-center gap-3 rounded-full bg-muted/70 px-5 py-1">
-                  <span className="size-2.5 rounded-full bg-pulse animate-pulse" />
-                  <span className="text-xs">Join 1,000+ Engineers Worldwide</span>
-                </Button>
-
-                <h1 className="relative z-10 max-w-3xl text-center text-5xl font-medium tracking-tight md:text-7xl">
-                  Earn More. Work
-                  <br />
-                  <span className="text-pulse">On Your Terms.</span>
-                </h1>
-
-                <p className="relative z-10 mt-3 max-w-xl text-center text-muted-foreground/80">
-                  Get matched to top global companies at rates that reflect your
-                  skills. We handle contracts, payroll, and compliance — you
-                  focus on building.
-                </p>
-
-                <div className="relative z-10 mt-4 flex gap-4">
-                  <Button variant="secondary" className="group flex w-fit items-center justify-center gap-2 rounded-full px-4 py-1 tracking-tight" asChild>
-                    <a href="#process">
-                      <span>How it works</span>
-                      <ArrowRight className="size-4 -rotate-45 transition-all ease-out group-hover:ml-3 group-hover:rotate-0" />
-                    </a>
-                  </Button>
-                  <Button variant="default" className="group flex w-fit items-center justify-center gap-2 rounded-full px-4 py-1 tracking-tight" onClick={onStart}>
-                    <span>Apply Now</span>
-                    <ArrowRight className="size-4 -rotate-45 transition-all ease-out group-hover:ml-3 group-hover:rotate-0" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Orbiting circles */}
-              <div className="pointer-events-none relative z-0 flex h-[840px] w-full flex-col items-center justify-center overflow-x-clip">
-                <OrbitingCircles iconSize={44} radius={180} speed={0.5}>
-                  {circle1Images.map((src, i) => (
-                    <div key={i} className="size-11 overflow-hidden rounded-full">
-                      <img src={src} className="size-full object-cover" alt="" />
-                    </div>
-                  ))}
-                </OrbitingCircles>
-                <OrbitingCircles iconSize={44} radius={280} reverse speed={0.4}>
-                  {circle2Images.map((src, i) => (
-                    <div key={i} className="size-11 overflow-hidden rounded-full">
-                      <img src={src} className="size-full object-cover" alt="" />
-                    </div>
-                  ))}
-                </OrbitingCircles>
-                <OrbitingCircles iconSize={44} radius={380} speed={0.3}>
-                  {circle3Images.map((src, i) => (
-                    <div key={i} className="size-11 overflow-hidden rounded-full">
-                      <img src={src} className="size-full object-cover" alt="" />
-                    </div>
-                  ))}
-                </OrbitingCircles>
-              </div>
+          {/* Badge */}
+          <div className="flex justify-center">
+            <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5">
+              <span className="size-2 rounded-full bg-pulse animate-pulse" />
+              <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+                Join 1,000+ Engineers Worldwide
+              </span>
             </div>
           </div>
+
+          {/* Headline */}
+          <h1 className="mt-8 text-center text-5xl font-medium tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
+            Earn Above Your
+            <br />
+            Local Market.
+            <br />
+            <span className="text-pulse">Build Global Products.</span>
+          </h1>
+
+          {/* Description */}
+          <p className="mx-auto mt-8 max-w-xl text-center text-base text-muted-foreground sm:text-lg">
+            Join our network and get matched with top companies in the US, UK,
+            and Europe. Hourly, monthly, or annual contracts — you choose what
+            works for you.
+          </p>
+
+          {/* CTAs */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Button size="lg" className="rounded-full px-6 gap-2" onClick={onStart}>
+              Apply Now
+              <ArrowRight className="size-4 -rotate-45" />
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-full px-6">
+              <a href="#process">How It Works</a>
+            </Button>
+          </div>
+
+          {/* Country label */}
+          <p className="mt-16 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Engineers from 30+ countries
+          </p>
         </div>
 
-        {/* ── Logo carousel ── */}
-        <div className="pb-20">
-          <p className="mb-6 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Work with teams at
-          </p>
-          <div className="relative">
-            <Carousel plugins={[AutoScroll({ playOnInit: true, speed: 0.6 })]} opts={{ loop: true, align: "start" }}>
-              <CarouselContent className="ml-0">
-                {allLogos.map((logo, i) => (
-                  <CarouselItem key={`${logo.id}-${i}`} className="basis-1/3 pl-0 pr-10 sm:basis-1/4 md:basis-1/5 lg:basis-1/7 xl:basis-1/8">
-                    <div className="flex h-12 items-center justify-center opacity-30">
-                      <img src={logo.src} alt="" className={cn("w-auto", logo.h)} />
-                    </div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-linear-to-r from-background to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-linear-to-l from-background to-transparent" />
-          </div>
+        {/* Country flag carousel — full width */}
+        <div className="relative mt-6 pb-20">
+          <Carousel
+            plugins={[AutoScroll({ playOnInit: true, speed: 0.4, stopOnInteraction: false })]}
+            opts={{ loop: true, align: "start" }}
+          >
+            <CarouselContent className="ml-0">
+              {allCountries.map((country, i) => (
+                <CarouselItem
+                  key={`${country.isoCode}-${i}`}
+                  className="basis-1/4 pl-0 pr-4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8 xl:basis-1/10"
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <img
+                      src={`https://flagcdn.com/w40/${country.isoCode.toLowerCase()}.png`}
+                      srcSet={`https://flagcdn.com/w80/${country.isoCode.toLowerCase()}.png 2x`}
+                      alt={country.name}
+                      className="h-8 w-auto rounded-sm shadow-sm"
+                      width={40}
+                      height={27}
+                    />
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      {country.name}
+                    </span>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-linear-to-r from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-linear-to-l from-background to-transparent" />
         </div>
       </section>
 
@@ -753,7 +882,7 @@ const ApplyHero = ({ onStart }: ApplyHeroProps) => {
             <div className="space-y-2 px-2">
               <h3 className="text-lg font-semibold">Earn what your skills are worth</h3>
               <p className="text-sm text-muted-foreground">
-                Get matched to global companies at rates that reflect your seniority and stack — typically 40–60% above local market, with full transparency before any interview.
+                Get matched to global companies at rates that reflect your seniority and stack — above your local market, with full transparency before any interview.
               </p>
             </div>
           </div>
@@ -806,10 +935,10 @@ const ApplyHero = ({ onStart }: ApplyHeroProps) => {
       {/* ── 4. Earnings calculator ── */}
       <section className="py-24 bg-muted/20">
         <div className="container mx-auto px-6">
-          <div className="mb-16 flex flex-col gap-4">
+          <div className="mb-10 flex flex-col gap-4">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Earnings</span>
             <h2 className="max-w-2xl text-4xl font-medium tracking-tight lg:text-5xl">
-              Estimate your rate by role, stack, and experience
+              See what you could earn
             </h2>
           </div>
           <EarningsCalculator />
@@ -842,6 +971,18 @@ const ApplyHero = ({ onStart }: ApplyHeroProps) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">{item.summary}</p>
+
+                {/* Tech stack icons */}
+                <div className="flex flex-wrap gap-2">
+                  {item.stack.map((s) => (
+                    <div key={s.label} className="flex items-center gap-1.5 rounded-full border border-border bg-muted/40 px-2.5 py-1">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={s.icon} alt="" className="size-4" />
+                      <span className="text-[11px] font-medium">{s.label}</span>
+                    </div>
+                  ))}
+                </div>
+
                 <ul className="space-y-1.5">
                   {item.focus.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
@@ -888,27 +1029,26 @@ const ApplyHero = ({ onStart }: ApplyHeroProps) => {
           <h2 className="max-w-2xl text-4xl font-medium tracking-tight lg:text-5xl">
             You&apos;re in good company.
           </h2>
-          <p className="text-muted-foreground">You don&apos;t have to trust our word.</p>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((item) => (
-            <Card key={item.name} className="border-border/70 bg-card/90">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="relative h-11 w-11 overflow-hidden rounded-full border border-border/70">
-                    <Image src={item.image} alt={item.name} fill className="object-cover" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">{item.name}</CardTitle>
-                    <p className="text-xs text-muted-foreground">{item.title}</p>
-                  </div>
+            <div key={item.name} className="bg-background p-8 flex flex-col justify-between gap-6">
+              <blockquote className="text-xl font-medium leading-snug lg:text-2xl">
+                &ldquo;{item.quote}&rdquo;
+              </blockquote>
+              <div className="flex items-center gap-3">
+                <Avatar className="size-10 ring-2 ring-border">
+                  <AvatarImage src={item.image} alt={item.name} />
+                  <AvatarFallback className="text-xs font-semibold">
+                    {item.name.split(" ").map((n) => n[0]).join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-sm font-semibold">{item.name}</p>
+                  <p className="text-xs text-muted-foreground">{item.title}</p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <Rating rate={item.rating} showScore />
-                <p className="mt-3 text-sm text-muted-foreground">{item.quote}</p>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       </section>
@@ -952,7 +1092,7 @@ const ApplyHero = ({ onStart }: ApplyHeroProps) => {
                   { value: "1,000+", label: "Engineers vetted" },
                   { value: "Top 3%", label: "Acceptance rate" },
                   { value: "48h", label: "Match timeline" },
-                  { value: "$65+", label: "Avg. hourly rate" },
+                  { value: "30+", label: "Countries" },
                 ].map((s) => (
                   <div key={s.label} className="rounded-lg border border-white/10 bg-white/5 p-6 text-center">
                     <p className="font-mono text-3xl font-semibold text-pulse">{s.value}</p>

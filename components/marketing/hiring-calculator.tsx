@@ -126,6 +126,13 @@ const MARKET_FLAGS: Record<Market, string> = {
   Australia: "au",
 };
 
+const MARKET_CURRENCY: Record<Market, string> = {
+  US: "$",
+  UK: "£",
+  Germany: "€",
+  Australia: "A$",
+};
+
 const HiringCalculator = ({ className }: HiringCalculatorProps) => {
   const [role, setRole] = useState<Role>("Frontend Engineer");
   const [experience, setExperience] = useState<Experience>("mid");
@@ -143,7 +150,8 @@ const HiringCalculator = ({ className }: HiringCalculatorProps) => {
     [teamSize, monthlySavings],
   );
 
-  const fmt = (n: number) => `$${n.toLocaleString()}`;
+  const currency = MARKET_CURRENCY[market];
+  const fmt = (n: number) => `${currency}${n.toLocaleString()}`;
 
   return (
     <section className={cn("py-24 container mx-auto px-6", className)}>

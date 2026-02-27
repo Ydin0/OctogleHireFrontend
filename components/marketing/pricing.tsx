@@ -1,6 +1,7 @@
 import { ArrowRight, Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
 interface PricingProps {

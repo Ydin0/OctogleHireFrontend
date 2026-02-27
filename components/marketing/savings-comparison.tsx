@@ -27,6 +27,7 @@ const stories = [
     octogleRate: 3800,
     market: "UK",
     flag: "gb",
+    currency: "£",
   },
   {
     name: "Marcus Rivera",
@@ -43,6 +44,7 @@ const stories = [
     octogleRate: 4300,
     market: "US",
     flag: "us",
+    currency: "$",
   },
   {
     name: "Priya Sharma",
@@ -59,6 +61,7 @@ const stories = [
     octogleRate: 4300,
     market: "AU",
     flag: "au",
+    currency: "A$",
   },
   {
     name: "James Okafor",
@@ -75,6 +78,7 @@ const stories = [
     octogleRate: 3200,
     market: "DE",
     flag: "de",
+    currency: "€",
   },
 ];
 
@@ -183,7 +187,7 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
                       {s.market} rate
                     </p>
                     <p className="mt-1 font-mono text-xl font-semibold tracking-tight line-through decoration-muted-foreground/40">
-                      ${s.localRate.toLocaleString()}
+                      {s.currency}{s.localRate.toLocaleString()}
                       <span className="text-xs text-muted-foreground no-underline">/mo</span>
                     </p>
                   </div>
@@ -195,7 +199,7 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
                       OctogleHire
                     </p>
                     <p className="mt-1 font-mono text-xl font-semibold tracking-tight text-pulse">
-                      ${s.octogleRate.toLocaleString()}
+                      {s.currency}{s.octogleRate.toLocaleString()}
                       <span className="text-xs text-muted-foreground">/mo</span>
                     </p>
                   </div>
@@ -208,7 +212,7 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
                       {s.hiredCount} engineers hired
                     </p>
                     <p className="mt-1 font-mono text-xl font-semibold tracking-tight">
-                      ${annualSavings.toLocaleString()}
+                      {s.currency}{annualSavings.toLocaleString()}
                       <span className="text-xs text-muted-foreground">/yr saved</span>
                     </p>
                   </div>

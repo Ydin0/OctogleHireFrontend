@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowRight,
+  Check,
   CheckCircle,
   ChevronDown,
   Clock,
@@ -75,20 +77,24 @@ const stats = [
 
 const faqs = [
   {
-    q: "How are developers vetted on OctogleHire?",
-    a: "Every developer goes through a rigorous 5-stage process: application review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only the top 3% of applicants are approved.",
+    q: "How quickly can I hire a developer?",
+    a: "You'll receive 3–5 vetted candidate profiles within 48 hours of your discovery call. Most companies go from first intro to signed contract in under 5 business days.",
   },
   {
-    q: "How fast can I get matched with a developer?",
-    a: "Most companies receive 3\u20135 vetted candidate profiles within 48 hours of posting a role. The average time from posting to signed contract is 5 business days.",
+    q: "How are developers vetted?",
+    a: "Every developer passes a 5-stage process: application screening, stack-specific technical assessment, live system design interview, soft-skills evaluation, and reference checks. Only the top 3% of applicants make it into our network.",
   },
   {
-    q: "How does pricing work?",
-    a: "On the free Pay Per Hire plan, there are no upfront costs \u2014 you only pay a one-time success fee when you make a hire. The Scale plan is a flat monthly subscription with no per-hire fees. Enterprise pricing is available for large teams.",
+    q: "How much does it cost?",
+    a: "OctogleHire developers typically cost 40–60% less than hiring locally. There are no upfront fees — you only pay when you hire. We offer transparent monthly rates with no hidden markups or recruitment commissions.",
   },
   {
-    q: "Is there a trial period?",
-    a: "Yes. All placements come with a talent guarantee. If a developer doesn\u2019t meet your expectations within the guarantee period, we replace them at no additional cost.",
+    q: "What if a developer isn't the right fit?",
+    a: "Every placement includes a risk-free guarantee period. If a developer doesn't meet your expectations, we'll find a replacement at no additional cost and manage the transition for you.",
+  },
+  {
+    q: "Do you handle contracts and compliance?",
+    a: "Yes. We manage all contracts, IP agreements, payroll, and tax compliance end-to-end. You get a single invoice — no need to set up foreign entities or navigate international employment law.",
   },
 ];
 
@@ -602,9 +608,11 @@ function FaqAccordion() {
 // Inline lead capture form
 // ---------------------------------------------------------------------------
 
+const CALENDLY_URL = "https://calendly.com/yaseen-octogle/30min";
+
 function HeroForm() {
-  const [submitted, setSubmitted] = useState(false);
-  const [submittedName, setSubmittedName] = useState("");
+  const [view, setView] = useState<"form" | "calendly">("form");
+  const [contactName, setContactName] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
 
   const {
@@ -619,7 +627,7 @@ function HeroForm() {
   const onSubmit = async (data: CompanyLead) => {
     setApiError(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/company-enquiries`, {
+      const res = await fetch(`${API_BASE_URL}/api/public/company-enquiries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -631,51 +639,78 @@ function HeroForm() {
         return;
       }
 
-      setSubmittedName(data.contactName.split(" ")[0]);
-      setSubmitted(true);
+      setContactName(data.contactName);
+      setView("calendly");
     } catch {
       setApiError("Unable to connect. Please check your connection and try again.");
     }
   };
 
-  if (submitted) {
+  if (view === "calendly") {
     return (
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm animate-in fade-in duration-500">
-        <div className="flex flex-col items-center text-center space-y-4 py-6">
-          <CheckCircle className="size-10 text-pulse" />
-          <h3 className="text-lg font-semibold">
-            Thanks {submittedName}!
-          </h3>
-          <p className="text-sm text-muted-foreground max-w-xs">
-            We&apos;ll match you with vetted developers within 48 hours.
-          </p>
-          <Button asChild variant="outline" className="rounded-full gap-2">
-            <Link href="/marketplace">
-              Browse Developers
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
+      <div className="rounded-2xl border border-border bg-card p-7 lg:p-8 animate-in fade-in duration-500">
+        <div className="mb-4 flex items-center gap-3">
+          <a href="https://www.linkedin.com/in/yaseen-deen-52249219b/" target="_blank" rel="noopener noreferrer" className="shrink-0">
+            <Avatar className="size-14 ring-2 ring-border">
+              <AvatarImage src="/Yaseen Founder.jpg" alt="Yaseen" className="scale-110" />
+              <AvatarFallback>Y</AvatarFallback>
+            </Avatar>
+          </a>
+          <div>
+            <p className="text-sm font-semibold">
+              Thanks {contactName.split(" ")[0]}!
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Yaseen will reach out within 24 hours. Pick a time below.
+            </p>
+          </div>
         </div>
+        <div
+          className="calendly-inline-widget"
+          data-url={CALENDLY_URL}
+          style={{ minWidth: "100%", height: "650px" }}
+        />
+        <Script
+          src="https://assets.calendly.com/assets/external/widget.js"
+          strategy="lazyOnload"
+        />
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
-      <div className="flex items-center gap-2">
-        <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-          Get matched in 48 hours
-        </span>
+    <div className="rounded-2xl border border-border bg-card p-7 lg:p-8">
+      <div className="mb-6 flex items-start gap-3.5">
+        <a href="https://www.linkedin.com/in/yaseen-deen-52249219b/" target="_blank" rel="noopener noreferrer" className="shrink-0">
+          <Avatar className="size-12 ring-2 ring-border">
+            <AvatarImage src="/Yaseen Founder.jpg" alt="Yaseen" className="scale-110" />
+            <AvatarFallback>Y</AvatarFallback>
+          </Avatar>
+        </a>
+        <div>
+          <p className="text-sm font-semibold">Yaseen Deen</p>
+          <p className="text-xs text-muted-foreground">Co-Founder at OctogleHire</p>
+          <p className="mt-1.5 text-sm text-muted-foreground italic">
+            &ldquo;I&apos;ll personally match you with the right team.&rdquo;
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-4 space-y-3">
+      <div className="mb-6">
+        <h2 className="text-lg font-semibold">
+          Book a free discovery call
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          30 minutes · No commitment · Results in 48h
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         <Field>
           <FieldLabel htmlFor="hero-contactName">Full Name</FieldLabel>
           <Input
             id="hero-contactName"
             placeholder="Jane Smith"
-            className="h-11 rounded-lg"
             {...register("contactName")}
           />
           <div className="min-h-5">
@@ -690,7 +725,6 @@ function HeroForm() {
           <Input
             id="hero-companyName"
             placeholder="Acme Labs"
-            className="h-11 rounded-lg"
             {...register("companyName")}
           />
           <div className="min-h-5">
@@ -706,7 +740,6 @@ function HeroForm() {
             id="hero-email"
             type="email"
             placeholder="jane@acme.com"
-            className="h-11 rounded-lg"
             {...register("email")}
           />
           <div className="min-h-5">
@@ -717,12 +750,11 @@ function HeroForm() {
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="hero-phone">Phone Number</FieldLabel>
+          <FieldLabel htmlFor="hero-phone">Mobile Number</FieldLabel>
           <Input
             id="hero-phone"
             type="tel"
             placeholder="+1 (555) 000-0000"
-            className="h-11 rounded-lg"
             {...register("phone")}
           />
           <div className="min-h-5">
@@ -736,20 +768,10 @@ function HeroForm() {
           <p className="text-sm text-destructive">{apiError}</p>
         )}
 
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full rounded-full gap-2"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? "Submitting..." : "Get Matched"}
-          {!isSubmitting && <ArrowRight className="size-4" />}
+        <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
+          {isSubmitting ? "Submitting..." : "Book a Call →"}
         </Button>
       </form>
-
-      <p className="mt-4 text-center text-xs text-muted-foreground">
-        No fees until you hire. Cancel anytime.
-      </p>
     </div>
   );
 }
@@ -791,35 +813,60 @@ export function HirePageLayout({
       <Navbar />
       <main>
         {/* ── 1. Hero — split layout with embedded form ────────── */}
-        <section className="container mx-auto px-6 py-20 lg:py-28">
-          <div className="grid gap-12 lg:grid-cols-[1fr_380px] lg:gap-16 lg:items-start">
-            {/* Left */}
-            <div>
-              {/* Trust badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5">
-                <span className="size-2 rounded-full bg-pulse animate-pulse" />
-                <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-                  Pre-vetted &amp; ready to start
+        <section className="container mx-auto px-6">
+          <div className="grid lg:grid-cols-[1fr_460px] gap-12 xl:gap-20 py-16 lg:py-24 lg:items-start">
+
+            {/* Left — value props */}
+            <div className="lg:sticky lg:top-24 space-y-10">
+
+              {/* Headline block */}
+              <div>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {label}
                 </span>
+                <h1 className="mt-4 text-4xl font-semibold tracking-tight lg:text-5xl">
+                  {renderTitle(title, titleAccent)}
+                </h1>
+                <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
+                  {description}
+                </p>
               </div>
 
-              {/* Section label */}
-              <p className="mt-6 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                {label}
-              </p>
+              {/* Benefits */}
+              <ul className="space-y-5">
+                {benefits.map((b) => (
+                  <li key={b.title} className="flex gap-3.5 items-start">
+                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-border bg-muted">
+                      <Check className="size-3 text-foreground" strokeWidth={2.5} />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold">{b.title}</p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">
+                        {b.description}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
 
-              {/* Heading */}
-              <h1 className="mt-3 text-4xl font-medium tracking-tight sm:text-5xl lg:text-6xl">
-                {renderTitle(title, titleAccent)}
-              </h1>
-
-              {/* Description */}
-              <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-                {description}
-              </p>
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-6 border-t pt-8">
+                {[
+                  { value: "48h", label: "Avg. time to first match" },
+                  { value: "94%", label: "6-month retention rate" },
+                  { value: "60%", label: "Lower cost vs agencies" },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <p className="font-mono text-2xl font-semibold text-pulse lg:text-3xl">
+                      {s.value}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{s.label}</p>
+                  </div>
+                ))}
+              </div>
 
               {/* CTAs — visible on mobile, hidden on lg (form takes over) */}
-              <div className="mt-8 flex flex-wrap gap-3 lg:hidden">
+              <div className="flex flex-wrap gap-3 lg:hidden">
                 <Button asChild size="lg" className="rounded-full gap-2">
                   <Link href="/companies/signup">
                     Start Hiring
@@ -836,35 +883,16 @@ export function HirePageLayout({
                 </Button>
               </div>
 
-              {/* Trust line */}
-              <p className="mt-10 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Trusted by 500+ companies worldwide
-              </p>
             </div>
 
             {/* Right — embedded form */}
-            <div className="hidden lg:block lg:sticky lg:top-24">
+            <div className="lg:sticky lg:top-24">
               <HeroForm />
             </div>
           </div>
         </section>
 
-        {/* ── 2. Stats strip with count-up animation ───────────── */}
-        <section className="bg-muted/50 py-16">
-          <div className="container mx-auto px-6">
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-              {stats.map((stat) => (
-                <AnimatedStat
-                  key={stat.label}
-                  value={stat.value}
-                  prefix={stat.prefix}
-                  suffix={stat.suffix}
-                  label={stat.label}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
+
 
         {/* ── 3. Features showcase — match + vetting mockups ──── */}
         <section className="container mx-auto px-6 py-24">

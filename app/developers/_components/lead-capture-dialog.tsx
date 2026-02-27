@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import {
@@ -65,7 +64,7 @@ function LeadCaptureDialog({
   const onSubmit = async (data: CompanyLead) => {
     setApiError(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/company-enquiries`, {
+      const res = await fetch(`${API_BASE_URL}/api/public/company-enquiries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -93,12 +92,17 @@ function LeadCaptureDialog({
       <DialogContent className="sm:max-w-md">
         {submitted ? (
           <div className="flex flex-col items-center text-center space-y-4 py-6">
-            <CheckCircle className="size-10 text-pulse" />
+            <a href="https://www.linkedin.com/in/yaseen-deen-52249219b/" target="_blank" rel="noopener noreferrer">
+              <Avatar className="size-14 ring-2 ring-border">
+                <AvatarImage src="/Yaseen Founder.jpg" alt="Yaseen" className="scale-110" />
+                <AvatarFallback>Y</AvatarFallback>
+              </Avatar>
+            </a>
             <h3 className="text-lg font-semibold">
               Thanks {submittedName}!
             </h3>
             <p className="text-sm text-muted-foreground max-w-xs">
-              Our team will reach out within 24 hours.
+              Yaseen will reach out within 24 hours.
             </p>
           </div>
         ) : (
@@ -107,6 +111,18 @@ function LeadCaptureDialog({
               <DialogTitle>{copy.title}</DialogTitle>
               <DialogDescription>{copy.description}</DialogDescription>
             </DialogHeader>
+
+            <div className="flex items-center gap-3">
+              <a href="https://www.linkedin.com/in/yaseen-deen-52249219b/" target="_blank" rel="noopener noreferrer" className="shrink-0">
+                <Avatar className="size-10 ring-2 ring-border">
+                  <AvatarImage src="/Yaseen Founder.jpg" alt="Yaseen" className="scale-110" />
+                  <AvatarFallback>Y</AvatarFallback>
+                </Avatar>
+              </a>
+              <p className="text-sm text-muted-foreground">
+                Yaseen will reach out within 24h
+              </p>
+            </div>
 
             <form
               onSubmit={handleSubmit(onSubmit)}

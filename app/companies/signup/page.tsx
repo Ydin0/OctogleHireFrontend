@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Check } from "lucide-react";
 
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Navbar } from "@/components/marketing/navbar";
 import { CompanySignupForm } from "./_components/company-signup-form";
 
@@ -61,7 +62,7 @@ export default function CompanySignupPage() {
                   In 48 hours.
                 </h1>
                 <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-                  OctogleHire connects you with pre-vetted, India-based engineers
+                  OctogleHire connects you with pre-vetted engineers
                   ready to contribute from day one — at a fraction of the local
                   cost.
                 </p>
@@ -101,6 +102,22 @@ export default function CompanySignupPage() {
             {/* ── Right — form ── */}
             <div>
               <div className="rounded-2xl border bg-card p-7 lg:p-8">
+                <div className="mb-6 flex items-start gap-3.5">
+                  <a href="https://www.linkedin.com/in/yaseen-deen-52249219b/" target="_blank" rel="noopener noreferrer" className="shrink-0">
+                    <Avatar className="size-12 ring-2 ring-border">
+                      <AvatarImage src="/Yaseen Founder.jpg" alt="Yaseen" className="scale-110" />
+                      <AvatarFallback>Y</AvatarFallback>
+                    </Avatar>
+                  </a>
+                  <div>
+                    <p className="text-sm font-semibold">Yaseen Deen</p>
+                    <p className="text-xs text-muted-foreground">Co-Founder at OctogleHire</p>
+                    <p className="mt-1.5 text-sm text-muted-foreground italic">
+                      &ldquo;I&apos;ll personally match you with the right team.&rdquo;
+                    </p>
+                  </div>
+                </div>
+
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold">
                     Book a free discovery call
