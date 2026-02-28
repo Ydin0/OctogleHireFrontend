@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -57,22 +56,9 @@ const CompanySignupForm = () => {
   if (view === "calendly") {
     return (
       <div className="animate-in fade-in duration-500">
-        <div className="mb-4 flex items-center gap-3">
-          <a href="https://www.linkedin.com/in/yaseen-deen-52249219b/" target="_blank" rel="noopener noreferrer" className="shrink-0">
-            <Avatar className="size-14 ring-2 ring-border">
-              <AvatarImage src="/Yaseen Founder.jpg" alt="Yaseen" className="scale-110" />
-              <AvatarFallback>Y</AvatarFallback>
-            </Avatar>
-          </a>
-          <div>
-            <p className="text-sm font-semibold">
-              Thanks {contactName.split(" ")[0]}!
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Yaseen will reach out within 24 hours. Pick a time below.
-            </p>
-          </div>
-        </div>
+        <p className="mb-4 text-sm text-muted-foreground">
+          Thanks {contactName.split(" ")[0]}! Pick a time below to book your discovery call.
+        </p>
         <div
           className="calendly-inline-widget"
           data-url={CALENDLY_URL}
