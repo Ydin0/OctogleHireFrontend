@@ -78,6 +78,8 @@ export interface JobRequirement {
   title: string;
   techStack: string[];
   experienceLevel: ExperienceLevel;
+  experienceYearsMin?: number;
+  experienceYearsMax?: number;
   developersNeeded: number;
   engagementType: EngagementType;
   timezonePreference: string;
@@ -122,6 +124,8 @@ export interface CreateJobRequirementPayload {
   title: string;
   techStack: string[];
   experienceLevel: ExperienceLevel;
+  experienceYearsMin?: number;
+  experienceYearsMax?: number;
   developersNeeded: number;
   engagementType: EngagementType;
   timezonePreference: string;
@@ -130,6 +134,33 @@ export interface CreateJobRequirementPayload {
   description: string;
   startDate: string;
   priority: Priority;
+}
+
+export interface LinkedInJob {
+  externalId: string;
+  title: string;
+  description: string;
+  descriptionHtml: string;
+  location: string;
+  employmentType: string;
+  salary: string;
+  postedAt: string;
+  url: string;
+}
+
+export interface ParsedJobData {
+  title: string;
+  techStack: string[];
+  experienceYearsMin: number;
+  experienceYearsMax: number;
+  developersNeeded: number;
+  engagementType: string;
+  timezonePreference: string;
+  budgetMin?: number;
+  budgetMax?: number;
+  description: string;
+  startDate?: string;
+  priority: string;
 }
 
 export interface ProposeMatchPayload {
@@ -284,6 +315,91 @@ export async function respondToMatch(
   } catch {
     return null;
   }
+}
+
+// ── LinkedIn + Document Parsing API functions ────────────────────────────────
+
+export async function fetchLinkedInJobs(
+  token: string | null,
+  linkedinCompanyUrl: string,
+): Promise<LinkedInJob[]> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/linkedin-jobs`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ linkedinCompanyUrl }),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to fetch LinkedIn jobs");
+  }
+
+  return (await response.json()) as LinkedInJob[];
+}
+
+export async function parseLinkedInJob(
+  token: string | null,
+  data: { title: string; description: string },
+): Promise<ParsedJobData> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/linkedin-jobs/parse`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to parse job");
+  }
+
+  return (await response.json()) as ParsedJobData;
+}
+
+export async function parseJobDocument(
+  token: string | null,
+  file: File,
+): Promise<ParsedJobData> {
+  if (!token) throw new Error("Not authenticated");
+
+  const formData = new FormData();
+  formData.append("document", file);
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/requirements/parse-document`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to parse document");
+  }
+
+  return (await response.json()) as ParsedJobData;
 }
 
 // ── Admin-side API functions ─────────────────────────────────────────────────

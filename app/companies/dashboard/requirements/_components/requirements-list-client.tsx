@@ -171,7 +171,11 @@ const RequirementsListClient = () => {
                         </div>
 
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span className="capitalize">{req.experienceLevel} level</span>
+                          <span>
+                            {req.experienceYearsMin != null && req.experienceYearsMax != null
+                              ? `${req.experienceYearsMin}-${req.experienceYearsMax} yrs`
+                              : <span className="capitalize">{req.experienceLevel} level</span>}
+                          </span>
                           <span className="capitalize">{req.engagementType.replace("-", " ")}</span>
                           <span>Start: {formatDate(req.startDate)}</span>
                         </div>

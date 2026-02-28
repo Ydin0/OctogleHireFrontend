@@ -51,6 +51,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { MarkdownDisplay } from "@/components/markdown-display";
+import { experienceLabel } from "@/lib/utils/experience";
 
 const getInitials = (name: string) =>
   name
@@ -201,7 +203,7 @@ const ProposedMatchesClient = ({
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                 Experience
               </p>
-              <p className="capitalize">{requirement.experienceLevel}</p>
+              <p>{experienceLabel(requirement.experienceYearsMin, requirement.experienceYearsMax, requirement.experienceLevel)}</p>
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -231,9 +233,9 @@ const ProposedMatchesClient = ({
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground">
-            {requirement.description}
-          </p>
+          <div className="text-sm text-muted-foreground">
+            <MarkdownDisplay content={requirement.description} />
+          </div>
         </CardContent>
       </Card>
 

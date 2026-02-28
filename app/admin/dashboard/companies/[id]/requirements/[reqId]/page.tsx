@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import { MarkdownDisplay } from "@/components/markdown-display";
+import { experienceLabel } from "@/lib/utils/experience";
 import { CurrentMatches } from "./_components/current-matches";
 import { DeveloperPool } from "./_components/developer-pool";
 
@@ -147,7 +149,7 @@ const AllocationPage = ({
         <CardContent className="p-6 lg:p-8">
           <h1 className="text-2xl font-semibold">{requirement.title}</h1>
           <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            <span className="capitalize">{requirement.experienceLevel} level</span>
+            <span>{experienceLabel(requirement.experienceYearsMin, requirement.experienceYearsMax, requirement.experienceLevel)}</span>
             <span className="capitalize">
               {requirement.engagementType.replace("-", " ")}
             </span>
@@ -219,9 +221,9 @@ const AllocationPage = ({
           <CardTitle className="text-base">Description</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {requirement.description}
-          </p>
+          <div className="text-sm leading-relaxed text-muted-foreground">
+            <MarkdownDisplay content={requirement.description} />
+          </div>
           <Separator className="my-4" />
           <div className="flex flex-wrap gap-1.5">
             {requirement.techStack.map((tech) => (
