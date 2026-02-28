@@ -384,7 +384,7 @@ const ApplyForm = () => {
 
       window.localStorage.removeItem(APPLICATION_DRAFT_STORAGE_KEY);
 
-      router.push(`/apply/verify?email=${encodeURIComponent(values.email)}`);
+      router.push(`/apply/status?applicationId=${resolvedId}`);
     } catch (error) {
       const message =
         error instanceof Error

@@ -32,6 +32,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { StatusChanger } from "./_components/status-changer";
+import { ActivateButton } from "./_components/activate-button";
 import { NotesSection } from "./_components/notes-section";
 import { FeaturedToggle } from "./_components/featured-toggle";
 import { MarketplaceProfileEditor } from "./_components/marketplace-profile-editor";
@@ -168,11 +169,19 @@ export default async function ApplicantDetailPage({
               </div>
             </div>
 
-            <StatusChanger
-              applicationId={applicant.id}
-              currentStatus={applicant.status}
-              token={token!}
-            />
+            <div className="flex items-end gap-3">
+              <StatusChanger
+                applicationId={applicant.id}
+                currentStatus={applicant.status}
+                token={token!}
+              />
+              <ActivateButton
+                applicationId={applicant.id}
+                currentStatus={applicant.status}
+                clerkUserId={applicant.clerkUserId}
+                token={token!}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
