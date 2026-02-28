@@ -7,8 +7,21 @@ import { developers } from "@/lib/data/developers";
 import { fetchPublicDeveloper } from "@/lib/api/public-developers";
 import { DeveloperProfile } from "./_components/developer-profile";
 
+export const revalidate = 60;
+
 export function generateStaticParams() {
   return developers.map((dev) => ({ slug: dev.id }));
+}
+
+async function getDeveloper(slug: string) {
+  const staticDev = developers.find((d) => d.id === slug);
+
+  // Static slugs: use seed data directly (no API call needed at build)
+  if (staticDev) return staticDev;
+
+  // Dynamic slugs (live developers from DB): fetch from API
+  const apiDeveloper = await fetchPublicDeveloper(slug);
+  return apiDeveloper ?? null;
 }
 
 export async function generateMetadata({
@@ -17,10 +30,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-
-  // Try API first, fall back to static
-  const apiDeveloper = await fetchPublicDeveloper(slug);
-  const developer = apiDeveloper ?? developers.find((d) => d.id === slug);
+  const developer = await getDeveloper(slug);
 
   if (!developer) {
     return { title: "Developer Not Found | OctogleHire" };
@@ -38,10 +48,7 @@ export default async function DeveloperProfileRoute({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
-  // Try API first, fall back to static data
-  const apiDeveloper = await fetchPublicDeveloper(slug);
-  const developer = apiDeveloper ?? developers.find((d) => d.id === slug);
+  const developer = await getDeveloper(slug);
 
   if (!developer) {
     notFound();

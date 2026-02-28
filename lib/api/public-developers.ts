@@ -31,6 +31,7 @@ export async function fetchPublicDevelopers(
     const response = await fetch(url, {
       method: "GET",
       next: { revalidate: 30 },
+      signal: AbortSignal.timeout(10_000),
     });
 
     if (!response.ok) return null;
@@ -52,6 +53,7 @@ export async function fetchPublicDeveloper(
       {
         method: "GET",
         next: { revalidate: 60 },
+        signal: AbortSignal.timeout(10_000),
       },
     );
 
