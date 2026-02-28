@@ -1,15 +1,4 @@
 import type { CompanyStatus } from "@/app/admin/dashboard/_components/dashboard-data";
-import {
-  getMockCompanies,
-  getMockCompanyById,
-  getMockRequirementsByCompanyId,
-  getMockRequirementById,
-  getMockMatchesByRequirementId,
-  getMockTeamMembersByCompanyId,
-  type MockCompany,
-  type MockJobRequirement,
-  type MockProposedMatch,
-} from "@/lib/data/mock-companies";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -103,6 +92,18 @@ export interface JobRequirement {
   updatedAt: string;
 }
 
+export interface CompanyProfileSummary {
+  id: string;
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  website?: string;
+  location?: string;
+  status: CompanyStatus;
+  createdAt: string;
+}
+
 export interface CompanyProfile {
   id: string;
   companyName: string;
@@ -140,6 +141,50 @@ export interface ProposeMatchPayload {
 
 // ── Company-side API functions ───────────────────────────────────────────────
 
+export async function fetchCompanyProfile(
+  token: string | null,
+): Promise<CompanyProfileSummary | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/profile`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) throw new Error("API error");
+    return (await response.json()) as CompanyProfileSummary;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchCompanyTeam(
+  token: string | null,
+): Promise<TeamMember[] | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/team`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) throw new Error("API error");
+    return (await response.json()) as TeamMember[];
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchCompanyRequirements(
   token: string | null,
 ): Promise<JobRequirement[] | null> {
@@ -147,7 +192,7 @@ export async function fetchCompanyRequirements(
 
   try {
     const response = await fetch(
-      `${apiBaseUrl}/api/company/requirements`,
+      `${apiBaseUrl}/api/companies/requirements`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
@@ -158,10 +203,7 @@ export async function fetchCompanyRequirements(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as JobRequirement[];
   } catch {
-    // Fallback to mock data
-    const companyId = "company-1";
-    const reqs = getMockRequirementsByCompanyId(companyId);
-    return reqs.map(mapMockRequirement);
+    return null;
   }
 }
 
@@ -173,7 +215,7 @@ export async function fetchCompanyRequirement(
 
   try {
     const response = await fetch(
-      `${apiBaseUrl}/api/company/requirements/${requirementId}`,
+      `${apiBaseUrl}/api/companies/requirements/${requirementId}`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
@@ -184,46 +226,35 @@ export async function fetchCompanyRequirement(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as JobRequirement;
   } catch {
-    const req = getMockRequirementById(requirementId);
-    if (!req) return null;
-    return mapMockRequirement(req);
+    return null;
   }
 }
 
 export async function createJobRequirement(
   token: string | null,
   payload: CreateJobRequirementPayload,
-): Promise<JobRequirement | null> {
-  if (!token) return null;
+): Promise<JobRequirement> {
+  if (!token) throw new Error("Not authenticated");
 
-  try {
-    const response = await fetch(
-      `${apiBaseUrl}/api/company/requirements`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-        cache: "no-store",
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/requirements`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
 
-    if (!response.ok) throw new Error("API error");
-    return (await response.json()) as JobRequirement;
-  } catch {
-    // Mock: return a fake created requirement
-    return {
-      id: `req-${Date.now()}`,
-      companyId: "company-1",
-      ...payload,
-      status: "open",
-      proposedMatches: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to create requirement");
   }
+
+  return (await response.json()) as JobRequirement;
 }
 
 export async function respondToMatch(
@@ -236,7 +267,7 @@ export async function respondToMatch(
 
   try {
     const response = await fetch(
-      `${apiBaseUrl}/api/company/matches/${matchId}/respond`,
+      `${apiBaseUrl}/api/companies/matches/${matchId}/respond`,
       {
         method: "PATCH",
         headers: {
@@ -275,7 +306,7 @@ export async function fetchCompanies(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as CompanyProfile[];
   } catch {
-    return getMockCompanies().map(mapMockCompany);
+    return null;
   }
 }
 
@@ -298,9 +329,7 @@ export async function fetchCompany(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as CompanyProfile;
   } catch {
-    const company = getMockCompanyById(companyId);
-    if (!company) return null;
-    return mapMockCompany(company);
+    return null;
   }
 }
 
@@ -323,9 +352,7 @@ export async function fetchCompanyRequirementAdmin(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as JobRequirement;
   } catch {
-    const req = getMockRequirementById(requirementId);
-    if (!req) return null;
-    return mapMockRequirement(req);
+    return null;
   }
 }
 
@@ -431,28 +458,4 @@ export async function removeMatch(
   } catch {
     return false;
   }
-}
-
-// ── Mappers (mock → typed) ───────────────────────────────────────────────────
-
-function mapMockRequirement(r: MockJobRequirement): JobRequirement {
-  const matches = getMockMatchesByRequirementId(r.id);
-  return {
-    ...r,
-    proposedMatches: matches.map(mapMockMatch),
-  };
-}
-
-function mapMockMatch(m: MockProposedMatch): ProposedMatch {
-  return { ...m };
-}
-
-function mapMockCompany(c: MockCompany): CompanyProfile {
-  const reqs = getMockRequirementsByCompanyId(c.id);
-  const members = getMockTeamMembersByCompanyId(c.id);
-  return {
-    ...c,
-    requirements: reqs.map(mapMockRequirement),
-    teamMembers: members.map((m) => ({ ...m })),
-  };
 }

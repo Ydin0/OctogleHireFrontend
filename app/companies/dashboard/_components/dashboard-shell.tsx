@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   Bell,
   Building2,
@@ -12,18 +13,11 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
+import { useAuth, useClerk } from "@clerk/nextjs";
 
-import {
-  companyProfile,
-  getInitials,
-  teamMembers,
-} from "./dashboard-data";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import { getInitials } from "./dashboard-data";
+import { fetchCompanyProfile, type CompanyProfileSummary } from "@/lib/api/companies";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,6 +49,21 @@ const isItemActive = (pathname: string, href: string) => {
 const DashboardShell = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const { signOut } = useClerk();
+  const { getToken } = useAuth();
+  const [profile, setProfile] = useState<CompanyProfileSummary | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const token = await getToken();
+      const data = await fetchCompanyProfile(token);
+      if (!cancelled) setProfile(data);
+    })();
+    return () => { cancelled = true; };
+  }, [getToken]);
+
+  const companyName = profile?.companyName ?? "Company Dashboard";
+  const initials = profile ? getInitials(profile.companyName) : "CO";
 
   return (
     <div className="min-h-screen bg-background font-sans normal-case tracking-normal">
@@ -72,7 +81,7 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
               <p className="text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
                 Company Dashboard
               </p>
-              <p className="text-sm font-semibold">{companyProfile.name}</p>
+              <p className="text-sm font-semibold">{companyName}</p>
             </div>
           </div>
 
@@ -95,8 +104,7 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
               Alerts
             </Button>
             <Avatar>
-              <AvatarImage src={companyProfile.adminAvatar} alt="Company admin" />
-              <AvatarFallback>{companyProfile.adminInitials}</AvatarFallback>
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </div>
         </div>
@@ -131,28 +139,6 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
                     );
                   })}
                 </nav>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base">Team at a glance</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2">
-                  {teamMembers.slice(0, 4).map((member) => (
-                    <Avatar key={member.id} size="sm">
-                      <AvatarImage src={member.avatar} alt={member.name} />
-                      <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-                    </Avatar>
-                  ))}
-                  <Badge variant="outline" className="font-mono uppercase tracking-[0.08em]">
-                    +{Math.max(0, teamMembers.length - 4)}
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Active developers assigned to your company account.
-                </p>
               </CardContent>
             </Card>
           </aside>
