@@ -357,6 +357,32 @@ export async function updateCompanyStatus(
   }
 }
 
+export async function activateCompany(
+  token: string | null,
+  companyId: string,
+): Promise<CompanyProfile | null> {
+  if (!token) return null;
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/admin/companies/${companyId}/activate`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to activate company");
+  }
+
+  return (await response.json()) as CompanyProfile;
+}
+
 export async function proposeMatch(
   token: string | null,
   requirementId: string,

@@ -21,6 +21,7 @@ import { use } from "react";
 
 import {
   type CompanyProfile,
+  activateCompany,
   fetchCompany,
   updateCompanyStatus,
 } from "@/lib/api/companies";
@@ -115,15 +116,20 @@ const CompanyDetailPage = ({
   const handleActivate = async () => {
     if (!company) return;
     setActivating(true);
-    const token = await getToken();
-    const updated = await updateCompanyStatus(token, company.id, "active");
-    if (updated) {
-      setCompany(updated);
-    } else {
-      setCompany({ ...company, status: "active" });
+    try {
+      const token = await getToken();
+      const activated = await activateCompany(token, company.id);
+      if (activated) {
+        setCompany(activated);
+      } else {
+        setCompany({ ...company, status: "active" });
+      }
+    } catch {
+      // Activation failed — keep current state
+    } finally {
+      setActivating(false);
+      setActivateOpen(false);
     }
-    setActivating(false);
-    setActivateOpen(false);
   };
 
   if (loading) {
