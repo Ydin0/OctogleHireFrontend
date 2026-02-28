@@ -36,19 +36,16 @@ const volksans = localFont({
       weight: "700",
       style: "normal",
     },
-    {
-      path: "../public/fonts/volksansTest-Black-BF63eee6e404e28.otf",
-      weight: "900",
-      style: "normal",
-    },
   ],
   variable: "--font-volksans",
+  preload: false,
 });
 
 const dmMono = DM_Mono({
   variable: "--font-dm-mono",
   subsets: ["latin"],
   weight: ["300", "400", "500"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
