@@ -45,7 +45,7 @@ export const fetchDeveloperApplicationStatus = async (
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
-        cache: "no-store",
+        next: { revalidate: 30 },
       }
     );
 

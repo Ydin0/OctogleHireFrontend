@@ -183,7 +183,7 @@ export async function fetchCompanyProfile(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 60 },
       },
     );
 
@@ -205,7 +205,7 @@ export async function fetchCompanyTeam(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 60 },
       },
     );
 
@@ -227,7 +227,7 @@ export async function fetchCompanyRequirements(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 30 },
       },
     );
 
@@ -250,7 +250,7 @@ export async function fetchCompanyRequirement(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 30 },
       },
     );
 
@@ -415,7 +415,7 @@ export async function fetchCompanies(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 60 },
       },
     );
 
@@ -438,7 +438,7 @@ export async function fetchCompany(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 60 },
       },
     );
 
@@ -461,7 +461,7 @@ export async function fetchCompanyRequirementAdmin(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 30 },
       },
     );
 

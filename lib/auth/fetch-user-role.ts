@@ -17,7 +17,7 @@ export const fetchUserRole = async (
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
 
     if (!response.ok) {

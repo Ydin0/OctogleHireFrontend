@@ -67,7 +67,7 @@ export async function fetchPayouts(
     const response = await fetch(`${apiBaseUrl}/api/admin/payouts`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
+      next: { revalidate: 60 },
     });
 
     if (!response.ok) throw new Error("API error");
@@ -87,7 +87,7 @@ export async function fetchPayout(
     const response = await fetch(`${apiBaseUrl}/api/admin/payouts/${id}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
+      next: { revalidate: 60 },
     });
 
     if (!response.ok) throw new Error("API error");
@@ -109,7 +109,7 @@ export async function fetchPayoutsByDeveloper(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 60 },
       },
     );
 
@@ -131,7 +131,7 @@ export async function fetchPayoutSummary(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 60 },
       },
     );
 
@@ -154,7 +154,7 @@ export async function fetchDeveloperPayoutSummary(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 60 },
       },
     );
 

@@ -166,7 +166,7 @@ export async function fetchApplications(
     const response = await fetch(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
+      next: { revalidate: 30 },
     });
 
     if (!response.ok) return null;
@@ -190,7 +190,7 @@ export async function fetchFilterOptions(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 30 },
       }
     );
 
@@ -213,7 +213,7 @@ export async function fetchApplication(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
+        next: { revalidate: 30 },
       }
     );
 
@@ -538,7 +538,7 @@ export async function fetchAdminStats(
     const response = await fetch(`${apiBaseUrl}/api/admin/stats`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
+      next: { revalidate: 30 },
     });
 
     if (!response.ok) return null;
