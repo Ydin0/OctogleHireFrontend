@@ -1,10 +1,14 @@
 import Link from "next/link";
 import {
   AlertTriangle,
+  ArrowRight,
+  ClipboardList,
   CreditCard,
   Download,
+  Plus,
   Search,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 
 import {
@@ -19,6 +23,15 @@ import {
   timezoneCoverage,
   teamMembers,
 } from "./_components/dashboard-data";
+import {
+  requirementStatusBadgeClass,
+  requirementStatusLabel,
+  formatDate as formatDateAdmin,
+} from "@/app/admin/dashboard/_components/dashboard-data";
+import {
+  getMockRequirementsByCompanyId,
+  getMockMatchesByRequirementId,
+} from "@/lib/data/mock-companies";
 import {
   Avatar,
   AvatarFallback,
@@ -36,6 +49,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+
+const recentRequirements = getMockRequirementsByCompanyId("company-1")
+  .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  .slice(0, 3);
 
 const CompanyOverviewPage = () => {
   return (
@@ -71,6 +88,12 @@ const CompanyOverviewPage = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
+              <Button variant="outline" className="gap-2" asChild>
+                <Link href="/companies/dashboard/requirements/new">
+                  <Plus className="size-4" />
+                  Post a Requirement
+                </Link>
+              </Button>
               <Button variant="outline" className="gap-2" asChild>
                 <Link href="/marketplace">
                   <Search className="size-4" />
@@ -108,6 +131,59 @@ const CompanyOverviewPage = () => {
           </Card>
         ))}
       </section>
+
+      {recentRequirements.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Recent Requirements</CardTitle>
+              <CardDescription>Latest posted development requirements.</CardDescription>
+            </div>
+            <Button variant="outline" size="sm" className="gap-1.5" asChild>
+              <Link href="/companies/dashboard/requirements">
+                View All
+                <ArrowRight className="size-3.5" />
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {recentRequirements.map((req) => {
+              const matches = getMockMatchesByRequirementId(req.id);
+              const acceptedCount = matches.filter(
+                (m) => m.status === "accepted" || m.status === "active",
+              ).length;
+
+              return (
+                <Link
+                  key={req.id}
+                  href={`/companies/dashboard/requirements/${req.id}`}
+                  className="flex items-center justify-between gap-3 rounded-lg border border-border/70 p-3 transition-colors hover:border-pulse/30"
+                >
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex items-center gap-2">
+                      <ClipboardList className="size-3.5 text-pulse" />
+                      <p className="truncate text-sm font-semibold">{req.title}</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>{formatDateAdmin(req.createdAt)}</span>
+                      <span className="flex items-center gap-1">
+                        <Users className="size-3" />
+                        {acceptedCount}/{req.developersNeeded}
+                      </span>
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={requirementStatusBadgeClass(req.status)}
+                  >
+                    {requirementStatusLabel[req.status]}
+                  </Badge>
+                </Link>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
 
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-5">
         <Card className="xl:col-span-3">

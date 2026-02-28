@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Bell,
   Building2,
+  ClipboardList,
   FileText,
   Layers,
   LogOut,
@@ -37,6 +38,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 const sidebarItems = [
   { href: "/companies/dashboard", label: "Overview", icon: Layers },
+  { href: "/companies/dashboard/requirements", label: "Requirements", icon: ClipboardList },
   { href: "/companies/dashboard/invoices", label: "Invoices", icon: FileText },
   { href: "/companies/dashboard/team", label: "Team", icon: Users },
   { href: "/companies/dashboard/resources", label: "Resources", icon: Wrench },

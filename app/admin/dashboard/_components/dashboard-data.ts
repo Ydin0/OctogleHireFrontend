@@ -11,7 +11,21 @@ export type ApplicationStatus =
   | "approved"
   | "rejected";
 
-export type CompanyStatus = "pending" | "contacted" | "active" | "inactive";
+export type CompanyStatus = "enquired" | "pending" | "contacted" | "active" | "inactive";
+
+export type RequirementStatus =
+  | "open"
+  | "matching"
+  | "partially_filled"
+  | "filled"
+  | "closed";
+
+export type MatchStatus =
+  | "proposed"
+  | "accepted"
+  | "rejected"
+  | "active"
+  | "ended";
 
 // ── Pipeline stages (ordered) ────────────────────────────────────────────────
 
@@ -70,6 +84,7 @@ export const applicationStatusBadgeClass = (status: ApplicationStatus) => {
 };
 
 export const companyStatusLabel: Record<CompanyStatus, string> = {
+  enquired: "Enquired",
   pending: "Pending",
   contacted: "Contacted",
   active: "Active",
@@ -78,6 +93,8 @@ export const companyStatusLabel: Record<CompanyStatus, string> = {
 
 export const companyStatusBadgeClass = (status: CompanyStatus) => {
   switch (status) {
+    case "enquired":
+      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
     case "active":
       return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
     case "inactive":
@@ -88,6 +105,146 @@ export const companyStatusBadgeClass = (status: CompanyStatus) => {
       return "bg-amber-500/10 text-amber-700 border-amber-600/20";
   }
 };
+
+// ── Requirement status helpers ───────────────────────────────────────────────
+
+export const requirementStatusLabel: Record<RequirementStatus, string> = {
+  open: "Open",
+  matching: "Matching",
+  partially_filled: "Partially Filled",
+  filled: "Filled",
+  closed: "Closed",
+};
+
+export const requirementStatusBadgeClass = (status: RequirementStatus) => {
+  switch (status) {
+    case "open":
+      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    case "matching":
+      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+    case "partially_filled":
+      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+    case "filled":
+      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+    case "closed":
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
+export const matchStatusLabel: Record<MatchStatus, string> = {
+  proposed: "Proposed",
+  accepted: "Accepted",
+  rejected: "Rejected",
+  active: "Active",
+  ended: "Ended",
+};
+
+export const matchStatusBadgeClass = (status: MatchStatus) => {
+  switch (status) {
+    case "proposed":
+      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+    case "accepted":
+      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    case "active":
+      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+    case "rejected":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
+    case "ended":
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
+export const priorityLabel: Record<string, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  urgent: "Urgent",
+};
+
+export const priorityBadgeClass = (priority: string) => {
+  switch (priority) {
+    case "urgent":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
+    case "high":
+      return "bg-orange-500/10 text-orange-600 border-orange-600/20";
+    case "medium":
+      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
+// ── Invoice status helpers ──────────────────────────────────────────────────
+
+export type InvoiceStatus = "draft" | "sent" | "paid" | "overdue" | "cancelled";
+
+export const invoiceStatusLabel: Record<InvoiceStatus, string> = {
+  draft: "Draft",
+  sent: "Sent",
+  paid: "Paid",
+  overdue: "Overdue",
+  cancelled: "Cancelled",
+};
+
+export const invoiceStatusBadgeClass = (status: InvoiceStatus) => {
+  switch (status) {
+    case "paid":
+      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+    case "sent":
+      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    case "overdue":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
+    case "draft":
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+    case "cancelled":
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
+// ── Payout status helpers ─────────────────────────────────────────────────
+
+export type PayoutStatus = "pending" | "approved" | "processing" | "paid" | "cancelled";
+
+export const payoutStatusLabel: Record<PayoutStatus, string> = {
+  pending: "Pending",
+  approved: "Approved",
+  processing: "Processing",
+  paid: "Paid",
+  cancelled: "Cancelled",
+};
+
+export const payoutStatusBadgeClass = (status: PayoutStatus) => {
+  switch (status) {
+    case "paid":
+      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+    case "approved":
+      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    case "processing":
+      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+    case "pending":
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+    case "cancelled":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
+export const formatCurrency = (
+  amount: number,
+  currency: string = "USD",
+) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+  }).format(amount);
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

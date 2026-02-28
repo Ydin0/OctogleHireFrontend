@@ -7,8 +7,10 @@ import {
   Building2,
   Layers,
   LogOut,
+  Receipt,
   Shield,
   Users,
+  Wallet,
 } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 
@@ -24,6 +26,8 @@ const navItems = [
   { href: "/admin/dashboard", label: "Overview", icon: Layers },
   { href: "/admin/dashboard/applicants", label: "Applicants", icon: Users },
   { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
+  { href: "/admin/dashboard/invoices", label: "Invoices", icon: Receipt },
+  { href: "/admin/dashboard/payouts", label: "Payouts", icon: Wallet },
   { href: "/admin/dashboard/team", label: "Team", icon: Shield },
   { href: "/admin/dashboard/aeo", label: "AEO Monitoring", icon: Bot },
 ] as const;

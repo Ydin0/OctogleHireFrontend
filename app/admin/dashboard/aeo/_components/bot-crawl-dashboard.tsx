@@ -53,7 +53,9 @@ export function BotCrawlDashboard() {
         },
       });
       if (!res.ok) throw new Error("Failed to fetch");
-      setData(await res.json());
+      const json = await res.json();
+      if (typeof json?.totalEvents !== "number") throw new Error("Invalid data");
+      setData(json);
     } catch {
       setError("Could not load crawl data. Monitoring is active — data will appear once bots start crawling.");
     } finally {
