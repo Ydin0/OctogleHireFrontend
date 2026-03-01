@@ -1,6 +1,12 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { CheckCircle2, Circle, Clock3 } from "lucide-react";
 
-import { readinessChecklist, statusTimeline } from "../_components/dashboard-data";
+import { fetchDeveloperProfile } from "@/lib/api/developer";
+import {
+  buildDefaultTimeline,
+  fetchDeveloperApplicationStatus,
+} from "@/lib/developer-application";
 import {
   Card,
   CardContent,
@@ -9,7 +15,67 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const ApplicationStatusPage = () => {
+function buildReadinessChecklist(profile: Awaited<ReturnType<typeof fetchDeveloperProfile>>) {
+  if (!profile) return [];
+
+  return [
+    {
+      title: "GitHub Connected",
+      done: !!profile.githubUrl,
+      hint: "Link your GitHub to enable repository analysis.",
+    },
+    {
+      title: "LinkedIn Connected",
+      done: !!profile.linkedinUrl,
+      hint: "Add your LinkedIn profile for professional verification.",
+    },
+    {
+      title: "Portfolio Added",
+      done: !!profile.portfolioUrl,
+      hint: "Showcase your work with a portfolio link.",
+    },
+    {
+      title: "Availability Confirmed",
+      done: !!profile.availability,
+      hint: "Set your availability to help with matching.",
+    },
+    {
+      title: "Profile Photo",
+      done: !!profile.profilePhotoUrl,
+      hint: "Add a profile photo to build trust with companies.",
+    },
+    {
+      title: "Bio Complete",
+      done: !!(profile.aboutLong || profile.bio),
+      hint: "Write a summary to introduce yourself to potential clients.",
+    },
+    {
+      title: "Skills Listed",
+      done: (profile.primaryStack?.length ?? 0) > 0,
+      hint: "Add your primary skills for accurate matching.",
+    },
+    {
+      title: "Work Experience Added",
+      done: Array.isArray(profile.workExperience) && profile.workExperience.length > 0,
+      hint: "Add past work experience to strengthen your profile.",
+    },
+  ];
+}
+
+export default async function ApplicationStatusPage() {
+  const { userId, getToken } = await auth();
+  if (!userId) redirect("/login");
+
+  const token = await getToken();
+
+  const [applicationStatus, profile] = await Promise.all([
+    fetchDeveloperApplicationStatus(token),
+    fetchDeveloperProfile(token),
+  ]);
+
+  const timeline = applicationStatus?.timeline ?? buildDefaultTimeline();
+  const checklist = buildReadinessChecklist(profile);
+
   return (
     <>
       <Card className="border-pulse/30 bg-gradient-to-br from-card to-pulse/5">
@@ -30,7 +96,7 @@ const ApplicationStatusPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-0">
-            {statusTimeline.map((step, index) => (
+            {timeline.map((step, index) => (
               <div key={step.label} className="flex gap-4">
                 <div className="flex flex-col items-center">
                   <div
@@ -50,7 +116,7 @@ const ApplicationStatusPage = () => {
                       <Circle className="size-4" />
                     )}
                   </div>
-                  {index < statusTimeline.length - 1 && (
+                  {index < timeline.length - 1 && (
                     <div className="my-1 w-0.5 flex-1 bg-border" />
                   )}
                 </div>
@@ -75,7 +141,7 @@ const ApplicationStatusPage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {readinessChecklist.map((item) => (
+            {checklist.map((item) => (
               <div key={item.title} className="rounded-lg border border-border/70 p-3">
                 <div className="flex items-center gap-2">
                   {item.done ? (
@@ -93,6 +159,4 @@ const ApplicationStatusPage = () => {
       </section>
     </>
   );
-};
-
-export default ApplicationStatusPage;
+}

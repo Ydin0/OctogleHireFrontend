@@ -1,7 +1,9 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, UserCircle2 } from "lucide-react";
 
-import { currentDeveloper, opportunities } from "../_components/dashboard-data";
+import { fetchDeveloperProfile, fetchDeveloperOpportunities } from "@/lib/api/developer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +15,19 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-const ProfilePage = () => {
+export default async function ProfilePage() {
+  const { userId, getToken } = await auth();
+  if (!userId) redirect("/login");
+
+  const token = await getToken();
+
+  const [profile, opportunities] = await Promise.all([
+    fetchDeveloperProfile(token),
+    fetchDeveloperOpportunities(token),
+  ]);
+
+  const proposedMatches = (opportunities ?? []).filter((o) => o.status === "proposed");
+
   return (
     <>
       <Card className="border-pulse/30 bg-gradient-to-br from-card to-pulse/5">
@@ -36,7 +50,9 @@ const ProfilePage = () => {
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm font-semibold">Professional Title</p>
-              <p className="text-sm text-muted-foreground">{currentDeveloper.role}</p>
+              <p className="text-sm text-muted-foreground">
+                {profile?.professionalTitle ?? "Not set"}
+              </p>
             </div>
 
             <Separator />
@@ -44,11 +60,15 @@ const ProfilePage = () => {
             <div>
               <p className="text-sm font-semibold">Primary Skills</p>
               <div className="mt-2 flex flex-wrap gap-2">
-                {currentDeveloper.skills.map((skill) => (
-                  <Badge key={skill} variant="secondary">
-                    {skill}
-                  </Badge>
-                ))}
+                {(profile?.primaryStack ?? []).length > 0 ? (
+                  profile!.primaryStack!.map((skill) => (
+                    <Badge key={skill} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No skills listed yet.</p>
+                )}
               </div>
             </div>
 
@@ -56,7 +76,9 @@ const ProfilePage = () => {
 
             <div>
               <p className="text-sm font-semibold">Profile Summary</p>
-              <p className="mt-1 text-sm text-muted-foreground">{currentDeveloper.about}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {profile?.aboutLong || profile?.bio || "No summary added yet."}
+              </p>
             </div>
 
             <Button asChild className="mt-2 bg-pulse text-pulse-foreground hover:bg-pulse/90">
@@ -76,18 +98,31 @@ const ProfilePage = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {opportunities.map((opportunity) => (
-              <div key={opportunity.role} className="rounded-lg border border-border/70 p-3">
+            {proposedMatches.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No proposed matches yet. Keep your profile updated.
+              </p>
+            )}
+            {proposedMatches.slice(0, 5).map((opp) => (
+              <div key={opp.id} className="rounded-lg border border-border/70 p-3">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <p className="text-sm font-semibold">{opportunity.role}</p>
-                    <p className="text-xs text-muted-foreground">{opportunity.company}</p>
+                    <p className="text-sm font-semibold">{opp.requirementTitle}</p>
+                    <p className="text-xs text-muted-foreground">{opp.companyName}</p>
                   </div>
-                  <Badge variant="outline" className="border-pulse/35 bg-pulse/10 text-pulse">
-                    {opportunity.match}%
+                  <Badge variant="outline" className="border-pulse/35 bg-pulse/10 font-mono text-pulse">
+                    ${opp.proposedHourlyRate}/hr
                   </Badge>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">{opportunity.timezone}</p>
+                {opp.techStack.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {opp.techStack.slice(0, 4).map((tech) => (
+                      <Badge key={tech} variant="secondary" className="text-[10px]">
+                        {tech}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
             <div className="rounded-lg border border-pulse/35 bg-pulse/10 p-3 text-xs text-muted-foreground">
@@ -101,6 +136,4 @@ const ProfilePage = () => {
       </section>
     </>
   );
-};
-
-export default ProfilePage;
+}

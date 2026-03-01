@@ -1,13 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Save, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 
-import type { WorkHistoryItem } from "@/lib/data/developers";
-import {
-  currentDeveloper,
-  getInitials,
-} from "../../_components/dashboard-data";
+import type { DeveloperProfile } from "@/lib/api/developer";
+import { updateDeveloperProfile } from "@/lib/api/developer";
 import {
   Avatar,
   AvatarFallback,
@@ -25,12 +24,20 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-interface EditableProfile {
+interface WorkHistoryItem {
+  company: string;
   role: string;
-  about: string;
-  skills: string[];
-  workHistory: WorkHistoryItem[];
-  achievements: string[];
+  duration: string;
+  description: string;
+  techUsed: string[];
+}
+
+interface EditableProfile {
+  professionalTitle: string;
+  aboutLong: string;
+  primaryStack: string[];
+  workExperience: WorkHistoryItem[];
+  marketplaceAchievements: string[];
 }
 
 const emptyWorkHistoryItem: WorkHistoryItem = {
@@ -41,21 +48,51 @@ const emptyWorkHistoryItem: WorkHistoryItem = {
   techUsed: [],
 };
 
-const ProfileEditor = () => {
-  const [profile, setProfile] = useState<EditableProfile>({
-    role: currentDeveloper.role,
-    about: currentDeveloper.about,
-    skills: [...currentDeveloper.skills],
-    workHistory: currentDeveloper.workHistory.map((item) => ({ ...item })),
-    achievements: [...currentDeveloper.achievements],
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function parseWorkExperience(raw: unknown): WorkHistoryItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) => ({
+    company: item?.company ?? "",
+    role: item?.role ?? "",
+    duration: item?.duration ?? "",
+    description: item?.description ?? "",
+    techUsed: Array.isArray(item?.techUsed) ? item.techUsed : [],
+  }));
+}
+
+function parseAchievements(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((item): item is string => typeof item === "string");
+}
+
+const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
+  const router = useRouter();
+  const { getToken } = useAuth();
+
+  const [formData, setFormData] = useState<EditableProfile>({
+    professionalTitle: profile?.professionalTitle ?? "",
+    aboutLong: profile?.aboutLong || profile?.bio || "",
+    primaryStack: [...(profile?.primaryStack ?? [])],
+    workExperience: parseWorkExperience(profile?.workExperience),
+    marketplaceAchievements: parseAchievements(profile?.marketplaceAchievements),
   });
 
   const [skillInput, setSkillInput] = useState("");
-  const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
+  const displayName = profile?.fullName ?? "Developer";
   const firstName = useMemo(
-    () => currentDeveloper.name.split(" ")[0],
-    [],
+    () => displayName.split(" ")[0],
+    [displayName],
   );
 
   const updateWorkHistory = (
@@ -63,8 +100,8 @@ const ProfileEditor = () => {
     key: keyof WorkHistoryItem,
     value: string,
   ) => {
-    setProfile((prev) => {
-      const next = [...prev.workHistory];
+    setFormData((prev) => {
+      const next = [...prev.workExperience];
       const row = { ...next[index] };
 
       if (key === "techUsed") {
@@ -78,29 +115,29 @@ const ProfileEditor = () => {
 
       next[index] = row;
 
-      return { ...prev, workHistory: next };
+      return { ...prev, workExperience: next };
     });
   };
 
   const removeWorkHistory = (index: number) => {
-    setProfile((prev) => ({
+    setFormData((prev) => ({
       ...prev,
-      workHistory: prev.workHistory.filter((_, i) => i !== index),
+      workExperience: prev.workExperience.filter((_, i) => i !== index),
     }));
   };
 
   const updateAchievement = (index: number, value: string) => {
-    setProfile((prev) => {
-      const next = [...prev.achievements];
+    setFormData((prev) => {
+      const next = [...prev.marketplaceAchievements];
       next[index] = value;
-      return { ...prev, achievements: next };
+      return { ...prev, marketplaceAchievements: next };
     });
   };
 
   const removeAchievement = (index: number) => {
-    setProfile((prev) => ({
+    setFormData((prev) => ({
       ...prev,
-      achievements: prev.achievements.filter((_, i) => i !== index),
+      marketplaceAchievements: prev.marketplaceAchievements.filter((_, i) => i !== index),
     }));
   };
 
@@ -109,24 +146,41 @@ const ProfileEditor = () => {
 
     if (!value) return;
 
-    if (profile.skills.some((skill) => skill.toLowerCase() === value.toLowerCase())) {
+    if (formData.primaryStack.some((skill) => skill.toLowerCase() === value.toLowerCase())) {
       setSkillInput("");
       return;
     }
 
-    setProfile((prev) => ({ ...prev, skills: [...prev.skills, value] }));
+    setFormData((prev) => ({ ...prev, primaryStack: [...prev.primaryStack, value] }));
     setSkillInput("");
   };
 
   const removeSkill = (skill: string) => {
-    setProfile((prev) => ({
+    setFormData((prev) => ({
       ...prev,
-      skills: prev.skills.filter((item) => item !== skill),
+      primaryStack: prev.primaryStack.filter((item) => item !== skill),
     }));
   };
 
-  const handleSave = () => {
-    setSavedAt(new Date().toLocaleString("en-US"));
+  const handleSave = async () => {
+    setSaving(true);
+    setFeedback(null);
+
+    try {
+      const token = await getToken();
+      await updateDeveloperProfile(token, {
+        professionalTitle: formData.professionalTitle,
+        aboutLong: formData.aboutLong,
+        primaryStack: formData.primaryStack,
+        workExperience: formData.workExperience,
+      });
+      setFeedback({ type: "success", message: "Profile saved successfully." });
+      router.refresh();
+    } catch {
+      setFeedback({ type: "error", message: "Failed to save. Please try again." });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -151,24 +205,24 @@ const ProfileEditor = () => {
           <CardContent className="space-y-6">
             <div className="flex items-center gap-3">
               <Avatar className="size-12 border border-pulse/30">
-                <AvatarImage src={currentDeveloper.avatar} alt={currentDeveloper.name} />
-                <AvatarFallback>{getInitials(currentDeveloper.name)}</AvatarFallback>
+                <AvatarImage src={profile?.profilePhotoUrl ?? undefined} alt={displayName} />
+                <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
               </Avatar>
               <div>
-                <p className="text-lg font-semibold">{currentDeveloper.name}</p>
-                <p className="text-sm text-muted-foreground">{profile.role}</p>
+                <p className="text-lg font-semibold">{displayName}</p>
+                <p className="text-sm text-muted-foreground">{formData.professionalTitle}</p>
               </div>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold">About {firstName}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{profile.about}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{formData.aboutLong}</p>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold">Tech Stack</h3>
               <div className="mt-2 flex flex-wrap gap-2">
-                {profile.skills.map((skill) => (
+                {formData.primaryStack.map((skill) => (
                   <Badge key={skill} variant="secondary">
                     {skill}
                   </Badge>
@@ -179,7 +233,7 @@ const ProfileEditor = () => {
             <div>
               <h3 className="text-lg font-semibold">Work History</h3>
               <div className="mt-3 space-y-3">
-                {profile.workHistory.map((item, index) => (
+                {formData.workExperience.map((item, index) => (
                   <div key={`${item.company}-${index}`} className="rounded-lg border border-border/70 p-3">
                     <p className="text-sm font-semibold">{item.role || "Role"}</p>
                     <p className="text-xs text-muted-foreground">
@@ -194,7 +248,7 @@ const ProfileEditor = () => {
             <div>
               <h3 className="text-lg font-semibold">Top Achievements</h3>
               <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
-                {profile.achievements.map((achievement, index) => (
+                {formData.marketplaceAchievements.map((achievement, index) => (
                   <li key={`${achievement}-${index}`}>{achievement || "Untitled achievement"}</li>
                 ))}
               </ul>
@@ -215,9 +269,9 @@ const ProfileEditor = () => {
                 Professional title
               </p>
               <Input
-                value={profile.role}
+                value={formData.professionalTitle}
                 onChange={(event) =>
-                  setProfile((prev) => ({ ...prev, role: event.target.value }))
+                  setFormData((prev) => ({ ...prev, professionalTitle: event.target.value }))
                 }
               />
             </div>
@@ -228,9 +282,9 @@ const ProfileEditor = () => {
               </p>
               <Textarea
                 rows={6}
-                value={profile.about}
+                value={formData.aboutLong}
                 onChange={(event) =>
-                  setProfile((prev) => ({ ...prev, about: event.target.value }))
+                  setFormData((prev) => ({ ...prev, aboutLong: event.target.value }))
                 }
               />
             </div>
@@ -244,13 +298,19 @@ const ProfileEditor = () => {
                   value={skillInput}
                   placeholder="Add a skill"
                   onChange={(event) => setSkillInput(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      addSkill();
+                    }
+                  }}
                 />
                 <Button type="button" variant="outline" onClick={addSkill}>
                   <Plus className="size-4" />
                 </Button>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
-                {profile.skills.map((skill) => (
+                {formData.primaryStack.map((skill) => (
                   <button
                     key={skill}
                     type="button"
@@ -273,9 +333,9 @@ const ProfileEditor = () => {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    setProfile((prev) => ({
+                    setFormData((prev) => ({
                       ...prev,
-                      workHistory: [...prev.workHistory, { ...emptyWorkHistoryItem }],
+                      workExperience: [...prev.workExperience, { ...emptyWorkHistoryItem }],
                     }))
                   }
                 >
@@ -285,7 +345,7 @@ const ProfileEditor = () => {
               </div>
 
               <div className="space-y-3">
-                {profile.workHistory.map((item, index) => (
+                {formData.workExperience.map((item, index) => (
                   <div key={`${item.company}-${index}`} className="rounded-lg border border-border/70 p-3">
                     <div className="grid grid-cols-1 gap-2">
                       <Input
@@ -350,9 +410,9 @@ const ProfileEditor = () => {
                   variant="outline"
                   size="sm"
                   onClick={() =>
-                    setProfile((prev) => ({
+                    setFormData((prev) => ({
                       ...prev,
-                      achievements: [...prev.achievements, ""],
+                      marketplaceAchievements: [...prev.marketplaceAchievements, ""],
                     }))
                   }
                 >
@@ -362,7 +422,7 @@ const ProfileEditor = () => {
               </div>
 
               <div className="space-y-2">
-                {profile.achievements.map((achievement, index) => (
+                {formData.marketplaceAchievements.map((achievement, index) => (
                   <div key={`${achievement}-${index}`} className="flex items-center gap-2">
                     <Input
                       value={achievement}
@@ -387,13 +447,20 @@ const ProfileEditor = () => {
               type="button"
               className="w-full bg-pulse text-pulse-foreground hover:bg-pulse/90"
               onClick={handleSave}
+              disabled={saving}
             >
-              <Save className="size-4" />
-              Save profile updates
+              {saving ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Save className="size-4" />
+              )}
+              {saving ? "Saving..." : "Save profile updates"}
             </Button>
 
-            {savedAt && (
-              <p className="text-xs text-muted-foreground">Saved locally at {savedAt}</p>
+            {feedback && (
+              <p className={`text-xs ${feedback.type === "success" ? "text-emerald-600" : "text-red-600"}`}>
+                {feedback.message}
+              </p>
             )}
           </CardContent>
         </Card>

@@ -1,3 +1,5 @@
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   BookOpen,
@@ -8,7 +10,7 @@ import {
   UserCircle2,
 } from "lucide-react";
 
-import { currentDeveloper } from "../_components/dashboard-data";
+import { fetchDeveloperProfile } from "@/lib/api/developer";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,52 +20,62 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const resources = [
-  {
-    title: "Application Status",
-    description: "View detailed onboarding and review checkpoints.",
-    href: "/apply/status",
-    icon: FileText,
-    cta: "Open Status",
-  },
-  {
-    title: "Update Application",
-    description: "Edit profile details, links, and availability preferences.",
-    href: "/apply",
-    icon: UserCircle2,
-    cta: "Edit Application",
-  },
-  {
-    title: "Public Profile",
-    description: "See how companies view your marketplace profile.",
-    href: `/developers/${currentDeveloper.id}`,
-    icon: ShieldCheck,
-    cta: "View Profile",
-  },
-  {
-    title: "Marketplace",
-    description: "Browse talent pages and benchmark profile positioning.",
-    href: "/developers",
-    icon: Briefcase,
-    cta: "Open Marketplace",
-  },
-  {
-    title: "Developer Guides",
-    description: "Access profile optimization and interview readiness resources.",
-    href: "#",
-    icon: BookOpen,
-    cta: "Open Guides",
-  },
-  {
-    title: "Support",
-    description: "Contact the OctogleHire team for onboarding help.",
-    href: "#",
-    icon: LifeBuoy,
-    cta: "Get Support",
-  },
-] as const;
+export default async function ResourcesPage() {
+  const { userId, getToken } = await auth();
+  if (!userId) redirect("/login");
 
-const ResourcesPage = () => {
+  const token = await getToken();
+  const profile = await fetchDeveloperProfile(token);
+
+  const publicProfileHref = profile?.slug
+    ? `/developers/${profile.slug}`
+    : "/developers";
+
+  const resources = [
+    {
+      title: "Application Status",
+      description: "View detailed onboarding and review checkpoints.",
+      href: "/apply/status",
+      icon: FileText,
+      cta: "Open Status",
+    },
+    {
+      title: "Update Application",
+      description: "Edit profile details, links, and availability preferences.",
+      href: "/apply",
+      icon: UserCircle2,
+      cta: "Edit Application",
+    },
+    {
+      title: "Public Profile",
+      description: "See how companies view your marketplace profile.",
+      href: publicProfileHref,
+      icon: ShieldCheck,
+      cta: "View Profile",
+    },
+    {
+      title: "Marketplace",
+      description: "Browse talent pages and benchmark profile positioning.",
+      href: "/developers",
+      icon: Briefcase,
+      cta: "Open Marketplace",
+    },
+    {
+      title: "Developer Guides",
+      description: "Access profile optimization and interview readiness resources.",
+      href: "#",
+      icon: BookOpen,
+      cta: "Open Guides",
+    },
+    {
+      title: "Support",
+      description: "Contact the OctogleHire team for onboarding help.",
+      href: "#",
+      icon: LifeBuoy,
+      cta: "Get Support",
+    },
+  ] as const;
+
   return (
     <>
       <Card className="border-pulse/30 bg-gradient-to-br from-card to-pulse/5">
@@ -95,6 +107,4 @@ const ResourcesPage = () => {
       </section>
     </>
   );
-};
-
-export default ResourcesPage;
+}

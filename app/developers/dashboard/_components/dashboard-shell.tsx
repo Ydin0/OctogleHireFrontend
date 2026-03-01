@@ -6,6 +6,7 @@ import {
   FileText,
   FolderKanban,
   Globe2,
+  HandCoins,
   Layers,
   LogOut,
   Rocket,
@@ -15,12 +16,7 @@ import {
 } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 
-import {
-  currentDeveloper,
-  getInitials,
-  profileCompleteness,
-  readinessScore,
-} from "./dashboard-data";
+import { useDeveloperProfile } from "./developer-profile-context";
 import {
   Avatar,
   AvatarFallback,
@@ -52,6 +48,16 @@ const sidebarItems = [
     icon: UserCircle2,
   },
   {
+    href: "/developers/dashboard/offers",
+    label: "Offers",
+    icon: HandCoins,
+  },
+  {
+    href: "/developers/dashboard/opportunities",
+    label: "Opportunities",
+    icon: Rocket,
+  },
+  {
     href: "/developers/dashboard/engagements",
     label: "My Engagements",
     icon: FolderKanban,
@@ -76,9 +82,64 @@ const isItemActive = (pathname: string, href: string) => {
   return pathname === href || pathname.startsWith(`${href}/`);
 };
 
-const DashboardShell = ({ children }: { children: React.ReactNode }) => {
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+const COMPLETENESS_FIELDS: Array<(p: { fullName: string | null; professionalTitle: string | null; bio: string | null; aboutLong: string | null; primaryStack: string[] | null; linkedinUrl: string | null; githubUrl: string | null; portfolioUrl: string | null; profilePhotoUrl: string | null; availability: string | null; workExperience: unknown; education: unknown; engagementType: string[] | null }) => boolean> = [
+  (p) => !!p.fullName,
+  (p) => !!p.professionalTitle,
+  (p) => !!(p.aboutLong || p.bio),
+  (p) => (p.primaryStack?.length ?? 0) > 0,
+  (p) => !!p.linkedinUrl,
+  (p) => !!p.githubUrl,
+  (p) => !!p.portfolioUrl,
+  (p) => !!p.profilePhotoUrl,
+  (p) => !!p.availability,
+  (p) => Array.isArray(p.workExperience) && p.workExperience.length > 0,
+  (p) => !!p.education,
+  (p) => (p.engagementType?.length ?? 0) > 0,
+];
+
+function computeProfileCompleteness(profile: Parameters<(typeof COMPLETENESS_FIELDS)[0]>[0]) {
+  const filled = COMPLETENESS_FIELDS.filter((check) => check(profile)).length;
+  return Math.round((filled / COMPLETENESS_FIELDS.length) * 100);
+}
+
+const DashboardShell = ({
+  token,
+  children,
+}: {
+  token: string | null;
+  children: React.ReactNode;
+}) => {
   const pathname = usePathname();
   const { signOut } = useClerk();
+
+  let displayName = "Developer";
+  let avatarUrl: string | null = null;
+  let initials = "D";
+  let publicProfileHref = "/developers";
+  let completeness = 0;
+
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const profile = useDeveloperProfile();
+    displayName = profile.fullName ?? "Developer";
+    avatarUrl = profile.profilePhotoUrl;
+    initials = profile.fullName ? getInitials(profile.fullName) : "D";
+    publicProfileHref = profile.slug
+      ? `/developers/${profile.slug}`
+      : "/developers";
+    completeness = computeProfileCompleteness(profile);
+  } catch {
+    // Profile context not available — use defaults
+  }
 
   return (
     <div className="min-h-screen bg-background font-sans normal-case tracking-normal">
@@ -90,14 +151,14 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
             </Link>
             <span className="text-border">|</span>
             <Avatar className="size-10 border border-pulse/30">
-              <AvatarImage src={currentDeveloper.avatar} alt={currentDeveloper.name} />
-              <AvatarFallback>{getInitials(currentDeveloper.name)}</AvatarFallback>
+              <AvatarImage src={avatarUrl ?? undefined} alt={displayName} />
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div>
               <p className="text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
                 Developer Dashboard
               </p>
-              <p className="text-sm font-semibold">{currentDeveloper.name}</p>
+              <p className="text-sm font-semibold">{displayName}</p>
             </div>
           </div>
 
@@ -113,7 +174,7 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
               <span className="sr-only">Sign out</span>
             </Button>
             <Button asChild size="sm" variant="outline" className="gap-2">
-              <Link href={`/developers/${currentDeveloper.id}`}>
+              <Link href={publicProfileHref}>
                 <ShieldCheck className="size-4" />
                 Public Profile
               </Link>
@@ -168,23 +229,33 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs font-mono uppercase tracking-[0.08em]">
                     <span className="text-muted-foreground">Profile completeness</span>
-                    <span>{profileCompleteness}%</span>
+                    <span>{completeness}%</span>
                   </div>
-                  <Progress value={profileCompleteness} />
+                  <Progress value={completeness} />
                 </div>
                 <div>
                   <div className="mb-1 flex items-center justify-between text-xs font-mono uppercase tracking-[0.08em]">
                     <span className="text-muted-foreground">Client readiness</span>
-                    <span>{readinessScore}%</span>
+                    <span>{completeness}%</span>
                   </div>
-                  <Progress value={readinessScore} className="bg-muted" />
+                  <Progress value={completeness} className="bg-muted" />
                 </div>
-                <Badge
-                  variant="outline"
-                  className="border-pulse/35 bg-pulse/10 font-mono uppercase tracking-[0.08em] text-pulse"
-                >
-                  Profile under review
-                </Badge>
+                {completeness < 100 && (
+                  <Badge
+                    variant="outline"
+                    className="border-pulse/35 bg-pulse/10 font-mono uppercase tracking-[0.08em] text-pulse"
+                  >
+                    Profile incomplete
+                  </Badge>
+                )}
+                {completeness === 100 && (
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-500/35 bg-emerald-500/10 font-mono uppercase tracking-[0.08em] text-emerald-600"
+                  >
+                    Profile complete
+                  </Badge>
+                )}
               </CardContent>
             </Card>
           </aside>

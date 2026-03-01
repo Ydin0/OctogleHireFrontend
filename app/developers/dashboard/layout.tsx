@@ -3,9 +3,11 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { DashboardShell } from "./_components/dashboard-shell";
+import { DeveloperProfileProvider } from "./_components/developer-profile-context";
 import { PendingDashboard } from "./_components/pending-dashboard";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
+import { fetchDeveloperProfile } from "@/lib/api/developer";
 import {
   buildDefaultTimeline,
   fetchDeveloperApplicationStatus,
@@ -51,5 +53,17 @@ export default async function DeveloperDashboardLayout({
     );
   }
 
-  return <DashboardShell>{children}</DashboardShell>;
+  const profile = await fetchDeveloperProfile(token);
+
+  if (!profile) {
+    return (
+      <DashboardShell token={token}>{children}</DashboardShell>
+    );
+  }
+
+  return (
+    <DeveloperProfileProvider profile={profile}>
+      <DashboardShell token={token}>{children}</DashboardShell>
+    </DeveloperProfileProvider>
+  );
 }
