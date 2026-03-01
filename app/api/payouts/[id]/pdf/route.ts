@@ -26,18 +26,32 @@ export async function GET(
     );
   }
 
-  const response = await fetch(`${apiBaseUrl}/api/admin/payouts/${id}`, {
+  // Try admin endpoint first, then developer endpoint
+  let payout: Payout | null = null;
+
+  const adminResponse = await fetch(`${apiBaseUrl}/api/admin/payouts/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
-  if (!response.ok) {
+  if (adminResponse.ok) {
+    payout = (await adminResponse.json()) as Payout;
+  } else {
+    const devResponse = await fetch(
+      `${apiBaseUrl}/api/developers/earnings/${id}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+
+    if (devResponse.ok) {
+      payout = (await devResponse.json()) as Payout;
+    }
+  }
+
+  if (!payout) {
     return NextResponse.json(
       { error: "not_found", message: "Payout not found." },
       { status: 404 },
     );
   }
-
-  const payout = (await response.json()) as Payout;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const element = React.createElement(PayoutPDF, { payout }) as any;

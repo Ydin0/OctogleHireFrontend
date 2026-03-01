@@ -26,18 +26,32 @@ export async function GET(
     );
   }
 
-  const response = await fetch(`${apiBaseUrl}/api/admin/invoices/${id}`, {
+  // Try admin endpoint first, then company endpoint
+  let invoice: Invoice | null = null;
+
+  const adminResponse = await fetch(`${apiBaseUrl}/api/admin/invoices/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
-  if (!response.ok) {
+  if (adminResponse.ok) {
+    invoice = (await adminResponse.json()) as Invoice;
+  } else {
+    const companyResponse = await fetch(
+      `${apiBaseUrl}/api/companies/invoices/${id}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+
+    if (companyResponse.ok) {
+      invoice = (await companyResponse.json()) as Invoice;
+    }
+  }
+
+  if (!invoice) {
     return NextResponse.json(
       { error: "not_found", message: "Invoice not found." },
       { status: 404 },
     );
   }
-
-  const invoice = (await response.json()) as Invoice;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const element = React.createElement(InvoicePDF, { invoice }) as any;

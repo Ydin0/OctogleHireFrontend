@@ -6,6 +6,7 @@ import {
   ChevronDown,
   ChevronUp,
   DollarSign,
+  Download,
   FileText,
   Loader2,
   Receipt,
@@ -25,6 +26,7 @@ import {
   type InvoiceStatus,
 } from "@/app/admin/dashboard/_components/dashboard-data";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -295,12 +297,28 @@ const InvoicesPage = () => {
                           </TableBody>
                         </Table>
                         <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
-                          <p className="text-xs text-muted-foreground">
-                            Issued{" "}
-                            {inv.issuedAt ? formatDate(inv.issuedAt) : "—"}
-                            {inv.paidAt &&
-                              ` · Paid ${formatDate(inv.paidAt)}`}
-                          </p>
+                          <div className="flex items-center gap-3">
+                            <p className="text-xs text-muted-foreground">
+                              Issued{" "}
+                              {inv.issuedAt ? formatDate(inv.issuedAt) : "—"}
+                              {inv.paidAt &&
+                                ` · Paid ${formatDate(inv.paidAt)}`}
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 gap-1.5 text-xs"
+                              asChild
+                            >
+                              <a
+                                href={`/api/invoices/${inv.id}/pdf`}
+                                download={`${inv.invoiceNumber}.pdf`}
+                              >
+                                <Download className="size-3" />
+                                Download PDF
+                              </a>
+                            </Button>
+                          </div>
                           <div className="text-right">
                             <p className="text-xs text-muted-foreground">
                               Subtotal:{" "}

@@ -183,22 +183,20 @@ function EarningsClient({ payouts, summary }: EarningsClientProps) {
                             ? `Paid ${formatDate(payout.paidAt)}`
                             : `Created ${formatDate(payout.createdAt)}`}
                         </div>
-                        {payout.status === "paid" && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 gap-1.5 text-xs"
-                            asChild
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 gap-1.5 text-xs"
+                          asChild
+                        >
+                          <a
+                            href={`/api/payouts/${payout.id}/pdf`}
+                            download={`${payout.payoutNumber}.pdf`}
                           >
-                            <a
-                              href={`/api/payouts/${payout.id}/pdf`}
-                              download={`${payout.payoutNumber}.pdf`}
-                            >
-                              <Download className="size-3" />
-                              Payslip
-                            </a>
-                          </Button>
-                        )}
+                            <Download className="size-3" />
+                            Payslip
+                          </a>
+                        </Button>
                       </div>
                     </div>
                   )}
