@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
+  Bell,
+  Briefcase,
   ClipboardList,
   Loader2,
   Plus,
   Search,
   ShieldCheck,
-  Users,
-  Briefcase,
   UserCheck,
+  Users,
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 
@@ -35,6 +36,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+function countToReview(req: JobRequirement): number {
+  return (req.proposedMatches ?? []).filter((m) => m.status === "accepted").length;
+}
 
 const CompanyOverviewPage = () => {
   const { getToken } = useAuth();
@@ -73,34 +78,45 @@ const CompanyOverviewPage = () => {
     return sum + accepted;
   }, 0);
 
+  const totalToReview = reqs.reduce((sum, r) => sum + countToReview(r), 0);
+
+  const reqsWithReviews = reqs
+    .map((r) => ({ req: r, reviewCount: countToReview(r) }))
+    .filter((r) => r.reviewCount > 0)
+    .sort((a, b) => b.reviewCount - a.reviewCount);
+
   const recentRequirements = [...reqs]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3);
 
   const kpis = [
     {
+      label: "To Review",
+      value: totalToReview.toString(),
+      hint: "Developers awaiting your decision",
+      icon: Bell,
+      highlight: totalToReview > 0,
+    },
+    {
       label: "Requirements",
       value: reqs.length.toString(),
       hint: "Total job requirements posted",
       icon: ClipboardList,
+      highlight: false,
     },
     {
       label: "Open Positions",
       value: openPositions.toString(),
       hint: "Developers needed across open requirements",
       icon: Briefcase,
-    },
-    {
-      label: "Team Members",
-      value: teamMembers.length.toString(),
-      hint: "People in your company workspace",
-      icon: Users,
+      highlight: false,
     },
     {
       label: "Matched",
       value: matchedCount.toString(),
       hint: "Accepted or active developer matches",
       icon: UserCheck,
+      highlight: false,
     },
   ];
 
@@ -147,25 +163,97 @@ const CompanyOverviewPage = () => {
         </div>
       ) : (
         <>
+          {/* Action-needed banner */}
+          {totalToReview > 0 && (
+            <Card className="border-amber-500/40 bg-amber-500/5">
+              <CardContent className="flex items-center gap-4 p-4">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15">
+                  <Bell className="size-5 text-amber-600" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">
+                    {totalToReview} developer{totalToReview !== 1 ? "s" : ""} awaiting your review
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Developers have expressed interest in your roles. Review their profiles and confirm hire to start engagements.
+                  </p>
+                </div>
+                <Button size="sm" className="shrink-0 gap-1.5 bg-amber-600 text-white hover:bg-amber-700" asChild>
+                  <Link href="/companies/dashboard/requirements">
+                    Review Now
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* KPIs */}
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {kpis.map((kpi) => (
-              <Card key={kpi.label}>
+              <Card
+                key={kpi.label}
+                className={kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}
+              >
                 <CardHeader className="pb-2">
                   <CardDescription className="text-xs font-mono uppercase tracking-[0.08em]">
                     {kpi.label}
                   </CardDescription>
-                  <CardTitle className="text-2xl">{kpi.value}</CardTitle>
+                  <CardTitle className={`text-2xl ${kpi.highlight ? "text-amber-600" : ""}`}>
+                    {kpi.value}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">{kpi.hint}</span>
-                  <div className="flex size-8 items-center justify-center rounded-full bg-pulse/10">
-                    <kpi.icon className="size-4 text-pulse" />
+                  <div className={`flex size-8 items-center justify-center rounded-full ${kpi.highlight ? "bg-amber-500/15" : "bg-pulse/10"}`}>
+                    <kpi.icon className={`size-4 ${kpi.highlight ? "text-amber-600" : "text-pulse"}`} />
                   </div>
                 </CardContent>
               </Card>
             ))}
           </section>
 
+          {/* Requirements needing review */}
+          {reqsWithReviews.length > 0 && (
+            <Card className="border-amber-500/30">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-8 items-center justify-center rounded-full bg-amber-500/15">
+                    <UserCheck className="size-4 text-amber-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-base">Matches to Review</CardTitle>
+                    <CardDescription>Developers who accepted — confirm hire to start engagement.</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {reqsWithReviews.map(({ req, reviewCount }) => (
+                  <Link
+                    key={req.id}
+                    href={`/companies/dashboard/requirements/${req.id}`}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/25 bg-amber-500/5 p-3 transition-colors hover:border-amber-500/40"
+                  >
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <ClipboardList className="size-3.5 text-amber-600" />
+                        <p className="truncate text-sm font-semibold">{req.title}</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {req.techStack.slice(0, 3).join(", ")}
+                        {req.techStack.length > 3 ? ` +${req.techStack.length - 3}` : ""}
+                      </p>
+                    </div>
+                    <Badge className="shrink-0 border-amber-500/40 bg-amber-500/15 text-amber-700">
+                      {reviewCount} to review
+                    </Badge>
+                  </Link>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent requirements */}
           {recentRequirements.length > 0 && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
@@ -182,8 +270,9 @@ const CompanyOverviewPage = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 {recentRequirements.map((req) => {
-                  const acceptedCount = (req.proposedMatches ?? []).filter(
-                    (m) => m.status === "accepted" || m.status === "active",
+                  const reviewCount = countToReview(req);
+                  const activeCount = (req.proposedMatches ?? []).filter(
+                    (m) => m.status === "active",
                   ).length;
 
                   return (
@@ -201,16 +290,23 @@ const CompanyOverviewPage = () => {
                           <span>{formatDateAdmin(req.createdAt)}</span>
                           <span className="flex items-center gap-1">
                             <Users className="size-3" />
-                            {acceptedCount}/{req.developersNeeded}
+                            {activeCount}/{req.developersNeeded}
                           </span>
                         </div>
                       </div>
-                      <Badge
-                        variant="outline"
-                        className={requirementStatusBadgeClass(req.status)}
-                      >
-                        {requirementStatusLabel[req.status]}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        {reviewCount > 0 && (
+                          <Badge className="border-amber-500/40 bg-amber-500/15 text-amber-700">
+                            {reviewCount} to review
+                          </Badge>
+                        )}
+                        <Badge
+                          variant="outline"
+                          className={requirementStatusBadgeClass(req.status)}
+                        >
+                          {requirementStatusLabel[req.status]}
+                        </Badge>
+                      </div>
                     </Link>
                   );
                 })}

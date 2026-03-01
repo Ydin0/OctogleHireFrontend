@@ -6,12 +6,8 @@ import {
   Award,
   Briefcase,
   Clock,
-  ExternalLink,
-  Github,
-  Globe,
   GraduationCap,
   Languages,
-  Linkedin,
   MapPin,
   Star,
   Trophy,
@@ -20,7 +16,14 @@ import {
 import {
   fetchCompanyDeveloperProfile,
   type CompanyDeveloperProfile,
+  type CompanyDeveloperMatch,
 } from "@/lib/api/companies";
+import {
+  matchStatusBadgeClass,
+  matchStatusLabel,
+  formatDate,
+} from "@/app/admin/dashboard/_components/dashboard-data";
+import { DownloadCVButton } from "./_components/download-cv-button";
 import { TECH_ICONS } from "@/lib/tech-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +69,11 @@ export default async function CompanyDeveloperProfilePage({
         <ArrowLeft className="size-3.5" />
         Back to requirements
       </Link>
+
+      {/* Match info */}
+      {developer.matches.length > 0 && (
+        <MatchInfoSection matches={developer.matches} />
+      )}
 
       {/* Hero section */}
       <HeroSection developer={developer} />
@@ -243,6 +251,50 @@ export default async function CompanyDeveloperProfilePage({
   );
 }
 
+function MatchInfoSection({ matches }: { matches: CompanyDeveloperMatch[] }) {
+  return (
+    <Card className="border-pulse/30">
+      <CardHeader>
+        <CardTitle className="text-base">Match Details</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {matches.map((match) => (
+          <div
+            key={match.id}
+            className="flex flex-col gap-3 rounded-lg border border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="space-y-1">
+              <p className="text-sm font-semibold">{match.requirementTitle}</p>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span className="capitalize">
+                  {match.engagementType.replace("-", " ")}
+                </span>
+                <span>Proposed {formatDate(match.proposedAt)}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="font-mono text-sm font-semibold">
+                  ${match.proposedHourlyRate}/hr
+                </p>
+                <p className="font-mono text-xs text-muted-foreground">
+                  ${match.proposedMonthlyRate.toLocaleString()}/mo
+                </p>
+              </div>
+              <Badge
+                variant="outline"
+                className={matchStatusBadgeClass(match.status as "proposed" | "accepted" | "rejected" | "active" | "ended")}
+              >
+                {matchStatusLabel[match.status as keyof typeof matchStatusLabel] ?? match.status}
+              </Badge>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
+}
+
 function HeroSection({ developer }: { developer: CompanyDeveloperProfile }) {
   return (
     <Card>
@@ -301,36 +353,12 @@ function HeroSection({ developer }: { developer: CompanyDeveloperProfile }) {
               </Badge>
             </div>
 
-            {/* Links */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              {developer.linkedinUrl && (
-                <Button asChild variant="outline" size="sm" className="gap-1.5">
-                  <a href={developer.linkedinUrl} target="_blank" rel="noopener noreferrer">
-                    <Linkedin className="size-3.5" />
-                    LinkedIn
-                    <ExternalLink className="size-3" />
-                  </a>
-                </Button>
-              )}
-              {developer.githubUrl && (
-                <Button asChild variant="outline" size="sm" className="gap-1.5">
-                  <a href={developer.githubUrl} target="_blank" rel="noopener noreferrer">
-                    <Github className="size-3.5" />
-                    GitHub
-                    <ExternalLink className="size-3" />
-                  </a>
-                </Button>
-              )}
-              {developer.portfolioUrl && (
-                <Button asChild variant="outline" size="sm" className="gap-1.5">
-                  <a href={developer.portfolioUrl} target="_blank" rel="noopener noreferrer">
-                    <Globe className="size-3.5" />
-                    Portfolio
-                    <ExternalLink className="size-3" />
-                  </a>
-                </Button>
-              )}
-            </div>
+            {/* CV download */}
+            {developer.hasResume && (
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                <DownloadCVButton developerId={developer.id} />
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

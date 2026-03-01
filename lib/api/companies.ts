@@ -578,6 +578,17 @@ export async function removeMatch(
 
 // ── Company Developer Profile ─────────────────────────────────────────────────
 
+export interface CompanyDeveloperMatch {
+  id: string;
+  requirementTitle: string;
+  proposedHourlyRate: number;
+  proposedMonthlyRate: number;
+  currency: string;
+  status: string;
+  proposedAt: string;
+  engagementType: string;
+}
+
 export interface CompanyDeveloperProfile {
   id: string;
   name: string;
@@ -598,9 +609,7 @@ export interface CompanyDeveloperProfile {
   availability: string | null;
   engagementType: string[];
   certifications: string | null;
-  linkedinUrl: string | null;
-  githubUrl: string | null;
-  portfolioUrl: string | null;
+  hasResume: boolean;
   workHistory: {
     company: string;
     role: string;
@@ -623,6 +632,7 @@ export interface CompanyDeveloperProfile {
     issuer: string;
     year: string;
   }[];
+  matches: CompanyDeveloperMatch[];
 }
 
 export async function fetchCompanyDeveloperProfile(
