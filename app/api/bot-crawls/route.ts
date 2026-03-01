@@ -33,8 +33,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const event: BotCrawlEvent = await req.json();
-    ensureLogDir();
-    fs.appendFileSync(LOG_FILE, JSON.stringify(event) + "\n");
+    try {
+      ensureLogDir();
+      fs.appendFileSync(LOG_FILE, JSON.stringify(event) + "\n");
+    } catch {
+      // Vercel has a read-only filesystem — silently skip file write
+    }
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
@@ -58,10 +62,25 @@ export async function GET(req: NextRequest) {
   const days = parseInt(searchParams.get("days") || "7", 10);
   const botFilter = searchParams.get("bot");
 
-  ensureLogDir();
+  try {
+    ensureLogDir();
+  } catch {
+    // Vercel has a read-only filesystem — return empty data gracefully
+    return NextResponse.json({
+      period: `${days} days`,
+      totalEvents: 0,
+      summary: {},
+      recentEvents: [],
+    });
+  }
 
   if (!fs.existsSync(LOG_FILE)) {
-    return NextResponse.json({ events: [], summary: {} });
+    return NextResponse.json({
+      period: `${days} days`,
+      totalEvents: 0,
+      summary: {},
+      recentEvents: [],
+    });
   }
 
   const cutoff = new Date();
