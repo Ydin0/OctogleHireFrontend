@@ -38,15 +38,18 @@ export function OffersClient({ offers }: { offers: DeveloperOffer[] }) {
   const router = useRouter();
   const { getToken } = useAuth();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRespond = async (offerId: string, action: "accepted" | "declined") => {
+    if (loadingId) return;
     setLoadingId(offerId);
+    setError(null);
     try {
       const token = await getToken();
       await respondToDeveloperOffer(token, offerId, action);
       router.refresh();
-    } catch {
-      // Silently handle — page will refresh
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoadingId(null);
     }
@@ -62,6 +65,14 @@ export function OffersClient({ offers }: { offers: DeveloperOffer[] }) {
           </CardDescription>
         </CardHeader>
       </Card>
+
+      {error && (
+        <Card className="border-red-500/30">
+          <CardContent className="py-4 text-sm text-red-600">
+            {error}
+          </CardContent>
+        </Card>
+      )}
 
       {offers.length === 0 && (
         <Card>
