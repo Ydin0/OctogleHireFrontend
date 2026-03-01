@@ -10,13 +10,18 @@ import {
   Mail,
   MapPin,
   Phone,
+  HandCoins,
+  Clock,
+  CircleDollarSign,
 } from "lucide-react";
 
 import { fetchApplication } from "@/lib/api/admin";
+import type { ApplicationOffer } from "@/lib/api/admin";
 import {
   type ApplicationStatus,
   applicationStatusBadgeClass,
   applicationStatusLabel,
+  formatCurrency,
   PIPELINE_STAGES,
 } from "../../_components/dashboard-data";
 import {
@@ -56,6 +61,90 @@ const formatDate = (dateStr: string | null) => {
     year: "numeric",
   });
 };
+
+const offerStatusConfig: Record<
+  string,
+  { label: string; className: string }
+> = {
+  pending: {
+    label: "Pending",
+    className: "border-amber-600/20 bg-amber-500/10 text-amber-700",
+  },
+  accepted: {
+    label: "Accepted",
+    className: "border-emerald-600/20 bg-emerald-500/10 text-emerald-600",
+  },
+  declined: {
+    label: "Declined",
+    className: "border-red-600/20 bg-red-500/10 text-red-600",
+  },
+};
+
+function OfferCard({ offer }: { offer: ApplicationOffer }) {
+  const statusCfg = offerStatusConfig[offer.status] ?? offerStatusConfig.pending;
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <HandCoins className="size-4" />
+          Extended Offer
+        </CardTitle>
+        <Badge variant="outline" className={statusCfg!.className}>
+          {statusCfg!.label}
+        </Badge>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Hourly Rate
+            </p>
+            <p className="font-mono text-lg font-semibold">
+              {formatCurrency(offer.hourlyRateCents / 100, offer.currency)}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Monthly Rate
+            </p>
+            <p className="font-mono text-lg font-semibold">
+              {formatCurrency(offer.monthlyRateCents / 100, offer.currency)}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Engagement
+            </p>
+            <p className="text-sm font-medium capitalize">
+              {offer.engagementType}
+            </p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Start Date
+            </p>
+            <p className="text-sm font-medium">{formatDate(offer.startDate)}</p>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <CircleDollarSign className="size-3" />
+            {offer.currency}
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="size-3" />
+            Offered {formatDate(offer.createdAt)}
+          </span>
+          {offer.respondedAt && (
+            <span>Responded {formatDate(offer.respondedAt)}</span>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 interface ApplicantDetailPageProps {
   params: Promise<{ id: string }>;
@@ -206,6 +295,9 @@ export default async function ApplicantDetailPage({
           </div>
         </CardContent>
       </Card>
+
+      {/* ── Offer card (if one exists) ────────────────────────────────── */}
+      {applicant.offer && <OfferCard offer={applicant.offer} />}
 
       {/* ── Two-column detail grid ──────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
