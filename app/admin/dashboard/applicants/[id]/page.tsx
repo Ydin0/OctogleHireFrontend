@@ -17,6 +17,7 @@ import {
 
 import { fetchApplication } from "@/lib/api/admin";
 import type { ApplicationOffer } from "@/lib/api/admin";
+import { ReofferDialog } from "./_components/reoffer-dialog";
 import {
   type ApplicationStatus,
   applicationStatusBadgeClass,
@@ -80,7 +81,13 @@ const offerStatusConfig: Record<
   },
 };
 
-function OfferCard({ offer }: { offer: ApplicationOffer }) {
+function OfferCard({
+  offer,
+  applicationId,
+}: {
+  offer: ApplicationOffer;
+  applicationId: string;
+}) {
   const statusCfg = offerStatusConfig[offer.status] ?? offerStatusConfig.pending;
 
   return (
@@ -90,9 +97,18 @@ function OfferCard({ offer }: { offer: ApplicationOffer }) {
           <HandCoins className="size-4" />
           Extended Offer
         </CardTitle>
-        <Badge variant="outline" className={statusCfg!.className}>
-          {statusCfg!.label}
-        </Badge>
+        <div className="flex items-center gap-2">
+          {offer.status === "declined" && (
+            <ReofferDialog
+              applicationId={applicationId}
+              previousCurrency={offer.currency}
+              previousEngagementType={offer.engagementType}
+            />
+          )}
+          <Badge variant="outline" className={statusCfg!.className}>
+            {statusCfg!.label}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -297,7 +313,7 @@ export default async function ApplicantDetailPage({
       </Card>
 
       {/* ── Offer card (if one exists) ────────────────────────────────── */}
-      {applicant.offer && <OfferCard offer={applicant.offer} />}
+      {applicant.offer && <OfferCard offer={applicant.offer} applicationId={applicant.id} />}
 
       {/* ── Two-column detail grid ──────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">

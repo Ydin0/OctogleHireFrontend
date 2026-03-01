@@ -595,3 +595,34 @@ export async function fetchAdminStats(
     return null;
   }
 }
+
+export async function reofferApplication(
+  token: string,
+  applicationId: string,
+  payload: {
+    hourlyRateCents: number;
+    monthlyRateCents: number;
+    currency: string;
+    engagementType: string;
+    startDate: string;
+    note?: string;
+  },
+): Promise<void> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/admin/applications/${applicationId}/reoffer`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => null);
+    throw new Error(err?.message ?? "Failed to re-offer");
+  }
+}
