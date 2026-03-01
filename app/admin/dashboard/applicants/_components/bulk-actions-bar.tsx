@@ -35,9 +35,11 @@ function BulkActionsBar({ selectedIds, token, onComplete }: BulkActionsBarProps)
   const [dialogOpen, setDialogOpen] = useState(false);
   const [status, setStatus] = useState("");
   const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const handleBulkUpdate = async () => {
     if (!status) return;
+    setError(null);
 
     const apiBaseUrl =
       process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -59,16 +61,22 @@ function BulkActionsBar({ selectedIds, token, onComplete }: BulkActionsBarProps)
         }
       );
 
-      if (response.ok) {
-        setDialogOpen(false);
-        setStatus("");
-        setNote("");
-        startTransition(() => {
-          onComplete();
-        });
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          message?: string;
+        } | null;
+        throw new Error(payload?.message ?? "Failed to update status");
       }
-    } catch {
-      // Error handling kept simple
+
+      setDialogOpen(false);
+      setStatus("");
+      setNote("");
+      setError(null);
+      startTransition(() => {
+        onComplete();
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };
 
@@ -150,6 +158,8 @@ function BulkActionsBar({ selectedIds, token, onComplete }: BulkActionsBarProps)
             </div>
           </div>
 
+          {error && <p className="text-sm text-destructive">{error}</p>}
+
           <DialogFooter>
             <Button
               variant="outline"
@@ -157,6 +167,7 @@ function BulkActionsBar({ selectedIds, token, onComplete }: BulkActionsBarProps)
                 setDialogOpen(false);
                 setStatus("");
                 setNote("");
+                setError(null);
               }}
             >
               Cancel

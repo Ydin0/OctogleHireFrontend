@@ -25,9 +25,11 @@ const FeaturedToggle = ({
   const router = useRouter();
   const [isFeatured, setIsFeatured] = useState(initialFeatured);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   const handleToggle = async () => {
     setIsLoading(true);
+    setError(false);
     try {
       const response = await fetch(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/featured`,
@@ -41,12 +43,13 @@ const FeaturedToggle = ({
         }
       );
 
-      if (response.ok) {
-        setIsFeatured(!isFeatured);
-        router.refresh();
-      }
+      if (!response.ok) throw new Error();
+
+      setIsFeatured(!isFeatured);
+      router.refresh();
     } catch {
-      // silently fail
+      setError(true);
+      setTimeout(() => setError(false), 3000);
     } finally {
       setIsLoading(false);
     }
@@ -59,15 +62,17 @@ const FeaturedToggle = ({
       onClick={handleToggle}
       disabled={!isLive || isLoading}
       className={
-        isFeatured
-          ? "border-amber-500/30 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
-          : ""
+        error
+          ? "border-red-500/30 bg-red-500/10 text-red-600 hover:bg-red-500/20"
+          : isFeatured
+            ? "border-amber-500/30 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
+            : ""
       }
     >
       <Star
         className={`size-4 mr-1.5 ${isFeatured ? "fill-amber-500 text-amber-500" : ""}`}
       />
-      {isLoading ? "Updating..." : isFeatured ? "Featured" : "Feature"}
+      {isLoading ? "Updating..." : error ? "Failed" : isFeatured ? "Featured" : "Feature"}
     </Button>
   );
 };
