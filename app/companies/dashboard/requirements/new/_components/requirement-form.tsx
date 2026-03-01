@@ -19,6 +19,7 @@ import {
   jobRequirementSchema,
   type JobRequirementFormData,
 } from "@/lib/schemas/job-requirement";
+import { TIMEZONE_OPTIONS } from "@/lib/constants/timezones";
 import {
   createJobRequirement,
   fetchLinkedInJobs,
@@ -469,16 +470,11 @@ const RequirementForm = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="any">Any Timezone</SelectItem>
-                    <SelectItem value="americas">Americas</SelectItem>
-                    <SelectItem value="europe">Europe</SelectItem>
-                    <SelectItem value="asia-pacific">Asia-Pacific</SelectItem>
-                    <SelectItem value="overlap-us">
-                      US Overlap (4+ hrs)
-                    </SelectItem>
-                    <SelectItem value="overlap-eu">
-                      EU Overlap (4+ hrs)
-                    </SelectItem>
+                    {TIMEZONE_OPTIONS.map((tz) => (
+                      <SelectItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

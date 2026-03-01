@@ -12,6 +12,7 @@ import {
   proposeMatch,
   removeMatch,
 } from "@/lib/api/companies";
+import { getTimezoneLabel } from "@/lib/constants/timezones";
 import {
   formatDate,
   priorityBadgeClass,
@@ -128,7 +129,7 @@ const AllocationPage = ({
             <span className="capitalize">
               {requirement.engagementType.replace("-", " ")}
             </span>
-            <span>{requirement.timezonePreference.replace(/-/g, " ")}</span>
+            <span>{getTimezoneLabel(requirement.timezonePreference)}</span>
           </div>
 
           {/* Inline stat cards */}

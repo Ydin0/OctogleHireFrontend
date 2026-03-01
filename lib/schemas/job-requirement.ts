@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import { TIMEZONE_OPTIONS } from "@/lib/constants/timezones";
+
+const timezoneValues = TIMEZONE_OPTIONS.map((tz) => tz.value) as [string, ...string[]];
+
 export const jobRequirementSchema = z
   .object({
     title: z.string().min(3, "Title must be at least 3 characters"),
@@ -21,14 +25,7 @@ export const jobRequirementSchema = z
       "contract",
       "project-based",
     ]),
-    timezonePreference: z.enum([
-      "any",
-      "americas",
-      "europe",
-      "asia-pacific",
-      "overlap-us",
-      "overlap-eu",
-    ]),
+    timezonePreference: z.enum(timezoneValues),
     budgetMin: z.string().optional(),
     budgetMax: z.string().optional(),
     description: z

@@ -19,6 +19,7 @@ import {
   fetchCompanyRequirement,
   respondToMatch,
 } from "@/lib/api/companies";
+import { getTimezoneLabel } from "@/lib/constants/timezones";
 import {
   formatDate,
   matchStatusBadgeClass,
@@ -217,8 +218,8 @@ const ProposedMatchesClient = ({
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                 Timezone
               </p>
-              <p className="capitalize">
-                {requirement.timezonePreference.replace("-", " ")}
+              <p>
+                {getTimezoneLabel(requirement.timezonePreference)}
               </p>
             </div>
             <div>
