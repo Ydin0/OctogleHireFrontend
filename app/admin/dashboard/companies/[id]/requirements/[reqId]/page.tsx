@@ -8,12 +8,10 @@ import { use } from "react";
 
 import {
   type JobRequirement,
-  type ProposedMatch,
   fetchCompanyRequirementAdmin,
   proposeMatch,
   removeMatch,
 } from "@/lib/api/companies";
-import { getAllDeveloperSummaries } from "@/lib/data/mock-companies";
 import {
   formatDate,
   priorityBadgeClass,
@@ -64,31 +62,8 @@ const AllocationPage = ({
     currency: string;
   }) => {
     const token = await getToken();
-    const result = await proposeMatch(token, reqId, payload);
-
-    const allDevs = getAllDeveloperSummaries();
-    const dev = allDevs.find((d) => d.id === payload.developerId);
-    if (!dev) return;
-
-    const newMatch: ProposedMatch = result ?? {
-      id: `match-${Date.now()}`,
-      requirementId: reqId,
-      developerId: payload.developerId,
-      developer: dev,
-      proposedHourlyRate: payload.hourlyRate,
-      proposedMonthlyRate: payload.monthlyRate,
-      currency: payload.currency,
-      status: "proposed",
-      proposedAt: new Date().toISOString(),
-    };
-
-    setRequirement((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        proposedMatches: [...(prev.proposedMatches ?? []), newMatch],
-      };
-    });
+    await proposeMatch(token, reqId, payload);
+    await load();
   };
 
   const handleRemove = async (matchId: string) => {

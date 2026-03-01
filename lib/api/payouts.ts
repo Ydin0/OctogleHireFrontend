@@ -1,11 +1,4 @@
 import type { PayoutStatus } from "@/app/admin/dashboard/_components/dashboard-data";
-import {
-  getMockPayouts,
-  getMockPayoutById,
-  getMockPayoutsByDeveloperId,
-  getMockPayoutSummary,
-  getMockDeveloperPayoutSummary,
-} from "@/lib/data/mock-payouts";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -73,7 +66,7 @@ export async function fetchPayouts(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as Payout[];
   } catch {
-    return getMockPayouts();
+    return null;
   }
 }
 
@@ -93,7 +86,7 @@ export async function fetchPayout(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as Payout;
   } catch {
-    return getMockPayoutById(id) ?? null;
+    return null;
   }
 }
 
@@ -116,7 +109,7 @@ export async function fetchPayoutsByDeveloper(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as Payout[];
   } catch {
-    return getMockPayoutsByDeveloperId(developerId);
+    return null;
   }
 }
 
@@ -138,7 +131,7 @@ export async function fetchPayoutSummary(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as PayoutSummary;
   } catch {
-    return getMockPayoutSummary();
+    return null;
   }
 }
 
@@ -161,7 +154,7 @@ export async function fetchDeveloperPayoutSummary(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as PayoutSummary;
   } catch {
-    return getMockDeveloperPayoutSummary(developerId);
+    return null;
   }
 }
 

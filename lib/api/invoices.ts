@@ -1,11 +1,4 @@
 import type { InvoiceStatus } from "@/app/admin/dashboard/_components/dashboard-data";
-import {
-  getMockInvoices,
-  getMockInvoiceById,
-  getMockInvoicesByCompanyId,
-  getMockInvoiceSummary,
-  getMockCompanyInvoiceSummary,
-} from "@/lib/data/mock-invoices";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -71,7 +64,7 @@ export async function fetchInvoices(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as Invoice[];
   } catch {
-    return getMockInvoices();
+    return null;
   }
 }
 
@@ -91,7 +84,7 @@ export async function fetchInvoice(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as Invoice;
   } catch {
-    return getMockInvoiceById(id) ?? null;
+    return null;
   }
 }
 
@@ -114,7 +107,7 @@ export async function fetchInvoicesByCompany(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as Invoice[];
   } catch {
-    return getMockInvoicesByCompanyId(companyId);
+    return null;
   }
 }
 
@@ -136,7 +129,7 @@ export async function fetchInvoiceSummary(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as InvoiceSummary;
   } catch {
-    return getMockInvoiceSummary();
+    return null;
   }
 }
 
@@ -159,7 +152,7 @@ export async function fetchCompanyInvoiceSummary(
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as InvoiceSummary;
   } catch {
-    return getMockCompanyInvoiceSummary(companyId);
+    return null;
   }
 }
 

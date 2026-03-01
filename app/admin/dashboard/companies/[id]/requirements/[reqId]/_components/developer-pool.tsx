@@ -17,7 +17,6 @@ import type {
   ExperienceLevel,
   JobRequirement,
 } from "@/lib/api/companies";
-import { getAllDeveloperSummaries } from "@/lib/data/mock-companies";
 import { getInitials } from "../../../../../_components/dashboard-data";
 import { cn } from "@/lib/utils";
 import {
@@ -180,12 +179,37 @@ const EMPTY_FILTERS: Filters = {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
+const apiBaseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+
 const DeveloperPool = ({
   requirement,
   excludeDevIds,
   onPropose,
 }: DeveloperPoolProps) => {
-  const allDevs = useMemo(() => getAllDeveloperSummaries(), []);
+  const [allDevs, setAllDevs] = useState<DeveloperSummary[]>([]);
+  const [devsLoading, setDevsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(
+          `${apiBaseUrl}/api/public/developers?limit=200`,
+        );
+        if (!res.ok) throw new Error("Failed to fetch developers");
+        const data = await res.json();
+        if (!cancelled) setAllDevs(data.developers ?? []);
+      } catch {
+        if (!cancelled) setAllDevs([]);
+      } finally {
+        if (!cancelled) setDevsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const [open, setOpen] = useState(false);
   const [searchInput, setSearchInput] = useState("");
@@ -619,20 +643,31 @@ const DeveloperPool = ({
 
             {/* Right main area — table */}
             <div className="flex-1 flex flex-col min-h-0">
-              {filteredDevs.length === 0 ? (
+              {devsLoading ? (
+                <div className="flex flex-1 flex-col items-center justify-center text-center">
+                  <Loader2 className="size-6 animate-spin text-muted-foreground" />
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Loading developers...
+                  </p>
+                </div>
+              ) : filteredDevs.length === 0 ? (
                 <div className="flex flex-1 flex-col items-center justify-center text-center">
                   <Users className="size-10 text-muted-foreground/40" />
                   <p className="mt-3 text-sm text-muted-foreground">
-                    No developers match your filters.
+                    {allDevs.length === 0
+                      ? "No live developers in the pool yet."
+                      : "No developers match your filters."}
                   </p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mt-2"
-                    onClick={clearAllFilters}
-                  >
-                    Clear all filters
-                  </Button>
+                  {allDevs.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mt-2"
+                      onClick={clearAllFilters}
+                    >
+                      Clear all filters
+                    </Button>
+                  )}
                 </div>
               ) : (
                 <div className="flex-1 overflow-auto">
