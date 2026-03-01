@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import {
+  ArrowRight,
   Bell,
   CheckCircle2,
   ClipboardList,
@@ -17,6 +18,7 @@ import {
 
 import {
   type JobRequirement,
+  type ProposedMatch,
   fetchCompanyRequirements,
 } from "@/lib/api/companies";
 import {
@@ -26,6 +28,7 @@ import {
   requirementStatusBadgeClass,
   requirementStatusLabel,
 } from "@/app/admin/dashboard/_components/dashboard-data";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,6 +41,15 @@ import {
 
 function countToReview(req: JobRequirement): number {
   return (req.proposedMatches ?? []).filter((m) => m.status === "accepted").length;
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 const RequirementsListClient = () => {
@@ -145,93 +157,165 @@ const RequirementsListClient = () => {
             </CardContent>
           </Card>
         ) : (
-          sorted.map((req) => {
-            const matchCount = req.proposedMatches?.length ?? 0;
-            const reviewCount = countToReview(req);
-            const activeCount = (req.proposedMatches ?? []).filter(
-              (m) => m.status === "active",
-            ).length;
-            const hasReviews = reviewCount > 0;
-
-            return (
-              <Link
-                key={req.id}
-                href={`/companies/dashboard/requirements/${req.id}`}
-                className="block"
-              >
-                <Card className={`transition-colors hover:border-pulse/30 ${hasReviews ? "border-amber-500/35" : ""}`}>
-                  <CardContent className="p-5">
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div className="min-w-0 flex-1 space-y-2.5">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-sm font-semibold">{req.title}</h3>
-                          <Badge
-                            variant="outline"
-                            className={requirementStatusBadgeClass(req.status)}
-                          >
-                            {requirementStatusLabel[req.status]}
-                          </Badge>
-                          <Badge
-                            variant="outline"
-                            className={priorityBadgeClass(req.priority)}
-                          >
-                            {priorityLabel[req.priority]}
-                          </Badge>
-                          {hasReviews && (
-                            <Badge className="gap-1 border-amber-500/40 bg-amber-500/15 text-amber-700">
-                              <UserCheck className="size-3" />
-                              {reviewCount} to review
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="flex flex-wrap gap-1.5">
-                          {req.techStack.slice(0, 4).map((tech) => (
-                            <Badge key={tech} variant="secondary" className="text-xs">
-                              {tech}
-                            </Badge>
-                          ))}
-                          {req.techStack.length > 4 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{req.techStack.length - 4}
-                            </Badge>
-                          )}
-                        </div>
-
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          <span>
-                            {req.experienceYearsMin != null && req.experienceYearsMax != null
-                              ? `${req.experienceYearsMin}-${req.experienceYearsMax} yrs`
-                              : <span className="capitalize">{req.experienceLevel} level</span>}
-                          </span>
-                          <span className="capitalize">{req.engagementType.replace("-", " ")}</span>
-                          <span>Start: {formatDate(req.startDate)}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 text-sm">
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Users className="size-3.5" />
-                          <span className="font-mono">
-                            {activeCount}/{req.developersNeeded}
-                          </span>
-                        </div>
-                        {matchCount > 0 && (
-                          <Badge variant="outline" className="font-mono text-xs">
-                            {matchCount} match{matchCount !== 1 ? "es" : ""}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })
+          sorted.map((req) => (
+            <RequirementCard key={req.id} req={req} />
+          ))
         )}
       </div>
     </>
   );
 };
+
+function RequirementCard({ req }: { req: JobRequirement }) {
+  const matches = req.proposedMatches ?? [];
+  const reviewCount = countToReview(req);
+  const activeCount = matches.filter((m) => m.status === "active").length;
+  const hasReviews = reviewCount > 0;
+
+  // Get matches that need review (accepted by developer, awaiting company)
+  const toReviewMatches = matches.filter((m) => m.status === "accepted");
+  // All other non-rejected matches for the avatar stack
+  const otherMatches = matches.filter((m) => m.status !== "accepted" && m.status !== "rejected");
+  // Combine for avatar display, review matches first
+  const avatarMatches = [...toReviewMatches, ...otherMatches];
+
+  return (
+    <Link
+      href={`/companies/dashboard/requirements/${req.id}`}
+      className="group block"
+    >
+      <Card className={`transition-all hover:border-foreground/15 hover:shadow-sm ${hasReviews ? "border-amber-500/35" : ""}`}>
+        <CardContent className="p-0">
+          <div className="flex flex-col lg:flex-row">
+            {/* Main content */}
+            <div className="flex-1 p-5 lg:p-6">
+              {/* Top row: title + badges */}
+              <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
+                <h3 className="text-base font-semibold tracking-tight">
+                  {req.title}
+                </h3>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <Badge
+                    variant="outline"
+                    className={requirementStatusBadgeClass(req.status)}
+                  >
+                    {requirementStatusLabel[req.status]}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={priorityBadgeClass(req.priority)}
+                  >
+                    {priorityLabel[req.priority]}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Meta row */}
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span>
+                  {req.experienceYearsMin != null && req.experienceYearsMax != null
+                    ? `${req.experienceYearsMin}–${req.experienceYearsMax} yrs exp`
+                    : <span className="capitalize">{req.experienceLevel} level</span>}
+                </span>
+                <span className="text-border">|</span>
+                <span className="capitalize">{req.engagementType.replace("-", " ")}</span>
+                <span className="text-border">|</span>
+                <span>Start {formatDate(req.startDate)}</span>
+                <span className="text-border">|</span>
+                <span className="flex items-center gap-1">
+                  <Users className="size-3" />
+                  {activeCount}/{req.developersNeeded} filled
+                </span>
+              </div>
+
+              {/* Tech stack */}
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {req.techStack.slice(0, 5).map((tech) => (
+                  <Badge key={tech} variant="secondary" className="text-xs font-normal">
+                    {tech}
+                  </Badge>
+                ))}
+                {req.techStack.length > 5 && (
+                  <Badge variant="secondary" className="text-xs font-normal">
+                    +{req.techStack.length - 5}
+                  </Badge>
+                )}
+              </div>
+
+              {/* Review alert */}
+              {hasReviews && (
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/8 px-3 py-1.5">
+                  <UserCheck className="size-3.5 text-amber-600" />
+                  <span className="text-xs font-medium text-amber-700">
+                    {reviewCount} developer{reviewCount !== 1 ? "s" : ""} awaiting your review
+                  </span>
+                  <ArrowRight className="size-3 text-amber-600" />
+                </div>
+              )}
+            </div>
+
+            {/* Right side: avatars + match count */}
+            {avatarMatches.length > 0 && (
+              <div className="flex items-center gap-4 border-t border-border/50 p-5 lg:w-56 lg:border-l lg:border-t-0 lg:p-6">
+                <div className="flex-1">
+                  {/* Avatar stack */}
+                  <AvatarStack matches={avatarMatches} />
+
+                  {/* Match summary */}
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      {matches.length}
+                    </span>{" "}
+                    match{matches.length !== 1 ? "es" : ""}
+                    {toReviewMatches.length > 0 && (
+                      <>
+                        {" "}&middot;{" "}
+                        <span className="font-semibold text-amber-600">
+                          {toReviewMatches.length}
+                        </span>{" "}
+                        pending
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
+function AvatarStack({ matches }: { matches: ProposedMatch[] }) {
+  const visible = matches.slice(0, 4);
+  const remaining = matches.length - visible.length;
+
+  return (
+    <div className="flex -space-x-2">
+      {visible.map((m) => {
+        const dev = m.developer;
+        const isToReview = m.status === "accepted";
+
+        return (
+          <Avatar
+            key={m.id}
+            className={`size-9 border-2 border-background ${isToReview ? "ring-2 ring-amber-400" : ""}`}
+          >
+            <AvatarImage src={dev?.avatar} alt={dev?.name ?? ""} className="object-cover" />
+            <AvatarFallback className="text-[10px] font-medium">
+              {dev?.name ? getInitials(dev.name) : "?"}
+            </AvatarFallback>
+          </Avatar>
+        );
+      })}
+      {remaining > 0 && (
+        <div className="flex size-9 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground">
+          +{remaining}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export { RequirementsListClient };
