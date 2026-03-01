@@ -23,6 +23,7 @@ import {
 
 interface GetColumnsOptions {
   onMarkPaid?: (payout: Payout) => void;
+  formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
 function getMarginColorClass(marginPercent: number): string {
@@ -92,7 +93,7 @@ export function getColumns(
       meta: { sortKey: "total" },
       cell: ({ row }) => (
         <span className="block font-mono text-sm">
-          {formatCurrency(row.original.total, row.original.currency)}
+          {(options.formatDisplay ?? formatCurrency)(row.original.total, row.original.currency)}
         </span>
       ),
     },
@@ -107,7 +108,7 @@ export function getColumns(
         );
         return (
           <span className="block font-mono text-sm">
-            {formatCurrency(billed, row.original.currency)}
+            {(options.formatDisplay ?? formatCurrency)(billed, row.original.currency)}
           </span>
         );
       },

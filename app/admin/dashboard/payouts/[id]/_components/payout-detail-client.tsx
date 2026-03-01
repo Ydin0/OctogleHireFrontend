@@ -11,10 +11,10 @@ import { fetchPayout } from "@/lib/api/payouts";
 import {
   payoutStatusBadgeClass,
   payoutStatusLabel,
-  formatCurrency,
   formatDate,
   type PayoutStatus,
 } from "../../../_components/dashboard-data";
+import { useAdminCurrency } from "../../../_components/admin-currency-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -40,6 +40,7 @@ const PayoutDetailClient = ({
 }) => {
   const { id } = use(params);
   const { getToken } = useAuth();
+  const { formatDisplay } = useAdminCurrency();
   const [payout, setPayout] = useState<Payout | null>(null);
   const [token, setToken] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -140,7 +141,7 @@ const PayoutDetailClient = ({
                 Payout Amount
               </p>
               <p className="font-mono text-lg font-semibold">
-                {formatCurrency(payout.total, payout.currency)}
+                {formatDisplay(payout.total, payout.currency)}
               </p>
             </div>
           </CardContent>
@@ -156,7 +157,7 @@ const PayoutDetailClient = ({
                 Billed Amount
               </p>
               <p className="font-mono text-lg font-semibold">
-                {formatCurrency(totalBilled, payout.currency)}
+                {formatDisplay(totalBilled, payout.currency)}
               </p>
             </div>
           </CardContent>
@@ -172,7 +173,7 @@ const PayoutDetailClient = ({
                 Margin
               </p>
               <p className={`font-mono text-lg font-semibold ${getMarginColorClass(marginPercent)}`}>
-                {formatCurrency(totalMargin, payout.currency)}{" "}
+                {formatDisplay(totalMargin, payout.currency)}{" "}
                 <span className="text-sm">({marginPercent.toFixed(1)}%)</span>
               </p>
             </div>
@@ -255,20 +256,20 @@ const PayoutDetailClient = ({
                             {item.hoursWorked}
                           </TableCell>
                           <TableCell className="text-right font-mono text-sm">
-                            {formatCurrency(item.developerPayoutRate, payout.currency)}/hr
+                            {formatDisplay(item.developerPayoutRate, payout.currency)}/hr
                           </TableCell>
                           <TableCell className="text-right font-mono text-sm">
-                            {formatCurrency(item.payoutAmount, payout.currency)}
+                            {formatDisplay(item.payoutAmount, payout.currency)}
                           </TableCell>
                           <TableCell className="text-right font-mono text-sm">
-                            {formatCurrency(item.companyBillingRate, payout.currency)}/hr
+                            {formatDisplay(item.companyBillingRate, payout.currency)}/hr
                           </TableCell>
                           <TableCell className="text-right font-mono text-sm">
-                            {formatCurrency(item.billingAmount, payout.currency)}
+                            {formatDisplay(item.billingAmount, payout.currency)}
                           </TableCell>
                           <TableCell className="text-right">
                             <span className={`font-mono text-sm font-medium ${getMarginColorClass(itemMarginPercent)}`}>
-                              {formatCurrency(item.margin, payout.currency)}{" "}
+                              {formatDisplay(item.margin, payout.currency)}{" "}
                               <span className="text-xs">
                                 ({itemMarginPercent.toFixed(1)}%)
                               </span>
@@ -286,14 +287,14 @@ const PayoutDetailClient = ({
                         Subtotal
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm font-medium">
-                        {formatCurrency(payout.subtotal, payout.currency)}
+                        {formatDisplay(payout.subtotal, payout.currency)}
                       </TableCell>
                       <TableCell />
                       <TableCell className="text-right font-mono text-sm font-medium">
-                        {formatCurrency(totalBilled, payout.currency)}
+                        {formatDisplay(totalBilled, payout.currency)}
                       </TableCell>
                       <TableCell className={`text-right font-mono text-sm font-medium ${getMarginColorClass(marginPercent)}`}>
-                        {formatCurrency(totalMargin, payout.currency)}
+                        {formatDisplay(totalMargin, payout.currency)}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -304,7 +305,7 @@ const PayoutDetailClient = ({
                         Tax ({payout.taxRate}%)
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        {formatCurrency(payout.taxAmount, payout.currency)}
+                        {formatDisplay(payout.taxAmount, payout.currency)}
                       </TableCell>
                       <TableCell colSpan={3} />
                     </TableRow>
@@ -316,14 +317,14 @@ const PayoutDetailClient = ({
                         Total Payout
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm font-semibold">
-                        {formatCurrency(payout.total, payout.currency)}
+                        {formatDisplay(payout.total, payout.currency)}
                       </TableCell>
                       <TableCell />
                       <TableCell className="text-right font-mono text-sm font-semibold">
-                        {formatCurrency(totalBilled, payout.currency)}
+                        {formatDisplay(totalBilled, payout.currency)}
                       </TableCell>
                       <TableCell className={`text-right font-mono text-sm font-semibold ${getMarginColorClass(marginPercent)}`}>
-                        {formatCurrency(totalMargin, payout.currency)}{" "}
+                        {formatDisplay(totalMargin, payout.currency)}{" "}
                         <span className="text-xs font-medium">
                           ({marginPercent.toFixed(1)}%)
                         </span>

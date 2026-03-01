@@ -6,9 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { AdminTimeEntry } from "@/lib/api/time-entries";
 import { approveTimeEntry, rejectTimeEntry } from "@/lib/api/time-entries";
 import type { Pagination } from "@/lib/api/admin";
-import { formatCurrency } from "../../_components/dashboard-data";
 import { DataTable } from "../../_components/data-table";
 import { getColumns } from "./columns";
+import { useAdminCurrency } from "../../_components/admin-currency-context";
 import { TimeEntryFiltersBar } from "./filters-bar";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -155,9 +155,11 @@ function TimeEntriesClient({ timeEntries, token }: TimeEntriesClientProps) {
     0,
   );
 
+  const { formatDisplay } = useAdminCurrency();
   const columns = getColumns({
     onApprove: handleApprove,
     onReject: handleReject,
+    formatDisplay,
   });
 
   return (
@@ -193,7 +195,7 @@ function TimeEntriesClient({ timeEntries, token }: TimeEntriesClientProps) {
               Approved This Month
             </p>
             <p className="mt-1 font-mono text-2xl font-semibold">
-              {formatCurrency(approvedThisMonthTotal)}
+              {formatDisplay(approvedThisMonthTotal, "USD")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               {approvedThisMonth.length} entr{approvedThisMonth.length !== 1 ? "ies" : "y"}

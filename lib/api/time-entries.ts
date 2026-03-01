@@ -20,6 +20,8 @@ export interface AdminTimeEntry {
   billingRate: number;
   billingAmount: number;
   payoutRate: number;
+  currency: string;
+  payoutCurrency: string;
   description?: string;
   status: TimeEntryStatus;
   approvedBy?: string;

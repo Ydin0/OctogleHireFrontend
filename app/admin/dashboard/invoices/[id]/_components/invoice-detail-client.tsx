@@ -11,10 +11,10 @@ import { fetchInvoice } from "@/lib/api/invoices";
 import {
   invoiceStatusBadgeClass,
   invoiceStatusLabel,
-  formatCurrency,
   formatDate,
   type InvoiceStatus,
 } from "../../../_components/dashboard-data";
+import { useAdminCurrency } from "../../../_components/admin-currency-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -37,6 +37,7 @@ const InvoiceDetailClient = ({
   const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [token, setToken] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const { formatDisplay } = useAdminCurrency();
 
   const load = useCallback(async () => {
     const t = await getToken();
@@ -123,7 +124,7 @@ const InvoiceDetailClient = ({
                 Subtotal
               </p>
               <p className="font-mono text-lg font-semibold">
-                {formatCurrency(invoice.subtotal, invoice.currency)}
+                {formatDisplay(invoice.subtotal, invoice.currency)}
               </p>
             </div>
           </CardContent>
@@ -139,7 +140,7 @@ const InvoiceDetailClient = ({
                 Tax ({invoice.taxRate}%)
               </p>
               <p className="font-mono text-lg font-semibold">
-                {formatCurrency(invoice.taxAmount, invoice.currency)}
+                {formatDisplay(invoice.taxAmount, invoice.currency)}
               </p>
             </div>
           </CardContent>
@@ -155,7 +156,7 @@ const InvoiceDetailClient = ({
                 Total
               </p>
               <p className="font-mono text-lg font-semibold">
-                {formatCurrency(invoice.total, invoice.currency)}
+                {formatDisplay(invoice.total, invoice.currency)}
               </p>
             </div>
           </CardContent>
@@ -221,13 +222,13 @@ const InvoiceDetailClient = ({
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-mono text-sm">
-                          {formatCurrency(item.hourlyRate, invoice.currency)}
+                          {formatDisplay(item.hourlyRate, invoice.currency)}
                         </TableCell>
                         <TableCell className="text-right font-mono text-sm">
                           {item.hoursWorked}
                         </TableCell>
                         <TableCell className="text-right font-mono text-sm">
-                          {formatCurrency(item.amount, invoice.currency)}
+                          {formatDisplay(item.amount, invoice.currency)}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -240,7 +241,7 @@ const InvoiceDetailClient = ({
                         Subtotal
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm font-medium">
-                        {formatCurrency(invoice.subtotal, invoice.currency)}
+                        {formatDisplay(invoice.subtotal, invoice.currency)}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -251,7 +252,7 @@ const InvoiceDetailClient = ({
                         Tax ({invoice.taxRate}%)
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        {formatCurrency(invoice.taxAmount, invoice.currency)}
+                        {formatDisplay(invoice.taxAmount, invoice.currency)}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -262,7 +263,7 @@ const InvoiceDetailClient = ({
                         Total
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm font-semibold">
-                        {formatCurrency(invoice.total, invoice.currency)}
+                        {formatDisplay(invoice.total, invoice.currency)}
                       </TableCell>
                     </TableRow>
                   </TableBody>

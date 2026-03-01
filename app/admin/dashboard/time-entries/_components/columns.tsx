@@ -22,6 +22,7 @@ import {
 interface GetColumnsOptions {
   onApprove?: (entry: AdminTimeEntry) => void;
   onReject?: (entry: AdminTimeEntry) => void;
+  formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
 export function getColumns(
@@ -95,7 +96,7 @@ export function getColumns(
       meta: { sortKey: "billingAmount" },
       cell: ({ row }) => (
         <span className="block text-right font-mono text-sm">
-          {formatCurrency(row.original.billingAmount)}
+          {(options.formatDisplay ?? formatCurrency)(row.original.billingAmount, row.original.currency ?? "USD")}
         </span>
       ),
     },

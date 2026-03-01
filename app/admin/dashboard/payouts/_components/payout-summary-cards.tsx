@@ -3,14 +3,16 @@
 import { CheckCircle2, Clock, Receipt, TrendingUp } from "lucide-react";
 
 import type { PayoutSummary } from "@/lib/api/payouts";
-import { formatCurrency } from "../../_components/dashboard-data";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAdminCurrency } from "../../_components/admin-currency-context";
 
 interface PayoutSummaryCardsProps {
   summary: PayoutSummary;
 }
 
 function PayoutSummaryCards({ summary }: PayoutSummaryCardsProps) {
+  const { formatDisplay } = useAdminCurrency();
+
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <Card>
@@ -39,7 +41,7 @@ function PayoutSummaryCards({ summary }: PayoutSummaryCardsProps) {
               Total Paid Out
             </p>
             <p className="font-mono text-lg font-semibold">
-              {formatCurrency(summary.totalPaidOut)}
+              {formatDisplay(summary.totalPaidOut, "USD")}
             </p>
           </div>
         </CardContent>
@@ -55,7 +57,7 @@ function PayoutSummaryCards({ summary }: PayoutSummaryCardsProps) {
               Pending
             </p>
             <p className="font-mono text-lg font-semibold">
-              {formatCurrency(summary.totalPending)}
+              {formatDisplay(summary.totalPending, "USD")}
             </p>
           </div>
         </CardContent>

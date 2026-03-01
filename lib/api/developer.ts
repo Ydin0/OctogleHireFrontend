@@ -12,6 +12,7 @@ export interface DeveloperEngagement {
   companyBillingRate: number;
   developerPayoutRate: number;
   currency: string;
+  payoutCurrency: string;
   engagementType: string;
   status: string;
   startDate: string | null;

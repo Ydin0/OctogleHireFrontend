@@ -24,6 +24,7 @@ import {
   activateCompany,
   fetchCompany,
   updateCompanyStatus,
+  updateCompanyCurrency,
 } from "@/lib/api/companies";
 import { CompanyInvoices } from "./_components/company-invoices";
 import {
@@ -111,6 +112,13 @@ const CompanyDetailPage = ({
       setCompany({ ...company, status: newStatus as CompanyStatus });
     }
     setUpdatingStatus(false);
+  };
+
+  const handleCurrencyChange = async (newCurrency: string) => {
+    if (!company) return;
+    setCompany({ ...company, invoiceCurrency: newCurrency });
+    const token = await getToken();
+    await updateCompanyCurrency(token, company.id, newCurrency);
   };
 
   const handleActivate = async () => {
@@ -278,26 +286,47 @@ const CompanyDetailPage = ({
               </div>
             </div>
 
-            <div className="flex flex-col items-end gap-1.5">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Status
-              </p>
-              <Select
-                value={company.status}
-                onValueChange={handleStatusChange}
-                disabled={updatingStatus}
-              >
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {allCompanyStatuses.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {companyStatusLabel[status]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-end gap-4">
+              <div className="flex flex-col items-end gap-1.5">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Invoice Currency
+                </p>
+                <Select
+                  value={company.invoiceCurrency ?? "USD"}
+                  onValueChange={handleCurrencyChange}
+                >
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD ($)</SelectItem>
+                    <SelectItem value="GBP">GBP (&pound;)</SelectItem>
+                    <SelectItem value="EUR">EUR (&euro;)</SelectItem>
+                    <SelectItem value="AED">AED (د.إ)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col items-end gap-1.5">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Status
+                </p>
+                <Select
+                  value={company.status}
+                  onValueChange={handleStatusChange}
+                  disabled={updatingStatus}
+                >
+                  <SelectTrigger className="w-[160px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allCompanyStatuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {companyStatusLabel[status]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </CardContent>

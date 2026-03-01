@@ -151,6 +151,7 @@ export interface CompanyProfileSummary {
   website?: string;
   location?: string;
   status: CompanyStatus;
+  invoiceCurrency: string;
   createdAt: string;
 }
 
@@ -163,6 +164,7 @@ export interface CompanyProfile {
   website?: string;
   location?: string;
   status: CompanyStatus;
+  invoiceCurrency: string;
   requirements: JobRequirement[];
   teamMembers: TeamMember[];
   createdAt: string;
@@ -637,6 +639,34 @@ export async function updateCompanyStatus(
 
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as CompanyProfile;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateCompanyCurrency(
+  token: string | null,
+  companyId: string,
+  invoiceCurrency: string,
+): Promise<{ id: string; companyName: string; invoiceCurrency: string } | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/currency`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ invoiceCurrency }),
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) throw new Error("API error");
+    return (await response.json()) as { id: string; companyName: string; invoiceCurrency: string };
   } catch {
     return null;
   }

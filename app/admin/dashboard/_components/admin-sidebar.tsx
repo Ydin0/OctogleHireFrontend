@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/avatar";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAdminCurrency } from "./admin-currency-context";
 
 const navItems = [
   { href: "/admin/dashboard", label: "Overview", icon: Layers },
@@ -47,6 +48,33 @@ interface AdminSidebarProps {
     email: string | null;
     imageUrl: string | null;
   };
+}
+
+const currencies = ["USD", "GBP", "AED"] as const;
+
+function CurrencyToggle() {
+  const { displayCurrency, setDisplayCurrency } = useAdminCurrency();
+
+  return (
+    <div className="flex items-center gap-1">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mr-auto">
+        Display
+      </p>
+      {currencies.map((c) => (
+        <button
+          key={c}
+          onClick={() => setDisplayCurrency(c)}
+          className={`rounded-md px-2 py-1 text-[10px] font-mono transition-colors ${
+            displayCurrency === c
+              ? "bg-pulse/10 text-pulse"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          }`}
+        >
+          {c}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 function SidebarContent({ user }: AdminSidebarProps) {
@@ -91,7 +119,8 @@ function SidebarContent({ user }: AdminSidebarProps) {
         })}
       </nav>
 
-      <div className="border-t border-border/70 px-4 py-4">
+      <div className="border-t border-border/70 px-4 py-4 space-y-3">
+        <CurrencyToggle />
         <div className="flex items-center gap-3">
           <Avatar size="sm">
             {user.imageUrl && (

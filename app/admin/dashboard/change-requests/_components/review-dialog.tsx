@@ -21,8 +21,8 @@ import {
   type ChangeRequestType,
   changeRequestTypeBadgeClass,
   changeRequestTypeLabel,
-  formatCurrency,
 } from "../../_components/dashboard-data";
+import { useAdminCurrency } from "../../_components/admin-currency-context";
 
 interface ReviewDialogProps {
   open: boolean;
@@ -32,6 +32,7 @@ interface ReviewDialogProps {
 }
 
 function ReviewDialog({ open, onOpenChange, request, token }: ReviewDialogProps) {
+  const { formatDisplay } = useAdminCurrency();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [adminNotes, setAdminNotes] = useState("");
@@ -95,7 +96,7 @@ function ReviewDialog({ open, onOpenChange, request, token }: ReviewDialogProps)
             </div>
             <div>
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Billing Rate</p>
-              <p className="font-mono font-medium">{formatCurrency(request.companyBillingRate)}/hr</p>
+              <p className="font-mono font-medium">{formatDisplay(request.companyBillingRate, "USD")}/hr</p>
             </div>
           </div>
 

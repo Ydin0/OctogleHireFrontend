@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AdminSidebar } from "./_components/admin-sidebar";
 import { AdminHeader } from "./_components/admin-header";
+import { AdminCurrencyProvider } from "./_components/admin-currency-context";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 
@@ -43,14 +44,16 @@ export default async function AdminDashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <AdminSidebar user={user} />
-      <AdminHeader user={user} />
-      <main className="lg:ml-64">
-        <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 lg:py-8">
-          {children}
-        </div>
-      </main>
-    </div>
+    <AdminCurrencyProvider token={token}>
+      <div className="min-h-screen bg-background">
+        <AdminSidebar user={user} />
+        <AdminHeader user={user} />
+        <main className="lg:ml-64">
+          <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 lg:py-8">
+            {children}
+          </div>
+        </main>
+      </div>
+    </AdminCurrencyProvider>
   );
 }

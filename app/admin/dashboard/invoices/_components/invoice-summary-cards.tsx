@@ -8,14 +8,16 @@ import {
 } from "lucide-react";
 
 import type { InvoiceSummary } from "@/lib/api/invoices";
-import { formatCurrency } from "../../_components/dashboard-data";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAdminCurrency } from "../../_components/admin-currency-context";
 
 interface InvoiceSummaryCardsProps {
   summary: InvoiceSummary;
 }
 
 function InvoiceSummaryCards({ summary }: InvoiceSummaryCardsProps) {
+  const { formatDisplay } = useAdminCurrency();
+
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <Card>
@@ -28,7 +30,7 @@ function InvoiceSummaryCards({ summary }: InvoiceSummaryCardsProps) {
               Total Revenue
             </p>
             <p className="font-mono text-lg font-semibold">
-              {formatCurrency(summary.totalRevenue)}
+              {formatDisplay(summary.totalRevenue, "USD")}
             </p>
           </div>
         </CardContent>
@@ -44,7 +46,7 @@ function InvoiceSummaryCards({ summary }: InvoiceSummaryCardsProps) {
               Paid
             </p>
             <p className="font-mono text-lg font-semibold">
-              {formatCurrency(summary.totalPaid)}
+              {formatDisplay(summary.totalPaid, "USD")}
             </p>
           </div>
         </CardContent>
@@ -60,7 +62,7 @@ function InvoiceSummaryCards({ summary }: InvoiceSummaryCardsProps) {
               Outstanding
             </p>
             <p className="font-mono text-lg font-semibold">
-              {formatCurrency(summary.totalOutstanding)}
+              {formatDisplay(summary.totalOutstanding, "USD")}
             </p>
           </div>
         </CardContent>

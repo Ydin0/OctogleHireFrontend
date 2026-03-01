@@ -10,6 +10,7 @@ import { DataTable } from "../../_components/data-table";
 import { getColumns } from "./columns";
 import { InvoiceFiltersBar } from "./filters-bar";
 import { InvoiceSummaryCards } from "./invoice-summary-cards";
+import { useAdminCurrency } from "../../_components/admin-currency-context";
 
 interface InvoicesClientProps {
   invoices: Invoice[];
@@ -133,7 +134,8 @@ function InvoicesClient({ invoices, summary, token }: InvoicesClientProps) {
     });
   };
 
-  const columns = getColumns({ onMarkPaid: handleMarkPaid });
+  const { formatDisplay } = useAdminCurrency();
+  const columns = getColumns({ onMarkPaid: handleMarkPaid, formatDisplay });
 
   return (
     <>

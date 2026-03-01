@@ -10,6 +10,7 @@ import { DataTable } from "../../_components/data-table";
 import { getColumns } from "./columns";
 import { PayoutFiltersBar } from "./filters-bar";
 import { PayoutSummaryCards } from "./payout-summary-cards";
+import { useAdminCurrency } from "../../_components/admin-currency-context";
 
 interface PayoutsClientProps {
   payouts: Payout[];
@@ -120,7 +121,8 @@ function PayoutsClient({ payouts, summary, token }: PayoutsClientProps) {
     });
   };
 
-  const columns = getColumns({ onMarkPaid: handleMarkPaid });
+  const { formatDisplay } = useAdminCurrency();
+  const columns = getColumns({ onMarkPaid: handleMarkPaid, formatDisplay });
 
   return (
     <>

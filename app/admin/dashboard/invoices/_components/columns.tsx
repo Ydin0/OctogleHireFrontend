@@ -24,6 +24,7 @@ import {
 
 interface GetColumnsOptions {
   onMarkPaid?: (invoice: Invoice) => void;
+  formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
 export function getColumns(
@@ -72,7 +73,7 @@ export function getColumns(
       meta: { sortKey: "total" },
       cell: ({ row }) => (
         <span className="block font-mono text-sm">
-          {formatCurrency(row.original.total, row.original.currency)}
+          {(options.formatDisplay ?? formatCurrency)(row.original.total, row.original.currency)}
         </span>
       ),
     },

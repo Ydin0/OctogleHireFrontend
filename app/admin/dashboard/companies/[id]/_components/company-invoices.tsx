@@ -13,9 +13,9 @@ import {
 import {
   invoiceStatusBadgeClass,
   invoiceStatusLabel,
-  formatCurrency,
   type InvoiceStatus,
 } from "../../../_components/dashboard-data";
+import { useAdminCurrency } from "../../../_components/admin-currency-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -25,6 +25,7 @@ interface CompanyInvoicesProps {
 
 function CompanyInvoices({ companyId }: CompanyInvoicesProps) {
   const { getToken } = useAuth();
+  const { formatDisplay } = useAdminCurrency();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [summary, setSummary] = useState<InvoiceSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -97,7 +98,7 @@ function CompanyInvoices({ companyId }: CompanyInvoicesProps) {
                 Total Billed
               </p>
               <p className="font-mono text-sm font-semibold">
-                {formatCurrency(summary.totalRevenue)}
+                {formatDisplay(summary.totalRevenue, "USD")}
               </p>
             </div>
             <div className="flex-1 text-center">
@@ -105,7 +106,7 @@ function CompanyInvoices({ companyId }: CompanyInvoicesProps) {
                 Paid
               </p>
               <p className="font-mono text-sm font-semibold text-emerald-600">
-                {formatCurrency(summary.totalPaid)}
+                {formatDisplay(summary.totalPaid, "USD")}
               </p>
             </div>
             <div className="flex-1 text-center">
@@ -113,7 +114,7 @@ function CompanyInvoices({ companyId }: CompanyInvoicesProps) {
                 Outstanding
               </p>
               <p className="font-mono text-sm font-semibold text-amber-600">
-                {formatCurrency(summary.totalOutstanding)}
+                {formatDisplay(summary.totalOutstanding, "USD")}
               </p>
             </div>
           </div>
@@ -138,7 +139,7 @@ function CompanyInvoices({ companyId }: CompanyInvoicesProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">
-                    {formatCurrency(inv.total, inv.currency)}
+                    {formatDisplay(inv.total, inv.currency)}
                   </span>
                   <Badge
                     variant="outline"

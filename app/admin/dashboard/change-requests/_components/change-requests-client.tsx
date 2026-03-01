@@ -31,7 +31,6 @@ import {
   changeRequestTypeLabel,
   changeRequestStatusBadgeClass,
   changeRequestStatusLabel,
-  formatCurrency,
   formatDate,
 } from "../../_components/dashboard-data";
 import { DataTable } from "../../_components/data-table";
