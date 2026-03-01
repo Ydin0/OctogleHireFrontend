@@ -90,14 +90,15 @@ const ProposedMatchesClient = ({
     setRespondingId(match.id);
     const token = await getToken();
     await respondToMatch(token, match.id, "accepted");
-    // Optimistic update
+    // Optimistic update — backend sets to "active" when company confirms
+    const newStatus = match.status === "accepted" ? "active" : "accepted";
     setRequirement((prev) => {
       if (!prev) return prev;
       return {
         ...prev,
         proposedMatches: prev.proposedMatches?.map((m) =>
           m.id === match.id
-            ? { ...m, status: "accepted" as const, respondedAt: new Date().toISOString() }
+            ? { ...m, status: newStatus as ProposedMatch["status"], respondedAt: new Date().toISOString() }
             : m,
         ),
       };
@@ -345,6 +346,34 @@ const ProposedMatchesClient = ({
                         >
                           <X className="size-3.5" />
                           Reject
+                        </Button>
+                      </div>
+                    )}
+
+                    {match.status === "accepted" && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+                          disabled={respondingId === match.id}
+                          onClick={() => handleAccept(match)}
+                        >
+                          {respondingId === match.id ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <Check className="size-3.5" />
+                          )}
+                          Confirm Hire
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+                          disabled={respondingId === match.id}
+                          onClick={() => setRejectDialog(match)}
+                        >
+                          <X className="size-3.5" />
+                          Decline
                         </Button>
                       </div>
                     )}

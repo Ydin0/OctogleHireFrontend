@@ -135,7 +135,7 @@ export const requirementStatusBadgeClass = (status: RequirementStatus) => {
 
 export const matchStatusLabel: Record<MatchStatus, string> = {
   proposed: "Proposed",
-  accepted: "Accepted",
+  accepted: "Applicant Accepted",
   rejected: "Rejected",
   active: "Active",
   ended: "Ended",
