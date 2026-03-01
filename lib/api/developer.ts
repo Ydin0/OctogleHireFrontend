@@ -133,12 +133,13 @@ export interface DeveloperOpportunity {
   techStack: string[];
   experienceLevel: string;
   engagementType: string;
+  timezonePreference: string;
+  startDate: string | null;
+  experienceYearsMin: number | null;
+  experienceYearsMax: number | null;
   companyName: string;
   companyWebsite: string | null;
   companyLocation: string | null;
-  proposedHourlyRate: number;
-  proposedMonthlyRate: number;
-  currency: string;
   status: string;
   rejectionReason: string | null;
   proposedAt: string;

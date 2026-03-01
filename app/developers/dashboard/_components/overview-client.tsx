@@ -206,8 +206,8 @@ export function OverviewClient({
                     <p className="text-sm font-semibold">{opp.requirementTitle}</p>
                     <p className="text-xs text-muted-foreground">{opp.companyName}</p>
                   </div>
-                  <Badge variant="outline" className="border-pulse/35 bg-pulse/10 font-mono text-pulse">
-                    ${opp.proposedHourlyRate}/hr
+                  <Badge variant="outline" className="border-pulse/35 bg-pulse/10 text-pulse capitalize">
+                    {opp.engagementType}
                   </Badge>
                 </div>
               </div>
