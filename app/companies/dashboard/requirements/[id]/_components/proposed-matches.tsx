@@ -192,11 +192,11 @@ const ProposedMatchesClient = ({
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Proposed Matches</CardTitle>
+          <CardTitle className="text-base">Matched Candidates</CardTitle>
           <CardDescription>
             {matches.length === 0
-              ? "No matches proposed yet. Our team is reviewing candidates."
-              : `${matches.length} engineer${matches.length !== 1 ? "s" : ""} proposed for this role.`}
+              ? "No candidates available yet. Our team is reviewing and matching engineers."
+              : `${matches.length} interested engineer${matches.length !== 1 ? "s" : ""} ready for your review.`}
           </CardDescription>
         </CardHeader>
         {matches.length > 0 && (
@@ -269,35 +269,6 @@ const ProposedMatchesClient = ({
                       <span className="text-muted-foreground">|</span>{" "}
                       ${match.proposedMonthlyRate.toLocaleString()}/mo
                     </p>
-
-                    {match.status === "proposed" && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5"
-                          disabled={respondingId === match.id}
-                          onClick={() => handleAccept(match)}
-                        >
-                          {respondingId === match.id ? (
-                            <Loader2 className="size-3.5 animate-spin" />
-                          ) : (
-                            <Check className="size-3.5" />
-                          )}
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
-                          disabled={respondingId === match.id}
-                          onClick={() => setRejectDialog(match)}
-                        >
-                          <X className="size-3.5" />
-                          Reject
-                        </Button>
-                      </div>
-                    )}
 
                     {match.status === "accepted" && (
                       <div className="flex items-center gap-2">

@@ -23,6 +23,7 @@ export type RequirementStatus =
 export type MatchStatus =
   | "proposed"
   | "accepted"
+  | "declined"
   | "rejected"
   | "active"
   | "ended";
@@ -136,6 +137,7 @@ export const requirementStatusBadgeClass = (status: RequirementStatus) => {
 export const matchStatusLabel: Record<MatchStatus, string> = {
   proposed: "Proposed",
   accepted: "Applicant Accepted",
+  declined: "Declined",
   rejected: "Rejected",
   active: "Active",
   ended: "Ended",
@@ -147,6 +149,8 @@ export const matchStatusBadgeClass = (status: MatchStatus) => {
       return "bg-amber-500/10 text-amber-700 border-amber-600/20";
     case "accepted":
       return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    case "declined":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
     case "active":
       return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
     case "rejected":
@@ -253,6 +257,49 @@ export const payoutStatusBadgeClass = (status: PayoutStatus) => {
     case "pending":
       return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
     case "cancelled":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
+// ── Change request status helpers ───────────────────────────────────────────
+
+export type ChangeRequestType = "cancellation" | "hour_reduction" | "extension";
+export type ChangeRequestStatus = "pending" | "approved" | "rejected";
+
+export const changeRequestTypeLabel: Record<ChangeRequestType, string> = {
+  cancellation: "Cancellation",
+  hour_reduction: "Hour Reduction",
+  extension: "Extension",
+};
+
+export const changeRequestTypeBadgeClass = (type: ChangeRequestType) => {
+  switch (type) {
+    case "cancellation":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
+    case "hour_reduction":
+      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+    case "extension":
+      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
+export const changeRequestStatusLabel: Record<ChangeRequestStatus, string> = {
+  pending: "Pending",
+  approved: "Approved",
+  rejected: "Rejected",
+};
+
+export const changeRequestStatusBadgeClass = (status: ChangeRequestStatus) => {
+  switch (status) {
+    case "pending":
+      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+    case "approved":
+      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+    case "rejected":
       return "bg-red-500/10 text-red-600 border-red-600/20";
     default:
       return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";

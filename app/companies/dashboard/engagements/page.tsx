@@ -9,5 +9,5 @@ export default async function EngagementsPage() {
 
   const engagements = await fetchCompanyEngagements(token);
 
-  return <EngagementsClient engagements={engagements ?? []} />;
+  return <EngagementsClient engagements={engagements ?? []} token={token!} />;
 }

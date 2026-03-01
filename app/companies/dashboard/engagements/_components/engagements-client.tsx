@@ -1,10 +1,8 @@
 "use client";
 
-import { Briefcase, DollarSign, Users } from "lucide-react";
+import { Briefcase, Users, DollarSign, AlertCircle } from "lucide-react";
 
 import type { CompanyEngagement } from "@/lib/api/companies";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -12,29 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { EngagementRow } from "./engagement-row";
 
 interface EngagementsClientProps {
   engagements: CompanyEngagement[];
+  token: string;
 }
-
-const statusBadgeClass = (status: string) => {
-  switch (status) {
-    case "active":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
-    case "pending":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
-    case "ended":
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
-    default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
-  }
-};
-
-const statusLabel: Record<string, string> = {
-  active: "Active",
-  pending: "Pending",
-  ended: "Ended",
-};
 
 const formatCurrency = (amount: number, currency = "USD") =>
   new Intl.NumberFormat("en-US", {
@@ -43,37 +24,27 @@ const formatCurrency = (amount: number, currency = "USD") =>
     minimumFractionDigits: 2,
   }).format(amount);
 
-const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
 function computeMonthlyBill(engagements: CompanyEngagement[]): number {
   return engagements
     .filter((e) => e.status === "active")
     .reduce((sum, e) => {
-      const hours =
-        e.engagementType === "full-time"
-          ? 160
-          : e.engagementType === "part-time"
-            ? 80
-            : 0;
+      const hours = e.monthlyHoursCap ?? e.monthlyHoursExpected ?? 0;
       return sum + e.companyBillingRate * hours;
     }, 0);
 }
 
-function EngagementsClient({ engagements }: EngagementsClientProps) {
+function EngagementsClient({ engagements, token }: EngagementsClientProps) {
   const activeEngagements = engagements.filter((e) => e.status === "active");
   const uniqueDevIds = new Set(activeEngagements.map((e) => e.developerId));
   const predictedBill = computeMonthlyBill(engagements);
+  const pendingRequestCount = engagements.filter(
+    (e) => e.pendingChangeRequests > 0,
+  ).length;
 
   return (
     <>
       {/* KPI Cards */}
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
@@ -112,7 +83,21 @@ function EngagementsClient({ engagements }: EngagementsClientProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            Based on full-time (160hr) and part-time (80hr) rates.
+            Based on effective monthly hours and billing rates.
+          </CardContent>
+        </Card>
+
+        <Card className={pendingRequestCount > 0 ? "border-amber-600/20" : undefined}>
+          <CardHeader className="pb-2">
+            <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
+              Pending Requests
+            </CardDescription>
+            <CardTitle className="text-2xl">{pendingRequestCount}</CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-muted-foreground">
+            {pendingRequestCount > 0
+              ? `${pendingRequestCount} engagement${pendingRequestCount !== 1 ? "s" : ""} with pending requests`
+              : "No pending change requests."}
           </CardContent>
         </Card>
       </section>
@@ -125,7 +110,7 @@ function EngagementsClient({ engagements }: EngagementsClientProps) {
             Engagements
           </CardTitle>
           <CardDescription>
-            All developer engagements and billing details.
+            All developer engagements and billing details. Click to expand.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -141,49 +126,7 @@ function EngagementsClient({ engagements }: EngagementsClientProps) {
             </div>
           ) : (
             engagements.map((eng) => (
-              <div
-                key={eng.id}
-                className="flex items-center justify-between gap-3 rounded-md border p-3"
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <Avatar className="size-9 shrink-0">
-                    {eng.developerAvatar && (
-                      <AvatarImage src={eng.developerAvatar} alt={eng.developerName} />
-                    )}
-                    <AvatarFallback className="text-xs">
-                      {getInitials(eng.developerName || "D")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate text-sm font-medium">{eng.developerName}</p>
-                      <Badge
-                        variant="outline"
-                        className={statusBadgeClass(eng.status)}
-                      >
-                        {statusLabel[eng.status] ?? eng.status}
-                      </Badge>
-                    </div>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {eng.developerRole}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {eng.requirementTitle}
-                    </p>
-                  </div>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="font-mono text-sm">
-                    {formatCurrency(eng.companyBillingRate, eng.currency)}/hr
-                  </p>
-                  <p className="text-xs text-muted-foreground">{eng.engagementType}</p>
-                  {eng.startDate && (
-                    <p className="text-xs text-muted-foreground">
-                      Since {new Date(eng.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" })}
-                    </p>
-                  )}
-                </div>
-              </div>
+              <EngagementRow key={eng.id} engagement={eng} token={token} />
             ))
           )}
         </CardContent>

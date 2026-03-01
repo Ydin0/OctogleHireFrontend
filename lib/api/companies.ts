@@ -15,6 +15,7 @@ export type RequirementStatus =
 export type MatchStatus =
   | "proposed"
   | "accepted"
+  | "declined"
   | "rejected"
   | "active"
   | "ended";
@@ -108,6 +109,36 @@ export interface CompanyEngagement {
   status: string;
   startDate: string | null;
   endDate: string | null;
+  monthlyHoursExpected: number | null;
+  monthlyHoursCap: number | null;
+  currentMonthTimeEntry: { hours: number; status: string } | null;
+  pendingChangeRequests: number;
+  createdAt: string;
+}
+
+export interface EngagementChangeRequest {
+  id: string;
+  engagementId: string;
+  companyId: string;
+  type: "cancellation" | "hour_reduction" | "extension";
+  status: "pending" | "approved" | "rejected";
+  reason: string;
+  requestedEffectiveDate: string;
+  requestedMonthlyHours: number | null;
+  requestedEndDate: string | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+  adminNotes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CompanyTimeEntry {
+  id: string;
+  period: string;
+  hours: number;
+  description: string | null;
+  status: string;
   createdAt: string;
 }
 
@@ -253,6 +284,78 @@ export async function fetchCompanyEngagements(
   } catch {
     return null;
   }
+}
+
+export async function fetchEngagementTimeEntries(
+  token: string | null,
+  engagementId: string,
+): Promise<CompanyTimeEntry[]> {
+  if (!token) return [];
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/engagements/${engagementId}/time-entries`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) throw new Error("Failed to fetch time entries");
+  return (await response.json()) as CompanyTimeEntry[];
+}
+
+export async function fetchEngagementChangeRequests(
+  token: string | null,
+  engagementId: string,
+): Promise<EngagementChangeRequest[]> {
+  if (!token) return [];
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/engagements/${engagementId}/change-requests`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) throw new Error("Failed to fetch change requests");
+  return (await response.json()) as EngagementChangeRequest[];
+}
+
+export async function createChangeRequest(
+  token: string | null,
+  engagementId: string,
+  payload: {
+    type: "cancellation" | "hour_reduction" | "extension";
+    reason: string;
+    requestedEffectiveDate: string;
+    requestedMonthlyHours?: number;
+    requestedEndDate?: string;
+  },
+): Promise<EngagementChangeRequest> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/engagements/${engagementId}/change-requests`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to create change request");
+  }
+
+  return (await response.json()) as EngagementChangeRequest;
 }
 
 export async function fetchCompanyRequirements(

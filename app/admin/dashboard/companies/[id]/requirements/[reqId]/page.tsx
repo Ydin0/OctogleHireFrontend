@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { use } from "react";
 
 import {
@@ -44,6 +44,7 @@ const AllocationPage = ({
   const { getToken } = useAuth();
   const [requirement, setRequirement] = useState<JobRequirement | null>(null);
   const [loading, setLoading] = useState(true);
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
   const load = useCallback(async () => {
     const token = await getToken();
@@ -191,27 +192,7 @@ const AllocationPage = ({
         </CardContent>
       </Card>
 
-      {/* ── Description + Tech Stack ─────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Description</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-sm leading-relaxed text-muted-foreground">
-            <MarkdownDisplay content={requirement.description} />
-          </div>
-          <Separator className="my-4" />
-          <div className="flex flex-wrap gap-1.5">
-            {requirement.techStack.map((tech) => (
-              <Badge key={tech} variant="outline">
-                {tech}
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* ── Current Matches ──────────────────────────────────────────── */}
+      {/* ── Current Matches (moved to top) ────────────────────────────── */}
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -236,6 +217,51 @@ const AllocationPage = ({
               matches={matches}
               onRemove={handleRemove}
             />
+          </CardContent>
+        )}
+      </Card>
+
+      {/* ── Description + Tech Stack (collapsible) ────────────────────── */}
+      <Card>
+        <CardHeader>
+          <button
+            type="button"
+            onClick={() => setDescriptionExpanded((prev) => !prev)}
+            className="flex w-full items-center justify-between text-left"
+          >
+            <CardTitle className="text-base">Description</CardTitle>
+            {descriptionExpanded ? (
+              <ChevronUp className="size-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="size-4 text-muted-foreground" />
+            )}
+          </button>
+          {!descriptionExpanded && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {requirement.techStack.slice(0, 8).map((tech) => (
+                <Badge key={tech} variant="outline">
+                  {tech}
+                </Badge>
+              ))}
+              {requirement.techStack.length > 8 && (
+                <Badge variant="outline">+{requirement.techStack.length - 8}</Badge>
+              )}
+            </div>
+          )}
+        </CardHeader>
+        {descriptionExpanded && (
+          <CardContent>
+            <div className="text-sm leading-relaxed text-muted-foreground">
+              <MarkdownDisplay content={requirement.description} />
+            </div>
+            <Separator className="my-4" />
+            <div className="flex flex-wrap gap-1.5">
+              {requirement.techStack.map((tech) => (
+                <Badge key={tech} variant="outline">
+                  {tech}
+                </Badge>
+              ))}
+            </div>
           </CardContent>
         )}
       </Card>
