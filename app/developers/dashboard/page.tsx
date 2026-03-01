@@ -2,8 +2,13 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 import { OverviewClient } from "./_components/overview-client";
-import { fetchDeveloperProfile, fetchDeveloperOffers, fetchDeveloperOpportunities } from "@/lib/api/developer";
-import { fetchDeveloperApplicationStatus } from "@/lib/developer-application";
+import {
+  fetchDeveloperOpportunities,
+  fetchDeveloperEngagements,
+  fetchDeveloperEarnings,
+  fetchDeveloperEarningsSummary,
+  fetchDeveloperTimeEntries,
+} from "@/lib/api/developer";
 
 export default async function OverviewPage() {
   const { userId, getToken } = await auth();
@@ -11,19 +16,31 @@ export default async function OverviewPage() {
 
   const token = await getToken();
 
-  const [profile, offers, opportunities, applicationStatus] = await Promise.all([
-    fetchDeveloperProfile(token),
-    fetchDeveloperOffers(token),
-    fetchDeveloperOpportunities(token),
-    fetchDeveloperApplicationStatus(token),
-  ]);
+  const [opportunities, engagements, payouts, summary, timeEntries] =
+    await Promise.all([
+      fetchDeveloperOpportunities(token),
+      fetchDeveloperEngagements(token),
+      fetchDeveloperEarnings(token),
+      fetchDeveloperEarningsSummary(token),
+      fetchDeveloperTimeEntries(token),
+    ]);
 
   return (
     <OverviewClient
-      profile={profile}
-      offers={offers ?? []}
       opportunities={opportunities ?? []}
-      applicationStatus={applicationStatus}
+      engagements={engagements ?? []}
+      payouts={payouts ?? []}
+      summary={
+        summary ?? {
+          totalPayouts: 0,
+          totalPaidOut: 0,
+          totalPending: 0,
+          totalBilledToCompanies: 0,
+          totalMargin: 0,
+          averageMarginPercent: 0,
+        }
+      }
+      timeEntries={timeEntries ?? []}
     />
   );
 }
