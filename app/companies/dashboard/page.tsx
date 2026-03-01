@@ -7,10 +7,10 @@ import {
   Bell,
   Briefcase,
   ClipboardList,
+  DollarSign,
   Loader2,
   Plus,
   Search,
-  ShieldCheck,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -24,9 +24,12 @@ import {
 import {
   fetchCompanyRequirements,
   fetchCompanyTeam,
+  fetchCompanyEngagements,
   type JobRequirement,
   type TeamMember,
+  type CompanyEngagement,
 } from "@/lib/api/companies";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,23 +44,56 @@ function countToReview(req: JobRequirement): number {
   return (req.proposedMatches ?? []).filter((m) => m.status === "accepted").length;
 }
 
+const formatCurrency = (amount: number, currency = "USD") =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+function computeMonthlyBill(engagements: CompanyEngagement[]): number {
+  return engagements
+    .filter((e) => e.status === "active")
+    .reduce((sum, e) => {
+      const hours =
+        e.engagementType === "full-time"
+          ? 160
+          : e.engagementType === "part-time"
+            ? 80
+            : 0;
+      return sum + e.companyBillingRate * hours;
+    }, 0);
+}
+
 const CompanyOverviewPage = () => {
   const { getToken } = useAuth();
   const [requirements, setRequirements] = useState<JobRequirement[] | null>(null);
   const [team, setTeam] = useState<TeamMember[] | null>(null);
+  const [engagements, setEngagements] = useState<CompanyEngagement[] | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const token = await getToken();
-      const [reqs, members] = await Promise.all([
+      const [reqs, members, engs] = await Promise.all([
         fetchCompanyRequirements(token),
         fetchCompanyTeam(token),
+        fetchCompanyEngagements(token),
       ]);
       if (!cancelled) {
         setRequirements(reqs);
         setTeam(members);
+        setEngagements(engs);
         setLoading(false);
       }
     })();
@@ -65,20 +101,14 @@ const CompanyOverviewPage = () => {
   }, [getToken]);
 
   const reqs = requirements ?? [];
-  const teamMembers = team ?? [];
+  const engs = engagements ?? [];
 
+  const activeEngagements = engs.filter((e) => e.status === "active");
+  const predictedBill = computeMonthlyBill(engs);
+  const totalToReview = reqs.reduce((sum, r) => sum + countToReview(r), 0);
   const openPositions = reqs
     .filter((r) => r.status === "open" || r.status === "matching" || r.status === "partially_filled")
     .reduce((sum, r) => sum + r.developersNeeded, 0);
-
-  const matchedCount = reqs.reduce((sum, r) => {
-    const accepted = (r.proposedMatches ?? []).filter(
-      (m) => m.status === "accepted" || m.status === "active",
-    ).length;
-    return sum + accepted;
-  }, 0);
-
-  const totalToReview = reqs.reduce((sum, r) => sum + countToReview(r), 0);
 
   const reqsWithReviews = reqs
     .map((r) => ({ req: r, reviewCount: countToReview(r) }))
@@ -89,7 +119,24 @@ const CompanyOverviewPage = () => {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 3);
 
+  const topActiveEngagements = activeEngagements.slice(0, 3);
+
   const kpis = [
+    {
+      label: "Active Engagements",
+      value: activeEngagements.length.toString(),
+      hint: "Developers currently working for you",
+      icon: Briefcase,
+      highlight: false,
+    },
+    {
+      label: "Predicted Monthly Bill",
+      value: formatCurrency(predictedBill),
+      hint: "Based on engagement hours",
+      icon: DollarSign,
+      highlight: false,
+      mono: true,
+    },
     {
       label: "To Review",
       value: totalToReview.toString(),
@@ -98,64 +145,39 @@ const CompanyOverviewPage = () => {
       highlight: totalToReview > 0,
     },
     {
-      label: "Requirements",
-      value: reqs.length.toString(),
-      hint: "Total job requirements posted",
-      icon: ClipboardList,
-      highlight: false,
-    },
-    {
       label: "Open Positions",
       value: openPositions.toString(),
       hint: "Developers needed across open requirements",
-      icon: Briefcase,
-      highlight: false,
-    },
-    {
-      label: "Matched",
-      value: matchedCount.toString(),
-      hint: "Accepted or active developer matches",
-      icon: UserCheck,
+      icon: Users,
       highlight: false,
     },
   ];
 
   return (
     <>
-      <Card className="overflow-hidden border-pulse/30 bg-gradient-to-br from-card via-card to-pulse/5">
-        <CardContent className="p-6 lg:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-3">
-              <Badge variant="outline" className="gap-1.5 border-pulse/40 bg-pulse/10 text-pulse">
-                <ShieldCheck className="size-3.5" />
-                Company Workspace
-              </Badge>
-              <h1 className="text-3xl font-semibold tracking-tight lg:text-4xl">
-                Operations Overview
-              </h1>
-              <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Manage your development requirements, review proposed matches,
-                and track your offshore team from a single dashboard.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center">
-              <Button variant="outline" className="gap-2" asChild>
-                <Link href="/companies/dashboard/requirements/new">
-                  <Plus className="size-4" />
-                  Post a Requirement
-                </Link>
-              </Button>
-              <Button variant="outline" className="gap-2" asChild>
-                <Link href="/marketplace">
-                  <Search className="size-4" />
-                  Browse Talent
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Operations Overview</h1>
+          <p className="text-sm text-muted-foreground">
+            Track engagements, review matches, and manage requirements.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <Link href="/companies/dashboard/requirements/new">
+              <Plus className="size-4" />
+              Post a Requirement
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2" asChild>
+            <Link href="/marketplace">
+              <Search className="size-4" />
+              Browse Talent
+            </Link>
+          </Button>
+        </div>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
@@ -163,31 +185,6 @@ const CompanyOverviewPage = () => {
         </div>
       ) : (
         <>
-          {/* Action-needed banner */}
-          {totalToReview > 0 && (
-            <Card className="border-amber-500/40 bg-amber-500/5">
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-amber-500/15">
-                  <Bell className="size-5 text-amber-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">
-                    {totalToReview} developer{totalToReview !== 1 ? "s" : ""} awaiting your review
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Developers have expressed interest in your roles. Review their profiles and confirm hire to start engagements.
-                  </p>
-                </div>
-                <Button size="sm" className="shrink-0 gap-1.5 bg-amber-600 text-white hover:bg-amber-700" asChild>
-                  <Link href="/companies/dashboard/requirements">
-                    Review Now
-                    <ArrowRight className="size-3.5" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
           {/* KPIs */}
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {kpis.map((kpi) => (
@@ -196,10 +193,12 @@ const CompanyOverviewPage = () => {
                 className={kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}
               >
                 <CardHeader className="pb-2">
-                  <CardDescription className="text-xs font-mono uppercase tracking-[0.08em]">
+                  <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
                     {kpi.label}
                   </CardDescription>
-                  <CardTitle className={`text-2xl ${kpi.highlight ? "text-amber-600" : ""}`}>
+                  <CardTitle
+                    className={`text-2xl ${kpi.mono ? "font-mono" : ""} ${kpi.highlight ? "text-amber-600" : ""}`}
+                  >
                     {kpi.value}
                   </CardTitle>
                 </CardHeader>
@@ -213,7 +212,56 @@ const CompanyOverviewPage = () => {
             ))}
           </section>
 
-          {/* Requirements needing review */}
+          {/* Active Team */}
+          {topActiveEngagements.length > 0 && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-base">Active Team</CardTitle>
+                  <CardDescription>Developers currently engaged with your company.</CardDescription>
+                </div>
+                <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                  <Link href="/companies/dashboard/engagements">
+                    View All
+                    <ArrowRight className="size-3.5" />
+                  </Link>
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {topActiveEngagements.map((eng) => (
+                  <div
+                    key={eng.id}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-border/70 p-3"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar className="size-8 shrink-0">
+                        {eng.developerAvatar && (
+                          <AvatarImage src={eng.developerAvatar} alt={eng.developerName} />
+                        )}
+                        <AvatarFallback className="text-xs">
+                          {getInitials(eng.developerName || "D")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{eng.developerName}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {eng.requirementTitle}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="font-mono text-sm">
+                        {formatCurrency(eng.companyBillingRate)}/hr
+                      </p>
+                      <p className="text-xs text-muted-foreground">{eng.engagementType}</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Matches to Review */}
           {reqsWithReviews.length > 0 && (
             <Card className="border-amber-500/30">
               <CardHeader className="flex flex-row items-center justify-between">
@@ -253,7 +301,7 @@ const CompanyOverviewPage = () => {
             </Card>
           )}
 
-          {/* Recent requirements */}
+          {/* Recent Requirements */}
           {recentRequirements.length > 0 && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">

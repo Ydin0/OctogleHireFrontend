@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Bell,
+  Briefcase,
   Building2,
   ClipboardList,
   FileText,
   Layers,
   LogOut,
   Users,
-  Wrench,
 } from "lucide-react";
 import { useAuth, useClerk } from "@clerk/nextjs";
 
@@ -35,7 +35,7 @@ const sidebarItems = [
   { href: "/companies/dashboard/requirements", label: "Requirements", icon: ClipboardList },
   { href: "/companies/dashboard/invoices", label: "Invoices", icon: FileText },
   { href: "/companies/dashboard/team", label: "Team", icon: Users },
-  { href: "/companies/dashboard/resources", label: "Resources", icon: Wrench },
+  { href: "/companies/dashboard/engagements", label: "Engagements", icon: Briefcase },
 ] as const;
 
 const isItemActive = (pathname: string, href: string) => {

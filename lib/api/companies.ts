@@ -94,6 +94,23 @@ export interface JobRequirement {
   updatedAt: string;
 }
 
+export interface CompanyEngagement {
+  id: string;
+  developerId: string;
+  developerName: string;
+  developerRole: string;
+  developerAvatar: string;
+  requirementId: string;
+  requirementTitle: string;
+  companyBillingRate: number;
+  currency: string;
+  engagementType: string;
+  status: string;
+  startDate: string | null;
+  endDate: string | null;
+  createdAt: string;
+}
+
 export interface CompanyProfileSummary {
   id: string;
   companyName: string;
@@ -211,6 +228,28 @@ export async function fetchCompanyTeam(
 
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as TeamMember[];
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchCompanyEngagements(
+  token: string | null,
+): Promise<CompanyEngagement[] | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/engagements`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        next: { revalidate: 60 },
+      },
+    );
+
+    if (!response.ok) throw new Error("API error");
+    return (await response.json()) as CompanyEngagement[];
   } catch {
     return null;
   }

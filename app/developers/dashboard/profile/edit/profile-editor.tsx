@@ -7,6 +7,7 @@ import { useAuth } from "@clerk/nextjs";
 
 import type { DeveloperProfile } from "@/lib/api/developer";
 import { updateDeveloperProfile } from "@/lib/api/developer";
+import { TechStackSelector } from "@/app/apply/_components/tech-stack-selector";
 import {
   Avatar,
   AvatarFallback,
@@ -26,10 +27,20 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface WorkHistoryItem {
   company: string;
-  role: string;
-  duration: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  current: boolean;
   description: string;
   techUsed: string[];
+}
+
+interface EducationItem {
+  institution: string;
+  degree: string;
+  field: string;
+  startYear: string;
+  endYear: string;
 }
 
 interface EditableProfile {
@@ -37,15 +48,26 @@ interface EditableProfile {
   aboutLong: string;
   primaryStack: string[];
   workExperience: WorkHistoryItem[];
+  education: EducationItem[];
   marketplaceAchievements: string[];
 }
 
 const emptyWorkHistoryItem: WorkHistoryItem = {
   company: "",
-  role: "",
-  duration: "",
+  title: "",
+  startDate: "",
+  endDate: "",
+  current: false,
   description: "",
   techUsed: [],
+};
+
+const emptyEducationItem: EducationItem = {
+  institution: "",
+  degree: "",
+  field: "",
+  startYear: "",
+  endYear: "",
 };
 
 function getInitials(name: string) {
@@ -61,16 +83,35 @@ function parseWorkExperience(raw: unknown): WorkHistoryItem[] {
   if (!Array.isArray(raw)) return [];
   return raw.map((item) => ({
     company: item?.company ?? "",
-    role: item?.role ?? "",
-    duration: item?.duration ?? "",
+    title: item?.title ?? item?.role ?? "",
+    startDate: item?.startDate ?? "",
+    endDate: item?.endDate ?? "",
+    current: item?.current ?? false,
     description: item?.description ?? "",
     techUsed: Array.isArray(item?.techUsed) ? item.techUsed : [],
+  }));
+}
+
+function parseEducation(raw: unknown): EducationItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((item) => ({
+    institution: item?.institution ?? "",
+    degree: item?.degree ?? "",
+    field: item?.field ?? item?.grade ?? "",
+    startYear: item?.startYear ?? "",
+    endYear: item?.endYear ?? "",
   }));
 }
 
 function parseAchievements(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter((item): item is string => typeof item === "string");
+}
+
+function formatDuration(item: WorkHistoryItem): string {
+  if (!item.startDate) return "";
+  const end = item.current ? "Present" : item.endDate || "";
+  return end ? `${item.startDate} - ${end}` : item.startDate;
 }
 
 const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
@@ -82,10 +123,10 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
     aboutLong: profile?.aboutLong || profile?.bio || "",
     primaryStack: [...(profile?.primaryStack ?? [])],
     workExperience: parseWorkExperience(profile?.workExperience),
+    education: parseEducation(profile?.education),
     marketplaceAchievements: parseAchievements(profile?.marketplaceAchievements),
   });
 
-  const [skillInput, setSkillInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -98,23 +139,24 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
   const updateWorkHistory = (
     index: number,
     key: keyof WorkHistoryItem,
-    value: string,
+    value: string | boolean,
   ) => {
     setFormData((prev) => {
       const next = [...prev.workExperience];
       const row = { ...next[index] };
 
-      if (key === "techUsed") {
+      if (key === "techUsed" && typeof value === "string") {
         row.techUsed = value
           .split(",")
           .map((tech) => tech.trim())
           .filter(Boolean);
+      } else if (key === "current" && typeof value === "boolean") {
+        row.current = value;
       } else {
-        (row[key] as string) = value;
+        (row[key] as string) = value as string;
       }
 
       next[index] = row;
-
       return { ...prev, workExperience: next };
     });
   };
@@ -123,6 +165,25 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
     setFormData((prev) => ({
       ...prev,
       workExperience: prev.workExperience.filter((_, i) => i !== index),
+    }));
+  };
+
+  const updateEducation = (
+    index: number,
+    key: keyof EducationItem,
+    value: string,
+  ) => {
+    setFormData((prev) => {
+      const next = [...prev.education];
+      next[index] = { ...next[index], [key]: value };
+      return { ...prev, education: next };
+    });
+  };
+
+  const removeEducation = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      education: prev.education.filter((_, i) => i !== index),
     }));
   };
 
@@ -141,27 +202,6 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
     }));
   };
 
-  const addSkill = () => {
-    const value = skillInput.trim();
-
-    if (!value) return;
-
-    if (formData.primaryStack.some((skill) => skill.toLowerCase() === value.toLowerCase())) {
-      setSkillInput("");
-      return;
-    }
-
-    setFormData((prev) => ({ ...prev, primaryStack: [...prev.primaryStack, value] }));
-    setSkillInput("");
-  };
-
-  const removeSkill = (skill: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      primaryStack: prev.primaryStack.filter((item) => item !== skill),
-    }));
-  };
-
   const handleSave = async () => {
     setSaving(true);
     setFeedback(null);
@@ -173,6 +213,8 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
         aboutLong: formData.aboutLong,
         primaryStack: formData.primaryStack,
         workExperience: formData.workExperience,
+        education: formData.education,
+        marketplaceAchievements: formData.marketplaceAchievements,
       });
       setFeedback({ type: "success", message: "Profile saved successfully." });
       router.refresh();
@@ -195,6 +237,7 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
       </Card>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-5">
+        {/* Live Preview */}
         <Card className="xl:col-span-3">
           <CardHeader>
             <CardTitle>Live Preview</CardTitle>
@@ -216,7 +259,7 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
 
             <div>
               <h3 className="text-lg font-semibold">About {firstName}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{formData.aboutLong}</p>
+              <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{formData.aboutLong}</p>
             </div>
 
             <div>
@@ -227,35 +270,78 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
                     {skill}
                   </Badge>
                 ))}
+                {formData.primaryStack.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No skills selected.</p>
+                )}
               </div>
             </div>
 
             <div>
               <h3 className="text-lg font-semibold">Work History</h3>
               <div className="mt-3 space-y-3">
+                {formData.workExperience.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No work history added.</p>
+                )}
                 {formData.workExperience.map((item, index) => (
-                  <div key={`${item.company}-${index}`} className="rounded-lg border border-border/70 p-3">
-                    <p className="text-sm font-semibold">{item.role || "Role"}</p>
+                  <div key={`wh-preview-${index}`} className="rounded-lg border border-border/70 p-3">
+                    <p className="text-sm font-semibold">{item.title || "Role"}</p>
                     <p className="text-xs text-muted-foreground">
-                      {item.company || "Company"} {item.duration ? `- ${item.duration}` : ""}
+                      {item.company || "Company"}
+                      {formatDuration(item) ? ` \u00b7 ${formatDuration(item)}` : ""}
                     </p>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.description || "No description yet."}</p>
+                    {item.description && (
+                      <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
+                    )}
+                    {item.techUsed.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {item.techUsed.map((tech) => (
+                          <Badge key={tech} variant="outline" className="text-[10px]">
+                            {tech}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold">Top Achievements</h3>
-              <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
-                {formData.marketplaceAchievements.map((achievement, index) => (
-                  <li key={`${achievement}-${index}`}>{achievement || "Untitled achievement"}</li>
+              <h3 className="text-lg font-semibold">Education</h3>
+              <div className="mt-3 space-y-3">
+                {formData.education.length === 0 && (
+                  <p className="text-xs text-muted-foreground">No education added.</p>
+                )}
+                {formData.education.map((item, index) => (
+                  <div key={`edu-preview-${index}`} className="rounded-lg border border-border/70 p-3">
+                    <p className="text-sm font-semibold">
+                      {item.degree || "Degree"}{item.field ? ` in ${item.field}` : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {item.institution || "Institution"}
+                      {item.startYear || item.endYear
+                        ? ` \u00b7 ${item.startYear}${item.endYear ? ` - ${item.endYear}` : ""}`
+                        : ""}
+                    </p>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
+
+            {formData.marketplaceAchievements.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold">Top Achievements</h3>
+                <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                  {formData.marketplaceAchievements.map((achievement, index) => (
+                    <li key={`ach-preview-${index}`}>{achievement || "Untitled achievement"}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
 
+        {/* Editable Fields */}
         <Card className="xl:col-span-2">
           <CardHeader>
             <CardTitle>Editable Fields</CardTitle>
@@ -264,6 +350,7 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
+            {/* Professional Title */}
             <div>
               <p className="mb-2 text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
                 Professional title
@@ -276,6 +363,7 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
               />
             </div>
 
+            {/* About */}
             <div>
               <p className="mb-2 text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
                 About summary
@@ -289,40 +377,21 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
               />
             </div>
 
+            {/* Skills — TechStackSelector */}
             <div>
               <p className="mb-2 text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
                 Skills
               </p>
-              <div className="flex gap-2">
-                <Input
-                  value={skillInput}
-                  placeholder="Add a skill"
-                  onChange={(event) => setSkillInput(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      addSkill();
-                    }
-                  }}
-                />
-                <Button type="button" variant="outline" onClick={addSkill}>
-                  <Plus className="size-4" />
-                </Button>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {formData.primaryStack.map((skill) => (
-                  <button
-                    key={skill}
-                    type="button"
-                    onClick={() => removeSkill(skill)}
-                    className="rounded-full border border-border px-2 py-0.5 text-xs hover:bg-muted"
-                  >
-                    {skill} x
-                  </button>
-                ))}
-              </div>
+              <TechStackSelector
+                value={formData.primaryStack}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, primaryStack: value }))
+                }
+                max={8}
+              />
             </div>
 
+            {/* Work History */}
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
@@ -346,7 +415,7 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
 
               <div className="space-y-3">
                 {formData.workExperience.map((item, index) => (
-                  <div key={`${item.company}-${index}`} className="rounded-lg border border-border/70 p-3">
+                  <div key={`wh-edit-${index}`} className="rounded-lg border border-border/70 p-3">
                     <div className="grid grid-cols-1 gap-2">
                       <Input
                         placeholder="Company"
@@ -356,19 +425,42 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
                         }
                       />
                       <Input
-                        placeholder="Role"
-                        value={item.role}
+                        placeholder="Role / Title"
+                        value={item.title}
                         onChange={(event) =>
-                          updateWorkHistory(index, "role", event.target.value)
+                          updateWorkHistory(index, "title", event.target.value)
                         }
                       />
-                      <Input
-                        placeholder="Duration"
-                        value={item.duration}
-                        onChange={(event) =>
-                          updateWorkHistory(index, "duration", event.target.value)
-                        }
-                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Start date (e.g. Jan 2022)"
+                          value={item.startDate}
+                          onChange={(event) =>
+                            updateWorkHistory(index, "startDate", event.target.value)
+                          }
+                        />
+                        <div className="flex items-center gap-2">
+                          <Input
+                            placeholder="End date"
+                            value={item.current ? "" : item.endDate}
+                            disabled={item.current}
+                            onChange={(event) =>
+                              updateWorkHistory(index, "endDate", event.target.value)
+                            }
+                          />
+                        </div>
+                      </div>
+                      <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <input
+                          type="checkbox"
+                          checked={item.current}
+                          onChange={(event) =>
+                            updateWorkHistory(index, "current", event.target.checked)
+                          }
+                          className="rounded border-input"
+                        />
+                        Currently working here
+                      </label>
                       <Textarea
                         rows={3}
                         placeholder="Description"
@@ -400,6 +492,86 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
               </div>
             </div>
 
+            {/* Education */}
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
+                  Education
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      education: [...prev.education, { ...emptyEducationItem }],
+                    }))
+                  }
+                >
+                  <Plus className="size-3.5" />
+                  Add
+                </Button>
+              </div>
+
+              <div className="space-y-3">
+                {formData.education.map((item, index) => (
+                  <div key={`edu-edit-${index}`} className="rounded-lg border border-border/70 p-3">
+                    <div className="grid grid-cols-1 gap-2">
+                      <Input
+                        placeholder="Institution"
+                        value={item.institution}
+                        onChange={(event) =>
+                          updateEducation(index, "institution", event.target.value)
+                        }
+                      />
+                      <Input
+                        placeholder="Degree (e.g. BSc, MSc, PhD)"
+                        value={item.degree}
+                        onChange={(event) =>
+                          updateEducation(index, "degree", event.target.value)
+                        }
+                      />
+                      <Input
+                        placeholder="Field of study"
+                        value={item.field}
+                        onChange={(event) =>
+                          updateEducation(index, "field", event.target.value)
+                        }
+                      />
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Start year"
+                          value={item.startYear}
+                          onChange={(event) =>
+                            updateEducation(index, "startYear", event.target.value)
+                          }
+                        />
+                        <Input
+                          placeholder="End year"
+                          value={item.endYear}
+                          onChange={(event) =>
+                            updateEducation(index, "endYear", event.target.value)
+                          }
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="w-fit"
+                        onClick={() => removeEducation(index)}
+                      >
+                        <Trash2 className="size-3.5" />
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Achievements */}
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
@@ -423,7 +595,7 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
 
               <div className="space-y-2">
                 {formData.marketplaceAchievements.map((achievement, index) => (
-                  <div key={`${achievement}-${index}`} className="flex items-center gap-2">
+                  <div key={`ach-edit-${index}`} className="flex items-center gap-2">
                     <Input
                       value={achievement}
                       onChange={(event) =>

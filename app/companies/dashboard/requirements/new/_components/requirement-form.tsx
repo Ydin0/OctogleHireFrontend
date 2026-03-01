@@ -20,6 +20,7 @@ import {
   type JobRequirementFormData,
 } from "@/lib/schemas/job-requirement";
 import { TIMEZONE_OPTIONS } from "@/lib/constants/timezones";
+import { MARKETPLACE_TECH_STACK_OPTIONS } from "@/lib/data/developers";
 import {
   createJobRequirement,
   fetchLinkedInJobs,
@@ -49,13 +50,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const ALLOWED_TECH_SET = new Set(MARKETPLACE_TECH_STACK_OPTIONS);
+
 function prefillForm(
   parsed: ParsedJobData,
   setValue: UseFormSetValue<JobRequirementFormData>,
 ) {
   if (parsed.title) setValue("title", parsed.title, { shouldValidate: true });
-  if (parsed.techStack?.length)
-    setValue("techStack", parsed.techStack, { shouldValidate: true });
+  if (parsed.techStack?.length) {
+    // Only keep values that exist in the canonical tech stack list
+    const filtered = parsed.techStack.filter((t) => ALLOWED_TECH_SET.has(t));
+    setValue("techStack", filtered, { shouldValidate: true });
+  }
   if (parsed.experienceYearsMin != null)
     setValue("experienceYearsMin", parsed.experienceYearsMin, { shouldValidate: true });
   if (parsed.experienceYearsMax != null)
