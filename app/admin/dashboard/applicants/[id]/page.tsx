@@ -36,6 +36,7 @@ import { ActivateButton } from "./_components/activate-button";
 import { NotesSection } from "./_components/notes-section";
 import { FeaturedToggle } from "./_components/featured-toggle";
 import { MarketplaceProfileEditor } from "./_components/marketplace-profile-editor";
+import { EditProfileDialog } from "./_components/edit-profile-dialog";
 
 const getInitials = (name: string | null) => {
   if (!name) return "??";
@@ -180,6 +181,26 @@ export default async function ApplicantDetailPage({
                 currentStatus={applicant.status}
                 clerkUserId={applicant.clerkUserId}
                 token={token!}
+              />
+              <EditProfileDialog
+                applicationId={applicant.id}
+                token={token!}
+                initialData={{
+                  email: applicant.email,
+                  fullName: applicant.fullName,
+                  phone: applicant.phone,
+                  locationCity: applicant.locationCity,
+                  locationState: applicant.locationState,
+                  professionalTitle: applicant.professionalTitle,
+                  yearsOfExperience: applicant.yearsOfExperience,
+                  bio: applicant.bio,
+                  linkedinUrl: applicant.linkedinUrl,
+                  githubUrl: applicant.githubUrl,
+                  portfolioUrl: applicant.portfolioUrl,
+                  availability: applicant.availability,
+                  englishProficiency: applicant.englishProficiency,
+                  certifications: applicant.certifications,
+                }}
               />
             </div>
           </div>

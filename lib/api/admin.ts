@@ -491,6 +491,54 @@ export async function sendOffer(
   }
 }
 
+export interface ApplicationProfilePayload {
+  email?: string;
+  fullName?: string;
+  phone?: string;
+  locationCity?: string;
+  locationState?: string;
+  professionalTitle?: string;
+  yearsOfExperience?: number | null;
+  bio?: string;
+  primaryStack?: string[];
+  secondarySkills?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  portfolioUrl?: string;
+  engagementType?: string[];
+  availability?: string;
+  englishProficiency?: string;
+  certifications?: string;
+}
+
+export async function updateApplicationProfile(
+  token: string | null,
+  id: string,
+  payload: ApplicationProfilePayload
+): Promise<{ application: AdminApplicationFull } | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/applications/${id}/profile`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) return null;
+    return (await response.json()) as { application: AdminApplicationFull };
+  } catch {
+    return null;
+  }
+}
+
 export interface MarketplaceProfilePayload {
   hourlyRateCents?: number | null;
   monthlyRateCents?: number | null;
