@@ -575,3 +575,74 @@ export async function removeMatch(
     return false;
   }
 }
+
+// ── Company Developer Profile ─────────────────────────────────────────────────
+
+export interface CompanyDeveloperProfile {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  isOnline: boolean;
+  skills: string[];
+  secondarySkills: string;
+  rating: number;
+  projects: number;
+  hourlyRate: number;
+  monthlyRate: number;
+  location: string;
+  yearsOfExperience: number;
+  bio: string;
+  about: string;
+  englishProficiency: string | null;
+  availability: string | null;
+  engagementType: string[];
+  certifications: string | null;
+  linkedinUrl: string | null;
+  githubUrl: string | null;
+  portfolioUrl: string | null;
+  workHistory: {
+    company: string;
+    role: string;
+    duration: string;
+    description: string;
+    techUsed: string[];
+    companyDomain?: string;
+    companyLogoUrl?: string;
+  }[];
+  achievements: string[];
+  education: {
+    institution: string;
+    degree: string;
+    field: string;
+    year: string;
+    institutionLogoUrl?: string;
+  }[];
+  awards: {
+    title: string;
+    issuer: string;
+    year: string;
+  }[];
+}
+
+export async function fetchCompanyDeveloperProfile(
+  token: string | null,
+  developerId: string,
+): Promise<CompanyDeveloperProfile | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/developers/${developerId}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        next: { revalidate: 60 },
+      },
+    );
+    if (!response.ok) return null;
+    const data = (await response.json()) as { developer: CompanyDeveloperProfile };
+    return data.developer;
+  } catch {
+    return null;
+  }
+}

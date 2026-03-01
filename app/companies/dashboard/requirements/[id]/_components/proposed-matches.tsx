@@ -385,7 +385,7 @@ const ProposedMatchesClient = ({
                     )}
 
                     <Link
-                      href={`/developers/${match.developerId}`}
+                      href={`/companies/dashboard/developers/${match.developerId}`}
                       className="inline-flex items-center gap-1 text-xs text-pulse hover:underline"
                     >
                       View Profile
