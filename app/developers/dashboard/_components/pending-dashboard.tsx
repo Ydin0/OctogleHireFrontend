@@ -1,11 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Circle, Clock3, FileText, Globe, LogOut } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import {
+  Check,
+  Circle,
+  Clock3,
+  FileText,
+  HandCoins,
+  Loader2,
+  LogOut,
+  X,
+} from "lucide-react";
+import { useClerk, useAuth } from "@clerk/nextjs";
 
 import type { ApplicationTimelineItem } from "@/lib/developer-application";
+import type { DeveloperOffer } from "@/lib/api/developer";
+import { respondToDeveloperOffer } from "@/lib/api/developer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +28,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const getInitials = (name: string) =>
@@ -29,6 +44,122 @@ interface PendingDashboardProps {
   avatarUrl: string | null;
   status: string;
   timeline: ApplicationTimelineItem[];
+  offers?: DeveloperOffer[];
+}
+
+function OfferSection({ offers }: { offers: DeveloperOffer[] }) {
+  const router = useRouter();
+  const { getToken } = useAuth();
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const pendingOffers = offers.filter((o) => o.status === "pending");
+
+  if (pendingOffers.length === 0) return null;
+
+  const handleRespond = async (offerId: string, action: "accepted" | "declined") => {
+    if (loadingId) return;
+    setLoadingId(offerId);
+    setError(null);
+    try {
+      const token = await getToken();
+      await respondToDeveloperOffer(token, offerId, action);
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {pendingOffers.map((offer) => {
+        const isLoading = loadingId === offer.id;
+
+        return (
+          <Card key={offer.id} className="border-emerald-500/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <HandCoins className="size-4 text-emerald-600" />
+                You have an offer
+              </CardTitle>
+              <CardDescription>
+                Review the details below and accept to activate your account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Hourly Rate
+                  </p>
+                  <p className="font-mono text-lg font-semibold">
+                    {offer.currency} ${offer.hourlyRate.toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Monthly Rate
+                  </p>
+                  <p className="font-mono text-lg font-semibold">
+                    {offer.currency} ${offer.monthlyRate.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Engagement
+                  </p>
+                  <p className="text-sm font-medium capitalize">
+                    {offer.engagementType}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Start Date
+                  </p>
+                  <p className="text-sm font-medium">{offer.startDate}</p>
+                </div>
+              </div>
+
+              {error && (
+                <p className="text-sm text-red-600">{error}</p>
+              )}
+
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  className="bg-emerald-600 text-white hover:bg-emerald-700"
+                  disabled={isLoading}
+                  onClick={() => handleRespond(offer.id, "accepted")}
+                >
+                  {isLoading ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Check className="size-3.5" />
+                  )}
+                  Accept Offer
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={isLoading}
+                  onClick={() => handleRespond(offer.id, "declined")}
+                >
+                  <X className="size-3.5" />
+                  Decline
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground">
+                Accepting will activate your profile on the marketplace and unlock the full dashboard.
+              </p>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
 }
 
 const PendingDashboard = ({
@@ -36,6 +167,7 @@ const PendingDashboard = ({
   avatarUrl,
   status,
   timeline,
+  offers = [],
 }: PendingDashboardProps) => {
   const { signOut } = useClerk();
 
@@ -44,13 +176,14 @@ const PendingDashboard = ({
     .map((part) => part[0]?.toUpperCase() + part.slice(1))
     .join(" ");
 
+  const isOfferStage = status === "offer_extended";
+
   return (
     <main className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/90 backdrop-blur">
         <div className="mx-auto flex items-center justify-between px-6 py-3">
-          <Link href="/" className="flex items-center gap-2 text-foreground transition-colors hover:text-foreground/80">
-            <Globe className="size-5" />
-            <span className="text-sm font-semibold">OctogleHire</span>
+          <Link href="/" className="flex items-center text-foreground transition-colors hover:text-foreground/80">
+            <Logo width={110} height={26} />
           </Link>
 
           <div className="flex items-center gap-3">
@@ -75,7 +208,9 @@ const PendingDashboard = ({
         </div>
       </header>
 
-      <div className="container mx-auto max-w-3xl px-6 py-10">
+      <div className="container mx-auto max-w-3xl px-6 py-10 space-y-6">
+        {isOfferStage && <OfferSection offers={offers} />}
+
         <Card className="border-pulse/30 bg-gradient-to-br from-card to-pulse/5">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -84,10 +219,13 @@ const PendingDashboard = ({
                 <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle>Application in progress</CardTitle>
+                <CardTitle>
+                  {isOfferStage ? "Offer extended" : "Application in progress"}
+                </CardTitle>
                 <CardDescription>
-                  Current stage: {statusLabel}. Full dashboard access unlocks once
-                  status is Approved.
+                  {isOfferStage
+                    ? "Accept the offer above to activate your account and access the full dashboard."
+                    : `Current stage: ${statusLabel}. Full dashboard access unlocks once status is Approved.`}
                 </CardDescription>
               </div>
             </div>

@@ -7,7 +7,8 @@ import { DeveloperProfileProvider } from "./_components/developer-profile-contex
 import { PendingDashboard } from "./_components/pending-dashboard";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
-import { fetchDeveloperProfile } from "@/lib/api/developer";
+import { fetchDeveloperProfile, fetchDeveloperOffers } from "@/lib/api/developer";
+import type { DeveloperOffer } from "@/lib/api/developer";
 import {
   buildDefaultTimeline,
   fetchDeveloperApplicationStatus,
@@ -43,12 +44,21 @@ export default async function DeveloperDashboardLayout({
 
   if (!isApproved) {
     const user = await currentUser();
+    const status = applicationStatus?.status ?? "hr_communication_round";
+
+    // If offer_extended, fetch offers so developer can accept/decline
+    let offers: DeveloperOffer[] = [];
+    if (status === "offer_extended") {
+      offers = (await fetchDeveloperOffers(token)) ?? [];
+    }
+
     return (
       <PendingDashboard
         displayName={user?.firstName ?? user?.username ?? "Developer"}
         avatarUrl={user?.imageUrl ?? null}
-        status={applicationStatus?.status ?? "hr_communication_round"}
+        status={status}
         timeline={applicationStatus?.timeline ?? buildDefaultTimeline()}
+        offers={offers}
       />
     );
   }
