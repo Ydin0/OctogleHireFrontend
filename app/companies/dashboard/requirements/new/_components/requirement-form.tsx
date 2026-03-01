@@ -356,6 +356,7 @@ const RequirementForm = () => {
                 onChange={(val) =>
                   setValue("techStack", val, { shouldValidate: true })
                 }
+                max={20}
               />
               {errors.techStack && (
                 <p className="text-xs text-red-600">
