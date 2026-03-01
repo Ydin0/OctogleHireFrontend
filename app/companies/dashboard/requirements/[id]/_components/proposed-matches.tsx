@@ -6,6 +6,8 @@ import { useAuth } from "@clerk/nextjs";
 import {
   ArrowLeft,
   Check,
+  ChevronDown,
+  ChevronUp,
   ExternalLink,
   Loader2,
   MapPin,
@@ -74,6 +76,7 @@ const ProposedMatchesClient = ({
   const [rejectDialog, setRejectDialog] = useState<ProposedMatch | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [respondingId, setRespondingId] = useState<string | null>(null);
+  const [descriptionExpanded, setDescriptionExpanded] = useState<boolean>(false);
 
   const load = useCallback(async () => {
     const token = await getToken();
@@ -186,60 +189,6 @@ const ProposedMatchesClient = ({
           </p>
         </div>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Requirement Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-1.5">
-            {requirement.techStack.map((tech) => (
-              <Badge key={tech} variant="secondary" className="text-xs">
-                {tech}
-              </Badge>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Experience
-              </p>
-              <p>{experienceLabel(requirement.experienceYearsMin, requirement.experienceYearsMax, requirement.experienceLevel)}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Engagement
-              </p>
-              <p className="capitalize">
-                {requirement.engagementType.replace("-", " ")}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Timezone
-              </p>
-              <p>
-                {getTimezoneLabel(requirement.timezonePreference)}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Budget
-              </p>
-              <p className="font-mono">
-                {requirement.budgetMin && requirement.budgetMax
-                  ? `$${requirement.budgetMin}–$${requirement.budgetMax}/hr`
-                  : "Flexible"}
-              </p>
-            </div>
-          </div>
-
-          <div className="text-sm text-muted-foreground">
-            <MarkdownDisplay content={requirement.description} />
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
@@ -397,6 +346,77 @@ const ProposedMatchesClient = ({
             ))}
           </CardContent>
         )}
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Requirement Details</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-1.5">
+            {requirement.techStack.map((tech) => (
+              <Badge key={tech} variant="secondary" className="text-xs">
+                {tech}
+              </Badge>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Experience
+              </p>
+              <p>{experienceLabel(requirement.experienceYearsMin, requirement.experienceYearsMax, requirement.experienceLevel)}</p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Engagement
+              </p>
+              <p className="capitalize">
+                {requirement.engagementType.replace("-", " ")}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Timezone
+              </p>
+              <p>
+                {getTimezoneLabel(requirement.timezonePreference)}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Budget
+              </p>
+              <p className="font-mono">
+                {requirement.budgetMin && requirement.budgetMax
+                  ? `$${requirement.budgetMin}–$${requirement.budgetMax}/hr`
+                  : "Flexible"}
+              </p>
+            </div>
+          </div>
+
+          <div className="text-sm text-muted-foreground">
+            <div className={descriptionExpanded ? undefined : "line-clamp-3"}>
+              <MarkdownDisplay content={requirement.description} />
+            </div>
+            <button
+              type="button"
+              onClick={() => setDescriptionExpanded((prev) => !prev)}
+              className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-foreground hover:underline"
+            >
+              {descriptionExpanded ? (
+                <>
+                  Show less <ChevronUp className="size-3" />
+                </>
+              ) : (
+                <>
+                  Show full description <ChevronDown className="size-3" />
+                </>
+              )}
+            </button>
+          </div>
+        </CardContent>
       </Card>
 
       <Dialog
