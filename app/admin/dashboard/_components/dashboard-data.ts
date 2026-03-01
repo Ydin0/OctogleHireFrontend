@@ -178,6 +178,29 @@ export const priorityBadgeClass = (priority: string) => {
   }
 };
 
+// ── Time entry status helpers ────────────────────────────────────────────────
+
+export type TimeEntryStatus = "submitted" | "approved" | "rejected";
+
+export const timeEntryStatusLabel: Record<TimeEntryStatus, string> = {
+  submitted: "Submitted",
+  approved: "Approved",
+  rejected: "Rejected",
+};
+
+export const timeEntryStatusBadgeClass = (status: TimeEntryStatus) => {
+  switch (status) {
+    case "submitted":
+      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+    case "approved":
+      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+    case "rejected":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
 // ── Invoice status helpers ──────────────────────────────────────────────────
 
 export type InvoiceStatus = "draft" | "sent" | "paid" | "overdue" | "cancelled";

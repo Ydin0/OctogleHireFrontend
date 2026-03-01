@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Bot,
   Building2,
+  Clock,
   Layers,
   LogOut,
   Receipt,
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/admin/dashboard", label: "Overview", icon: Layers },
   { href: "/admin/dashboard/applicants", label: "Applicants", icon: Users },
   { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
+  { href: "/admin/dashboard/time-entries", label: "Timesheets", icon: Clock },
   { href: "/admin/dashboard/invoices", label: "Invoices", icon: Receipt },
   { href: "/admin/dashboard/payouts", label: "Payouts", icon: Wallet },
   { href: "/admin/dashboard/team", label: "Team", icon: Shield },

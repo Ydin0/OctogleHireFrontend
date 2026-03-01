@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight, Download } from "lucide-react";
 
-import type { Payout, PayoutSummary } from "@/lib/api/payouts";
+import type { DeveloperPayout, DeveloperPayoutSummary } from "@/lib/api/developer";
 import {
   payoutStatusBadgeClass,
   payoutStatusLabel,
@@ -16,8 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface EarningsClientProps {
-  payouts: Payout[];
-  summary: PayoutSummary;
+  payouts: DeveloperPayout[];
+  summary: DeveloperPayoutSummary;
 }
 
 function EarningsClient({ payouts, summary }: EarningsClientProps) {
@@ -133,9 +133,9 @@ function EarningsClient({ payouts, summary }: EarningsClientProps) {
                         </span>
                         <Badge
                           variant="outline"
-                          className={payoutStatusBadgeClass(payout.status)}
+                          className={payoutStatusBadgeClass(payout.status as PayoutStatus)}
                         >
-                          {payoutStatusLabel[payout.status]}
+                          {payoutStatusLabel[payout.status as PayoutStatus]}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">{period}</p>
