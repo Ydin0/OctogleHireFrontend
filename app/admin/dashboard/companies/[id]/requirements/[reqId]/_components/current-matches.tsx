@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Star, Trash2 } from "lucide-react";
+import { MapPin, Trash2 } from "lucide-react";
 
 import type { ProposedMatch } from "@/lib/api/companies";
 import {
@@ -81,10 +81,6 @@ const CurrentMatches = ({
                   <span className="flex items-center gap-0.5">
                     <MapPin className="size-3" />
                     {match.developer.location}
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <Star className="size-3 fill-amber-400 text-amber-400" />
-                    {match.developer.rating}
                   </span>
                   <span>{match.developer.yearsOfExperience}y exp</span>
                 </div>

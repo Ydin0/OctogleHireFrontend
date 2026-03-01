@@ -7,7 +7,6 @@ import {
   Loader2,
   MapPin,
   Search,
-  Star,
   Users,
   X,
 } from "lucide-react";
@@ -85,7 +84,6 @@ interface Filters {
   expMax: string;
   rateMin: string;
   rateMax: string;
-  minRating: string;
   location: string;
 }
 
@@ -173,7 +171,6 @@ const EMPTY_FILTERS: Filters = {
   expMax: "",
   rateMin: "",
   rateMax: "",
-  minRating: "",
   location: "",
 };
 
@@ -304,10 +301,6 @@ const DeveloperPool = ({
       const max = Number(filters.rateMax);
       result = result.filter(({ dev }) => dev.hourlyRate <= max);
     }
-    if (filters.minRating) {
-      const min = Number(filters.minRating);
-      result = result.filter(({ dev }) => dev.rating >= min);
-    }
     if (filters.location) {
       const loc = filters.location.toLowerCase();
       result = result.filter(({ dev }) =>
@@ -332,7 +325,6 @@ const DeveloperPool = ({
     filters.expMax,
     filters.rateMin,
     filters.rateMax,
-    filters.minRating,
     filters.location,
   ].filter(Boolean).length;
 
@@ -600,32 +592,6 @@ const DeveloperPool = ({
                 </div>
               </div>
 
-              {/* Rating */}
-              <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Minimum Rating
-                </Label>
-                <Select
-                  value={filters.minRating || "any"}
-                  onValueChange={(v) =>
-                    setFilters((p) => ({
-                      ...p,
-                      minRating: v === "any" ? "" : v,
-                    }))
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Any rating" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="any">Any rating</SelectItem>
-                    <SelectItem value="4.0">4.0+</SelectItem>
-                    <SelectItem value="4.5">4.5+</SelectItem>
-                    <SelectItem value="4.8">4.8+</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               {/* Location */}
               <div className="space-y-1.5">
                 <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -684,7 +650,6 @@ const DeveloperPool = ({
                         <th className="px-3 py-2.5 text-left">Skills</th>
                         <th className="px-3 py-2.5 text-left">Location</th>
                         <th className="px-3 py-2.5 text-right">Exp</th>
-                        <th className="px-3 py-2.5 text-right">Rating</th>
                         <th className="px-3 py-2.5 text-right">Rate</th>
                         <th className="w-20 px-3 py-2.5 text-right">Match</th>
                       </tr>
@@ -771,14 +736,8 @@ const DeveloperPool = ({
                             <td className="px-3 py-2.5 text-right text-xs text-muted-foreground whitespace-nowrap">
                               {dev.yearsOfExperience}y
                             </td>
-                            <td className="px-3 py-2.5 text-right">
-                              <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground whitespace-nowrap">
-                                <Star className="size-3 fill-amber-400 text-amber-400" />
-                                {dev.rating}
-                              </span>
-                            </td>
                             <td className="px-3 py-2.5 text-right font-mono text-xs text-muted-foreground whitespace-nowrap">
-                              ${dev.hourlyRate}/hr
+                              {dev.hourlyRate > 0 ? `$${dev.hourlyRate}/hr` : "—"}
                             </td>
                             <td className="px-3 py-2.5 text-right">
                               <Badge

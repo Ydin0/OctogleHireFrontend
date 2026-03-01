@@ -777,6 +777,79 @@ export interface CompanyDeveloperProfile {
   matches: CompanyDeveloperMatch[];
 }
 
+// ── Company Invoice types ────────────────────────────────────────────────────
+
+export interface CompanyInvoiceLineItem {
+  id: string;
+  developerName: string;
+  developerRole: string;
+  requirementTitle: string;
+  hourlyRate: number;
+  hoursWorked: number;
+  amount: number;
+}
+
+export interface CompanyInvoice {
+  id: string;
+  invoiceNumber: string;
+  periodStart: string;
+  periodEnd: string;
+  issuedAt: string | null;
+  dueDate: string | null;
+  paidAt: string | null;
+  currency: string;
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
+  total: number;
+  status: string;
+  notes: string | null;
+  lineItems: CompanyInvoiceLineItem[];
+  createdAt: string;
+}
+
+export interface CompanyInvoiceSummary {
+  totalInvoices: number;
+  totalBilled: number;
+  totalPaid: number;
+  totalOutstanding: number;
+  overdueCount: number;
+}
+
+export async function fetchCompanyInvoices(
+  token: string | null,
+): Promise<CompanyInvoice[]> {
+  if (!token) return [];
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/companies/invoices`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return [];
+    return (await response.json()) as CompanyInvoice[];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchCompanyInvoiceSummaryData(
+  token: string | null,
+): Promise<CompanyInvoiceSummary | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/companies/invoices/summary`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as CompanyInvoiceSummary;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchCompanyDeveloperProfile(
   token: string | null,
   developerId: string,

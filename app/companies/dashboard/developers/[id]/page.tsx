@@ -344,14 +344,16 @@ function HeroSection({ developer }: { developer: CompanyDeveloperProfile }) {
             </div>
 
             {/* Rates */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <Badge variant="secondary" className="font-mono text-xs">
-                ${developer.hourlyRate}/hr
-              </Badge>
-              <Badge variant="secondary" className="font-mono text-xs">
-                ${developer.monthlyRate.toLocaleString()}/mo
-              </Badge>
-            </div>
+            {(developer.hourlyRate > 0 || developer.monthlyRate > 0 || developer.matches.length > 0) && (
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                <Badge variant="secondary" className="font-mono text-xs">
+                  ${developer.hourlyRate || developer.matches[0]?.proposedHourlyRate || 0}/hr
+                </Badge>
+                <Badge variant="secondary" className="font-mono text-xs">
+                  ${(developer.monthlyRate || developer.matches[0]?.proposedMonthlyRate || 0).toLocaleString()}/mo
+                </Badge>
+              </div>
+            )}
 
             {/* CV download */}
             {developer.hasResume && (
