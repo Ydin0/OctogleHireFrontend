@@ -156,6 +156,38 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
       },
     },
     {
+      id: "aiScore",
+      header: "AI Score",
+      size: 80,
+      cell: ({ row }) => {
+        const { flowmingoStatus, flowmingoScore } = row.original;
+        if (flowmingoScore != null) {
+          const score = parseFloat(flowmingoScore);
+          return (
+            <span
+              className={`font-mono text-sm font-medium ${
+                score >= 7
+                  ? "text-emerald-600"
+                  : score >= 5
+                    ? "text-amber-600"
+                    : "text-red-600"
+              }`}
+            >
+              {flowmingoScore}
+            </span>
+          );
+        }
+        if (flowmingoStatus) {
+          return (
+            <Badge variant="outline" className="text-[10px]">
+              {flowmingoStatus}
+            </Badge>
+          );
+        }
+        return <span className="text-sm text-muted-foreground">-</span>;
+      },
+    },
+    {
       accessorKey: "primaryStack",
       header: "Stack",
       size: 180,

@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
+  BotMessageSquare,
   Briefcase,
   Calendar,
   FileText,
@@ -314,6 +315,60 @@ export default async function ApplicantDetailPage({
 
       {/* ── Offer card (if one exists) ────────────────────────────────── */}
       {applicant.offer && <OfferCard offer={applicant.offer} applicationId={applicant.id} />}
+
+      {/* ── AI Interview card ──────────────────────────────────────────── */}
+      {applicant.flowmingoStatus && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BotMessageSquare className="size-4" />
+              AI Technical Interview
+            </CardTitle>
+            <Badge
+              variant="outline"
+              className={
+                applicant.flowmingoStatus === "evaluated"
+                  ? "border-emerald-600/20 bg-emerald-500/10 text-emerald-600"
+                  : applicant.flowmingoStatus === "completed"
+                    ? "border-blue-600/20 bg-blue-500/10 text-blue-600"
+                    : applicant.flowmingoStatus === "started"
+                      ? "border-amber-600/20 bg-amber-500/10 text-amber-700"
+                      : "border-zinc-600/20 bg-zinc-500/10 text-zinc-600"
+              }
+            >
+              {applicant.flowmingoStatus.charAt(0).toUpperCase() +
+                applicant.flowmingoStatus.slice(1)}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            {applicant.flowmingoScore != null ? (
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Evaluation Score
+                </p>
+                <p
+                  className={`font-mono text-3xl font-semibold ${
+                    parseFloat(applicant.flowmingoScore) >= 7
+                      ? "text-emerald-600"
+                      : parseFloat(applicant.flowmingoScore) >= 5
+                        ? "text-amber-600"
+                        : "text-red-600"
+                  }`}
+                >
+                  {applicant.flowmingoScore}{" "}
+                  <span className="text-base font-normal text-muted-foreground">
+                    / 10
+                  </span>
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Interview in progress — score will appear once evaluated.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Two-column detail grid ──────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">

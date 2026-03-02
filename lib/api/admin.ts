@@ -19,6 +19,8 @@ export interface AdminApplication {
   profilePhotoPath: string | null;
   salaryAmount: number | null;
   salaryCurrency: string | null;
+  flowmingoStatus: string | null;
+  flowmingoScore: string | null;
 }
 
 export interface AdminApplicationFull {
@@ -61,6 +63,8 @@ export interface AdminApplicationFull {
   marketplaceAwards: { title: string; issuer: string; year: string }[] | null;
   aboutLong: string | null;
   offer: ApplicationOffer | null;
+  flowmingoStatus: string | null;
+  flowmingoScore: string | null;
   submittedAt: string | null;
   createdAt: string;
   updatedAt: string;
