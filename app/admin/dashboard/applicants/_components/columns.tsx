@@ -137,7 +137,7 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
     },
     {
       id: "salary",
-      header: "Salary",
+      header: "Salary / Mo",
       size: 110,
       cell: ({ row }) => {
         const { salaryAmount, salaryCurrency } = row.original;
@@ -149,8 +149,8 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
           ? `${sym}${Math.round(salaryAmount / 1000)}k`
           : `${sym}${salaryAmount}`;
         return (
-          <span className="truncate font-mono text-sm" title={`${formatCurrency(salaryAmount, salaryCurrency)}/mo`}>
-            {compact}/mo
+          <span className="truncate font-mono text-sm" title={formatCurrency(salaryAmount, salaryCurrency)}>
+            {compact}
           </span>
         );
       },
