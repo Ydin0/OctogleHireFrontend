@@ -221,7 +221,7 @@ export async function fetchApplication(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 30 },
+        cache: "no-store",
       }
     );
 
