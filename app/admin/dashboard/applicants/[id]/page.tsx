@@ -432,6 +432,16 @@ export default async function ApplicantDetailPage({
                     {applicant.engagementType?.join(", ") ?? "-"}
                   </p>
                 </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Expected Salary
+                  </p>
+                  <p className="font-mono text-sm font-medium">
+                    {applicant.salaryAmount != null && applicant.salaryCurrency
+                      ? formatCurrency(applicant.salaryAmount, applicant.salaryCurrency) + "/mo"
+                      : "-"}
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>

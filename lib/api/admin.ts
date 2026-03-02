@@ -17,6 +17,8 @@ export interface AdminApplication {
   isFeatured: boolean;
   submittedAt: string | null;
   profilePhotoPath: string | null;
+  salaryAmount: number | null;
+  salaryCurrency: string | null;
 }
 
 export interface AdminApplicationFull {
@@ -46,6 +48,8 @@ export interface AdminApplicationFull {
   workExperience: { company: string; title: string; startDate: string; endDate: string | null; current: boolean; description: string; companyLogoUrl?: string }[] | null;
   education: { institution: string; degree: string; grade?: string; startYear?: string; endYear?: string; institutionLogoUrl?: string }[] | null;
   certifications: string | null;
+  salaryCurrency: string | null;
+  salaryAmount: number | null;
   isLive: boolean;
   isFeatured: boolean;
   slug: string | null;

@@ -24,6 +24,7 @@ import {
   type ApplicationStatus,
   applicationStatusBadgeClass,
   applicationStatusLabel,
+  formatCurrency,
 } from "../../_components/dashboard-data";
 
 const getInitials = (name: string | null) => {
@@ -130,6 +131,22 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
         return (
           <span className="font-mono text-sm">
             {years != null ? `${years}yr` : "-"}
+          </span>
+        );
+      },
+    },
+    {
+      id: "salary",
+      header: "Salary",
+      size: 120,
+      cell: ({ row }) => {
+        const { salaryAmount, salaryCurrency } = row.original;
+        if (salaryAmount == null || !salaryCurrency) {
+          return <span className="text-sm text-muted-foreground">-</span>;
+        }
+        return (
+          <span className="font-mono text-sm">
+            {formatCurrency(salaryAmount, salaryCurrency)}/mo
           </span>
         );
       },
