@@ -138,15 +138,19 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
     {
       id: "salary",
       header: "Salary",
-      size: 120,
+      size: 110,
       cell: ({ row }) => {
         const { salaryAmount, salaryCurrency } = row.original;
         if (salaryAmount == null || !salaryCurrency) {
           return <span className="text-sm text-muted-foreground">-</span>;
         }
+        const sym = { USD: "$", GBP: "£", EUR: "€", AED: "د.إ", INR: "₹" }[salaryCurrency] ?? salaryCurrency;
+        const compact = salaryAmount >= 1000
+          ? `${sym}${Math.round(salaryAmount / 1000)}k`
+          : `${sym}${salaryAmount}`;
         return (
-          <span className="font-mono text-sm">
-            {formatCurrency(salaryAmount, salaryCurrency)}/mo
+          <span className="truncate font-mono text-sm" title={`${formatCurrency(salaryAmount, salaryCurrency)}/mo`}>
+            {compact}/mo
           </span>
         );
       },
