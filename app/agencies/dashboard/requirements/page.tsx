@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 
 import { fetchAgencyRequirements } from "@/lib/api/agencies";
@@ -51,7 +52,12 @@ export default async function AgencyRequirementsPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {requirements.map((req) => (
-            <Card key={req.id}>
+            <Link
+              key={req.id}
+              href={`/agencies/dashboard/requirements/${req.id}`}
+              className="group"
+            >
+            <Card className="transition-colors group-hover:border-pulse/40">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <CardTitle className="text-base">{req.title}</CardTitle>
@@ -122,6 +128,7 @@ export default async function AgencyRequirementsPage() {
                 </p>
               </CardContent>
             </Card>
+            </Link>
           ))}
         </div>
       )}

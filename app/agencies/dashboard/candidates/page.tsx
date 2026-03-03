@@ -15,6 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { AddDeveloperDialog } from "./_components/add-developer-dialog";
+
 const statusBadge: Record<string, string> = {
   draft: "border-zinc-600/20 bg-zinc-500/10 text-zinc-600",
   hr_communication_round: "border-blue-600/20 bg-blue-500/10 text-blue-600",
@@ -43,11 +45,14 @@ export default async function AgencyCandidatesPage({
 
   return (
     <>
-      <div>
-        <h1 className="text-lg font-semibold">Candidates</h1>
-        <p className="text-sm text-muted-foreground">
-          Developers who applied through your referral link.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Candidates</h1>
+          <p className="text-sm text-muted-foreground">
+            Developers who applied through your referral link.
+          </p>
+        </div>
+        <AddDeveloperDialog />
       </div>
 
       {candidates.length === 0 ? (

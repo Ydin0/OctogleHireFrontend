@@ -10,6 +10,7 @@ import {
   Layers,
   Link2,
   LogOut,
+  Send,
   Users,
   Wallet,
 } from "lucide-react";
@@ -33,6 +34,7 @@ const sidebarItems = [
   { href: "/agencies/dashboard", label: "Overview", icon: Layers },
   { href: "/agencies/dashboard/candidates", label: "Candidates", icon: Users },
   { href: "/agencies/dashboard/requirements", label: "Requirements", icon: ClipboardList },
+  { href: "/agencies/dashboard/pitches", label: "My Pitches", icon: Send },
   { href: "/agencies/dashboard/commissions", label: "Commissions", icon: Wallet },
   { href: "/agencies/dashboard/referral-link", label: "Referral Link", icon: Link2 },
   { href: "/agencies/dashboard/team", label: "Team", icon: Briefcase },

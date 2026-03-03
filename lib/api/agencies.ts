@@ -298,6 +298,265 @@ export async function fetchAgencyReferralLink(
   }
 }
 
+// ── Pitch Types ─────────────────────────────────────────────────────────────
+
+export interface AgencyPitchDeveloper {
+  id: string;
+  name: string | null;
+  title: string | null;
+  avatar: string | null;
+  skills?: string[] | null;
+  yearsOfExperience?: number | null;
+  location?: string;
+}
+
+export interface AgencyPitch {
+  id: string;
+  requirementId: string;
+  developerId: string;
+  pitchedHourlyRate: number;
+  pitchedMonthlyRate: number;
+  currency: string;
+  pitchedCommissionRate: number;
+  workingDaysPerMonth: number;
+  hoursPerDay: number;
+  coverNote: string | null;
+  status: "pending" | "approved" | "rejected";
+  adminNote: string | null;
+  proposedMatchId: string | null;
+  createdAt: string;
+  requirementTitle?: string;
+  companyName?: string;
+  developer: AgencyPitchDeveloper;
+}
+
+export interface AgencyRequirementDetail extends AgencyRequirement {
+  experienceYearsMin: number | null;
+  experienceYearsMax: number | null;
+  updatedAt: string;
+  pitches: AgencyPitch[];
+}
+
+export interface AgencyPoolCandidate {
+  id: string;
+  fullName: string | null;
+  email: string;
+  professionalTitle: string | null;
+  locationCity: string | null;
+  locationState: string | null;
+  yearsOfExperience: number | null;
+  primaryStack: string[] | null;
+  status: string;
+  availability: string | null;
+  engagementType: string[] | null;
+  hourlyRate: number | null;
+  monthlyRate: number | null;
+  hourlyRateCents: number | null;
+  monthlyRateCents: number | null;
+  salaryCurrency: string | null;
+  profilePhotoPath: string | null;
+  bio: string | null;
+  location: string;
+}
+
+export interface AdminAgencyPitch extends AgencyPitch {
+  agencyId: string;
+  agencyName: string | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+}
+
+// ── Pitch API Functions ─────────────────────────────────────────────────────
+
+export async function fetchAgencyRequirementDetail(
+  token: string | null,
+  reqId: string
+): Promise<AgencyRequirementDetail | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/requirements/${reqId}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as AgencyRequirementDetail;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchAgencyCandidatePool(
+  token: string | null
+): Promise<AgencyPoolCandidate[] | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/candidates/pool`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as AgencyPoolCandidate[];
+  } catch {
+    return null;
+  }
+}
+
+export async function submitAgencyPitches(
+  token: string | null,
+  reqId: string,
+  pitches: Array<{
+    developerId: string;
+    hourlyRate: number;
+    monthlyRate: number;
+    currency?: string;
+    commissionRate: number;
+    workingDaysPerMonth?: number;
+    hoursPerDay?: number;
+    coverNote?: string;
+  }>
+): Promise<{ created: number; skipped: number } | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/requirements/${reqId}/pitches`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ pitches }),
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as { created: number; skipped: number };
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchAgencyPitches(
+  token: string | null,
+  params: { status?: string } = {}
+): Promise<AgencyPitch[] | null> {
+  if (!token) return null;
+  try {
+    const searchParams = new URLSearchParams();
+    if (params.status) searchParams.set("status", params.status);
+    const qs = searchParams.toString();
+
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/pitches${qs ? `?${qs}` : ""}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as AgencyPitch[];
+  } catch {
+    return null;
+  }
+}
+
+export async function addAgencyCandidate(
+  token: string | null,
+  payload: {
+    fullName?: string;
+    email: string;
+    professionalTitle?: string;
+    primaryStack?: string[];
+    yearsOfExperience?: number;
+    locationCity?: string;
+    locationState?: string;
+    availability?: string;
+    engagementType?: string[];
+    hourlyRate?: number;
+    monthlyRate?: number;
+    salaryCurrency?: string;
+  }
+): Promise<Record<string, unknown> | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/agencies/candidates`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+// ── Admin Agency Pitch API Functions ────────────────────────────────────────
+
+export async function fetchAdminAgencyPitches(
+  token: string | null,
+  params: { status?: string } = {}
+): Promise<AdminAgencyPitch[] | null> {
+  if (!token) return null;
+  try {
+    const searchParams = new URLSearchParams();
+    if (params.status) searchParams.set("status", params.status);
+    const qs = searchParams.toString();
+
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/agency-pitches${qs ? `?${qs}` : ""}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as AdminAgencyPitch[];
+  } catch {
+    return null;
+  }
+}
+
+export async function reviewAdminAgencyPitch(
+  token: string | null,
+  pitchId: string,
+  payload: { action: "approve" | "reject"; adminNote?: string }
+): Promise<Record<string, unknown> | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/agency-pitches/${pitchId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 // ── Admin Agency API Functions ───────────────────────────────────────────────
 
 export async function fetchAdminAgencies(
