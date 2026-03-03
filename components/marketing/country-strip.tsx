@@ -15,13 +15,22 @@ interface CountryStripProps {
   className?: string;
 }
 
-const EXPENSIVE_MARKETS = new Set([
-  "GB", "US", "CA", "DE", "FR", "NL", "IT", "AU",
+const EXCLUDED = new Set([
+  "GB", "US", "CA", "DE", "FR", "NL", "IT", "AU", // expensive markets
+  "ET", "KE", "NG", "GH", "TZ", "UG",              // smaller markets
 ]);
 
-const hireFromCountries = REGIONAL_COUNTRIES.filter(
-  (c) => !EXPENSIVE_MARKETS.has(c.isoCode),
-);
+const hireFromCountries = (() => {
+  const filtered = REGIONAL_COUNTRIES.filter(
+    (c) => !EXCLUDED.has(c.isoCode),
+  );
+  // India at the center
+  const india = filtered.find((c) => c.isoCode === "IN");
+  const rest = filtered.filter((c) => c.isoCode !== "IN");
+  if (!india) return rest;
+  const mid = Math.floor(rest.length / 2);
+  return [...rest.slice(0, mid), india, ...rest.slice(mid)];
+})();
 
 const CountryStrip = ({ className }: CountryStripProps) => {
   const allCountries = [...hireFromCountries, ...hireFromCountries];
