@@ -266,6 +266,14 @@ export default async function ApplicantDetailPage({
                       Live
                     </Badge>
                   )}
+                  {applicant.agencyId && (
+                    <Badge
+                      variant="outline"
+                      className="border-blue-600/20 bg-blue-500/10 text-blue-600"
+                    >
+                      Sourced by {applicant.agencyName ?? "Agency"}
+                    </Badge>
+                  )}
                   <FeaturedToggle
                     applicationId={applicant.id}
                     isLive={applicant.isLive}

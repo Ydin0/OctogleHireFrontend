@@ -156,6 +156,15 @@ const buildApplicationFormData = (
     formData.append("resumeFile", values.resumeFile);
   }
 
+  // Attach agency referral code if present
+  const storedReferralCode =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem("agency_referral_code")
+      : null;
+  if (storedReferralCode) {
+    formData.append("referralCode", storedReferralCode);
+  }
+
   return formData;
 };
 
@@ -192,7 +201,13 @@ const readErrorMessage = async (response: Response): Promise<string> => {
   );
 };
 
-const ApplyForm = () => {
+interface ApplyFormProps {
+  referralCode?: string;
+}
+
+const REFERRAL_CODE_STORAGE_KEY = "agency_referral_code";
+
+const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
   const router = useRouter();
   const skipToForm = typeof window !== "undefined" && window.location.hash === "#apply-form";
   const [heroPhase, setHeroPhase] = useState(!skipToForm);
@@ -207,7 +222,11 @@ const ApplyForm = () => {
     if (draftId) {
       setApplicationId(draftId);
     }
-  }, []);
+    // Persist referral code from URL param or restore from localStorage
+    if (referralCode) {
+      window.localStorage.setItem(REFERRAL_CODE_STORAGE_KEY, referralCode);
+    }
+  }, [referralCode]);
 
   const methods = useForm<Application>({
     resolver: standardSchemaResolver(applicationSchema),
@@ -383,6 +402,7 @@ const ApplyForm = () => {
       }
 
       window.localStorage.removeItem(APPLICATION_DRAFT_STORAGE_KEY);
+      window.localStorage.removeItem(REFERRAL_CODE_STORAGE_KEY);
 
       router.push(`/apply/status?applicationId=${resolvedId}`);
     } catch (error) {

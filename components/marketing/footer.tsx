@@ -14,6 +14,7 @@ const sections = [
       { name: "How It Works", href: "#how-it-works" },
       { name: "Pricing", href: "#pricing" },
       { name: "For Companies", href: "/companies/signup" },
+      { name: "For Agencies", href: "/for-agencies" },
       { name: "For Developers", href: "/apply" },
     ],
   },

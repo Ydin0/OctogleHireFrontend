@@ -65,6 +65,10 @@ export interface AdminApplicationFull {
   offer: ApplicationOffer | null;
   flowmingoStatus: string | null;
   flowmingoScore: string | null;
+  agencyId: string | null;
+  agencyName: string | null;
+  referralCode: string | null;
+  source: string;
   submittedAt: string | null;
   createdAt: string;
   updatedAt: string;

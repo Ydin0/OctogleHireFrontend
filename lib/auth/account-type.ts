@@ -9,6 +9,7 @@ type ClerkUserLike = {
 type DashboardPath =
   | "/developers/dashboard"
   | "/companies/dashboard"
+  | "/agencies/dashboard"
   | "/admin/dashboard";
 
 const toNormalizedString = (value: unknown): string | null => {
@@ -39,6 +40,10 @@ const parseAccountType = (value: string | null): DashboardPath | null => {
     return "/admin/dashboard";
   }
 
+  if (value.includes("agency") || value.includes("recruiter")) {
+    return "/agencies/dashboard";
+  }
+
   if (
     value.includes("company") ||
     value.includes("client") ||
@@ -63,8 +68,10 @@ export const resolveDashboardPathFromRole = (
   accountType: string | null,
   orgId?: string | null,
 ): DashboardPath => {
+  const parsed = parseAccountType(accountType);
+  if (parsed) return parsed;
   if (orgId) return "/companies/dashboard";
-  return parseAccountType(accountType) ?? "/developers/dashboard";
+  return "/developers/dashboard";
 };
 
 export const resolveDashboardPath = (params: {
@@ -72,8 +79,6 @@ export const resolveDashboardPath = (params: {
   orgId?: string | null;
 }): DashboardPath => {
   const { user, orgId } = params;
-
-  if (orgId) return "/companies/dashboard";
 
   const sources: Array<MetadataRecord> = [
     user?.publicMetadata,
@@ -90,6 +95,8 @@ export const resolveDashboardPath = (params: {
     const parsedFromRole = parseAccountType(fromRole);
     if (parsedFromRole) return parsedFromRole;
   }
+
+  if (orgId) return "/companies/dashboard";
 
   return "/developers/dashboard";
 };

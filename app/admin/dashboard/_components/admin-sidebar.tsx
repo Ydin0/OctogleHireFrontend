@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bot,
+  Briefcase,
   Building2,
   Clock,
   GitPullRequestArrow,
@@ -29,6 +30,7 @@ const navItems = [
   { href: "/admin/dashboard", label: "Overview", icon: Layers },
   { href: "/admin/dashboard/applicants", label: "Applicants", icon: Users },
   { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
+  { href: "/admin/dashboard/agencies", label: "Agencies", icon: Briefcase },
   { href: "/admin/dashboard/time-entries", label: "Timesheets", icon: Clock },
   { href: "/admin/dashboard/change-requests", label: "Requests", icon: GitPullRequestArrow },
   { href: "/admin/dashboard/invoices", label: "Invoices", icon: Receipt },

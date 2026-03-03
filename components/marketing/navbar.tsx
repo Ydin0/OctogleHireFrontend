@@ -23,6 +23,7 @@ interface NavbarProps {
 
 const navLinks = [
   { label: "Marketplace", href: "/marketplace" },
+  { label: "For Agencies", href: "/for-agencies" },
   { label: "Pricing", href: "/#pricing" },
   { label: "Blog", href: "/blog" },
   { label: "Apply as a Dev", href: "/apply" },

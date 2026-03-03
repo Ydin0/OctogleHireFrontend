@@ -6,6 +6,7 @@ import { detectAIBot } from "@/lib/ai-bots";
 const isProtectedRoute = createRouteMatcher([
   "/developers/dashboard(.*)",
   "/companies/dashboard(.*)",
+  "/agencies/dashboard(.*)",
   "/admin(.*)",
 ]);
 
