@@ -691,6 +691,85 @@ export async function fetchAdminAgencyCommissions(
   }
 }
 
+// ── Admin Agency Stats / Activate / Pitches ─────────────────────────────────
+
+export interface AdminAgencyStats {
+  candidatesSourced: number;
+  candidatesPlaced: number;
+  pitchesTotal: number;
+  pitchesPending: number;
+  pitchesApproved: number;
+  pitchesRejected: number;
+  totalCommissionsCents: number;
+  pendingPayoutsCents: number;
+  paidCommissionsCents: number;
+  currency: string;
+  membersCount: number;
+}
+
+export async function activateAdminAgency(
+  token: string | null,
+  id: string
+): Promise<Agency> {
+  const response = await fetch(
+    `${apiBaseUrl}/api/admin/agencies/${id}/activate`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    }
+  );
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(
+      (body as { message?: string }).message ?? "Activation failed"
+    );
+  }
+  return (await response.json()) as Agency;
+}
+
+export async function fetchAdminAgencyStats(
+  token: string | null,
+  id: string
+): Promise<AdminAgencyStats | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/agencies/${id}/stats`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as AdminAgencyStats;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchAdminAgencyPitchesForAgency(
+  token: string | null,
+  agencyId: string
+): Promise<AdminAgencyPitch[] | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/agencies/${agencyId}/pitches`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as AdminAgencyPitch[];
+  } catch {
+    return null;
+  }
+}
+
 // ── Agency Enquiry Types ───────────────────────────────────────────────────
 
 export interface AgencyEnquiry {

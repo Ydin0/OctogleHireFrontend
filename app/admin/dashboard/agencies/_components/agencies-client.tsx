@@ -214,7 +214,8 @@ function AgenciesClient({ agencies, enquiries, token }: AgenciesClientProps) {
                         <th className="pb-2 pr-4 text-left font-medium">Contact</th>
                         <th className="pb-2 pr-4 text-left font-medium">Referral Code</th>
                         <th className="pb-2 pr-4 text-right font-medium">Rate</th>
-                        <th className="pb-2 text-right font-medium">Status</th>
+                        <th className="pb-2 pr-4 text-right font-medium">Status</th>
+                        <th className="pb-2 text-right font-medium">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -241,13 +242,22 @@ function AgenciesClient({ agencies, enquiries, token }: AgenciesClientProps) {
                           <td className="py-3 pr-4 text-right font-mono">
                             {a.commissionRate}%
                           </td>
-                          <td className="py-3 text-right">
+                          <td className="py-3 pr-4 text-right">
                             <Badge
                               variant="outline"
                               className={statusBadge[a.status] ?? statusBadge.pending}
                             >
                               {a.status}
                             </Badge>
+                          </td>
+                          <td className="py-3 text-right">
+                            {a.status === "pending" && !a.clerkOrgId && (
+                              <Link href={`/admin/dashboard/agencies/${a.id}`}>
+                                <Button size="sm" variant="outline">
+                                  Activate
+                                </Button>
+                              </Link>
+                            )}
                           </td>
                         </tr>
                       ))}
