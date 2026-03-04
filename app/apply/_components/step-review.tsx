@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { Pencil } from "lucide-react";
 
 import type { Application } from "@/lib/schemas/application";
+import { getCategoryForTitle } from "@/lib/data/professional-categories";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -164,9 +165,15 @@ const StepReview = ({ onEditStep }: StepReviewProps) => {
       <Separator />
 
       {/* Tech Stack */}
-      <SectionHeader title="Tech Stack & Skills" step={3} onEdit={onEditStep} />
+      <SectionHeader
+        title={getCategoryForTitle(data.professionalTitle ?? "") === "engineering" ? "Tech Stack & Skills" : "Skills & Tools"}
+        step={3}
+        onEdit={onEditStep}
+      />
       <div>
-        <p className="mb-2 text-xs text-muted-foreground">Primary Stack</p>
+        <p className="mb-2 text-xs text-muted-foreground">
+          {getCategoryForTitle(data.professionalTitle ?? "") === "engineering" ? "Primary Stack" : "Primary Skills"}
+        </p>
         <div className="flex flex-wrap gap-1.5">
           {data.primaryStack?.map((tech) => (
             <Badge key={tech} variant="secondary" className="text-xs">

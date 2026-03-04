@@ -8,6 +8,7 @@ export interface AdminApplication {
   fullName: string | null;
   email: string;
   professionalTitle: string | null;
+  professionalCategory: string | null;
   locationCity: string | null;
   locationState: string | null;
   yearsOfExperience: number | null;
@@ -35,6 +36,7 @@ export interface AdminApplicationFull {
   locationCity: string | null;
   locationState: string | null;
   professionalTitle: string | null;
+  professionalCategory: string | null;
   yearsOfExperience: number | null;
   bio: string | null;
   primaryStack: string[] | null;
@@ -117,6 +119,7 @@ export interface FetchApplicationsParams {
   sortBy?: string;
   sortOrder?: string;
   professionalTitle?: string;
+  professionalCategory?: string;
   stack?: string;
   location?: string;
   expMin?: string;
@@ -127,6 +130,7 @@ export interface FetchApplicationsParams {
 
 export interface FilterOptions {
   professionalTitles: string[];
+  professionalCategories: string[];
   techStacks: string[];
   locations: string[];
   engagementTypes: string[];
@@ -167,6 +171,7 @@ export async function fetchApplications(
     if (params.sortBy) searchParams.set("sortBy", params.sortBy);
     if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
     if (params.professionalTitle) searchParams.set("professionalTitle", params.professionalTitle);
+    if (params.professionalCategory) searchParams.set("professionalCategory", params.professionalCategory);
     if (params.stack) searchParams.set("stack", params.stack);
     if (params.location) searchParams.set("location", params.location);
     if (params.expMin) searchParams.set("expMin", params.expMin);
@@ -420,6 +425,7 @@ export async function exportApplicationsCsv(
     if (params.status) searchParams.set("status", params.status);
     if (params.isLive) searchParams.set("isLive", params.isLive);
     if (params.professionalTitle) searchParams.set("professionalTitle", params.professionalTitle);
+    if (params.professionalCategory) searchParams.set("professionalCategory", params.professionalCategory);
     if (params.stack) searchParams.set("stack", params.stack);
     if (params.location) searchParams.set("location", params.location);
     if (params.expMin) searchParams.set("expMin", params.expMin);

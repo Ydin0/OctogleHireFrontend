@@ -1,8 +1,13 @@
 "use client";
 
-import { useFormContext, Controller } from "react-hook-form";
+import { useEffect, useRef } from "react";
+import { useFormContext, useWatch, Controller } from "react-hook-form";
 
 import type { Application } from "@/lib/schemas/application";
+import {
+  getCategoryForTitle,
+  getSkillOptionsForCategory,
+} from "@/lib/data/professional-categories";
 import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { TechStackSelector } from "./tech-stack-selector";
@@ -11,13 +16,45 @@ const StepTechStack = () => {
   const {
     control,
     register,
+    setValue,
     formState: { errors },
   } = useFormContext<Application>();
+
+  const professionalTitle = useWatch({ control, name: "professionalTitle" }) ?? "";
+  const category = getCategoryForTitle(professionalTitle);
+  const skillOptions = getSkillOptionsForCategory(category);
+  const isEngineering = category === "engineering";
+
+  const prevCategoryRef = useRef(category);
+
+  useEffect(() => {
+    if (prevCategoryRef.current !== category) {
+      prevCategoryRef.current = category;
+      setValue("primaryStack", [], { shouldDirty: true });
+    }
+  }, [category, setValue]);
+
+  const fieldLabel = isEngineering ? "Primary Tech Stack" : "Primary Skills & Tools";
+  const selectorPlaceholder = isEngineering
+    ? "Search technologies..."
+    : category === "design"
+      ? "Search design tools & skills..."
+      : category === "marketing"
+        ? "Search marketing tools & skills..."
+        : "Search HR tools & skills...";
+  const selectorItemLabel = isEngineering ? "technologies" : "skills";
+  const secondaryPlaceholder = isEngineering
+    ? "e.g., Machine Learning, CI/CD, System Design..."
+    : category === "design"
+      ? "e.g., Design Thinking, Creative Direction, Art Direction..."
+      : category === "marketing"
+        ? "e.g., Affiliate Marketing, Community Building, Event Marketing..."
+        : "e.g., Mediation, Executive Coaching, Policy Writing...";
 
   return (
     <div className="space-y-4">
       <Field>
-        <FieldLabel>Primary Tech Stack</FieldLabel>
+        <FieldLabel>{fieldLabel}</FieldLabel>
         <Controller
           name="primaryStack"
           control={control}
@@ -26,6 +63,9 @@ const StepTechStack = () => {
               value={field.value ?? []}
               onChange={field.onChange}
               max={8}
+              options={skillOptions}
+              placeholder={selectorPlaceholder}
+              itemLabel={selectorItemLabel}
             />
           )}
         />
@@ -42,7 +82,7 @@ const StepTechStack = () => {
         </FieldLabel>
         <Textarea
           id="secondarySkills"
-          placeholder="e.g., Machine Learning, CI/CD, System Design..."
+          placeholder={secondaryPlaceholder}
           rows={3}
           {...register("secondarySkills")}
         />

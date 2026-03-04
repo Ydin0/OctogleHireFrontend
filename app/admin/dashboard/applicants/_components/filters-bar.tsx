@@ -67,6 +67,7 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
   const currentExpMax = searchParams.get("expMax") ?? "";
   const currentEngagement = searchParams.get("engagementType") ?? "";
   const currentAvailability = searchParams.get("availability") ?? "";
+  const currentCategory = searchParams.get("professionalCategory") ?? "all";
 
   const [searchValue, setSearchValue] = useState(currentSearch);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -81,6 +82,7 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
     currentExpMax,
     currentEngagement,
     currentAvailability,
+    currentCategory !== "all" ? currentCategory : "",
   ].filter(Boolean).length;
 
   const pushParams = useCallback(
@@ -129,6 +131,7 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
     if (currentStatus && currentStatus !== "all") exportParams.set("status", currentStatus);
     if (currentIsLive && currentIsLive !== "all") exportParams.set("isLive", currentIsLive);
     if (currentTitle) exportParams.set("professionalTitle", currentTitle);
+    if (currentCategory && currentCategory !== "all") exportParams.set("professionalCategory", currentCategory);
     if (currentStack) exportParams.set("stack", currentStack);
     if (currentLocation) exportParams.set("location", currentLocation);
     if (currentExpMin) exportParams.set("expMin", currentExpMin);
@@ -224,6 +227,21 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="true">Live</SelectItem>
             <SelectItem value="false">Not Live</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select
+          value={currentCategory}
+          onValueChange={(v) => pushParams({ professionalCategory: v })}
+        >
+          <SelectTrigger className="w-full sm:w-[160px]">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="engineering">Engineering</SelectItem>
+            <SelectItem value="design">Design</SelectItem>
+            <SelectItem value="marketing">Marketing</SelectItem>
+            <SelectItem value="hr">HR</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="sm" onClick={handleExport}>

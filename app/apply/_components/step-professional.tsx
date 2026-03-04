@@ -6,6 +6,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 
 import type { Application } from "@/lib/schemas/application";
 import { PROFESSIONAL_TITLE_OPTIONS } from "@/lib/data/professional-titles";
+import { getCategoryForTitle } from "@/lib/data/professional-categories";
 import { CURRENCIES } from "@/lib/data/currencies";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -132,7 +133,15 @@ const StepProfessional = () => {
         <FieldLabel htmlFor="bio">Bio</FieldLabel>
         <Textarea
           id="bio"
-          placeholder="Tell us about your experience, expertise, and what makes you a great developer..."
+          placeholder={
+            getCategoryForTitle(professionalTitle) === "design"
+              ? "Tell us about your design experience, creative process, and specialties..."
+              : getCategoryForTitle(professionalTitle) === "marketing"
+                ? "Tell us about your marketing experience, campaigns you've led, and areas of expertise..."
+                : getCategoryForTitle(professionalTitle) === "hr"
+                  ? "Tell us about your HR experience, specialties, and what sets you apart..."
+                  : "Tell us about your experience, expertise, and what makes you a great developer..."
+          }
           rows={3}
           {...register("bio")}
         />

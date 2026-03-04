@@ -108,6 +108,32 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
       ),
     },
     {
+      accessorKey: "professionalCategory",
+      header: "Category",
+      size: 100,
+      cell: ({ getValue }) => {
+        const category = getValue() as string | null;
+        if (!category) return <span className="text-sm text-muted-foreground">-</span>;
+        const styles: Record<string, string> = {
+          engineering: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300",
+          design: "border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300",
+          marketing: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300",
+          hr: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
+        };
+        const labels: Record<string, string> = {
+          engineering: "Engineering",
+          design: "Design",
+          marketing: "Marketing",
+          hr: "HR",
+        };
+        return (
+          <Badge variant="outline" className={`text-[10px] ${styles[category] ?? ""}`}>
+            {labels[category] ?? category}
+          </Badge>
+        );
+      },
+    },
+    {
       id: "location",
       header: "Location",
       size: 160,

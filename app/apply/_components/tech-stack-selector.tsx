@@ -12,25 +12,33 @@ interface TechStackSelectorProps {
   value: string[];
   onChange: (value: string[]) => void;
   max?: number;
+  options?: string[];
+  placeholder?: string;
+  itemLabel?: string;
 }
 
 const TechStackSelector = ({
   value,
   onChange,
   max = 8,
+  options,
+  placeholder = "Search technologies...",
+  itemLabel = "technologies",
 }: TechStackSelectorProps) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const resolvedOptions = options ?? (MARKETPLACE_TECH_STACK_OPTIONS as unknown as string[]);
+
   const filteredOptions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return MARKETPLACE_TECH_STACK_OPTIONS;
-    return MARKETPLACE_TECH_STACK_OPTIONS.filter((option) =>
+    if (!normalizedQuery) return resolvedOptions;
+    return resolvedOptions.filter((option) =>
       option.toLowerCase().includes(normalizedQuery),
     );
-  }, [query]);
+  }, [query, resolvedOptions]);
 
   const toggle = (tech: string) => {
     if (value.includes(tech)) {
@@ -72,10 +80,10 @@ const TechStackSelector = ({
 
   const selectionLabel =
     value.length === 0
-      ? "Select technologies..."
+      ? `Select ${itemLabel}...`
       : value.length <= 2
         ? value.join(", ")
-        : `${value.length} technologies selected`;
+        : `${value.length} ${itemLabel} selected`;
 
   return (
     <div ref={containerRef}>
@@ -104,7 +112,7 @@ const TechStackSelector = ({
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search technologies..."
+                  placeholder={placeholder}
                   className="h-8 w-full rounded-md border bg-background pl-7 pr-2 text-sm outline-none focus:border-ring"
                 />
               </div>

@@ -2,9 +2,22 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Plus } from "lucide-react";
 
 import type { CompanyProfile } from "@/lib/api/companies";
+import { deleteCompany, createCompany, type CreateCompanyPayload } from "@/lib/api/companies";
 import type { Pagination } from "@/lib/api/admin";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DataTable } from "../../_components/data-table";
 import { getColumns } from "./columns";
 import { FiltersBar } from "./filters-bar";
@@ -22,6 +35,24 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>(
     {},
   );
+
+  // Delete state
+  const [deleteTarget, setDeleteTarget] = useState<CompanyProfile | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  // Create state
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [createForm, setCreateForm] = useState<CreateCompanyPayload>({
+    companyName: "",
+    contactName: "",
+    email: "",
+    phone: "",
+    website: "",
+    location: "",
+  });
 
   const currentSearch = searchParams.get("search") ?? "";
   const currentStatus = searchParams.get("status") ?? "all";
@@ -185,15 +216,64 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
     .map((idx) => paginatedCompanies[parseInt(idx)]?.id)
     .filter(Boolean);
 
-  const columns = getColumns({ enableSelection: true });
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setDeleteError(null);
+
+    const result = await deleteCompany(token, deleteTarget.id);
+
+    if (result.ok) {
+      setDeleteTarget(null);
+      startTransition(() => {
+        router.refresh();
+      });
+    } else {
+      setDeleteError(result.message ?? "Failed to delete company");
+    }
+    setDeleting(false);
+  };
+
+  const handleCreate = async () => {
+    if (!createForm.companyName || !createForm.contactName || !createForm.email) return;
+    setCreating(true);
+    setCreateError(null);
+
+    const result = await createCompany(token, createForm);
+
+    if (result) {
+      setCreateOpen(false);
+      setCreateForm({ companyName: "", contactName: "", email: "", phone: "", website: "", location: "" });
+      startTransition(() => {
+        router.refresh();
+      });
+    } else {
+      setCreateError("Failed to create company");
+    }
+    setCreating(false);
+  };
+
+  const columns = getColumns({
+    enableSelection: true,
+    onDelete: (company) => {
+      setDeleteError(null);
+      setDeleteTarget(company);
+    },
+  });
 
   return (
     <>
-      <div>
-        <h1 className="text-lg font-semibold">Companies</h1>
-        <p className="text-sm text-muted-foreground">
-          Track company enquiries, requirements, and engagement status.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Companies</h1>
+          <p className="text-sm text-muted-foreground">
+            Track company enquiries, requirements, and engagement status.
+          </p>
+        </div>
+        <Button size="sm" onClick={() => setCreateOpen(true)}>
+          <Plus className="mr-1.5 size-3.5" />
+          Add Company
+        </Button>
       </div>
 
       <FiltersBar
@@ -242,6 +322,131 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
           router.push(`/admin/dashboard/companies/${company.id}`)
         }
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Company</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{deleteTarget?.companyName}</strong>? This will
+              remove the company and all associated requirements and team members. This action cannot be
+              undone.
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Company Dialog */}
+      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Company</DialogTitle>
+            <DialogDescription>
+              Create a new company record manually.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="create-companyName">Company Name *</Label>
+              <Input
+                id="create-companyName"
+                value={createForm.companyName}
+                onChange={(e) => setCreateForm((f) => ({ ...f, companyName: e.target.value }))}
+                placeholder="Acme Inc."
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="create-contactName">Contact Name *</Label>
+              <Input
+                id="create-contactName"
+                value={createForm.contactName}
+                onChange={(e) => setCreateForm((f) => ({ ...f, contactName: e.target.value }))}
+                placeholder="John Smith"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="create-email">Email *</Label>
+              <Input
+                id="create-email"
+                type="email"
+                value={createForm.email}
+                onChange={(e) => setCreateForm((f) => ({ ...f, email: e.target.value }))}
+                placeholder="john@acme.com"
+              />
+              {createForm.email.includes("@") && (
+                <p className="text-xs text-muted-foreground">
+                  Domain: {createForm.email.split("@")[1]?.toLowerCase()} — logo will be fetched automatically
+                </p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="create-phone">Phone</Label>
+              <Input
+                id="create-phone"
+                value={createForm.phone}
+                onChange={(e) => setCreateForm((f) => ({ ...f, phone: e.target.value }))}
+                placeholder="+1 555 123 4567"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="create-website">Website</Label>
+              <Input
+                id="create-website"
+                value={createForm.website}
+                onChange={(e) => setCreateForm((f) => ({ ...f, website: e.target.value }))}
+                placeholder="https://acme.com"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="create-location">Location</Label>
+              <Input
+                id="create-location"
+                value={createForm.location}
+                onChange={(e) => setCreateForm((f) => ({ ...f, location: e.target.value }))}
+                placeholder="New York, NY"
+              />
+            </div>
+          </div>
+          {createError && (
+            <p className="text-sm text-destructive">{createError}</p>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              disabled={creating}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreate}
+              disabled={creating || !createForm.companyName || !createForm.contactName || !createForm.email}
+            >
+              {creating ? "Creating..." : "Create Company"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

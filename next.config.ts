@@ -17,6 +17,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "deifkwefumgah.cloudfront.net",
       },
+      {
+        protocol: "https",
+        hostname: "www.google.com",
+        pathname: "/s2/favicons**",
+      },
     ],
     formats: ["image/avif", "image/webp"],
   },

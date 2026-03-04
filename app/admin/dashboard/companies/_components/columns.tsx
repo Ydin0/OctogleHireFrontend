@@ -1,8 +1,9 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import Image from "next/image";
 import Link from "next/link";
-import { Building2, MapPin, MoreHorizontal } from "lucide-react";
+import { Building2, MapPin, MoreHorizontal, Trash2 } from "lucide-react";
 
 import type { CompanyProfile } from "@/lib/api/companies";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ import {
 
 interface GetColumnsOptions {
   enableSelection?: boolean;
+  onDelete?: (company: CompanyProfile) => void;
 }
 
 export function getColumns(
@@ -65,11 +67,22 @@ export function getColumns(
       size: 220,
       meta: { sortKey: "companyName" },
       cell: ({ row }) => {
-        const { companyName, website } = row.original;
+        const { companyName, website, logoUrl } = row.original;
         return (
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
-              <Building2 className="size-4 text-muted-foreground" />
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
+              {logoUrl ? (
+                <Image
+                  src={logoUrl}
+                  alt={companyName}
+                  width={32}
+                  height={32}
+                  className="size-8 object-contain"
+                  unoptimized
+                />
+              ) : (
+                <Building2 className="size-4 text-muted-foreground" />
+              )}
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{companyName}</p>
@@ -240,6 +253,21 @@ export function getColumns(
                   Change Status
                 </Link>
               </DropdownMenuItem>
+              {options.onDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-destructive focus:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      options.onDelete!(company);
+                    }}
+                  >
+                    <Trash2 className="mr-2 size-3.5" />
+                    Delete Company
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

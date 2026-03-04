@@ -4,15 +4,17 @@ import { ApplyForm } from "./_components/apply-form";
 import { absoluteUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "Apply as a Developer",
+  title: "Apply as a Professional",
   description:
-    "Join our network of pre-vetted engineers. Apply to OctogleHire and get matched with top companies worldwide.",
+    "Join our network of pre-vetted professionals. Apply to OctogleHire and get matched with top companies worldwide.",
   keywords: [
-    "apply as developer",
+    "apply as professional",
     "remote developer jobs",
-    "freelance engineer application",
-    "join developer network",
-    "remote software jobs",
+    "remote design jobs",
+    "remote marketing jobs",
+    "remote HR jobs",
+    "freelance application",
+    "join talent network",
   ],
   alternates: { canonical: absoluteUrl("/apply") },
 };

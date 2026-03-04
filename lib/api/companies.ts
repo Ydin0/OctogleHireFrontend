@@ -150,6 +150,8 @@ export interface CompanyProfileSummary {
   phone: string;
   website?: string;
   location?: string;
+  domain?: string | null;
+  logoUrl?: string | null;
   status: CompanyStatus;
   invoiceCurrency: string;
   createdAt: string;
@@ -163,6 +165,8 @@ export interface CompanyProfile {
   phone: string;
   website?: string;
   location?: string;
+  domain?: string | null;
+  logoUrl?: string | null;
   status: CompanyStatus;
   invoiceCurrency: string;
   requirements: JobRequirement[];
@@ -745,6 +749,67 @@ export async function removeMatch(
     return response.ok;
   } catch {
     return false;
+  }
+}
+
+export async function deleteCompany(
+  token: string | null,
+  companyId: string,
+): Promise<{ ok: boolean; message?: string }> {
+  if (!token) return { ok: false, message: "No token" };
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/companies/${companyId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    if (response.status === 204) return { ok: true };
+
+    const body = await response.json().catch(() => ({}));
+    return { ok: false, message: body.message || "Failed to delete company" };
+  } catch {
+    return { ok: false, message: "Network error" };
+  }
+}
+
+export interface CreateCompanyPayload {
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone?: string;
+  website?: string;
+  location?: string;
+}
+
+export async function createCompany(
+  token: string | null,
+  payload: CreateCompanyPayload,
+): Promise<CompanyProfile | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/companies`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) return null;
+    return (await response.json()) as CompanyProfile;
+  } catch {
+    return null;
   }
 }
 
