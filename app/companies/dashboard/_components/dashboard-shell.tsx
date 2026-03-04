@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -74,9 +75,20 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
               <Logo width={110} height={26} />
             </Link>
             <span className="text-border">|</span>
-            <div className="flex size-9 items-center justify-center rounded-full bg-pulse/15">
-              <Building2 className="size-4 text-pulse" />
-            </div>
+            {profile?.logoUrl ? (
+              <Image
+                src={profile.logoUrl}
+                alt={companyName}
+                width={36}
+                height={36}
+                unoptimized
+                className="size-9 rounded-full object-cover"
+              />
+            ) : (
+              <div className="flex size-9 items-center justify-center rounded-full bg-pulse/15">
+                <Building2 className="size-4 text-pulse" />
+              </div>
+            )}
             <div>
               <p className="text-xs font-mono uppercase tracking-[0.08em] text-muted-foreground">
                 Company Dashboard

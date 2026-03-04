@@ -53,7 +53,35 @@ export interface AgencyRequirement {
   priority: string;
   status: string;
   companyName: string | null;
+  companyLogoUrl: string | null;
   createdAt: string;
+}
+
+export interface MarketplaceParams {
+  search?: string;
+  experienceLevel?: string;
+  engagementType?: string;
+  techStack?: string;
+  priority?: string;
+  budgetMin?: string;
+  budgetMax?: string;
+  sortBy?: string;
+  sortOrder?: string;
+  page?: string;
+  limit?: string;
+}
+
+export interface MarketplaceFilterOptions {
+  experienceLevels: string[];
+  engagementTypes: string[];
+  techStacks: string[];
+  priorities: string[];
+}
+
+export interface MarketplaceResponse {
+  requirements: AgencyRequirement[];
+  pagination: Pagination;
+  filterOptions: MarketplaceFilterOptions;
 }
 
 export interface AgencyCommission {
@@ -210,21 +238,38 @@ export async function fetchAgencyCandidate(
   }
 }
 
-export async function fetchAgencyRequirements(
-  token: string | null
-): Promise<AgencyRequirement[] | null> {
+export async function fetchMarketplaceRequirements(
+  token: string | null,
+  params: MarketplaceParams = {}
+): Promise<MarketplaceResponse | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/requirements`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 30 },
-    });
+    const searchParams = new URLSearchParams();
+    for (const [key, value] of Object.entries(params)) {
+      if (value) searchParams.set(key, value);
+    }
+    const qs = searchParams.toString();
+
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/requirements${qs ? `?${qs}` : ""}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        next: { revalidate: 30 },
+      }
+    );
     if (!response.ok) return null;
-    return (await response.json()) as AgencyRequirement[];
+    return (await response.json()) as MarketplaceResponse;
   } catch {
     return null;
   }
+}
+
+export async function fetchAgencyRequirements(
+  token: string | null
+): Promise<AgencyRequirement[] | null> {
+  const data = await fetchMarketplaceRequirements(token, { limit: "100" });
+  return data?.requirements ?? null;
 }
 
 export async function fetchAgencyCommissions(

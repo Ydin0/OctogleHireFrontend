@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import {
@@ -254,9 +255,20 @@ const CompanyDetailPage = ({
         <CardContent className="p-6 lg:p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-4">
-              <div className="flex size-16 items-center justify-center rounded-full bg-pulse/10">
-                <Building2 className="size-8 text-pulse" />
-              </div>
+              {company.logoUrl ? (
+                <Image
+                  src={company.logoUrl}
+                  alt={company.companyName}
+                  width={64}
+                  height={64}
+                  unoptimized
+                  className="size-16 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex size-16 items-center justify-center rounded-full bg-pulse/10">
+                  <Building2 className="size-8 text-pulse" />
+                </div>
+              )}
               <div className="space-y-1">
                 <h1 className="text-2xl font-semibold">
                   {company.companyName}

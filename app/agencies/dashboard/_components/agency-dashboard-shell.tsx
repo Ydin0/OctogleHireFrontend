@@ -6,11 +6,11 @@ import { useEffect, useState } from "react";
 import {
   Bell,
   Briefcase,
-  ClipboardList,
   Layers,
   Link2,
   LogOut,
   Send,
+  Store,
   Users,
   Wallet,
 } from "lucide-react";
@@ -33,7 +33,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 const sidebarItems = [
   { href: "/agencies/dashboard", label: "Overview", icon: Layers },
   { href: "/agencies/dashboard/candidates", label: "Candidates", icon: Users },
-  { href: "/agencies/dashboard/requirements", label: "Requirements", icon: ClipboardList },
+  { href: "/agencies/dashboard/requirements", label: "Marketplace", icon: Store },
   { href: "/agencies/dashboard/pitches", label: "My Pitches", icon: Send },
   { href: "/agencies/dashboard/commissions", label: "Commissions", icon: Wallet },
   { href: "/agencies/dashboard/referral-link", label: "Referral Link", icon: Link2 },
