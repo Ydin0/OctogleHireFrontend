@@ -6,6 +6,7 @@ import {
   BotMessageSquare,
   Briefcase,
   Calendar,
+  ExternalLink,
   FileText,
   GraduationCap,
   Mail,
@@ -38,6 +39,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { StatusChanger } from "./_components/status-changer";
 import { ActivateButton } from "./_components/activate-button";
 import { NotesSection } from "./_components/notes-section";
@@ -373,6 +375,23 @@ export default async function ApplicantDetailPage({
               <p className="text-sm text-muted-foreground">
                 Interview in progress — score will appear once evaluated.
               </p>
+            )}
+            {applicant.flowmingoSubmissionUrl && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                asChild
+              >
+                <a
+                  href={applicant.flowmingoSubmissionUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ExternalLink className="mr-1.5 size-3.5" />
+                  View Interview
+                </a>
+              </Button>
             )}
           </CardContent>
         </Card>

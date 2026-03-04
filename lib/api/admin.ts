@@ -21,6 +21,7 @@ export interface AdminApplication {
   salaryCurrency: string | null;
   flowmingoStatus: string | null;
   flowmingoScore: string | null;
+  flowmingoSubmissionUrl: string | null;
 }
 
 export interface AdminApplicationFull {
@@ -65,6 +66,7 @@ export interface AdminApplicationFull {
   offer: ApplicationOffer | null;
   flowmingoStatus: string | null;
   flowmingoScore: string | null;
+  flowmingoSubmissionUrl: string | null;
   agencyId: string | null;
   agencyName: string | null;
   referralCode: string | null;

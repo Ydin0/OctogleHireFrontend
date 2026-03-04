@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { MoreHorizontal, StickyNote } from "lucide-react";
+import { ExternalLink, MoreHorizontal, StickyNote } from "lucide-react";
 
 import type { AdminApplication } from "@/lib/api/admin";
 import {
@@ -160,19 +160,31 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
       header: "AI Score",
       size: 80,
       cell: ({ row }) => {
-        const { flowmingoStatus, flowmingoScore } = row.original;
+        const { flowmingoStatus, flowmingoScore, flowmingoSubmissionUrl } = row.original;
         if (flowmingoScore != null) {
           const score = parseFloat(flowmingoScore);
+          const colorClass = score >= 7
+            ? "text-emerald-600"
+            : score >= 5
+              ? "text-amber-600"
+              : "text-red-600";
+
+          if (flowmingoSubmissionUrl) {
+            return (
+              <a
+                href={flowmingoSubmissionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-1 font-mono text-sm font-medium ${colorClass} hover:underline`}
+              >
+                {flowmingoScore}
+                <ExternalLink className="size-3 opacity-50" />
+              </a>
+            );
+          }
+
           return (
-            <span
-              className={`font-mono text-sm font-medium ${
-                score >= 7
-                  ? "text-emerald-600"
-                  : score >= 5
-                    ? "text-amber-600"
-                    : "text-red-600"
-              }`}
-            >
+            <span className={`font-mono text-sm font-medium ${colorClass}`}>
               {flowmingoScore}
             </span>
           );
