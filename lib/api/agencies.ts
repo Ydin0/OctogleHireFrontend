@@ -343,6 +343,51 @@ export async function fetchAgencyReferralLink(
   }
 }
 
+export async function inviteAgencyTeamMember(
+  token: string | null,
+  payload: { email: string; name: string; role: string },
+): Promise<AgencyTeamMember> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/agencies/team/invite`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to invite team member");
+  }
+
+  return (await response.json()) as AgencyTeamMember;
+}
+
+export async function removeAgencyTeamMember(
+  token: string | null,
+  memberId: string,
+): Promise<boolean> {
+  if (!token) return false;
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/agencies/team/${memberId}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+
+  return response.ok;
+}
+
 // ── Pitch Types ─────────────────────────────────────────────────────────────
 
 export interface AgencyPitchDeveloper {

@@ -465,6 +465,51 @@ export async function respondToMatch(
   }
 }
 
+export async function inviteCompanyTeamMember(
+  token: string | null,
+  payload: { email: string; name: string; role: string },
+): Promise<TeamMember> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/team/invite`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to invite team member");
+  }
+
+  return (await response.json()) as TeamMember;
+}
+
+export async function removeCompanyTeamMember(
+  token: string | null,
+  memberId: string,
+): Promise<boolean> {
+  if (!token) return false;
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/team/${memberId}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+
+  return response.ok;
+}
+
 // ── LinkedIn + Document Parsing API functions ────────────────────────────────
 
 export async function fetchLinkedInJobs(
