@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { fetchAgencyRequirementDetail } from "@/lib/api/agencies";
 import { Badge } from "@/components/ui/badge";
+import { MarkdownDisplay } from "@/components/markdown-display";
 import {
   Card,
   CardContent,
@@ -54,7 +55,7 @@ export default async function AgencyRequirementDetailPage({
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-4" />
-        Back to Requirements
+        Back to Marketplace
       </Link>
 
       <Card>
@@ -145,9 +146,7 @@ export default async function AgencyRequirementDetailPage({
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
               Description
             </p>
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-              {requirement.description}
-            </p>
+            <MarkdownDisplay content={requirement.description} />
           </div>
         </CardContent>
       </Card>
