@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -7,6 +8,7 @@ import {
   Briefcase,
   ClipboardList,
   DollarSign,
+  Download,
   Plus,
   Search,
   UserCheck,
@@ -68,6 +70,8 @@ function computeMonthlyBill(engagements: CompanyEngagement[]): number {
     }, 0);
 }
 
+const DISMISS_KEY = "octoglehire:dismiss-discover-prompt";
+
 export function CompanyOverviewClient({
   requirements,
   team,
@@ -77,6 +81,14 @@ export function CompanyOverviewClient({
   team: TeamMember[];
   engagements: CompanyEngagement[];
 }) {
+  const [bannerDismissed, setBannerDismissed] = useState(true);
+
+  useEffect(() => {
+    setBannerDismissed(localStorage.getItem(DISMISS_KEY) === "true");
+  }, []);
+
+  const showBanner = requirements.length === 0 && !bannerDismissed;
+
   const activeEngagements = engagements.filter((e) => e.status === "active");
   const predictedBill = computeMonthlyBill(engagements);
   const totalToReview = requirements.reduce((sum, r) => sum + countToReview(r), 0);
@@ -152,6 +164,41 @@ export function CompanyOverviewClient({
           </Button>
         </div>
       </div>
+
+      {/* Onboarding: Discover Jobs Banner */}
+      {showBanner && (
+        <Card className="border-foreground/10">
+          <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Download className="size-4 text-pulse" />
+                <p className="text-sm font-semibold">Import your existing job listings</p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                We can discover your open positions from LinkedIn and Indeed.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  localStorage.setItem(DISMISS_KEY, "true");
+                  setBannerDismissed(true);
+                }}
+              >
+                I&apos;ll post manually
+              </button>
+              <Button size="sm" className="gap-2" asChild>
+                <Link href="/companies/dashboard/requirements/discover">
+                  <Search className="size-3.5" />
+                  Discover Jobs
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* KPIs */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

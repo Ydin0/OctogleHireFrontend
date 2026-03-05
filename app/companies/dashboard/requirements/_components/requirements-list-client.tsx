@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Clock,
+  Download,
   Loader2,
   Plus,
   Search,
@@ -113,12 +114,20 @@ const RequirementsListClient = () => {
                 Post development requirements and track engineer matches.
               </p>
             </div>
-            <Button className="gap-2 bg-pulse text-pulse-foreground hover:bg-pulse/90" asChild>
-              <Link href="/companies/dashboard/requirements/new">
-                <Plus className="size-4" />
-                Post New Requirement
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" className="gap-2" asChild>
+                <Link href="/companies/dashboard/requirements/discover">
+                  <Download className="size-4" />
+                  Discover Jobs
+                </Link>
+              </Button>
+              <Button className="gap-2 bg-pulse text-pulse-foreground hover:bg-pulse/90" asChild>
+                <Link href="/companies/dashboard/requirements/new">
+                  <Plus className="size-4" />
+                  Post New Requirement
+                </Link>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

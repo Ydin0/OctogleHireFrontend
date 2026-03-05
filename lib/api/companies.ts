@@ -217,6 +217,30 @@ export interface ParsedJobData {
   priority: string;
 }
 
+export interface DiscoveredJob {
+  id: string;
+  companyId: string;
+  source: "linkedin" | "indeed";
+  externalId: string;
+  title: string;
+  description: string;
+  descriptionHtml: string;
+  location: string;
+  employmentType: string;
+  salary: string;
+  postedAt: string;
+  url: string;
+  importedAsRequirementId: string | null;
+  discoveredAt: string;
+}
+
+export interface DiscoverJobsResponse {
+  jobs: DiscoveredJob[];
+  linkedinCompanyUrl: string | null;
+  lastDiscoveredAt: string | null;
+  cached: boolean;
+}
+
 export interface ProposeMatchPayload {
   developerId: string;
   hourlyRate: number;
@@ -593,6 +617,153 @@ export async function parseJobDocument(
   }
 
   return (await response.json()) as ParsedJobData;
+}
+
+// ── Discover Jobs API functions ──────────────────────────────────────────────
+
+export async function updateCompanyProfile(
+  token: string | null,
+  payload: { linkedinCompanyUrl?: string; website?: string },
+): Promise<{ id: string; companyName: string; linkedinCompanyUrl: string | null; website: string | null }> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/profile`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to update profile");
+  }
+
+  return (await response.json()) as { id: string; companyName: string; linkedinCompanyUrl: string | null; website: string | null };
+}
+
+export async function getDiscoveredJobs(
+  token: string | null,
+): Promise<DiscoverJobsResponse> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/discover-jobs`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to fetch discovered jobs");
+  }
+
+  return (await response.json()) as DiscoverJobsResponse;
+}
+
+export async function discoverJobs(
+  token: string | null,
+  payload: { linkedinCompanyUrl?: string; companyName?: string },
+): Promise<DiscoverJobsResponse> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/discover-jobs`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to discover jobs");
+  }
+
+  return (await response.json()) as DiscoverJobsResponse;
+}
+
+export async function parseDiscoveredJobs(
+  token: string | null,
+  jobIds: string[],
+): Promise<Array<{ discoveredJobId: string; parsed: ParsedJobData }>> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/discover-jobs/parse`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ jobIds }),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to parse discovered jobs");
+  }
+
+  return (await response.json()) as Array<{ discoveredJobId: string; parsed: ParsedJobData }>;
+}
+
+export async function importDiscoveredJobs(
+  token: string | null,
+  jobs: Array<{
+    discoveredJobId: string;
+    title: string;
+    techStack: string[];
+    experienceYearsMin?: number;
+    experienceYearsMax?: number;
+    experienceLevel?: string;
+    developersNeeded?: number;
+    engagementType: string;
+    timezonePreference?: string;
+    budgetMin?: number;
+    budgetMax?: number;
+    description: string;
+    startDate?: string;
+    priority?: string;
+  }>,
+): Promise<JobRequirement[]> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/discover-jobs/import`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ jobs }),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to import jobs");
+  }
+
+  return (await response.json()) as JobRequirement[];
 }
 
 // ── Admin-side API functions ─────────────────────────────────────────────────
