@@ -133,6 +133,16 @@ export interface Pagination {
   totalPages: number;
 }
 
+// ── Email Check Types ────────────────────────────────────────────────────────
+
+export type EmailCheckStatus = "available" | "own_agency" | "direct_claimable" | "other_agency";
+
+export interface EmailCheckResult {
+  status: EmailCheckStatus;
+  candidateId?: string;
+  candidateName?: string | null;
+}
+
 // ── API Functions ────────────────────────────────────────────────────────────
 
 export async function fetchAgencyProfile(
@@ -559,6 +569,60 @@ export async function fetchAgencyPitches(
   }
 }
 
+export async function checkAgencyCandidateEmail(
+  token: string | null,
+  email: string
+): Promise<EmailCheckResult> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/agencies/candidates/check-email`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error((body as { message?: string }).message ?? "Email check failed");
+  }
+
+  return (await response.json()) as EmailCheckResult;
+}
+
+export async function claimAgencyCandidate(
+  token: string | null,
+  candidateId: string
+): Promise<Record<string, unknown>> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/agencies/candidates/claim`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ candidateId }),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error((body as { message?: string }).message ?? "Claim failed");
+  }
+
+  return (await response.json()) as Record<string, unknown>;
+}
+
 export async function addAgencyCandidate(
   token: string | null,
   payload: {
@@ -574,24 +638,33 @@ export async function addAgencyCandidate(
     hourlyRate?: number;
     monthlyRate?: number;
     salaryCurrency?: string;
+    linkedinUrl?: string;
+    bio?: string;
+    workExperience?: unknown[];
+    education?: unknown[];
+    secondarySkills?: string;
+    profilePhotoUrl?: string;
+    englishProficiency?: string;
   }
-): Promise<Record<string, unknown> | null> {
-  if (!token) return null;
-  try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/candidates`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-      cache: "no-store",
-    });
-    if (!response.ok) return null;
-    return (await response.json()) as Record<string, unknown>;
-  } catch {
-    return null;
+): Promise<Record<string, unknown>> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(`${apiBaseUrl}/api/agencies/candidates`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error((body as { message?: string }).message ?? "Failed to add candidate");
   }
+
+  return (await response.json()) as Record<string, unknown>;
 }
 
 // ── Admin Agency Pitch API Functions ────────────────────────────────────────
