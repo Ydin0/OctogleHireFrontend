@@ -676,7 +676,7 @@ export async function getDiscoveredJobs(
 
 export async function discoverJobs(
   token: string | null,
-  payload: { linkedinCompanyUrl?: string; companyName?: string },
+  payload: { linkedinCompanyUrl?: string; companyName?: string; force?: boolean },
 ): Promise<DiscoverJobsResponse> {
   if (!token) throw new Error("Not authenticated");
 

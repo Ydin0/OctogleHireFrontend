@@ -158,6 +158,7 @@ export function DiscoverJobsClient() {
       const result = await discoverJobs(token, {
         linkedinCompanyUrl: linkedinUrl || undefined,
         companyName: companyName || undefined,
+        force: true,
       });
       setData(result);
       setSelected(new Set());
