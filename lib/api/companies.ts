@@ -652,6 +652,33 @@ export async function updateCompanyProfile(
   return (await response.json()) as CompanyProfileSummary;
 }
 
+export async function uploadCompanyLogo(
+  token: string | null,
+  file: File,
+): Promise<{ logoUrl: string }> {
+  if (!token) throw new Error("Not authenticated");
+
+  const formData = new FormData();
+  formData.append("logo", file);
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/profile/logo`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to upload logo");
+  }
+
+  return (await response.json()) as { logoUrl: string };
+}
+
 export async function getDiscoveredJobs(
   token: string | null,
 ): Promise<DiscoverJobsResponse> {

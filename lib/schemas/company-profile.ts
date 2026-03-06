@@ -12,7 +12,6 @@ export const companyProfileSchema = z.object({
     .optional()
     .or(z.literal("")),
   location: z.string().optional().or(z.literal("")),
-  logoUrl: z.string().url().optional().or(z.literal("")),
 });
 
 export type CompanyProfileFormValues = z.infer<typeof companyProfileSchema>;
