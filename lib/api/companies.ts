@@ -569,7 +569,13 @@ export async function fetchLinkedInJobs(
 
 export async function parseLinkedInJob(
   token: string | null,
-  data: { title: string; description: string },
+  data: {
+    title: string;
+    description: string;
+    descriptionHtml?: string;
+    location?: string;
+    employmentType?: string;
+  },
 ): Promise<ParsedJobData> {
   if (!token) throw new Error("Not authenticated");
 

@@ -156,6 +156,9 @@ const RequirementForm = () => {
       const parsed = await parseLinkedInJob(token, {
         title: job.title,
         description: job.description,
+        descriptionHtml: job.descriptionHtml,
+        location: job.location,
+        employmentType: job.employmentType,
       });
       prefillForm(parsed, setValue);
       setLinkedinJobs([]);
