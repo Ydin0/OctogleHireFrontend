@@ -10,6 +10,7 @@ import {
   Link2,
   LogOut,
   Send,
+  Settings,
   Store,
   Users,
   Wallet,
@@ -38,6 +39,7 @@ const sidebarItems = [
   { href: "/agencies/dashboard/commissions", label: "Commissions", icon: Wallet },
   { href: "/agencies/dashboard/referral-link", label: "Referral Link", icon: Link2 },
   { href: "/agencies/dashboard/team", label: "Team", icon: Briefcase },
+  { href: "/agencies/dashboard/settings", label: "Settings", icon: Settings },
 ] as const;
 
 const isItemActive = (pathname: string, href: string) => {

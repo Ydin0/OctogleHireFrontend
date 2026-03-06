@@ -12,6 +12,7 @@ import {
   FileText,
   Layers,
   LogOut,
+  Settings,
   Users,
 } from "lucide-react";
 import { useAuth, useClerk } from "@clerk/nextjs";
@@ -37,6 +38,7 @@ const sidebarItems = [
   { href: "/companies/dashboard/invoices", label: "Invoices", icon: FileText },
   { href: "/companies/dashboard/team", label: "Team", icon: Users },
   { href: "/companies/dashboard/engagements", label: "Engagements", icon: Briefcase },
+  { href: "/companies/dashboard/settings", label: "Settings", icon: Settings },
 ] as const;
 
 const isItemActive = (pathname: string, href: string) => {

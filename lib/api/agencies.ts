@@ -165,7 +165,7 @@ export async function fetchAgencyProfile(
 
 export async function updateAgencyProfile(
   token: string | null,
-  payload: Partial<Pick<Agency, "name" | "contactName" | "email" | "phone" | "website" | "location">>
+  payload: Partial<Pick<Agency, "name" | "contactName" | "email" | "phone" | "website" | "location" | "logo">>
 ): Promise<Agency | null> {
   if (!token) return null;
   try {

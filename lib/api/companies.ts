@@ -150,6 +150,7 @@ export interface CompanyProfileSummary {
   email: string;
   phone: string;
   website?: string;
+  linkedinCompanyUrl?: string | null;
   location?: string;
   domain?: string | null;
   logoUrl?: string | null;
@@ -626,8 +627,8 @@ export async function parseJobDocument(
 
 export async function updateCompanyProfile(
   token: string | null,
-  payload: { linkedinCompanyUrl?: string; website?: string },
-): Promise<{ id: string; companyName: string; linkedinCompanyUrl: string | null; website: string | null }> {
+  payload: Partial<Pick<CompanyProfileSummary, "companyName" | "contactName" | "email" | "phone" | "website" | "linkedinCompanyUrl" | "location" | "logoUrl">>,
+): Promise<CompanyProfileSummary> {
   if (!token) throw new Error("Not authenticated");
 
   const response = await fetch(
@@ -648,7 +649,7 @@ export async function updateCompanyProfile(
     throw new Error(body.message || "Failed to update profile");
   }
 
-  return (await response.json()) as { id: string; companyName: string; linkedinCompanyUrl: string | null; website: string | null };
+  return (await response.json()) as CompanyProfileSummary;
 }
 
 export async function getDiscoveredJobs(
