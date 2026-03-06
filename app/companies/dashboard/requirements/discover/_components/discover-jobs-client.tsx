@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   Check,
@@ -50,7 +51,6 @@ import {
 } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -85,6 +85,15 @@ const sourceBadge = (source: string) => {
   );
 };
 
+function getValidationIssues(parsed: ParsedJobData): string[] {
+  const issues: string[] = [];
+  if (!parsed.title?.trim()) issues.push("Title is empty");
+  if (!parsed.techStack?.length) issues.push("No tech stack selected");
+  if (!parsed.hiringCountries?.length) issues.push("No hiring countries");
+  if (!parsed.description?.trim()) issues.push("No description");
+  return issues;
+}
+
 export function DiscoverJobsClient() {
   const router = useRouter();
   const { getToken } = useAuth();
@@ -104,7 +113,6 @@ export function DiscoverJobsClient() {
 
   // Parse + Review
   const [parsing, setParsing] = useState(false);
-  const [parseProgress, setParseProgress] = useState({ current: 0, total: 0 });
   const [parsedResults, setParsedResults] = useState<ParsedResult[]>([]);
   const [importing, setImporting] = useState(false);
   const [importCount, setImportCount] = useState<number | null>(null);
@@ -150,6 +158,39 @@ export function DiscoverJobsClient() {
     }
   }, [getToken, linkedinUrl]);
 
+  // Core parse function (reusable)
+  const runParseAndReview = useCallback(
+    async (ids: string[], jobsData: DiscoverJobsResponse) => {
+      if (ids.length === 0) return;
+      setParsing(true);
+      setError(null);
+
+      try {
+        const token = await getToken();
+        const results = await parseDiscoveredJobs(token, ids);
+        const mapped: ParsedResult[] = results
+          .map((r) => {
+            const dj = jobsData.jobs.find((j) => j.id === r.discoveredJobId);
+            if (!dj) return null;
+            return {
+              discoveredJobId: r.discoveredJobId,
+              discoveredJob: dj,
+              parsed: r.parsed,
+            };
+          })
+          .filter((r): r is ParsedResult => r !== null);
+
+        setParsedResults(mapped);
+        setStep("review");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to parse jobs");
+      } finally {
+        setParsing(false);
+      }
+    },
+    [getToken],
+  );
+
   const handleDiscover = useCallback(async () => {
     setDiscovering(true);
     setError(null);
@@ -162,29 +203,36 @@ export function DiscoverJobsClient() {
       });
       setData(result);
       setSelected(new Set());
-      if (result.jobs.length > 0) {
-        setStep("select");
-      } else {
+
+      if (result.jobs.length === 0) {
         setError("No jobs found on LinkedIn or Indeed for this company.");
+        return;
+      }
+
+      // Auto-flow: if 1-3 importable jobs, auto-select all and go straight to parse
+      const importable = result.jobs.filter((j) => !j.importedAsRequirementId);
+      if (importable.length > 0 && importable.length <= 3) {
+        const ids = importable.map((j) => j.id);
+        setSelected(new Set(ids));
+        await runParseAndReview(ids, result);
+      } else {
+        setStep("select");
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Discovery failed");
     } finally {
       setDiscovering(false);
     }
-  }, [getToken, linkedinUrl, companyName]);
+  }, [getToken, linkedinUrl, companyName, runParseAndReview]);
 
-  const handleToggle = useCallback(
-    (id: string) => {
-      setSelected((prev) => {
-        const next = new Set(prev);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        return next;
-      });
-    },
-    [],
-  );
+  const handleToggle = useCallback((id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   const handleSelectAll = useCallback(
     (source: string) => {
@@ -206,29 +254,9 @@ export function DiscoverJobsClient() {
   );
 
   const handleParseAndReview = useCallback(async () => {
-    if (selected.size === 0) return;
-    setParsing(true);
-    setError(null);
-    const ids = Array.from(selected);
-    setParseProgress({ current: 0, total: ids.length });
-
-    try {
-      const token = await getToken();
-      const results = await parseDiscoveredJobs(token, ids);
-      const mapped: ParsedResult[] = results.map((r) => ({
-        discoveredJobId: r.discoveredJobId,
-        discoveredJob: data!.jobs.find((j) => j.id === r.discoveredJobId)!,
-        parsed: r.parsed,
-      }));
-      setParseProgress({ current: ids.length, total: ids.length });
-      setParsedResults(mapped);
-      setStep("review");
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to parse jobs");
-    } finally {
-      setParsing(false);
-    }
-  }, [getToken, selected, data]);
+    if (selected.size === 0 || !data) return;
+    await runParseAndReview(Array.from(selected), data);
+  }, [selected, data, runParseAndReview]);
 
   const handleRemoveParsed = useCallback((discoveredJobId: string) => {
     setParsedResults((prev) =>
@@ -241,10 +269,7 @@ export function DiscoverJobsClient() {
       setParsedResults((prev) =>
         prev.map((r) => {
           if (r.discoveredJobId !== discoveredJobId) return r;
-          return {
-            ...r,
-            parsed: { ...r.parsed, [field]: value },
-          };
+          return { ...r, parsed: { ...r.parsed, [field]: value } };
         }),
       );
     },
@@ -281,6 +306,16 @@ export function DiscoverJobsClient() {
       setImporting(false);
     }
   }, [getToken, parsedResults]);
+
+  // Validation summary for import button
+  const totalIssues = useMemo(
+    () =>
+      parsedResults.reduce(
+        (sum, r) => sum + getValidationIssues(r.parsed).length,
+        0,
+      ),
+    [parsedResults],
+  );
 
   if (loading) {
     return (
@@ -357,7 +392,7 @@ export function DiscoverJobsClient() {
       {error && (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardContent className="flex items-center gap-2 p-4">
-            <X className="size-4 text-destructive" />
+            <X className="size-4 shrink-0 text-destructive" />
             <p className="text-sm text-destructive">{error}</p>
           </CardContent>
         </Card>
@@ -414,13 +449,15 @@ export function DiscoverJobsClient() {
 
             <Button
               onClick={handleDiscover}
-              disabled={discovering || (!linkedinUrl && !companyName)}
+              disabled={discovering || parsing || (!linkedinUrl && !companyName)}
               className="w-full gap-2"
             >
-              {discovering ? (
+              {discovering || parsing ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Searching LinkedIn and Indeed...
+                  {parsing
+                    ? "Preparing your jobs..."
+                    : "Searching LinkedIn and Indeed..."}
                 </>
               ) : (
                 <>
@@ -601,12 +638,11 @@ export function DiscoverJobsClient() {
                     {parsing ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />
-                        Parsing {parseProgress.current} of{" "}
-                        {parseProgress.total}...
+                        Parsing...
                       </>
                     ) : (
                       <>
-                        Parse & Review ({selected.size})
+                        Continue ({selected.size})
                         <ArrowRight className="size-4" />
                       </>
                     )}
@@ -618,7 +654,7 @@ export function DiscoverJobsClient() {
         </>
       )}
 
-      {/* Step 3: Parse & Import */}
+      {/* Step 3: Review & Import */}
       {step === "review" && (
         <>
           <div className="flex items-center justify-between">
@@ -630,22 +666,22 @@ export function DiscoverJobsClient() {
               <ArrowLeft className="mr-1 size-3.5" />
               Back to Selection
             </Button>
+            {totalIssues > 0 && (
+              <div className="flex items-center gap-1.5 text-xs text-amber-600">
+                <AlertTriangle className="size-3.5" />
+                {totalIssues} field{totalIssues !== 1 ? "s" : ""} need
+                attention
+              </div>
+            )}
           </div>
 
           {parsing && (
             <Card>
-              <CardContent className="space-y-3 p-6">
+              <CardContent className="flex items-center gap-3 p-6">
+                <Loader2 className="size-5 animate-spin text-muted-foreground" />
                 <p className="text-sm font-medium">
-                  Parsing {parseProgress.current} of {parseProgress.total}{" "}
-                  jobs...
+                  Analyzing job descriptions...
                 </p>
-                <Progress
-                  value={
-                    parseProgress.total > 0
-                      ? (parseProgress.current / parseProgress.total) * 100
-                      : 0
-                  }
-                />
               </CardContent>
             </Card>
           )}
@@ -663,10 +699,19 @@ export function DiscoverJobsClient() {
 
               <Card className="border-foreground/10">
                 <CardContent className="flex items-center justify-between p-4">
-                  <p className="text-sm text-muted-foreground">
-                    {parsedResults.length} requirement
-                    {parsedResults.length !== 1 ? "s" : ""} ready to import
-                  </p>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      {parsedResults.length} requirement
+                      {parsedResults.length !== 1 ? "s" : ""} ready to import
+                    </p>
+                    {totalIssues > 0 && (
+                      <p className="text-xs text-amber-600">
+                        {totalIssues} optional field
+                        {totalIssues !== 1 ? "s" : ""} empty — you can still
+                        import
+                      </p>
+                    )}
+                  </div>
                   <Button
                     onClick={handleImport}
                     disabled={importing || parsedResults.length === 0}
@@ -688,6 +733,16 @@ export function DiscoverJobsClient() {
               </Card>
             </div>
           )}
+
+          {!parsing && parsedResults.length === 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <p className="text-sm text-muted-foreground">
+                  No jobs to review. Go back and select jobs to import.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </>
       )}
     </div>
@@ -695,6 +750,10 @@ export function DiscoverJobsClient() {
 }
 
 // ── Parsed Job Editable Card ─────────────────────────────────────────────────
+
+function RequiredDot() {
+  return <span className="ml-0.5 inline-block size-1.5 rounded-full bg-amber-500" />;
+}
 
 function ParsedJobCard({
   result,
@@ -706,16 +765,26 @@ function ParsedJobCard({
   onUpdate: (id: string, field: string, value: unknown) => void;
 }) {
   const { discoveredJobId, discoveredJob, parsed } = result;
-  const [descOpen, setDescOpen] = useState(false);
+  const [descOpen, setDescOpen] = useState(true);
+  const issues = getValidationIssues(parsed);
 
   return (
-    <Card>
+    <Card className={issues.length > 0 ? "border-amber-500/30" : undefined}>
       <CardHeader className="flex flex-row items-start justify-between pb-3">
         <div className="flex items-center gap-2 min-w-0">
           {sourceBadge(discoveredJob.source)}
-          <p className="truncate text-xs text-muted-foreground">
-            {discoveredJob.location}
-          </p>
+          {discoveredJob.location && (
+            <span className="flex items-center gap-1 truncate text-xs text-muted-foreground">
+              <MapPin className="size-3 shrink-0" />
+              {discoveredJob.location}
+            </span>
+          )}
+          {issues.length > 0 && (
+            <Badge variant="outline" className="gap-1 border-amber-500/50 text-[10px] text-amber-600">
+              <AlertTriangle className="size-3" />
+              {issues.length} to fill
+            </Badge>
+          )}
         </div>
         <Button
           variant="ghost"
@@ -730,7 +799,9 @@ function ParsedJobCard({
       <CardContent className="space-y-4">
         {/* Title */}
         <div className="space-y-1.5">
-          <Label className="text-xs">Title</Label>
+          <Label className="text-xs">
+            Title {!parsed.title?.trim() && <RequiredDot />}
+          </Label>
           <Input
             value={parsed.title}
             onChange={(e) =>
@@ -739,48 +810,41 @@ function ParsedJobCard({
           />
         </div>
 
-        {/* Tech Stack */}
+        {/* Tech Stack — prominent since it's often empty */}
         <div className="space-y-1.5">
-          <Label className="text-xs">Tech Stack</Label>
+          <Label className="text-xs">
+            Tech Stack {!parsed.techStack?.length && <RequiredDot />}
+          </Label>
           <TechStackSelector
             value={parsed.techStack.filter((t) => ALLOWED_TECH_SET.has(t))}
             onChange={(v) => onUpdate(discoveredJobId, "techStack", v)}
           />
+          {!parsed.techStack?.length && (
+            <p className="text-xs text-amber-600">
+              Select the technologies required for this role.
+            </p>
+          )}
+        </div>
+
+        {/* Hiring Countries — prominent since it's often empty */}
+        <div className="space-y-1.5">
+          <Label className="text-xs">
+            Hiring Countries {!parsed.hiringCountries?.length && <RequiredDot />}
+          </Label>
+          <CountrySelector
+            value={parsed.hiringCountries ?? []}
+            onChange={(v) =>
+              onUpdate(discoveredJobId, "hiringCountries", v)
+            }
+          />
+          {!parsed.hiringCountries?.length && (
+            <p className="text-xs text-amber-600">
+              Select which countries you&apos;re hiring from.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {/* Experience Range */}
-          <div className="space-y-1.5">
-            <Label className="text-xs">Min Years</Label>
-            <Input
-              type="number"
-              min={0}
-              value={parsed.experienceYearsMin ?? 0}
-              onChange={(e) =>
-                onUpdate(
-                  discoveredJobId,
-                  "experienceYearsMin",
-                  Number(e.target.value),
-                )
-              }
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-xs">Max Years</Label>
-            <Input
-              type="number"
-              min={0}
-              value={parsed.experienceYearsMax ?? 5}
-              onChange={(e) =>
-                onUpdate(
-                  discoveredJobId,
-                  "experienceYearsMax",
-                  Number(e.target.value),
-                )
-              }
-            />
-          </div>
-
           {/* Engagement Type */}
           <div className="space-y-1.5">
             <Label className="text-xs">Engagement</Label>
@@ -821,6 +885,38 @@ function ParsedJobCard({
                 <SelectItem value="urgent">Urgent</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Experience Range */}
+          <div className="space-y-1.5">
+            <Label className="text-xs">Min Years</Label>
+            <Input
+              type="number"
+              min={0}
+              value={parsed.experienceYearsMin ?? 0}
+              onChange={(e) =>
+                onUpdate(
+                  discoveredJobId,
+                  "experienceYearsMin",
+                  Number(e.target.value),
+                )
+              }
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Max Years</Label>
+            <Input
+              type="number"
+              min={0}
+              value={parsed.experienceYearsMax ?? 5}
+              onChange={(e) =>
+                onUpdate(
+                  discoveredJobId,
+                  "experienceYearsMax",
+                  Number(e.target.value),
+                )
+              }
+            />
           </div>
         </div>
 
@@ -882,24 +978,14 @@ function ParsedJobCard({
           </div>
         </div>
 
-        {/* Hiring Countries */}
-        <div className="space-y-1.5">
-          <Label className="text-xs">Hiring Countries</Label>
-          <CountrySelector
-            value={parsed.hiringCountries ?? []}
-            onChange={(v) =>
-              onUpdate(discoveredJobId, "hiringCountries", v)
-            }
-          />
-        </div>
-
-        {/* Description (collapsible) */}
+        {/* Description — open by default so user sees what was extracted */}
         <Collapsible open={descOpen} onOpenChange={setDescOpen}>
           <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
             <ChevronDown
               className={`size-3.5 transition-transform ${descOpen ? "rotate-180" : ""}`}
             />
             Description
+            {!parsed.description?.trim() && <RequiredDot />}
           </CollapsibleTrigger>
           <CollapsibleContent>
             <textarea
