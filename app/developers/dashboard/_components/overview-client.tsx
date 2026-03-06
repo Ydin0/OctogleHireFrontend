@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
-import { Clock, Download } from "lucide-react";
+import Image from "next/image";
+import { Building2, Clock, Download } from "lucide-react";
 
 import type {
   DeveloperEngagement,
@@ -175,7 +176,22 @@ export function OverviewClient({
             activeEngagements.map((eng) => (
               <Card key={eng.id}>
                 <CardContent className="flex items-center justify-between pt-6">
-                  <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    {eng.companyLogoUrl ? (
+                      <Image
+                        src={eng.companyLogoUrl}
+                        alt={eng.companyName}
+                        width={32}
+                        height={32}
+                        unoptimized
+                        className="size-8 shrink-0 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                        <Building2 className="size-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{eng.companyName}</p>
                       <Badge
@@ -199,6 +215,7 @@ export function OverviewClient({
                         <> &middot; Started {formatDate(eng.startDate)}</>
                       )}
                     </p>
+                    </div>
                   </div>
                   <Button
                     variant="outline"
@@ -233,7 +250,22 @@ export function OverviewClient({
                 <Card key={opp.id}>
                   <CardContent className="pt-6">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 flex-1 items-start gap-3">
+                        {opp.companyLogoUrl ? (
+                          <Image
+                            src={opp.companyLogoUrl}
+                            alt={opp.companyName}
+                            width={32}
+                            height={32}
+                            unoptimized
+                            className="size-8 shrink-0 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                            <Building2 className="size-4 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
                         <p className="font-medium">{opp.companyName}</p>
                         <p className="text-sm text-muted-foreground">
                           {opp.requirementTitle}
@@ -242,6 +274,7 @@ export function OverviewClient({
                           {opp.engagementType} &middot; Posted{" "}
                           {formatDate(opp.proposedAt)}
                         </p>
+                        </div>
                       </div>
                       <div className="flex shrink-0 gap-2">
                         <Button

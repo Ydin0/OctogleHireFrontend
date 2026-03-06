@@ -7,6 +7,7 @@ export interface DeveloperEngagement {
   id: string;
   companyId: string;
   companyName: string;
+  companyLogoUrl: string | null;
   requirementId: string;
   requirementTitle: string;
   companyBillingRate: number;
@@ -139,6 +140,7 @@ export interface DeveloperOpportunity {
   experienceYearsMin: number | null;
   experienceYearsMax: number | null;
   companyName: string;
+  companyLogoUrl: string | null;
   companyWebsite: string | null;
   companyLocation: string | null;
   status: string;

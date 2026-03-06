@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import Image from "next/image";
 import {
   Briefcase,
+  Building2,
   Check,
   ChevronDown,
   Clock,
@@ -144,7 +146,23 @@ export function OpportunitiesClient({
                             {opp.status}
                           </Badge>
                         </div>
-                        <CardDescription>{opp.companyName}</CardDescription>
+                        <CardDescription className="flex items-center gap-2">
+                          {opp.companyLogoUrl ? (
+                            <Image
+                              src={opp.companyLogoUrl}
+                              alt={opp.companyName}
+                              width={20}
+                              height={20}
+                              unoptimized
+                              className="size-5 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted">
+                              <Building2 className="size-3 text-muted-foreground" />
+                            </div>
+                          )}
+                          {opp.companyName}
+                        </CardDescription>
 
                         {/* Compact meta row */}
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1">
