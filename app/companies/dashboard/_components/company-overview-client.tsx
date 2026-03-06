@@ -36,6 +36,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 function countToReview(req: JobRequirement): number {
   return (req.proposedMatches ?? []).filter((m) => m.status === "accepted").length;
@@ -83,6 +90,7 @@ export function CompanyOverviewClient({
   engagements: CompanyEngagement[];
 }) {
   const [bannerDismissed, setBannerDismissed] = useState(true);
+  const [comingSoonOpen, setComingSoonOpen] = useState(false);
 
   useEffect(() => {
     setBannerDismissed(localStorage.getItem(DISMISS_KEY) === "true");
@@ -157,11 +165,14 @@ export function CompanyOverviewClient({
               Post a Requirement
             </Link>
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" asChild>
-            <Link href="/marketplace">
-              <Search className="size-4" />
-              Browse Talent
-            </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setComingSoonOpen(true)}
+          >
+            <Search className="size-4" />
+            Browse Talent
           </Button>
         </div>
       </div>
@@ -380,6 +391,24 @@ export function CompanyOverviewClient({
           </CardContent>
         </Card>
       )}
+      <Dialog open={comingSoonOpen} onOpenChange={setComingSoonOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Coming Soon</DialogTitle>
+            <DialogDescription>
+              Browse Talent is not available yet. We&apos;re working on it and
+              will notify you when it&apos;s ready.
+            </DialogDescription>
+          </DialogHeader>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setComingSoonOpen(false)}
+          >
+            Got it
+          </Button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
