@@ -29,6 +29,7 @@ import {
   requirementStatusBadgeClass,
   requirementStatusLabel,
 } from "@/app/admin/dashboard/_components/dashboard-data";
+import { CountryFlags } from "@/lib/utils/country-flags";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -248,6 +249,9 @@ function RequirementCard({ req }: { req: JobRequirement }) {
                   <Badge variant="secondary" className="text-xs font-normal">
                     +{req.techStack.length - 5}
                   </Badge>
+                )}
+                {req.hiringCountries?.length > 0 && (
+                  <CountryFlags codes={req.hiringCountries} max={4} />
                 )}
               </div>
 

@@ -32,6 +32,7 @@ import {
 import { MARKETPLACE_TECH_STACK_OPTIONS } from "@/lib/data/developers";
 import { TIMEZONE_OPTIONS } from "@/lib/constants/timezones";
 import { TechStackSelector } from "@/app/apply/_components/tech-stack-selector";
+import { CountrySelector } from "@/components/country-selector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -264,6 +265,7 @@ export function DiscoverJobsClient() {
         developersNeeded: r.parsed.developersNeeded,
         engagementType: r.parsed.engagementType,
         timezonePreference: r.parsed.timezonePreference,
+        hiringCountries: r.parsed.hiringCountries ?? [],
         budgetMin: r.parsed.budgetMin,
         budgetMax: r.parsed.budgetMax,
         description: r.parsed.description,
@@ -877,6 +879,17 @@ function ParsedJobCard({
               }
             />
           </div>
+        </div>
+
+        {/* Hiring Countries */}
+        <div className="space-y-1.5">
+          <Label className="text-xs">Hiring Countries</Label>
+          <CountrySelector
+            value={parsed.hiringCountries ?? []}
+            onChange={(v) =>
+              onUpdate(discoveredJobId, "hiringCountries", v)
+            }
+          />
         </div>
 
         {/* Description (collapsible) */}

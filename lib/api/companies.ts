@@ -84,6 +84,7 @@ export interface JobRequirement {
   developersNeeded: number;
   engagementType: EngagementType;
   timezonePreference: string;
+  hiringCountries: string[];
   budgetMin?: number;
   budgetMax?: number;
   description: string;
@@ -183,6 +184,7 @@ export interface CreateJobRequirementPayload {
   developersNeeded: number;
   engagementType: EngagementType;
   timezonePreference: string;
+  hiringCountries: string[];
   budgetMin?: number;
   budgetMax?: number;
   description: string;
@@ -210,6 +212,7 @@ export interface ParsedJobData {
   developersNeeded: number;
   engagementType: string;
   timezonePreference: string;
+  hiringCountries: string[];
   budgetMin?: number;
   budgetMax?: number;
   description: string;
@@ -736,6 +739,7 @@ export async function importDiscoveredJobs(
     developersNeeded?: number;
     engagementType: string;
     timezonePreference?: string;
+    hiringCountries?: string[];
     budgetMin?: number;
     budgetMax?: number;
     description: string;

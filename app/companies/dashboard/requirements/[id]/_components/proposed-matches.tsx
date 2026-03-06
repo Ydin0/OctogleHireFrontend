@@ -36,6 +36,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
+import { CountryFlags } from "@/lib/utils/country-flags";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -324,12 +325,15 @@ const ProposedMatchesClient = ({
           <CardTitle className="text-base">Requirement Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {requirement.techStack.map((tech) => (
               <Badge key={tech} variant="secondary" className="text-xs">
                 {tech}
               </Badge>
             ))}
+            {requirement.hiringCountries?.length > 0 && (
+              <CountryFlags codes={requirement.hiringCountries} />
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">

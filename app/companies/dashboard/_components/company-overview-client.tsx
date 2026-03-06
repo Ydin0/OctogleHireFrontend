@@ -25,6 +25,7 @@ import type {
   TeamMember,
   CompanyEngagement,
 } from "@/lib/api/companies";
+import { CountryFlags } from "@/lib/utils/country-flags";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -355,6 +356,9 @@ export function CompanyOverviewClient({
                         <Users className="size-3" />
                         {activeCount}/{req.developersNeeded}
                       </span>
+                      {req.hiringCountries?.length > 0 && (
+                        <CountryFlags codes={req.hiringCountries} max={3} />
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

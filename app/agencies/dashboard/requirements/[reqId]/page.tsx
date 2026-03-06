@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 import { fetchAgencyRequirementDetail } from "@/lib/api/agencies";
+import { CountryFlags } from "@/lib/utils/country-flags";
 import { Badge } from "@/components/ui/badge";
 import { MarkdownDisplay } from "@/components/markdown-display";
 import {
@@ -80,12 +81,15 @@ export default async function AgencyRequirementDetailPage({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {requirement.techStack.map((tech) => (
               <Badge key={tech} variant="outline" className="text-[10px]">
                 {tech}
               </Badge>
             ))}
+            {requirement.hiringCountries?.length > 0 && (
+              <CountryFlags codes={requirement.hiringCountries} />
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">

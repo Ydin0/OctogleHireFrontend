@@ -26,6 +26,7 @@ export const jobRequirementSchema = z
       "project-based",
     ]),
     timezonePreference: z.enum(timezoneValues),
+    hiringCountries: z.array(z.string()).min(1, "Select at least one country"),
     budgetMin: z.string().optional(),
     budgetMax: z.string().optional(),
     description: z

@@ -46,6 +46,7 @@ export interface AgencyRequirement {
   developersNeeded: number;
   engagementType: string;
   timezonePreference: string;
+  hiringCountries: string[];
   budgetMinCents: number | null;
   budgetMaxCents: number | null;
   description: string;

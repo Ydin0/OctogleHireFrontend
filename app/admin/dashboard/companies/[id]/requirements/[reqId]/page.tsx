@@ -20,6 +20,7 @@ import {
   requirementStatusBadgeClass,
   requirementStatusLabel,
 } from "../../../../_components/dashboard-data";
+import { CountryFlags } from "@/lib/utils/country-flags";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -246,6 +247,11 @@ const AllocationPage = ({
               {requirement.techStack.length > 8 && (
                 <Badge variant="outline">+{requirement.techStack.length - 8}</Badge>
               )}
+              {requirement.hiringCountries?.length > 0 && (
+                <span className="ml-1">
+                  <CountryFlags codes={requirement.hiringCountries} />
+                </span>
+              )}
             </div>
           )}
         </CardHeader>
@@ -262,6 +268,11 @@ const AllocationPage = ({
                 </Badge>
               ))}
             </div>
+            {requirement.hiringCountries?.length > 0 && (
+              <div className="mt-2">
+                <CountryFlags codes={requirement.hiringCountries} />
+              </div>
+            )}
           </CardContent>
         )}
       </Card>

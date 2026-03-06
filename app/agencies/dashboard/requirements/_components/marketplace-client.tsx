@@ -20,6 +20,7 @@ import type {
   MarketplaceParams,
   Pagination,
 } from "@/lib/api/agencies";
+import { CountryFlags } from "@/lib/utils/country-flags";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -593,6 +594,9 @@ function RequirementCard({ requirement: req }: { requirement: AgencyRequirement 
               <Badge variant="outline" className="text-[10px] text-muted-foreground">
                 +{extraTech} more
               </Badge>
+            )}
+            {req.hiringCountries?.length > 0 && (
+              <CountryFlags codes={req.hiringCountries} max={4} />
             )}
           </div>
 

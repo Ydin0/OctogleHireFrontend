@@ -31,6 +31,7 @@ import {
 } from "@/lib/api/companies";
 import { yearsToLevel } from "@/lib/utils/experience";
 import { TechStackSelector } from "@/app/apply/_components/tech-stack-selector";
+import { CountrySelector } from "@/components/country-selector";
 import { MarkdownEditor } from "@/components/markdown-editor";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,6 +73,8 @@ function prefillForm(
     setValue("engagementType", parsed.engagementType as JobRequirementFormData["engagementType"], { shouldValidate: true });
   if (parsed.timezonePreference)
     setValue("timezonePreference", parsed.timezonePreference as JobRequirementFormData["timezonePreference"], { shouldValidate: true });
+  if (parsed.hiringCountries?.length)
+    setValue("hiringCountries", parsed.hiringCountries, { shouldValidate: true });
   if (parsed.budgetMin)
     setValue("budgetMin", String(parsed.budgetMin), { shouldValidate: true });
   if (parsed.budgetMax)
@@ -109,6 +112,7 @@ const RequirementForm = () => {
     resolver: zodResolver(jobRequirementSchema),
     defaultValues: {
       techStack: [],
+      hiringCountries: [],
       experienceYearsMin: 3,
       experienceYearsMax: 5,
       developersNeeded: 1,
@@ -119,6 +123,7 @@ const RequirementForm = () => {
   });
 
   const techStack = watch("techStack");
+  const hiringCountries = watch("hiringCountries");
   const description = watch("description");
   const yearsMin = watch("experienceYearsMin");
   const yearsMax = watch("experienceYearsMax");
@@ -509,6 +514,23 @@ const RequirementForm = () => {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>
+                Hiring Countries <span className="text-destructive">*</span>
+              </Label>
+              <CountrySelector
+                value={hiringCountries}
+                onChange={(codes) =>
+                  setValue("hiringCountries", codes, { shouldValidate: true })
+                }
+              />
+              {errors.hiringCountries && (
+                <p className="text-sm text-destructive">
+                  {errors.hiringCountries.message}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
