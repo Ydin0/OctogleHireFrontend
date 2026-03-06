@@ -45,61 +45,31 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
     <>
       {/* KPI Cards */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
-              Active Engagements
-            </CardDescription>
-            <CardTitle className="text-2xl">{activeEngagements.length}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {activeEngagements.length > 0
-              ? `${activeEngagements.length} active engagement${activeEngagements.length !== 1 ? "s" : ""}`
-              : "No active engagements yet."}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
-              Active Developers
-            </CardDescription>
-            <CardTitle className="text-2xl">{uniqueDevIds.size}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {uniqueDevIds.size > 0
-              ? `${uniqueDevIds.size} developer${uniqueDevIds.size !== 1 ? "s" : ""} currently working`
-              : "No developers assigned yet."}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
-              Predicted Monthly Bill
-            </CardDescription>
-            <CardTitle className="font-mono text-2xl">
-              {formatCurrency(predictedBill)}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            Based on effective monthly hours and billing rates.
-          </CardContent>
-        </Card>
-
-        <Card className={pendingRequestCount > 0 ? "border-amber-600/20" : undefined}>
-          <CardHeader className="pb-2">
-            <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
-              Pending Requests
-            </CardDescription>
-            <CardTitle className="text-2xl">{pendingRequestCount}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            {pendingRequestCount > 0
-              ? `${pendingRequestCount} engagement${pendingRequestCount !== 1 ? "s" : ""} with pending requests`
-              : "No pending change requests."}
-          </CardContent>
-        </Card>
+        {([
+          { label: "Active Engagements", value: String(activeEngagements.length), icon: Briefcase, highlight: false, mono: false },
+          { label: "Active Developers", value: String(uniqueDevIds.size), icon: Users, highlight: false, mono: false },
+          { label: "Predicted Monthly Bill", value: formatCurrency(predictedBill), icon: DollarSign, highlight: false, mono: true },
+          { label: "Pending Requests", value: String(pendingRequestCount), icon: AlertCircle, highlight: pendingRequestCount > 0, mono: false },
+        ] as const).map((kpi) => (
+          <Card
+            key={kpi.label}
+            className={`py-4 gap-3 ${kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}`}
+          >
+            <CardHeader className="pb-2">
+              <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
+                {kpi.label}
+              </CardDescription>
+              <CardTitle className={`text-2xl ${kpi.mono ? "font-mono" : ""} ${kpi.highlight ? "text-amber-600" : ""}`}>
+                {kpi.value}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className={`flex size-8 items-center justify-center rounded-full ${kpi.highlight ? "bg-amber-500/15" : "bg-pulse/10"}`}>
+                <kpi.icon className={`size-4 ${kpi.highlight ? "text-amber-600" : "text-pulse"}`} />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </section>
 
       {/* Engagements List */}

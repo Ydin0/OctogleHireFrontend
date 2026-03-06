@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, FileText, AlertCircle } from "lucide-react";
+import { Clock, FileText, AlertCircle, MessageSquarePlus } from "lucide-react";
 
 import type {
   CompanyEngagement,
@@ -17,6 +17,9 @@ import { Button } from "@/components/ui/button";
 import { RequestCancellationDialog } from "./request-cancellation-dialog";
 import { RequestHourChangeDialog } from "./request-hour-change-dialog";
 import { RequestExtensionDialog } from "./request-extension-dialog";
+import { useReviews } from "@/lib/reviews/use-reviews";
+import { ReviewDialog } from "@/app/companies/dashboard/_components/review-dialog";
+import { DeveloperReviewsDisplay } from "@/app/companies/dashboard/_components/developer-reviews-display";
 
 const formatCurrency = (amount: number, currency = "USD") =>
   new Intl.NumberFormat("en-US", {
@@ -83,6 +86,9 @@ function EngagementDetails({ engagement, token }: EngagementDetailsProps) {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [hourDialogOpen, setHourDialogOpen] = useState(false);
   const [extensionDialogOpen, setExtensionDialogOpen] = useState(false);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+
+  const { reviews, addReview, hasReviewed } = useReviews(engagement.developerId);
 
   useEffect(() => {
     let cancelled = false;
@@ -327,6 +333,42 @@ function EngagementDetails({ engagement, token }: EngagementDetailsProps) {
           currentEndDate={engagement.endDate}
           token={token}
         />
+      )}
+
+      {/* Review Section for ended engagements */}
+      {engagement.status === "ended" && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquarePlus className="size-3.5 text-muted-foreground" />
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Developer Review</p>
+            </div>
+            {!hasReviewed(engagement.id) && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => setReviewDialogOpen(true)}
+              >
+                <MessageSquarePlus className="size-3.5" />
+                Leave Review
+              </Button>
+            )}
+          </div>
+          {reviews.length > 0 ? (
+            <DeveloperReviewsDisplay reviews={reviews} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No reviews yet. Share your experience with this developer.
+            </p>
+          )}
+          <ReviewDialog
+            open={reviewDialogOpen}
+            onOpenChange={setReviewDialogOpen}
+            developerName={engagement.developerName}
+            onSubmit={(data) => addReview({ ...data, engagementId: engagement.id })}
+          />
+        </div>
       )}
     </div>
   );

@@ -24,6 +24,7 @@ import type {
   JobRequirement,
   TeamMember,
   CompanyEngagement,
+  CompanyProfileSummary,
 } from "@/lib/api/companies";
 import { CountryFlags } from "@/lib/utils/country-flags";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -43,6 +44,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { OnboardingChecklist } from "./onboarding-checklist";
 
 function countToReview(req: JobRequirement): number {
   return (req.proposedMatches ?? []).filter((m) => m.status === "accepted").length;
@@ -84,10 +86,12 @@ export function CompanyOverviewClient({
   requirements,
   team,
   engagements,
+  profile,
 }: {
   requirements: JobRequirement[];
   team: TeamMember[];
   engagements: CompanyEngagement[];
+  profile: CompanyProfileSummary | null;
 }) {
   const [bannerDismissed, setBannerDismissed] = useState(true);
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
@@ -177,6 +181,13 @@ export function CompanyOverviewClient({
         </div>
       </div>
 
+      {/* Onboarding Checklist */}
+      <OnboardingChecklist
+        profile={profile}
+        requirements={requirements}
+        engagements={engagements}
+      />
+
       {/* Onboarding: Discover Jobs Banner */}
       {showBanner && (
         <Card className="border-foreground/10">
@@ -217,7 +228,7 @@ export function CompanyOverviewClient({
         {kpis.map((kpi) => (
           <Card
             key={kpi.label}
-            className={kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}
+            className={`py-4 gap-3 ${kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}`}
           >
             <CardHeader className="pb-2">
               <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
@@ -254,7 +265,7 @@ export function CompanyOverviewClient({
               </Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             {topActiveEngagements.map((eng) => (
               <div
                 key={eng.id}
@@ -302,7 +313,7 @@ export function CompanyOverviewClient({
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             {reqsWithReviews.map(({ req, reviewCount }) => (
               <Link
                 key={req.id}
@@ -343,7 +354,7 @@ export function CompanyOverviewClient({
               </Link>
             </Button>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-2">
             {recentRequirements.map((req) => {
               const reviewCount = countToReview(req);
               const activeCount = (req.proposedMatches ?? []).filter(

@@ -24,6 +24,7 @@ import {
   formatDate,
 } from "@/app/admin/dashboard/_components/dashboard-data";
 import { DownloadCVButton } from "./_components/download-cv-button";
+import { DeveloperReviewSection } from "./_components/developer-review-section";
 import { TECH_ICONS } from "@/lib/tech-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -247,6 +248,12 @@ export default async function CompanyDeveloperProfilePage({
           </CardContent>
         </Card>
       )}
+
+      {/* Reviews */}
+      <DeveloperReviewSection
+        developerId={developer.id}
+        developerName={developer.name}
+      />
     </div>
   );
 }

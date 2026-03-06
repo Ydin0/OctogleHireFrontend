@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  Bell,
   Briefcase,
   Building2,
   ClipboardList,
@@ -31,6 +30,7 @@ import {
 } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationsDropdown } from "./notifications-dropdown";
 
 const sidebarItems = [
   { href: "/companies/dashboard", label: "Overview", icon: Layers },
@@ -113,10 +113,7 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
               <LogOut className="size-4" />
               <span className="sr-only">Sign out</span>
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Bell className="size-4" />
-              Alerts
-            </Button>
+            <NotificationsDropdown />
             <Avatar>
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
@@ -157,7 +154,7 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
             </Card>
           </aside>
 
-          <section className="space-y-6">{children}</section>
+          <section className="space-y-5">{children}</section>
         </div>
       </div>
     </div>

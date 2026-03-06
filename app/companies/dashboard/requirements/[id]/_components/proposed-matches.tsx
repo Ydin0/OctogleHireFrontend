@@ -57,6 +57,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { MarkdownDisplay } from "@/components/markdown-display";
 import { experienceLabel } from "@/lib/utils/experience";
+import { ActivityTimeline } from "./activity-timeline";
 
 const getInitials = (name: string) =>
   name
@@ -391,6 +392,15 @@ const ProposedMatchesClient = ({
               )}
             </button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Activity Timeline</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ActivityTimeline requirement={requirement} />
         </CardContent>
       </Card>
 
