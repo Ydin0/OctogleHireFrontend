@@ -9,7 +9,10 @@ export type ApplicationStatus =
   | "offer_extended"
   | "offer_declined"
   | "approved"
-  | "rejected";
+  | "rejected"
+  | "prospected"
+  | "contacted"
+  | "interviewing";
 
 export type CompanyStatus = "enquired" | "pending" | "contacted" | "active" | "inactive";
 
@@ -58,6 +61,9 @@ export const applicationStatusLabel: Record<ApplicationStatus, string> = {
   offer_declined: "Offer Declined",
   approved: "Approved",
   rejected: "Rejected",
+  prospected: "Prospected",
+  contacted: "Contacted",
+  interviewing: "Interviewing",
 };
 
 export const applicationStatusBadgeClass = (status: ApplicationStatus) => {
@@ -79,6 +85,12 @@ export const applicationStatusBadgeClass = (status: ApplicationStatus) => {
     case "rejected":
     case "offer_declined":
       return "bg-red-500/10 text-red-600 border-red-600/20";
+    case "prospected":
+      return "bg-teal-500/10 text-teal-600 border-teal-600/20";
+    case "contacted":
+      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    case "interviewing":
+      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
     default:
       return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
   }

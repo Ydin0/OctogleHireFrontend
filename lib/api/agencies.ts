@@ -144,6 +144,83 @@ export interface EmailCheckResult {
   candidateName?: string | null;
 }
 
+// ── Saved Candidate Types (Chrome Extension) ────────────────────────────────
+
+export interface SavedCandidateExperience {
+  title: string | null;
+  company: string | null;
+  duration: string | null;
+  description: string | null;
+}
+
+export interface SavedCandidateEducation {
+  school: string | null;
+  degree: string | null;
+  field: string | null;
+  years: string | null;
+}
+
+export interface SavedCandidate {
+  id: string;
+  userId: string;
+  linkedinUrl: string;
+  fullName: string | null;
+  headline: string | null;
+  location: string | null;
+  profileImageUrl: string | null;
+  about: string | null;
+  experience: SavedCandidateExperience[];
+  education: SavedCandidateEducation[];
+  skills: string[];
+  notes: string | null;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Unified Candidate Types ─────────────────────────────────────────────────
+
+export interface UnifiedCandidate {
+  id: string;
+  sourceTable: "application" | "saved";
+  fullName: string | null;
+  email: string | null;
+  professionalTitle: string | null;
+  location: string | null;
+  yearsOfExperience: number | null;
+  primaryStack: string[] | null;
+  status: string;
+  source: string;
+  profilePhotoPath: string | null;
+  linkedinUrl: string | null;
+  submittedAt: string | null;
+  createdAt: string;
+}
+
+export interface UnifiedCandidateDetail extends UnifiedCandidate {
+  headline?: string | null;
+  about?: string | null;
+  experience?: SavedCandidateExperience[] | null;
+  education?: SavedCandidateEducation[] | null;
+  skills?: string[] | null;
+  profileImageUrl?: string | null;
+  locationCity?: string | null;
+  locationState?: string | null;
+  availability?: string | null;
+  engagementType?: string[] | null;
+  updatedAt?: string;
+}
+
+export interface UnifiedCandidatesParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  source?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
 // ── API Functions ────────────────────────────────────────────────────────────
 
 export async function fetchAgencyProfile(
@@ -249,6 +326,88 @@ export async function fetchAgencyCandidate(
   }
 }
 
+export async function fetchUnifiedCandidates(
+  token: string | null,
+  params: UnifiedCandidatesParams = {}
+): Promise<{ candidates: UnifiedCandidate[]; pagination: Pagination } | null> {
+  if (!token) return null;
+  try {
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.set("page", String(params.page));
+    if (params.limit) searchParams.set("limit", String(params.limit));
+    if (params.search) searchParams.set("search", params.search);
+    if (params.status) searchParams.set("status", params.status);
+    if (params.source) searchParams.set("source", params.source);
+    if (params.sortBy) searchParams.set("sortBy", params.sortBy);
+    if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
+    const qs = searchParams.toString();
+
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/candidates${qs ? `?${qs}` : ""}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as {
+      candidates: UnifiedCandidate[];
+      pagination: Pagination;
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchUnifiedCandidateDetail(
+  token: string | null,
+  id: string,
+  source?: string
+): Promise<UnifiedCandidateDetail | null> {
+  if (!token) return null;
+  try {
+    const qs = source === "saved" ? "?source=saved" : "";
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/candidates/${id}${qs}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as UnifiedCandidateDetail;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateCandidateStatus(
+  token: string | null,
+  id: string,
+  payload: { status: string; sourceTable: string }
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/candidates/${id}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      }
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function fetchMarketplaceRequirements(
   token: string | null,
   params: MarketplaceParams = {}
@@ -349,6 +508,36 @@ export async function fetchAgencyReferralLink(
     });
     if (!response.ok) return null;
     return (await response.json()) as AgencyReferralLink;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchSavedCandidates(
+  token: string | null,
+  params: { page?: number; limit?: number; search?: string } = {}
+): Promise<{ candidates: SavedCandidate[]; pagination: Pagination } | null> {
+  if (!token) return null;
+  try {
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.set("page", String(params.page));
+    if (params.limit) searchParams.set("limit", String(params.limit));
+    if (params.search) searchParams.set("search", params.search);
+    const qs = searchParams.toString();
+
+    const response = await fetch(
+      `${apiBaseUrl}/api/extension/candidates${qs ? `?${qs}` : ""}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as {
+      candidates: SavedCandidate[];
+      pagination: Pagination;
+    };
   } catch {
     return null;
   }
