@@ -142,6 +142,11 @@ export interface AdminStats {
   liveCount: number;
   featuredCount: number;
   byStatus: Record<string, number>;
+  companyCount: number;
+  agencyCount: number;
+  activeRequirementCount: number;
+  engagementCount: number;
+  enquiryCount: number;
 }
 
 export interface SendOfferPayload {

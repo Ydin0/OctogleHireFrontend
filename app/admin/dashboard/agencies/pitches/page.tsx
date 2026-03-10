@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const statusBadge: Record<string, string> = {
   pending: "border-amber-600/20 bg-amber-500/10 text-amber-700",
@@ -54,6 +55,8 @@ export default function AdminAgencyPitchesPage() {
   const [activeTab, setActiveTab] = useState("pending");
   const [loading, setLoading] = useState(true);
   const [adminNotes, setAdminNotes] = useState<Record<string, string>>({});
+  const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>({});
+  const [rejectingPitch, setRejectingPitch] = useState<string | null>(null);
   const [processing, setProcessing] = useState<Set<string>>(new Set());
 
   const loadPitches = useCallback(
@@ -82,12 +85,14 @@ export default function AdminAgencyPitchesPage() {
     await reviewAdminAgencyPitch(token, pitchId, {
       action,
       adminNote: adminNotes[pitchId] || undefined,
+      rejectionReason: action === "reject" ? rejectionReasons[pitchId] || undefined : undefined,
     });
     setProcessing((prev) => {
       const next = new Set(prev);
       next.delete(pitchId);
       return next;
     });
+    setRejectingPitch(null);
     loadPitches(activeTab);
   };
 
@@ -272,44 +277,100 @@ export default function AdminAgencyPitchesPage() {
                         </p>
                       )}
 
+                      {/* Rejection reason (for already rejected) */}
+                      {pitch.rejectionReason && pitch.status === "rejected" && (
+                        <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-wider text-red-600 mb-0.5">
+                            Rejection Reason (visible to agency)
+                          </p>
+                          <p className="text-sm text-red-700">{pitch.rejectionReason}</p>
+                        </div>
+                      )}
+
                       {/* Actions for pending */}
                       {pitch.status === "pending" && (
-                        <div className="flex items-end gap-3 pt-1">
-                          <div className="flex-1 space-y-1">
-                            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                              Admin Note (optional)
-                            </Label>
-                            <Input
-                              placeholder="Add a note..."
-                              value={adminNotes[pitch.id] ?? ""}
-                              onChange={(e) =>
-                                setAdminNotes((prev) => ({
-                                  ...prev,
-                                  [pitch.id]: e.target.value,
-                                }))
+                        <div className="space-y-3 pt-1">
+                          <div className="flex items-end gap-3">
+                            <div className="flex-1 space-y-1">
+                              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                                Admin Note (internal, optional)
+                              </Label>
+                              <Input
+                                placeholder="Add an internal note..."
+                                value={adminNotes[pitch.id] ?? ""}
+                                onChange={(e) =>
+                                  setAdminNotes((prev) => ({
+                                    ...prev,
+                                    [pitch.id]: e.target.value,
+                                  }))
+                                }
+                                className="h-8 text-sm"
+                              />
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="gap-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                              disabled={isProcessing}
+                              onClick={() =>
+                                setRejectingPitch(
+                                  rejectingPitch === pitch.id ? null : pitch.id
+                                )
                               }
-                              className="h-8 text-sm"
-                            />
+                            >
+                              <X className="size-3.5" />
+                              Reject
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="gap-1 bg-emerald-600 text-white hover:bg-emerald-700"
+                              disabled={isProcessing}
+                              onClick={() => handleReview(pitch.id, "approve")}
+                            >
+                              <Check className="size-3.5" />
+                              Approve
+                            </Button>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="gap-1 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                            disabled={isProcessing}
-                            onClick={() => handleReview(pitch.id, "reject")}
-                          >
-                            <X className="size-3.5" />
-                            Reject
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="gap-1 bg-emerald-600 text-white hover:bg-emerald-700"
-                            disabled={isProcessing}
-                            onClick={() => handleReview(pitch.id, "approve")}
-                          >
-                            <Check className="size-3.5" />
-                            Approve
-                          </Button>
+
+                          {rejectingPitch === pitch.id && (
+                            <div className="rounded-md border border-red-200 bg-red-50 p-3 space-y-2">
+                              <Label className="text-[10px] uppercase tracking-wider text-red-600">
+                                Rejection Reason (visible to agency)
+                              </Label>
+                              <Textarea
+                                placeholder="Explain why this pitch is being rejected..."
+                                value={rejectionReasons[pitch.id] ?? ""}
+                                onChange={(e) =>
+                                  setRejectionReasons((prev) => ({
+                                    ...prev,
+                                    [pitch.id]: e.target.value,
+                                  }))
+                                }
+                                className="min-h-[80px] text-sm border-red-200 bg-white"
+                              />
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => setRejectingPitch(null)}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="gap-1 border-red-200 bg-red-600 text-white hover:bg-red-700"
+                                  disabled={isProcessing}
+                                  onClick={() =>
+                                    handleReview(pitch.id, "reject")
+                                  }
+                                >
+                                  <X className="size-3.5" />
+                                  Confirm Rejection
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

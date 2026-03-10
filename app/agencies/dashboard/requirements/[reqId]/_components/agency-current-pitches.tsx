@@ -118,10 +118,13 @@ const AgencyCurrentPitches = ({ pitches }: { pitches: AgencyPitch[] }) => {
                       </span>
                     </div>
 
-                    {pitch.status === "rejected" && pitch.adminNote && (
-                      <p className="text-xs text-red-600">
-                        Rejected: {pitch.adminNote}
-                      </p>
+                    {pitch.status === "rejected" && pitch.rejectionReason && (
+                      <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2">
+                        <p className="text-[10px] uppercase tracking-wider text-red-600 mb-0.5">
+                          Rejection Feedback
+                        </p>
+                        <p className="text-xs text-red-700">{pitch.rejectionReason}</p>
+                      </div>
                     )}
 
                     {pitch.coverNote && (

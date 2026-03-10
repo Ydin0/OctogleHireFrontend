@@ -143,6 +143,22 @@ export interface CompanyTimeEntry {
   createdAt: string;
 }
 
+export interface CompanyTimeEntryFull {
+  id: string;
+  engagementId: string;
+  developerId: string;
+  developerName: string;
+  developerRole: string;
+  developerAvatar: string;
+  requirementTitle: string;
+  period: string;
+  hours: number;
+  description: string | null;
+  status: string;
+  approvedAt: string | null;
+  createdAt: string;
+}
+
 export interface CompanyProfileSummary {
   id: string;
   companyName: string;
@@ -337,6 +353,76 @@ export async function fetchEngagementTimeEntries(
 
   if (!response.ok) throw new Error("Failed to fetch time entries");
   return (await response.json()) as CompanyTimeEntry[];
+}
+
+export async function fetchCompanyTimeEntries(
+  token: string | null,
+  params?: { status?: string; period?: string; engagementId?: string },
+): Promise<CompanyTimeEntryFull[]> {
+  if (!token) return [];
+
+  const searchParams = new URLSearchParams();
+  if (params?.status) searchParams.set("status", params.status);
+  if (params?.period) searchParams.set("period", params.period);
+  if (params?.engagementId) searchParams.set("engagementId", params.engagementId);
+
+  const qs = searchParams.toString();
+  const url = `${apiBaseUrl}/api/companies/time-entries${qs ? `?${qs}` : ""}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  if (!response.ok) return [];
+  return (await response.json()) as CompanyTimeEntryFull[];
+}
+
+export async function approveCompanyTimeEntry(
+  token: string | null,
+  id: string,
+): Promise<CompanyTimeEntryFull | null> {
+  if (!token) return null;
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/time-entries/${id}/approve`,
+    {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to approve time entry");
+  }
+
+  return (await response.json()) as CompanyTimeEntryFull;
+}
+
+export async function rejectCompanyTimeEntry(
+  token: string | null,
+  id: string,
+): Promise<CompanyTimeEntryFull | null> {
+  if (!token) return null;
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/time-entries/${id}/reject`,
+    {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to reject time entry");
+  }
+
+  return (await response.json()) as CompanyTimeEntryFull;
 }
 
 export async function fetchEngagementChangeRequests(
@@ -1065,6 +1151,74 @@ export async function createCompany(
   } catch {
     return null;
   }
+}
+
+// ── Browse Developers ─────────────────────────────────────────────────────────
+
+export interface BrowseDevelopersParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  stack?: string;
+  experience?: string;
+  availability?: string;
+}
+
+export interface BrowseDeveloper {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  skills: string[];
+  rating: number;
+  projects: number;
+  hourlyRate: number;
+  monthlyRate: number;
+  location: string;
+  yearsOfExperience: number;
+  bio: string;
+  availability: string | null;
+  engagementType: string[];
+}
+
+export interface BrowseDevelopersResponse {
+  developers: BrowseDeveloper[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export async function browseCompanyDevelopers(
+  token: string | null,
+  params: BrowseDevelopersParams = {},
+): Promise<BrowseDevelopersResponse> {
+  if (!token) return { developers: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
+
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.limit) query.set("limit", String(params.limit));
+  if (params.search) query.set("search", params.search);
+  if (params.stack) query.set("stack", params.stack);
+  if (params.experience) query.set("experience", params.experience);
+  if (params.availability) query.set("availability", params.availability);
+
+  const qs = query.toString();
+  const url = `${apiBaseUrl}/api/companies/developers${qs ? `?${qs}` : ""}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    return { developers: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } };
+  }
+
+  return (await response.json()) as BrowseDevelopersResponse;
 }
 
 // ── Company Developer Profile ─────────────────────────────────────────────────

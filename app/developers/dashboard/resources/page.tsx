@@ -63,14 +63,14 @@ export default async function ResourcesPage() {
     {
       title: "Developer Guides",
       description: "Access profile optimization and interview readiness resources.",
-      href: "#",
+      href: "/developers/dashboard/guides",
       icon: BookOpen,
       cta: "Open Guides",
     },
     {
       title: "Support",
       description: "Contact the OctogleHire team for onboarding help.",
-      href: "#",
+      href: "/developers/dashboard/support",
       icon: LifeBuoy,
       cta: "Get Support",
     },

@@ -613,6 +613,7 @@ export interface AgencyPitch {
   coverNote: string | null;
   status: "pending" | "approved" | "rejected";
   adminNote: string | null;
+  rejectionReason: string | null;
   proposedMatchId: string | null;
   createdAt: string;
   requirementTitle?: string;
@@ -887,7 +888,7 @@ export async function fetchAdminAgencyPitches(
 export async function reviewAdminAgencyPitch(
   token: string | null,
   pitchId: string,
-  payload: { action: "approve" | "reject"; adminNote?: string }
+  payload: { action: "approve" | "reject"; adminNote?: string; rejectionReason?: string }
 ): Promise<Record<string, unknown> | null> {
   if (!token) return null;
   try {

@@ -1,51 +1,80 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { mockNotifications } from "./mock-data";
-import type { Notification } from "./types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 
-const STORAGE_KEY = "octoglehire:notifications-read";
+import {
+  fetchNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  type ApiNotification,
+} from "@/lib/api/notifications";
+import type { Notification, NotificationType } from "./types";
 
-function getReadIds(): Set<string> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
-  } catch {
-    return new Set();
-  }
-}
+const POLL_INTERVAL = 30_000;
 
-function persistReadIds(ids: Set<string>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]));
+function mapApiToNotification(n: ApiNotification): Notification {
+  return {
+    id: n.id,
+    type: n.type as NotificationType,
+    title: n.title,
+    description: n.body,
+    href: n.link ?? undefined,
+    createdAt: n.createdAt,
+  };
 }
 
 export function useNotifications() {
-  const [notifications] = useState<Notification[]>(mockNotifications);
+  const { getToken } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
+  const [unreadCount, setUnreadCount] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const load = useCallback(async () => {
+    const token = await getToken();
+    const data = await fetchNotifications(token);
+    if (!data) return;
+
+    setNotifications(data.notifications.map(mapApiToNotification));
+    setUnreadCount(data.unreadCount);
+    setReadIds(
+      new Set(
+        data.notifications.filter((n) => n.isRead).map((n) => n.id)
+      )
+    );
+  }, [getToken]);
 
   useEffect(() => {
-    setReadIds(getReadIds());
-  }, []);
+    void load();
+    intervalRef.current = setInterval(() => void load(), POLL_INTERVAL);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [load]);
 
-  const unreadCount = notifications.filter((n) => !readIds.has(n.id)).length;
+  const markAsRead = useCallback(
+    async (id: string) => {
+      setReadIds((prev) => {
+        const next = new Set(prev);
+        next.add(id);
+        return next;
+      });
+      setUnreadCount((prev) => Math.max(0, prev - 1));
 
-  const markAsRead = useCallback((id: string) => {
-    setReadIds((prev) => {
-      const next = new Set(prev);
-      next.add(id);
-      persistReadIds(next);
-      return next;
-    });
-  }, []);
+      const token = await getToken();
+      await markNotificationRead(token, id);
+    },
+    [getToken]
+  );
 
-  const markAllRead = useCallback(() => {
-    setReadIds((prev) => {
-      const next = new Set(prev);
-      for (const n of notifications) next.add(n.id);
-      persistReadIds(next);
-      return next;
-    });
-  }, [notifications]);
+  const markAllRead = useCallback(async () => {
+    setReadIds(new Set(notifications.map((n) => n.id)));
+    setUnreadCount(0);
+
+    const token = await getToken();
+    await markAllNotificationsRead(token);
+  }, [getToken, notifications]);
 
   return { notifications, readIds, unreadCount, markAsRead, markAllRead };
 }

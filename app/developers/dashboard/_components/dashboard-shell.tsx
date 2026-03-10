@@ -34,6 +34,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationsDropdown } from "@/app/companies/dashboard/_components/notifications-dropdown";
 
 const sidebarItems = [
   { href: "/developers/dashboard", label: "Overview", icon: Layers },
@@ -163,6 +164,7 @@ const DashboardShell = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <NotificationsDropdown />
             <ThemeToggle />
             <Button
               variant="ghost"

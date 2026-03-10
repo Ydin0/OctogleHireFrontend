@@ -5,6 +5,9 @@ import {
   CheckCircle2,
   ClipboardList,
   Eye,
+  FileText,
+  Handshake,
+  Landmark,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -95,9 +98,27 @@ export default async function AdminOverviewPage() {
     },
     {
       label: "Companies",
-      value: "-",
-      hint: "Coming soon",
+      value: String(stats?.companyCount ?? 0),
+      hint: `${stats?.enquiryCount ?? 0} new enquiries`,
       icon: Building2,
+    },
+    {
+      label: "Agencies",
+      value: String(stats?.agencyCount ?? 0),
+      hint: "Registered agencies",
+      icon: Landmark,
+    },
+    {
+      label: "Active Requirements",
+      value: String(stats?.activeRequirementCount ?? 0),
+      hint: "Open or matching",
+      icon: FileText,
+    },
+    {
+      label: "Active Engagements",
+      value: String(stats?.engagementCount ?? 0),
+      hint: "Currently active",
+      icon: Handshake,
     },
   ];
 
@@ -151,7 +172,7 @@ export default async function AdminOverviewPage() {
         </CardContent>
       </Card>
 
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((kpi) => (
           <Card key={kpi.label}>
             <CardHeader className="pb-2">

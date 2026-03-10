@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  Bell,
   Briefcase,
   Layers,
   Link2,
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationsDropdown } from "@/app/companies/dashboard/_components/notifications-dropdown";
 
 const sidebarItems = [
   { href: "/agencies/dashboard", label: "Overview", icon: Layers },
@@ -106,6 +106,7 @@ const AgencyDashboardShell = ({ children }: { children: React.ReactNode }) => {
             >
               Agency workspace
             </Badge>
+            <NotificationsDropdown />
             <ThemeToggle />
             <Button
               variant="ghost"
@@ -115,10 +116,6 @@ const AgencyDashboardShell = ({ children }: { children: React.ReactNode }) => {
             >
               <LogOut className="size-4" />
               <span className="sr-only">Sign out</span>
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Bell className="size-4" />
-              Alerts
             </Button>
             <Avatar>
               <AvatarFallback>{initials}</AvatarFallback>
