@@ -616,6 +616,177 @@ export async function fetchAdminStats(
   }
 }
 
+// ── Admin Requirements Types + API ──────────────────────────────────────────
+
+export interface AdminRequirement {
+  id: string;
+  companyId: string;
+  title: string;
+  techStack: string[];
+  experienceLevel: string;
+  developersNeeded: number;
+  engagementType: string;
+  timezonePreference: string;
+  hiringCountries: string[];
+  budgetMinCents: number | null;
+  budgetMaxCents: number | null;
+  description: string;
+  startDate: string | null;
+  priority: string;
+  status: string;
+  isFeatured: boolean;
+  companyName: string | null;
+  companyLogoUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FetchAdminRequirementsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  isFeatured?: string;
+  sortBy?: string;
+  sortOrder?: string;
+}
+
+export async function fetchAdminRequirements(
+  token: string | null,
+  params: FetchAdminRequirementsParams = {}
+): Promise<{ requirements: AdminRequirement[]; pagination: Pagination } | null> {
+  if (!token) return null;
+
+  try {
+    const searchParams = new URLSearchParams();
+    if (params.page) searchParams.set("page", String(params.page));
+    if (params.limit) searchParams.set("limit", String(params.limit));
+    if (params.search) searchParams.set("search", params.search);
+    if (params.status) searchParams.set("status", params.status);
+    if (params.isFeatured) searchParams.set("isFeatured", params.isFeatured);
+    if (params.sortBy) searchParams.set("sortBy", params.sortBy);
+    if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
+
+    const qs = searchParams.toString();
+    const url = `${apiBaseUrl}/api/admin/requirements${qs ? `?${qs}` : ""}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      next: { revalidate: 30 },
+    });
+
+    if (!response.ok) return null;
+    return (await response.json()) as {
+      requirements: AdminRequirement[];
+      pagination: Pagination;
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchAdminRequirement(
+  token: string | null,
+  id: string
+): Promise<{ requirement: AdminRequirement } | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/requirements/${id}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) return null;
+    return (await response.json()) as { requirement: AdminRequirement };
+  } catch {
+    return null;
+  }
+}
+
+export async function updateAdminRequirement(
+  token: string | null,
+  id: string,
+  data: Partial<Omit<AdminRequirement, "id" | "companyId" | "companyName" | "companyLogoUrl" | "createdAt" | "updatedAt">>
+): Promise<{ requirement: AdminRequirement } | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/requirements/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) return null;
+    return (await response.json()) as { requirement: AdminRequirement };
+  } catch {
+    return null;
+  }
+}
+
+export async function toggleRequirementFeatured(
+  token: string | null,
+  id: string,
+  isFeatured: boolean
+): Promise<{ requirement: AdminRequirement } | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/requirements/${id}/featured`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isFeatured }),
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) return null;
+    return (await response.json()) as { requirement: AdminRequirement };
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteAdminRequirement(
+  token: string | null,
+  id: string
+): Promise<boolean> {
+  if (!token) return false;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/requirements/${id}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function reofferApplication(
   token: string,
   applicationId: string,
