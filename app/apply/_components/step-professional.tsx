@@ -158,7 +158,10 @@ const StepProfessional = () => {
       </Field>
 
       <Field>
-        <FieldLabel>Current / Most Recent Monthly Salary</FieldLabel>
+        <FieldLabel>Monthly Salary (per month)</FieldLabel>
+        <p className="text-xs text-muted-foreground -mt-1 mb-2">
+          Enter the amount you receive <span className="font-semibold text-foreground">per month</span>, not your annual salary. This should be your current or most recent monthly take-home figure.
+        </p>
         <div className="grid grid-cols-[10rem_1fr] gap-3">
           <Popover open={currencyOpen} onOpenChange={setCurrencyOpen}>
             <PopoverTrigger asChild>
@@ -220,6 +223,11 @@ const StepProfessional = () => {
             className="font-mono"
             {...register("salaryAmount")}
           />
+        </div>
+        <div className="mt-2 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+          <p className="text-[11px] text-amber-700 dark:text-amber-500 leading-relaxed">
+            <span className="font-semibold">Important:</span> This must be your monthly salary, not annual. Applications with clearly inaccurate salary figures may be automatically rejected.
+          </p>
         </div>
         <div className="min-h-5">
           {errors.salaryCurrency ? (

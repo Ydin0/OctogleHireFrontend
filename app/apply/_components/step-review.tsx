@@ -95,7 +95,7 @@ const StepReview = ({ onEditStep }: StepReviewProps) => {
           value={data.yearsOfExperience?.toString()}
         />
         <div>
-          <p className="text-xs text-muted-foreground">Salary</p>
+          <p className="text-xs text-muted-foreground">Monthly Salary</p>
           <p className="font-mono text-sm">
             {data.salaryCurrency && data.salaryAmount != null
               ? `${data.salaryCurrency} ${data.salaryAmount.toLocaleString()}/mo`
