@@ -191,6 +191,16 @@ function LeadCaptureDialog({
                 </div>
               </Field>
 
+              {/* Honeypot */}
+              <div className="absolute -left-[9999px] -top-[9999px]" aria-hidden="true">
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  {...register("website")}
+                />
+              </div>
+
               {apiError && (
                 <p className="text-sm text-destructive">{apiError}</p>
               )}
