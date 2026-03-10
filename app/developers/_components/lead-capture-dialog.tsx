@@ -14,6 +14,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { PhoneInput } from "@/components/phone-input";
 import {
   companyLeadSchema,
   type CompanyLead,
@@ -53,11 +54,15 @@ function LeadCaptureDialog({
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CompanyLead>({
     resolver: zodResolver(companyLeadSchema),
     mode: "onTouched",
   });
+
+  const phoneValue = watch("phone") ?? "";
 
   const copy = COPY[trigger];
 
@@ -177,12 +182,11 @@ function LeadCaptureDialog({
 
               <Field>
                 <FieldLabel htmlFor="lc-phone">Phone Number</FieldLabel>
-                <Input
+                <input type="hidden" {...register("phone")} />
+                <PhoneInput
                   id="lc-phone"
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  className="h-11 rounded-lg"
-                  {...register("phone")}
+                  value={phoneValue}
+                  onChange={(v) => setValue("phone", v, { shouldValidate: true })}
                 />
                 <div className="min-h-5">
                   {errors.phone && (

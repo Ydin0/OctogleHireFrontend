@@ -9,6 +9,7 @@ import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enqui
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { PhoneInput } from "@/components/phone-input";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -25,11 +26,15 @@ const CompanySignupForm = () => {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CompanyLead>({
     resolver: zodResolver(companyLeadSchema),
     mode: "onTouched",
   });
+
+  const phoneValue = watch("phone") ?? "";
 
   const onSubmit = async (data: CompanyLead) => {
     setApiError(null);
@@ -120,11 +125,11 @@ const CompanySignupForm = () => {
 
         <Field>
           <FieldLabel htmlFor="phone">Mobile Number</FieldLabel>
-          <Input
+          <input type="hidden" {...register("phone")} />
+          <PhoneInput
             id="phone"
-            type="tel"
-            placeholder="+1 (555) 000-0000"
-            {...register("phone")}
+            value={phoneValue}
+            onChange={(v) => setValue("phone", v, { shouldValidate: true })}
           />
           <div className="min-h-5">
             {errors.phone && (

@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import { PhoneInput } from "@/components/phone-input";
 import { techToSlug, roleToSlug, countryToSlug } from "@/lib/seo-data";
 import { hireFaqs } from "@/lib/data/hire-faqs";
 import { HireComparison } from "@/components/marketing/hire-comparison";
@@ -600,11 +601,15 @@ function HeroForm() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CompanyLead>({
     resolver: zodResolver(companyLeadSchema),
     mode: "onTouched",
   });
+
+  const phoneValue = watch("phone") ?? "";
 
   const onSubmit = async (data: CompanyLead) => {
     setApiError(null);
@@ -733,11 +738,11 @@ function HeroForm() {
 
         <Field>
           <FieldLabel htmlFor="hero-phone">Mobile Number</FieldLabel>
-          <Input
+          <input type="hidden" {...register("phone")} />
+          <PhoneInput
             id="hero-phone"
-            type="tel"
-            placeholder="+1 (555) 000-0000"
-            {...register("phone")}
+            value={phoneValue}
+            onChange={(v) => setValue("phone", v, { shouldValidate: true })}
           />
           <div className="min-h-5">
             {errors.phone && (
