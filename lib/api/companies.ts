@@ -489,7 +489,7 @@ export async function fetchCompanyRequirements(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 30 },
+        cache: "no-store",
       },
     );
 
@@ -512,7 +512,7 @@ export async function fetchCompanyRequirement(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 30 },
+        cache: "no-store",
       },
     );
 
@@ -949,7 +949,7 @@ export async function fetchCompanyRequirementAdmin(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 30 },
+        cache: "no-store",
       },
     );
 

@@ -295,7 +295,7 @@ export async function fetchAgencyCandidates(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 30 },
+        cache: "no-store",
       }
     );
     if (!response.ok) return null;
@@ -425,7 +425,7 @@ export async function fetchMarketplaceRequirements(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 30 },
+        cache: "no-store",
       }
     );
     if (!response.ok) return null;
@@ -487,7 +487,7 @@ export async function fetchAgencyStats(
     const response = await fetch(`${apiBaseUrl}/api/agencies/stats`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 30 },
+      cache: "no-store",
     });
     if (!response.ok) return null;
     return (await response.json()) as AgencyStats;
@@ -921,7 +921,7 @@ export async function fetchAdminAgencies(
     const response = await fetch(`${apiBaseUrl}/api/admin/agencies`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 30 },
+      cache: "no-store",
     });
     if (!response.ok) return null;
     return (await response.json()) as Agency[];

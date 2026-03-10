@@ -30,7 +30,7 @@ export async function fetchPublicDevelopers(
 
     const response = await fetch(url, {
       method: "GET",
-      next: { revalidate: 30 },
+      cache: "no-store",
       signal: AbortSignal.timeout(10_000),
     });
 

@@ -190,7 +190,7 @@ export async function fetchApplications(
     const response = await fetch(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 30 },
+      cache: "no-store",
     });
 
     if (!response.ok) return null;
@@ -214,7 +214,7 @@ export async function fetchFilterOptions(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 30 },
+        cache: "no-store",
       }
     );
 
@@ -611,7 +611,7 @@ export async function fetchAdminStats(
     const response = await fetch(`${apiBaseUrl}/api/admin/stats`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 30 },
+      cache: "no-store",
     });
 
     if (!response.ok) return null;
@@ -678,7 +678,7 @@ export async function fetchAdminRequirements(
     const response = await fetch(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 30 },
+      cache: "no-store",
     });
 
     if (!response.ok) return null;
