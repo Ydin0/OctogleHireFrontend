@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "About Us — OctogleHire",
+  title: "About OctogleHire",
   description:
-    "Meet the founders behind OctogleHire. Learn how Yaseen Deen and Eduardo came together to build the global talent platform connecting companies with the top 3% of pre-vetted engineers.",
+    "OctogleHire connects companies with the top 3% of pre-vetted engineers from 150+ countries. Learn about our mission, team, and the platform behind 300+ successful placements.",
   alternates: { canonical: absoluteUrl("/about") },
 };
 
@@ -62,6 +62,10 @@ export default function AboutPage() {
       foundingDate: "2024",
       description:
         "The global talent platform for pre-vetted developers. Build world-class engineering teams in days, not months.",
+      numberOfEmployees: {
+        "@type": "QuantitativeValue",
+        minValue: 10,
+      },
       sameAs: [
         "https://twitter.com/octoglehire",
         "https://linkedin.com/company/octoglehire",
@@ -79,19 +83,19 @@ export default function AboutPage() {
             About Us
           </span>
           <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight lg:text-5xl">
-            Two founders. One mission.
-            <br />
-            <span className="text-pulse">Talent without borders.</span>
+            We connect companies with the world&apos;s best engineers
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
-            OctogleHire was born from a shared conviction that the best
-            engineering talent exists everywhere — but access to it is broken.
-            We&apos;re here to fix that.
+            OctogleHire is a global talent platform that has vetted 1,000+
+            engineers across 150+ countries through a rigorous 5-stage process
+            with a 3% acceptance rate. Over 300 companies use OctogleHire to
+            build engineering teams in days, not months — at 40–60% below
+            US/UK rates.
           </p>
         </section>
 
         {/* Stats */}
-        <section className="container mx-auto px-6 pb-20">
+        <section className="container mx-auto px-6 pb-24">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {stats.map((stat) => (
               <div
@@ -109,157 +113,56 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Origin Story */}
+        {/* Founder */}
         <section className="container mx-auto px-6 pb-24">
-          <div className="rounded-3xl border border-border bg-muted/30 p-8 md:p-12 lg:p-16">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Our Story
-            </span>
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight lg:text-3xl">
-              How it started
-            </h2>
-
-            <div className="mt-8 space-y-6 text-muted-foreground leading-relaxed">
-              <p>
-                It started the way most good things do — with a problem neither
-                of us could ignore.
-              </p>
-              <p>
-                Yaseen had been building Octogle Technologies, a tech company
-                focused on building products that push the boundaries of
-                what&apos;s possible. Along the way, he faced the same problem
-                every ambitious founder hits: finding engineers who were truly
-                exceptional, not just available. The recruitment industry was
-                slow, expensive, and built around volume rather than quality.
-                Agencies charged eye-watering fees. Freelance platforms were a
-                lottery. There had to be a better way.
-              </p>
-              <p>
-                Eduardo was running Scale Your Offer, helping businesses
-                optimise their sales infrastructure and scale their revenue. He
-                understood the mechanics of growth — how to build systems that
-                actually work, how to create offerings that companies would pay
-                for without hesitation, and how to turn an idea into a
-                repeatable engine. But he also saw the same talent bottleneck
-                from the other side: companies wanted to grow, but they
-                couldn&apos;t find the developers to build what they needed.
-              </p>
-              <p>
-                When they met, it clicked immediately. Yaseen brought the
-                technical vision — the obsession with vetting quality, the
-                infrastructure thinking, the product mind. Eduardo brought the
-                commercial engine — the growth strategy, the market
-                positioning, the ability to turn a platform into a business.
-                They weren&apos;t just complementary; they were the exact
-                combination this problem needed.
-              </p>
-              <p>
-                The conversation was simple: what if hiring world-class
-                engineers was as fast as ordering a service, as reliable as
-                working with your own team, and as affordable as hiring
-                globally should be? What if companies could get curated,
-                pre-vetted developer profiles in 48 hours instead of 6 weeks?
-                What if developers from 150+ countries had a platform that
-                valued their skills rather than their postcode?
-              </p>
-              <p>
-                OctogleHire was the answer. Not another job board. Not another
-                freelance marketplace. A talent platform with a 3% acceptance
-                rate, a rigorous 5-stage vetting process, and a matching engine
-                that actually understands what companies need. Built by
-                someone who knows what great engineering looks like, and
-                someone who knows how to build a business that lasts.
-              </p>
-              <p className="text-foreground font-medium">
-                Today, over 300 companies trust OctogleHire to build their
-                engineering teams. 94% of placements extend beyond six months.
-                We didn&apos;t set out to disrupt hiring — we set out to make
-                it work the way it should have from the start.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Founders */}
-        <section className="container mx-auto px-6 pb-24">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            The Founders
-          </span>
-          <h2 className="mt-4 text-2xl font-semibold tracking-tight lg:text-3xl">
-            Meet the team behind OctogleHire
-          </h2>
-
-          <div className="mt-10 grid gap-8 md:grid-cols-2">
-            {/* Yaseen */}
-            <div className="rounded-2xl border border-border bg-muted/30 p-8">
-              <div className="flex items-start gap-5">
+          <div className="rounded-3xl border border-border bg-muted/30 p-8 md:p-12">
+            <div className="grid gap-10 lg:grid-cols-[200px_1fr] lg:items-start">
+              <div className="flex flex-col items-center lg:items-start">
                 <Image
                   src="/Yaseen Founder.jpg"
                   alt="Yaseen Deen"
-                  width={120}
-                  height={120}
-                  className="size-28 rounded-2xl object-cover ring-2 ring-border"
+                  width={160}
+                  height={160}
+                  className="size-40 rounded-2xl object-cover ring-2 ring-border"
                 />
-                <div className="pt-1">
-                  <p className="text-lg font-semibold">Yaseen Deen</p>
-                  <p className="text-sm text-muted-foreground">
-                    Co-Founder &amp; CEO
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Founder of Octogle Technologies
-                  </p>
-                  <Link
-                    href="https://www.linkedin.com/in/yaseen-deen-52249219b/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-block text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-                  >
-                    LinkedIn
-                  </Link>
-                </div>
+                <p className="mt-4 text-sm font-semibold">Yaseen Deen</p>
+                <p className="text-xs text-muted-foreground">
+                  Co-Founder
+                </p>
+                <Link
+                  href="https://www.linkedin.com/in/yaseen-deen-52249219b/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                >
+                  LinkedIn
+                </Link>
               </div>
-              <Separator className="my-5" />
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Yaseen built Octogle Technologies from the ground up — a tech
-                company driven by the belief that great products come from
-                great engineers. After spending years navigating the broken
-                recruitment landscape firsthand, he decided to build the
-                platform he wished existed. He leads OctogleHire&apos;s
-                product, engineering, and vetting infrastructure with the same
-                rigour he applies to every line of code: nothing ships unless
-                it&apos;s exceptional.
-              </p>
-            </div>
-
-            {/* Eduardo */}
-            <div className="rounded-2xl border border-border bg-muted/30 p-8">
-              <div className="flex items-start gap-5">
-                <div className="flex size-28 shrink-0 items-center justify-center rounded-2xl bg-muted ring-2 ring-border">
-                  <span className="font-mono text-3xl font-semibold text-muted-foreground">
-                    E
-                  </span>
-                </div>
-                <div className="pt-1">
-                  <p className="text-lg font-semibold">Eduardo</p>
-                  <p className="text-sm text-muted-foreground">
-                    Co-Founder &amp; COO
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Founder of Scale Your Offer
-                  </p>
-                </div>
+              <div className="space-y-4">
+                <h2 className="text-2xl font-semibold tracking-tight">
+                  Our Story
+                </h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  OctogleHire was founded on a simple observation: the best
+                  engineering talent is everywhere, but access to it is broken.
+                  Traditional agencies charge $20K–$40K placement fees and take
+                  months. Freelance platforms offer quantity over quality. Neither
+                  model serves companies or developers well.
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  We built OctogleHire to fix this. Our 5-stage vetting process
+                  ensures only the top 3% of applicants join the network. Our
+                  compliance infrastructure covers 150+ countries. And our
+                  matching engine delivers 3–5 curated profiles within 48 hours —
+                  not weeks.
+                </p>
+                <p className="text-muted-foreground leading-relaxed">
+                  Today, over 300 companies trust OctogleHire to build their
+                  engineering teams. 94% of our placements extend beyond 6
+                  months. We&apos;re proving that global hiring can be fast,
+                  affordable, and high-quality — all at once.
+                </p>
               </div>
-              <Separator className="my-5" />
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Eduardo built Scale Your Offer into a powerhouse for businesses
-                looking to optimise their commercial operations and scale
-                revenue. He brings the strategic growth engine that turns a
-                great product into a sustainable business. At OctogleHire, he
-                drives go-to-market strategy, commercial partnerships, and
-                client acquisition — making sure the companies who need
-                world-class talent can find it without the traditional
-                headaches of recruitment.
-              </p>
             </div>
           </div>
         </section>
@@ -295,13 +198,11 @@ export default function AboutPage() {
               OctogleHire.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              <Button
-                asChild
-                variant="outline"
-                size="lg"
-                className="rounded-full"
-              >
-                <Link href="/apply">Apply as a Developer</Link>
+              <Button asChild size="lg" className="rounded-full gap-2">
+                <Link href="/companies/signup">
+                  Start Hiring
+                  <ArrowRight className="size-4" />
+                </Link>
               </Button>
               <Button
                 asChild
@@ -309,7 +210,7 @@ export default function AboutPage() {
                 size="lg"
                 className="rounded-full"
               >
-                <Link href="/marketplace">Browse Developers</Link>
+                <Link href="/apply">Apply as a Developer</Link>
               </Button>
             </div>
           </div>

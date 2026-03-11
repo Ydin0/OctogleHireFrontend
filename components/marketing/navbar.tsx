@@ -25,7 +25,6 @@ const navLinks = [
   { label: "Marketplace", href: "/marketplace" },
   { label: "For Agencies", href: "/for-agencies" },
   { label: "Pricing", href: "/#pricing" },
-  { label: "About", href: "/about" },
   { label: "Blog", href: "/blog" },
   { label: "Apply as a Dev", href: "/apply" },
 ];
