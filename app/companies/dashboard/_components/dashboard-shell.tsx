@@ -13,7 +13,6 @@ import {
   Layers,
   LogOut,
   Settings,
-  Users,
   UsersRound,
 } from "lucide-react";
 import { useAuth, useClerk } from "@clerk/nextjs";
@@ -36,7 +35,6 @@ import { NotificationsDropdown } from "./notifications-dropdown";
 
 const sidebarItems = [
   { href: "/companies/dashboard", label: "Overview", icon: Layers },
-  { href: "/companies/dashboard/developers", label: "Browse Developers", icon: Users },
   { href: "/companies/dashboard/requirements", label: "Requirements", icon: ClipboardList },
   { href: "/companies/dashboard/invoices", label: "Invoices", icon: FileText },
   { href: "/companies/dashboard/team", label: "Team", icon: UsersRound },
