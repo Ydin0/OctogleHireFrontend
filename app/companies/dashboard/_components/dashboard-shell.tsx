@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { CurrencySelector } from "@/lib/currency";
 import { NotificationsDropdown } from "./notifications-dropdown";
 
 const sidebarItems = [
@@ -106,7 +105,6 @@ const DashboardShell = ({ children }: { children: React.ReactNode }) => {
             <Badge variant="outline" className="font-mono uppercase tracking-[0.08em]">
               Company workspace
             </Badge>
-            <CurrencySelector />
             <ThemeToggle />
             <Button
               variant="ghost"

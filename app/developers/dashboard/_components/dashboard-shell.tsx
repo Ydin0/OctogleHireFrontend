@@ -34,7 +34,6 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { CurrencySelector } from "@/lib/currency";
 import { NotificationsDropdown } from "@/app/companies/dashboard/_components/notifications-dropdown";
 
 const sidebarItems = [
@@ -165,7 +164,6 @@ const DashboardShell = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <CurrencySelector />
             <NotificationsDropdown />
             <ThemeToggle />
             <Button

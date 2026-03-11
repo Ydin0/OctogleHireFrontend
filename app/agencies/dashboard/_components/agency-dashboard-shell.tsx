@@ -29,7 +29,6 @@ import {
 } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { CurrencySelector } from "@/lib/currency";
 import { NotificationsDropdown } from "@/app/companies/dashboard/_components/notifications-dropdown";
 
 const sidebarItems = [
@@ -107,7 +106,6 @@ const AgencyDashboardShell = ({ children }: { children: React.ReactNode }) => {
             >
               Agency workspace
             </Badge>
-            <CurrencySelector />
             <NotificationsDropdown />
             <ThemeToggle />
             <Button

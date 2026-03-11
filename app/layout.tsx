@@ -4,7 +4,6 @@ import localFont from "next/font/local";
 import { DM_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
-import { CurrencyProvider } from "@/lib/currency";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import { AIReferralTracker } from "@/components/analytics/ai-referral-tracker";
 import { SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION } from "@/lib/seo";
@@ -100,9 +99,7 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
           >
-            <CurrencyProvider>
-              {children}
-            </CurrencyProvider>
+            {children}
             <Suspense>
               <AIReferralTracker />
             </Suspense>
