@@ -77,19 +77,10 @@ const Navbar = ({ className }: NavbarProps) => {
 
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              {isSignedIn ? (
+              {isSignedIn && (
                 <Button asChild size="sm" className="rounded-full">
                   <Link href="/auth/after-sign-in">Dashboard</Link>
                 </Button>
-              ) : (
-                <>
-                  <Button asChild variant="ghost" size="sm">
-                    <Link href="/login">Sign In</Link>
-                  </Button>
-                  <Button asChild size="sm" className="rounded-full">
-                    <Link href="/companies/signup">Start Hiring</Link>
-                  </Button>
-                </>
               )}
             </div>
           </nav>
@@ -128,19 +119,10 @@ const Navbar = ({ className }: NavbarProps) => {
                       ))}
                     </div>
                     <div className="mt-6 flex flex-col gap-3">
-                      {isSignedIn ? (
+                      {isSignedIn && (
                         <Button asChild>
                           <Link href="/auth/after-sign-in">Dashboard</Link>
                         </Button>
-                      ) : (
-                        <>
-                          <Button asChild variant="outline">
-                            <Link href="/login">Sign In</Link>
-                          </Button>
-                          <Button asChild>
-                            <Link href="/companies/signup">Start Hiring</Link>
-                          </Button>
-                        </>
                       )}
                     </div>
                   </div>
