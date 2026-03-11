@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
@@ -11,6 +13,7 @@ const sections = [
       { name: "Marketplace", href: "/marketplace" },
       { name: "How It Works", href: "#how-it-works" },
       { name: "Pricing", href: "#pricing" },
+      { name: "For Companies", href: "/companies/signup" },
       { name: "For Agencies", href: "/for-agencies" },
       { name: "For Developers", href: "/apply" },
     ],
@@ -84,6 +87,12 @@ const Footer = ({ className }: FooterProps) => {
             </p>
           </div>
           <div className="flex flex-col gap-3 shrink-0">
+            <Button asChild size="lg" className="rounded-full gap-2">
+              <a href="/companies/signup">
+                Start Hiring
+                <ArrowRight className="size-4" />
+              </a>
+            </Button>
             <Button asChild variant="outline" size="lg" className="rounded-full">
               <a href="/apply">Apply as a Developer</a>
             </Button>
