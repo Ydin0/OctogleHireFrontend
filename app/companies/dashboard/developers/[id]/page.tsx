@@ -16,8 +16,10 @@ import {
 
 import {
   fetchCompanyDeveloperProfile,
+  fetchCompanyTimeEntries,
   type CompanyDeveloperProfile,
   type CompanyDeveloperMatch,
+  type CompanyTimeEntryFull,
 } from "@/lib/api/companies";
 import {
   matchStatusBadgeClass,
@@ -31,6 +33,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const getInitials = (name: string) =>
@@ -57,9 +67,14 @@ export default async function CompanyDeveloperProfilePage({
   const { id } = await params;
   const { getToken } = await auth();
   const token = await getToken();
-  const developer = await fetchCompanyDeveloperProfile(token, id);
+  const [developer, allTimeEntries] = await Promise.all([
+    fetchCompanyDeveloperProfile(token, id),
+    fetchCompanyTimeEntries(token),
+  ]);
 
   if (!developer) return notFound();
+
+  const timeEntries = allTimeEntries.filter((e) => e.developerId === id);
 
   const activeMatch = developer.matches.find(
     (m) => m.status === "active" || m.status === "accepted",
@@ -100,12 +115,23 @@ export default async function CompanyDeveloperProfilePage({
           <Tabs defaultValue="profile">
             <TabsList>
               <TabsTrigger value="profile">Profile</TabsTrigger>
+              {timeEntries.length > 0 && (
+                <TabsTrigger value="timesheets">
+                  Timesheets ({timeEntries.length})
+                </TabsTrigger>
+              )}
               <TabsTrigger value="documents">Documents</TabsTrigger>
             </TabsList>
 
             <TabsContent value="profile" className="mt-6 space-y-8">
               <ProfileTab developer={developer} />
             </TabsContent>
+
+            {timeEntries.length > 0 && (
+              <TabsContent value="timesheets" className="mt-6">
+                <TimesheetsTab entries={timeEntries} />
+              </TabsContent>
+            )}
 
             <TabsContent value="documents" className="mt-6">
               <DocumentsTab />
@@ -476,6 +502,125 @@ function ProfileTab({ developer }: { developer: CompanyDeveloperProfile }) {
         />
       </section>
     </>
+  );
+}
+
+/* ─── Timesheets Tab ────────────────────────────────────────────── */
+
+const statusBadgeVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+  submitted: "outline",
+  approved: "default",
+  rejected: "destructive",
+};
+
+function formatPeriod(period: string): string {
+  const [year, month] = period.split("-");
+  const date = new Date(Number(year), Number(month) - 1);
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "long" });
+}
+
+function TimesheetsTab({ entries }: { entries: CompanyTimeEntryFull[] }) {
+  const grouped = entries.reduce<Record<string, CompanyTimeEntryFull[]>>((acc, entry) => {
+    const key = entry.period;
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(entry);
+    return acc;
+  }, {});
+
+  const sortedPeriods = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
+
+  const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
+  const approvedHours = entries.filter((e) => e.status === "approved").reduce((sum, e) => sum + e.hours, 0);
+
+  return (
+    <div className="space-y-6">
+      {/* Summary */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2">
+          <div className="flex size-8 items-center justify-center rounded-full bg-pulse/10">
+            <Clock className="size-4 text-pulse" />
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Total Hours</p>
+            <p className="font-mono text-sm font-semibold">{totalHours}h</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Approved</p>
+            <p className="font-mono text-sm font-semibold">{approvedHours}h</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Periods</p>
+            <p className="text-sm font-semibold">{sortedPeriods.length}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Grouped by period */}
+      {sortedPeriods.map((period) => {
+        const periodEntries = grouped[period];
+        const periodTotal = periodEntries.reduce((sum, e) => sum + e.hours, 0);
+
+        return (
+          <Card key={period}>
+            <CardContent className="p-0">
+              <div className="flex items-center justify-between px-4 py-3 border-b">
+                <div>
+                  <p className="text-sm font-semibold">{formatPeriod(period)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {periodEntries.length} {periodEntries.length === 1 ? "entry" : "entries"}
+                  </p>
+                </div>
+                <span className="font-mono text-sm text-muted-foreground">
+                  {periodTotal}h total
+                </span>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Requirement</TableHead>
+                    <TableHead className="text-right">Hours</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {periodEntries.map((entry) => (
+                    <TableRow key={entry.id}>
+                      <TableCell>
+                        <p className="text-sm">{entry.requirementTitle}</p>
+                        {entry.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            {entry.description}
+                          </p>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-sm">
+                        {entry.hours}h
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={statusBadgeVariant[entry.status] ?? "outline"}>
+                          {entry.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(entry.createdAt).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
   );
 }
 
