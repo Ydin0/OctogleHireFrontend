@@ -29,7 +29,7 @@ export const jobRequirementSchema = z
     hiringCountries: z.array(z.string()).min(1, "Select at least one country"),
     budgetMin: z.string().optional(),
     budgetMax: z.string().optional(),
-    budgetType: z.enum(["hourly", "monthly", "annual"]).default("hourly"),
+    budgetType: z.enum(["hourly", "monthly", "annual"]),
     description: z
       .string()
       .min(20, "Description must be at least 20 characters"),
