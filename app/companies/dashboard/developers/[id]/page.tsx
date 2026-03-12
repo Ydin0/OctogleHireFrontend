@@ -274,7 +274,7 @@ function MatchInfoSection({ matches }: { matches: CompanyDeveloperMatch[] }) {
               <p className="text-sm font-semibold">{match.requirementTitle}</p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <span className="capitalize">
-                  {match.engagementType.replace("-", " ")}
+                  {match.engagementType?.replace("-", " ") ?? "-"}
                 </span>
                 <span>Proposed {formatDate(match.proposedAt)}</span>
               </div>

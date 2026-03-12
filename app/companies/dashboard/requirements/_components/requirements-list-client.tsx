@@ -241,7 +241,7 @@ function RequirementCard({ req }: { req: JobRequirement }) {
                 : <span className="capitalize">{req.experienceLevel} level</span>}
             </span>
             <span className="text-border">|</span>
-            <span className="capitalize">{req.engagementType.replace("-", " ")}</span>
+            <span className="capitalize">{req.engagementType?.replace("-", " ") ?? "-"}</span>
             <span className="text-border">|</span>
             <span>Start {formatDate(req.startDate)}</span>
             <span className="text-border">|</span>

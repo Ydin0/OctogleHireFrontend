@@ -522,7 +522,7 @@ const CompanyDetailPage = ({
                                 {req.experienceLevel}
                               </span>
                               <span className="capitalize">
-                                {req.engagementType.replace("-", " ")}
+                                {req.engagementType?.replace("-", " ") ?? "-"}
                               </span>
                               {req.budgetMin && req.budgetMax ? (
                                 <span className="font-mono">

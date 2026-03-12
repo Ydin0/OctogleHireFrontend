@@ -349,7 +349,7 @@ const ProposedMatchesClient = ({
                 Engagement
               </p>
               <p className="capitalize">
-                {requirement.engagementType.replace("-", " ")}
+                {requirement.engagementType?.replace("-", " ") ?? "-"}
               </p>
             </div>
             <div>

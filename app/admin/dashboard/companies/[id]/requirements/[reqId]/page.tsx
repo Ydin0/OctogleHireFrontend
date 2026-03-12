@@ -129,7 +129,7 @@ const AllocationPage = ({
           <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <span>{experienceLabel(requirement.experienceYearsMin, requirement.experienceYearsMax, requirement.experienceLevel)}</span>
             <span className="capitalize">
-              {requirement.engagementType.replace("-", " ")}
+              {requirement.engagementType?.replace("-", " ") ?? "-"}
             </span>
             <span>{getTimezoneLabel(requirement.timezonePreference)}</span>
           </div>

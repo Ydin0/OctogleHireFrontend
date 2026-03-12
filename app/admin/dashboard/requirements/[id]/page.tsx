@@ -584,7 +584,7 @@ const RequirementDetailPage = ({
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Engagement Type</dt>
                     <dd className="capitalize">
-                      {requirement.engagementType.replace(/-/g, " ")}
+                      {requirement.engagementType?.replace(/-/g, " ") ?? "-"}
                     </dd>
                   </div>
                   <Separator />
