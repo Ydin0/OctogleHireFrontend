@@ -66,6 +66,8 @@ export interface AdminApplicationFull {
   marketplaceAwards: { title: string; issuer: string; year: string }[] | null;
   aboutLong: string | null;
   offer: ApplicationOffer | null;
+  introVideoPath: string | null;
+  introVideoOriginalName: string | null;
   flowmingoStatus: string | null;
   flowmingoScore: string | null;
   flowmingoSubmissionUrl: string | null;
