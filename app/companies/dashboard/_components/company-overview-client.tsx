@@ -372,7 +372,10 @@ export function CompanyOverviewClient({
                 key={eng.id}
                 className="flex items-center justify-between gap-3 rounded-lg border border-border/70 p-3"
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <Link
+                  href={`/companies/dashboard/developers/${eng.developerId}`}
+                  className="flex items-center gap-3 min-w-0 hover:underline"
+                >
                   <Avatar className="size-8 shrink-0">
                     {eng.developerAvatar && (
                       <AvatarImage src={eng.developerAvatar} alt={eng.developerName} />
@@ -387,7 +390,7 @@ export function CompanyOverviewClient({
                       {eng.requirementTitle}
                     </p>
                   </div>
-                </div>
+                </Link>
                 <div className="shrink-0 text-right">
                   <p className="font-mono text-sm">
                     {formatCurrency(eng.companyBillingRate)}/hr

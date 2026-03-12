@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { Check, Clock, X } from "lucide-react";
 
@@ -228,7 +229,10 @@ export default function TimesheetsPage() {
                     {periodEntries.map((entry) => (
                       <TableRow key={entry.id}>
                         <TableCell>
-                          <div className="flex items-center gap-2.5">
+                          <Link
+                            href={`/companies/dashboard/developers/${entry.developerId}`}
+                            className="flex items-center gap-2.5 hover:underline"
+                          >
                             <Avatar className="size-7">
                               {entry.developerAvatar && (
                                 <AvatarImage src={entry.developerAvatar} alt={entry.developerName} />
@@ -238,7 +242,7 @@ export default function TimesheetsPage() {
                               </AvatarFallback>
                             </Avatar>
                             <span className="text-sm font-medium">{entry.developerName}</span>
-                          </div>
+                          </Link>
                         </TableCell>
                         <TableCell>
                           <div className="space-y-0.5">

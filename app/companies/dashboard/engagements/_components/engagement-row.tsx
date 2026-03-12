@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 
 import type { CompanyEngagement } from "@/lib/api/companies";
@@ -100,7 +101,13 @@ function EngagementRow({ engagement, token }: EngagementRowProps) {
               </Avatar>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-medium">{engagement.developerName}</p>
+                  <Link
+                    href={`/companies/dashboard/developers/${engagement.developerId}`}
+                    className="truncate text-sm font-medium hover:underline"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {engagement.developerName}
+                  </Link>
                   <Badge variant="outline" className={statusBadgeClass(engagement.status)}>
                     {statusLabel[engagement.status] ?? engagement.status}
                   </Badge>

@@ -6,6 +6,7 @@ import {
   Award,
   Briefcase,
   Clock,
+  FileText,
   GraduationCap,
   Languages,
   MapPin,
@@ -28,9 +29,9 @@ import { DeveloperReviewSection } from "./_components/developer-review-section";
 import { TECH_ICONS } from "@/lib/tech-icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const getInitials = (name: string) =>
   name
@@ -60,52 +61,275 @@ export default async function CompanyDeveloperProfilePage({
 
   if (!developer) return notFound();
 
+  const activeMatch = developer.matches.find(
+    (m) => m.status === "active" || m.status === "accepted",
+  );
+
   return (
     <div className="space-y-6">
-      {/* Back link */}
-      <Link
-        href="/companies/dashboard/requirements"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-3.5" />
-        Back to requirements
-      </Link>
+      {/* Back link + page header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/companies/dashboard/candidates"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="size-3.5" />
+          </Link>
+          <div>
+            <h1 className="text-lg font-semibold">{developer.name}</h1>
+            <p className="text-sm text-muted-foreground">{developer.role}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {developer.hasResume && (
+            <DownloadCVButton developerId={developer.id} />
+          )}
+        </div>
+      </div>
 
-      {/* Match info */}
-      {developer.matches.length > 0 && (
-        <MatchInfoSection matches={developer.matches} />
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
+        {/* Left sidebar */}
+        <div className="space-y-4">
+          <ProfileSidebar developer={developer} activeMatch={activeMatch} />
+        </div>
+
+        {/* Right content */}
+        <div>
+          <Tabs defaultValue="profile">
+            <TabsList>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="profile" className="mt-6 space-y-8">
+              <ProfileTab developer={developer} />
+            </TabsContent>
+
+            <TabsContent value="documents" className="mt-6">
+              <DocumentsTab />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Left Sidebar ──────────────────────────────────────────────── */
+
+function ProfileSidebar({
+  developer,
+  activeMatch,
+}: {
+  developer: CompanyDeveloperProfile;
+  activeMatch?: CompanyDeveloperMatch;
+}) {
+  return (
+    <Card>
+      <CardContent className="p-6">
+        {/* Avatar + name */}
+        <div className="flex flex-col items-center text-center">
+          <div className="relative">
+            <Avatar className="size-20 border-2 border-border">
+              <AvatarImage src={developer.avatar} alt={developer.name} className="object-cover" />
+              <AvatarFallback className="text-xl font-semibold">
+                {getInitials(developer.name)}
+              </AvatarFallback>
+            </Avatar>
+            {developer.isOnline && (
+              <span className="absolute bottom-0.5 right-0.5 size-4 rounded-full border-[3px] border-background bg-emerald-500" />
+            )}
+          </div>
+          <h2 className="mt-3 text-base font-semibold">{developer.name}</h2>
+          <p className="text-sm text-muted-foreground">{developer.role}</p>
+
+          {/* Status badge */}
+          {activeMatch && (
+            <Badge
+              variant="outline"
+              className={`mt-2 ${matchStatusBadgeClass(activeMatch.status as "active" | "accepted" | "proposed")}`}
+            >
+              {matchStatusLabel[activeMatch.status as keyof typeof matchStatusLabel] ?? activeMatch.status}
+            </Badge>
+          )}
+        </div>
+
+        <Separator className="my-4" />
+
+        {/* Match details */}
+        {developer.matches.length > 0 && (
+          <>
+            <div className="space-y-3">
+              {developer.matches.map((match) => (
+                <div key={match.id} className="space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-sm font-medium">{match.requirementTitle}</p>
+                    <Badge
+                      variant="outline"
+                      className={`shrink-0 text-[10px] ${matchStatusBadgeClass(match.status as "proposed" | "accepted" | "rejected" | "active" | "ended")}`}
+                    >
+                      {matchStatusLabel[match.status as keyof typeof matchStatusLabel] ?? match.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="font-mono">${match.proposedHourlyRate}/hr</span>
+                    <span className="text-border">|</span>
+                    <span className="capitalize">{match.engagementType?.replace("-", " ")}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Separator className="my-4" />
+          </>
+        )}
+
+        {/* Key info */}
+        <div className="space-y-3">
+          {developer.location && (
+            <InfoRow icon={MapPin} label="Working from" value={developer.location} />
+          )}
+          <InfoRow
+            icon={Clock}
+            label="Experience"
+            value={`${developer.yearsOfExperience} years`}
+          />
+          {developer.englishProficiency && (
+            <InfoRow
+              icon={Languages}
+              label="English"
+              value={ENGLISH_LABELS[developer.englishProficiency] ?? developer.englishProficiency}
+            />
+          )}
+          {developer.availability && (
+            <InfoRow
+              icon={Briefcase}
+              label="Availability"
+              value={developer.availability.replace(/_/g, " ")}
+            />
+          )}
+          {developer.engagementType.length > 0 && (
+            <InfoRow
+              icon={Briefcase}
+              label="Engagement"
+              value={developer.engagementType.join(", ")}
+            />
+          )}
+          {developer.rating > 0 && (
+            <InfoRow
+              icon={Star}
+              label="Rating"
+              value={developer.rating.toFixed(1)}
+            />
+          )}
+          {developer.projects > 0 && (
+            <InfoRow
+              icon={Briefcase}
+              label="Projects"
+              value={String(developer.projects)}
+            />
+          )}
+        </div>
+
+        {/* Rates */}
+        {(developer.hourlyRate > 0 || developer.monthlyRate > 0) && (
+          <>
+            <Separator className="my-4" />
+            <div className="space-y-2">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Rates
+              </p>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="font-mono text-xs">
+                  ${developer.hourlyRate || developer.matches[0]?.proposedHourlyRate || 0}/hr
+                </Badge>
+                <Badge variant="secondary" className="font-mono text-xs">
+                  ${(developer.monthlyRate || developer.matches[0]?.proposedMonthlyRate || 0).toLocaleString()}/mo
+                </Badge>
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      <Icon className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
+      <div>
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="text-sm capitalize">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Profile Tab ───────────────────────────────────────────────── */
+
+function ProfileTab({ developer }: { developer: CompanyDeveloperProfile }) {
+  return (
+    <>
+      {/* Intro / About */}
+      {(developer.about || developer.bio) && (
+        <section>
+          <h2 className="text-base font-semibold">Intro</h2>
+          <Separator className="my-3" />
+          <p className="max-w-3xl leading-relaxed text-muted-foreground">
+            {developer.about || developer.bio}
+          </p>
+        </section>
       )}
 
-      {/* Hero section */}
-      <HeroSection developer={developer} />
-
-      {/* Key details grid */}
-      <KeyDetailsGrid developer={developer} />
-
-      {/* About */}
-      {developer.about && (
-        <Card>
-          <CardHeader>
-            <CardTitle>About {developer.name.split(" ")[0]}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="max-w-3xl leading-relaxed text-muted-foreground">
-              {developer.about}
-            </p>
-          </CardContent>
-        </Card>
+      {/* Tech Stack */}
+      {developer.skills.length > 0 && (
+        <section>
+          <h2 className="text-base font-semibold">Tech Stack</h2>
+          <Separator className="my-3" />
+          <div className="flex flex-wrap gap-2">
+            {developer.skills.map((skill) => (
+              <Badge
+                key={skill}
+                variant="secondary"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm"
+              >
+                {TECH_ICONS[skill] && (
+                  <img src={TECH_ICONS[skill]} alt="" className="size-4" />
+                )}
+                {skill}
+              </Badge>
+            ))}
+          </div>
+          {developer.secondarySkills && (
+            <div className="mt-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Secondary Skills
+              </p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {developer.secondarySkills}
+              </p>
+            </div>
+          )}
+        </section>
       )}
 
-      {/* Skills */}
-      <SkillsSection developer={developer} />
-
-      {/* Work History */}
+      {/* Work Experience */}
       {developer.workHistory.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Work History</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <section>
+          <h2 className="text-base font-semibold">Work Experience</h2>
+          <Separator className="my-3" />
+          <div className="space-y-6">
             {developer.workHistory.map((item, i) => (
               <div key={i} className="flex gap-4">
                 <div className="hidden shrink-0 sm:block">
@@ -128,19 +352,13 @@ export default async function CompanyDeveloperProfilePage({
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-                    <h3 className="text-sm font-semibold">
-                      {item.role}{" "}
-                      <span className="font-normal text-muted-foreground">
-                        at {item.company}
-                      </span>
-                    </h3>
-                    <span className="shrink-0 text-xs text-muted-foreground">
-                      {item.duration}
-                    </span>
-                  </div>
+                  <h3 className="text-sm font-semibold">{item.role}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {item.company}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{item.duration}</p>
                   {item.description && (
-                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                       {item.description}
                     </p>
                   )}
@@ -154,316 +372,125 @@ export default async function CompanyDeveloperProfilePage({
                     </div>
                   )}
                   {i < developer.workHistory.length - 1 && (
-                    <Separator className="mt-4" />
+                    <Separator className="mt-6" />
                   )}
                 </div>
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       )}
 
-      {/* Education & Awards */}
-      {(developer.education.length > 0 || developer.awards.length > 0) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Education & Awards</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {developer.education.map((edu, i) => (
-                <div key={i} className="flex gap-3 rounded-lg border border-border/70 p-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                    {edu.institutionLogoUrl ? (
-                      <img
-                        src={edu.institutionLogoUrl}
-                        alt={edu.institution}
-                        className="size-10 rounded-lg object-contain p-1"
-                      />
-                    ) : (
-                      <GraduationCap className="size-5 text-muted-foreground" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">
-                      {edu.degree} in {edu.field}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {edu.institution}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{edu.year}</p>
-                  </div>
+      {/* Education */}
+      {developer.education.length > 0 && (
+        <section>
+          <h2 className="text-base font-semibold">Education</h2>
+          <Separator className="my-3" />
+          <div className="space-y-4">
+            {developer.education.map((edu, i) => (
+              <div key={i} className="flex gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  {edu.institutionLogoUrl ? (
+                    <img
+                      src={edu.institutionLogoUrl}
+                      alt={edu.institution}
+                      className="size-10 rounded-lg object-contain p-1"
+                    />
+                  ) : (
+                    <GraduationCap className="size-5 text-muted-foreground" />
+                  )}
                 </div>
-              ))}
-              {developer.awards.map((award, i) => (
-                <div key={i} className="flex gap-3 rounded-lg border border-border/70 p-4">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-pulse/10">
-                    <Award className="size-5 text-pulse" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">{award.title}</p>
-                    <p className="text-xs text-muted-foreground">{award.issuer}</p>
-                    <p className="text-xs text-muted-foreground">{award.year}</p>
-                  </div>
+                <div>
+                  <p className="text-sm font-semibold">
+                    {edu.degree} in {edu.field}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {edu.institution}
+                  </p>
+                  <p className="text-xs text-muted-foreground">{edu.year}</p>
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Awards */}
+      {developer.awards.length > 0 && (
+        <section>
+          <h2 className="text-base font-semibold">Awards</h2>
+          <Separator className="my-3" />
+          <div className="space-y-4">
+            {developer.awards.map((award, i) => (
+              <div key={i} className="flex gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent">
+                  <Award className="size-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{award.title}</p>
+                  <p className="text-xs text-muted-foreground">{award.issuer}</p>
+                  <p className="text-xs text-muted-foreground">{award.year}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Achievements */}
       {developer.achievements.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Achievements</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
-              {developer.achievements.map((achievement) => (
-                <li key={achievement} className="flex items-start gap-3">
-                  <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-pulse/10">
-                    <Trophy className="size-3.5 text-pulse" />
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {achievement}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <section>
+          <h2 className="text-base font-semibold">Achievements</h2>
+          <Separator className="my-3" />
+          <ul className="space-y-3">
+            {developer.achievements.map((achievement) => (
+              <li key={achievement} className="flex items-start gap-3">
+                <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent">
+                  <Trophy className="size-3.5 text-muted-foreground" />
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {achievement}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       {/* Certifications */}
       {developer.certifications && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Certifications</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {developer.certifications}
-            </p>
-          </CardContent>
-        </Card>
+        <section>
+          <h2 className="text-base font-semibold">Certifications</h2>
+          <Separator className="my-3" />
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            {developer.certifications}
+          </p>
+        </section>
       )}
 
       {/* Reviews */}
-      <DeveloperReviewSection
-        developerId={developer.id}
-        developerName={developer.name}
-      />
+      <section>
+        <DeveloperReviewSection
+          developerId={developer.id}
+          developerName={developer.name}
+        />
+      </section>
+    </>
+  );
+}
+
+/* ─── Documents Tab (placeholder) ───────────────────────────────── */
+
+function DocumentsTab() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+        <FileText className="size-6 text-muted-foreground" />
+      </div>
+      <h3 className="mt-4 text-sm font-semibold">No documents yet</h3>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        Documents for this team member will appear here once available.
+      </p>
     </div>
-  );
-}
-
-function MatchInfoSection({ matches }: { matches: CompanyDeveloperMatch[] }) {
-  return (
-    <Card className="border-pulse/30">
-      <CardHeader>
-        <CardTitle className="text-base">Match Details</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {matches.map((match) => (
-          <div
-            key={match.id}
-            className="flex flex-col gap-3 rounded-lg border border-border/70 p-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="space-y-1">
-              <p className="text-sm font-semibold">{match.requirementTitle}</p>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <span className="capitalize">
-                  {match.engagementType?.replace("-", " ") ?? "-"}
-                </span>
-                <span>Proposed {formatDate(match.proposedAt)}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="font-mono text-sm font-semibold">
-                  ${match.proposedHourlyRate}/hr
-                </p>
-                <p className="font-mono text-xs text-muted-foreground">
-                  ${match.proposedMonthlyRate.toLocaleString()}/mo
-                </p>
-              </div>
-              <Badge
-                variant="outline"
-                className={matchStatusBadgeClass(match.status as "proposed" | "accepted" | "rejected" | "active" | "ended")}
-              >
-                {matchStatusLabel[match.status as keyof typeof matchStatusLabel] ?? match.status}
-              </Badge>
-            </div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  );
-}
-
-function HeroSection({ developer }: { developer: CompanyDeveloperProfile }) {
-  return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
-          <div className="relative shrink-0">
-            <Avatar className="size-24 border-4 border-border shadow-lg">
-              <AvatarImage src={developer.avatar} alt={developer.name} className="object-cover" />
-              <AvatarFallback className="text-2xl font-semibold">
-                {getInitials(developer.name)}
-              </AvatarFallback>
-            </Avatar>
-            {developer.isOnline && (
-              <span className="absolute bottom-1 right-1 size-4 rounded-full border-[3px] border-background bg-emerald-500" />
-            )}
-          </div>
-
-          <div className="flex-1 space-y-3 text-center sm:text-left">
-            <div>
-              <h1 className="text-2xl font-semibold">{developer.name}</h1>
-              <p className="text-sm text-muted-foreground">{developer.role}</p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground sm:justify-start">
-              {developer.location && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="size-3.5" />
-                  {developer.location}
-                </span>
-              )}
-              <span className="flex items-center gap-1">
-                <Clock className="size-3.5" />
-                {developer.yearsOfExperience} years exp.
-              </span>
-              {developer.projects > 0 && (
-                <span className="flex items-center gap-1">
-                  <Briefcase className="size-3.5" />
-                  {developer.projects} projects
-                </span>
-              )}
-              {developer.rating > 0 && (
-                <span className="flex items-center gap-1">
-                  <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                  {developer.rating.toFixed(1)}
-                </span>
-              )}
-            </div>
-
-            {/* Rates */}
-            {(developer.hourlyRate > 0 || developer.monthlyRate > 0 || developer.matches.length > 0) && (
-              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                <Badge variant="secondary" className="font-mono text-xs">
-                  ${developer.hourlyRate || developer.matches[0]?.proposedHourlyRate || 0}/hr
-                </Badge>
-                <Badge variant="secondary" className="font-mono text-xs">
-                  ${(developer.monthlyRate || developer.matches[0]?.proposedMonthlyRate || 0).toLocaleString()}/mo
-                </Badge>
-              </div>
-            )}
-
-            {/* CV download */}
-            {developer.hasResume && (
-              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-                <DownloadCVButton developerId={developer.id} />
-              </div>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function KeyDetailsGrid({ developer }: { developer: CompanyDeveloperProfile }) {
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      <Card>
-        <CardContent className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            English
-          </p>
-          <div className="mt-1 flex items-center gap-1.5">
-            <Languages className="size-3.5 text-muted-foreground" />
-            <p className="text-sm font-medium">
-              {developer.englishProficiency
-                ? ENGLISH_LABELS[developer.englishProficiency] ?? developer.englishProficiency
-                : "Not specified"}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Availability
-          </p>
-          <p className="mt-1 text-sm font-medium capitalize">
-            {developer.availability?.replace(/_/g, " ") ?? "Not specified"}
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Engagement
-          </p>
-          <p className="mt-1 text-sm font-medium capitalize">
-            {developer.engagementType.length > 0
-              ? developer.engagementType.join(", ")
-              : "Not specified"}
-          </p>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Experience
-          </p>
-          <p className="mt-1 text-sm font-medium">
-            {developer.yearsOfExperience} years
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-function SkillsSection({ developer }: { developer: CompanyDeveloperProfile }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Tech Stack</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          {developer.skills.map((skill) => (
-            <Badge
-              key={skill}
-              variant="secondary"
-              className="flex items-center gap-2 px-3 py-1.5 text-sm"
-            >
-              {TECH_ICONS[skill] && (
-                <img src={TECH_ICONS[skill]} alt="" className="size-4" />
-              )}
-              {skill}
-            </Badge>
-          ))}
-        </div>
-        {developer.secondarySkills && (
-          <>
-            <Separator />
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Secondary Skills
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {developer.secondarySkills}
-              </p>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
   );
 }
