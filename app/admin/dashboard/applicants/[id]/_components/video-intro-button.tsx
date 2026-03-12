@@ -66,7 +66,7 @@ export function VideoIntroButton({
         </Button>
 
         <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
-          <DialogContent className="max-w-2xl p-0 overflow-hidden">
+          <DialogContent className="max-w-4xl p-0 overflow-hidden">
             <DialogHeader className="px-6 pt-6 pb-0">
               <DialogTitle>
                 Video Introduction — {applicantName}
