@@ -8,6 +8,7 @@ import { getCategoryForTitle } from "@/lib/data/professional-categories";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Check } from "lucide-react";
 
 interface StepReviewProps {
   onEditStep: (step: number) => void;
@@ -216,6 +217,27 @@ const StepReview = ({ onEditStep }: StepReviewProps) => {
           value={data.profilePhoto?.name}
         />
       </div>
+
+      <Separator />
+
+      {/* Video Introduction */}
+      <SectionHeader title="Video Introduction" step={6} onEdit={onEditStep} />
+      {data.introVideo ? (
+        <div className="flex items-center gap-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
+          <Check className="size-4 text-emerald-600" />
+          <div>
+            <p className="text-sm font-medium">Video recorded</p>
+            <p className="text-xs text-muted-foreground">
+              {data.introVideo.name} &middot;{" "}
+              {(data.introVideo.size / (1024 * 1024)).toFixed(1)}MB
+            </p>
+          </div>
+        </div>
+      ) : (
+        <p className="text-sm text-destructive">
+          No video recorded. Please go back and record your introduction.
+        </p>
+      )}
 
       <Separator />
 

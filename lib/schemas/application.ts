@@ -110,6 +110,20 @@ export const linksSchema = z.object({
     ),
 });
 
+export const introVideoSchema = z.object({
+  introVideo: z
+    .instanceof(File)
+    .refine(
+      (file) => file.size <= 50 * 1024 * 1024,
+      "Video must be 50MB or less",
+    )
+    .refine(
+      (file) =>
+        ["video/webm", "video/mp4", "video/quicktime"].includes(file.type),
+      "Video must be WebM, MP4, or MOV",
+    ),
+});
+
 export const preferencesSchema = z.object({
   engagementType: z
     .array(z.enum(["hourly", "part-time", "full-time"]))
@@ -130,6 +144,7 @@ export const applicationSchema = z.object({
   ...educationListSchema.shape,
   ...techStackSchema.shape,
   ...linksSchema.shape,
+  ...introVideoSchema.shape,
   ...preferencesSchema.shape,
 });
 
@@ -141,5 +156,6 @@ export type Education = z.infer<typeof educationSchema>;
 export type EducationList = z.infer<typeof educationListSchema>;
 export type TechStack = z.infer<typeof techStackSchema>;
 export type Links = z.infer<typeof linksSchema>;
+export type IntroVideo = z.infer<typeof introVideoSchema>;
 export type Preferences = z.infer<typeof preferencesSchema>;
 export type Application = z.infer<typeof applicationSchema>;

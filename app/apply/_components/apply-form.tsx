@@ -19,6 +19,7 @@ import { StepEducation } from "./step-education";
 import { StepTechStack } from "./step-tech-stack";
 import { StepLinks } from "./step-links";
 import { StepPreferences } from "./step-preferences";
+import { StepVideoIntro } from "./step-video-intro";
 import { StepReview } from "./step-review";
 
 const STEPS = [
@@ -28,6 +29,7 @@ const STEPS = [
   { label: "Skills" },
   { label: "Links" },
   { label: "Preferences" },
+  { label: "Video" },
   { label: "Review" },
 ];
 
@@ -55,6 +57,7 @@ const stepFields: Record<number, (keyof Application)[]> = {
     "resumeFile",
   ],
   5: ["engagementType", "availability", "englishProficiency"],
+  6: ["introVideo"],
 };
 
 const stepMeta = [
@@ -81,6 +84,11 @@ const stepMeta = [
   {
     title: "Preferences",
     description: "Let us know how and when you'd like to work.",
+  },
+  {
+    title: "Video Introduction",
+    description:
+      "Record a 1-minute video introducing yourself and your top 3 career achievements.",
   },
   {
     title: "Review & Submit",
@@ -154,6 +162,10 @@ const buildApplicationFormData = (
 
   if (params.includeFiles && values.resumeFile) {
     formData.append("resumeFile", values.resumeFile);
+  }
+
+  if (params.includeFiles && values.introVideo) {
+    formData.append("introVideo", values.introVideo);
   }
 
   // Attach agency referral code if present
@@ -252,6 +264,7 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
       portfolioUrl: "",
       resumeFile: undefined as unknown as File,
       profilePhoto: undefined as unknown as File,
+      introVideo: undefined as unknown as File,
       engagementType: [],
       availability: undefined as unknown as Application["availability"],
       englishProficiency: undefined as unknown as Application["englishProficiency"],
@@ -308,7 +321,7 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
 
   const persistDraft = async (step: number): Promise<string | null> => {
     const values = methods.getValues();
-    const includeFiles = step >= 4;
+    const includeFiles = step >= 4; // steps 4 (links+resume), 5, 6 (video), 7 (review)
     const formData = buildApplicationFormData(values, {
       applicationId: applicationIdRef.current,
       step,
@@ -382,6 +395,9 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
     try {
       if (!values.resumeFile || !values.profilePhoto) {
         throw new Error("Please upload your resume and profile photo.");
+      }
+      if (!values.introVideo) {
+        throw new Error("Please record your video introduction.");
       }
 
       const resolvedId = await persistDraft(currentStep);
@@ -505,7 +521,8 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
                 {currentStep === 3 && <StepTechStack />}
                 {currentStep === 4 && <StepLinks />}
                 {currentStep === 5 && <StepPreferences />}
-                {currentStep === 6 && <StepReview onEditStep={goToStep} />}
+                {currentStep === 6 && <StepVideoIntro />}
+                {currentStep === 7 && <StepReview onEditStep={goToStep} />}
               </div>
             </div>
           </div>
