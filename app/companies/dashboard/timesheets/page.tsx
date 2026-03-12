@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
-import { Check, Clock, Filter, X } from "lucide-react";
+import { Check, Clock, X } from "lucide-react";
 
 import {
   fetchCompanyTimeEntries,
@@ -132,33 +132,31 @@ export default function TimesheetsPage() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          Timesheets
-        </p>
-        <h1 className="text-lg font-semibold">Timesheet Approvals</h1>
-        <p className="text-sm text-muted-foreground">
-          Review and approve submitted timesheets from your developers.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Timesheets</h1>
+          <p className="text-sm text-muted-foreground">
+            Review and approve submitted timesheets from your developers.
+          </p>
+        </div>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center gap-2">
-        <Filter className="size-4 text-muted-foreground" />
+      <div className="flex flex-wrap items-center gap-2">
         {filters.map((f) => (
-          <Button
+          <button
             key={f.value}
-            variant={activeFilter === f.value ? "default" : "outline"}
-            size="sm"
+            type="button"
             onClick={() => setActiveFilter(f.value)}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+              activeFilter === f.value
+                ? "border-foreground bg-foreground text-background"
+                : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+            }`}
           >
             {f.label}
-            {f.value === "submitted" && pendingCount > 0 && (
-              <Badge variant="secondary" className="ml-1.5 px-1.5 py-0 text-[10px]">
-                {pendingCount}
-              </Badge>
-            )}
-          </Button>
+            {f.value === "submitted" && pendingCount > 0 ? ` (${pendingCount})` : ""}
+          </button>
         ))}
       </div>
 

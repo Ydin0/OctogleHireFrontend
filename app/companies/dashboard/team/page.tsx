@@ -15,13 +15,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +32,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const formatDate = (dateStr: string) => {
   const date = new Date(dateStr);
@@ -117,22 +119,20 @@ const TeamPage = () => {
 
   return (
     <>
-      <Card className="border-pulse/30 bg-gradient-to-br from-card to-pulse/5">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Team</CardTitle>
-              <CardDescription>
-                Team members in your company workspace.
-              </CardDescription>
-            </div>
-            <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) setInviteError(""); }}>
-              <DialogTrigger asChild>
-                <Button size="sm">
-                  <Plus className="mr-1.5 size-4" />
-                  Invite Member
-                </Button>
-              </DialogTrigger>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Team</h1>
+          <p className="text-sm text-muted-foreground">
+            Team members in your company workspace.
+          </p>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) setInviteError(""); }}>
+          <DialogTrigger asChild>
+            <Button size="sm">
+              <Plus className="mr-1.5 size-4" />
+              Invite Member
+            </Button>
+          </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Invite Team Member</DialogTitle>
@@ -186,10 +186,8 @@ const TeamPage = () => {
                   </Button>
                 </DialogFooter>
               </DialogContent>
-            </Dialog>
-          </div>
-        </CardHeader>
-      </Card>
+        </Dialog>
+      </div>
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
@@ -209,38 +207,32 @@ const TeamPage = () => {
         </Card>
       ) : (
         <Card>
-          <CardHeader>
-            <CardTitle>Team Members</CardTitle>
-            <CardDescription>
-              Name, email, role, and join date.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <table className="w-full min-w-[600px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-border text-xs text-muted-foreground">
-                  <th className="pb-3 font-medium">Member</th>
-                  <th className="pb-3 font-medium">Email</th>
-                  <th className="pb-3 font-medium">Role</th>
-                  <th className="pb-3 font-medium">Joined</th>
-                  <th className="pb-3 font-medium sr-only">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead className="sr-only">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {members.map((member) => (
-                  <tr key={member.id} className="border-b border-border/60">
-                    <td className="py-3">
+                  <TableRow key={member.id}>
+                    <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar size="sm">
                           <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
                         </Avatar>
-                        <p className="font-medium">{member.name}</p>
+                        <span className="text-sm font-medium">{member.name}</span>
                       </div>
-                    </td>
-                    <td className="py-3 text-muted-foreground">{member.email}</td>
-                    <td className="py-3">{member.role}</td>
-                    <td className="py-3 text-muted-foreground">{formatDate(member.joinedAt)}</td>
-                    <td className="py-3 text-right">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{member.email}</TableCell>
+                    <TableCell>{member.role}</TableCell>
+                    <TableCell className="text-muted-foreground">{formatDate(member.joinedAt)}</TableCell>
+                    <TableCell className="text-right">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -254,11 +246,11 @@ const TeamPage = () => {
                           <Trash2 className="size-4" />
                         )}
                       </Button>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       )}

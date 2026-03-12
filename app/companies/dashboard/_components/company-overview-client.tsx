@@ -234,24 +234,16 @@ export function CompanyOverviewClient({
       {/* KPIs */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((kpi) => (
-          <Card
-            key={kpi.label}
-            className={`py-4 gap-3 ${kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}`}
-          >
-            <CardHeader className="pb-2">
-              <CardDescription className="text-[10px] font-mono uppercase tracking-wider">
-                {kpi.label}
-              </CardDescription>
-              <CardTitle
-                className={`text-2xl ${kpi.mono ? "font-mono" : ""} ${kpi.highlight ? "text-amber-600" : ""}`}
-              >
-                {kpi.value}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">{kpi.hint}</span>
-              <div className={`flex size-8 items-center justify-center rounded-full ${kpi.highlight ? "bg-amber-500/15" : "bg-pulse/10"}`}>
-                <kpi.icon className={`size-4 ${kpi.highlight ? "text-amber-600" : "text-pulse"}`} />
+          <Card key={kpi.label} className={kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`flex size-8 items-center justify-center rounded-full ${kpi.highlight ? "bg-amber-500/15" : "bg-accent"}`}>
+                  <kpi.icon className={`size-4 ${kpi.highlight ? "text-amber-600" : "text-muted-foreground"}`} />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{kpi.label}</p>
+                  <p className={`text-lg font-semibold ${kpi.mono ? "font-mono" : ""} ${kpi.highlight ? "text-amber-600" : ""}`}>{kpi.value}</p>
+                </div>
               </div>
             </CardContent>
           </Card>

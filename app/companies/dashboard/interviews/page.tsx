@@ -19,13 +19,7 @@ import {
   interviewStatusBadgeClass,
   formatDate,
 } from "@/app/admin/dashboard/_components/dashboard-data";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -229,19 +223,29 @@ export default function InterviewsPage() {
 
   return (
     <>
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Interviews</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage and track all candidate interviews.
+          </p>
+        </div>
+      </div>
+
       {/* KPI Cards */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {kpis.map((kpi) => (
-          <Card key={kpi.label} className="gap-3 py-4">
-            <CardHeader className="pb-2">
-              <CardDescription className="font-mono text-[10px] uppercase tracking-wider">
-                {kpi.label}
-              </CardDescription>
-              <CardTitle className="text-2xl">{kpi.value}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex size-8 items-center justify-center rounded-full bg-pulse/10">
-                <kpi.icon className="size-4 text-pulse" />
+          <Card key={kpi.label}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex size-8 items-center justify-center rounded-full bg-accent">
+                  <kpi.icon className="size-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{kpi.label}</p>
+                  <p className="text-lg font-semibold">{kpi.value}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -250,16 +254,7 @@ export default function InterviewsPage() {
 
       {/* Interview List */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Video className="size-4" />
-            Interviews
-          </CardTitle>
-          <CardDescription>
-            Manage and track all candidate interviews.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <Tabs defaultValue="all">
             <TabsList>
               <TabsTrigger value="all">

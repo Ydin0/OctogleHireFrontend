@@ -27,20 +27,7 @@ import {
 } from "@/app/admin/dashboard/_components/dashboard-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -86,8 +73,26 @@ const InvoicesPage = () => {
     );
   }
 
+  const statusFilters = [
+    { label: "All", value: "all", count: invoices.length },
+    { label: "Sent", value: "sent", count: invoices.filter((i) => i.status === "sent").length },
+    { label: "Paid", value: "paid", count: invoices.filter((i) => i.status === "paid").length },
+    { label: "Overdue", value: "overdue", count: invoices.filter((i) => i.status === "overdue").length },
+    { label: "Draft", value: "draft", count: invoices.filter((i) => i.status === "draft").length },
+  ];
+
   return (
     <>
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Invoices</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage pending, overdue, and paid invoices for your offshore team.
+          </p>
+        </div>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card>
@@ -160,33 +165,27 @@ const InvoicesPage = () => {
         </Card>
       </div>
 
-      {/* Invoices Table */}
+      {/* Status Filters */}
+      <div className="flex flex-wrap items-center gap-2">
+        {statusFilters.map((f) => (
+          <button
+            key={f.value}
+            type="button"
+            onClick={() => setStatusFilter(f.value)}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+              statusFilter === f.value
+                ? "border-foreground bg-foreground text-background"
+                : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+            }`}
+          >
+            {f.label} ({f.count})
+          </button>
+        ))}
+      </div>
+
+      {/* Invoices List */}
       <Card>
-        <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <CardTitle>Invoices</CardTitle>
-              <CardDescription>
-                Manage pending, overdue, and paid invoices for your offshore
-                team.
-              </CardDescription>
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="sent">Sent</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="overdue">Overdue</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="flex size-12 items-center justify-center rounded-full bg-muted">
