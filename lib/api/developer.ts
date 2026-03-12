@@ -149,6 +149,36 @@ export interface DeveloperOpportunity {
   respondedAt: string | null;
 }
 
+export interface DeveloperAvailabilitySlot {
+  id: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+}
+
+export interface DeveloperInterview {
+  id: string;
+  matchId: string;
+  companyName: string;
+  companyLogoUrl: string | null;
+  requirementTitle: string;
+  scheduledAt: string | null;
+  durationMinutes: number;
+  companyTimezone: string;
+  developerTimezone: string;
+  type: string;
+  meetingLink: string | null;
+  location: string | null;
+  status: string;
+  proposedSlots: Array<{ start: string; end: string }> | null;
+  selectedSlot: string | null;
+  declineReason: string | null;
+  alternativeSlots: Array<{ start: string; end: string }> | null;
+  outcome: string | null;
+  createdAt: string;
+}
+
 // ── API Functions ────────────────────────────────────────────────────────────
 
 export async function fetchDeveloperEngagements(
@@ -420,6 +450,104 @@ export async function respondToDeveloperOpportunity(
       },
     );
 
+    if (!response.ok) {
+      const err = await response.json().catch(() => null);
+      throw new Error(err?.message ?? "API error");
+    }
+    return await response.json();
+  } catch (error) {
+    throw error;
+  }
+}
+
+// ── Availability ────────────────────────────────────────────────────────────
+
+export async function fetchDeveloperAvailability(
+  token: string | null,
+): Promise<DeveloperAvailabilitySlot[] | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/developers/availability`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as DeveloperAvailabilitySlot[];
+  } catch {
+    return null;
+  }
+}
+
+export async function saveDeveloperAvailability(
+  token: string | null,
+  data: {
+    timezone: string;
+    slots: Array<{ dayOfWeek: number; startTime: string; endTime: string }>;
+  },
+): Promise<DeveloperAvailabilitySlot[] | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/developers/availability`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => null);
+      throw new Error(err?.message ?? "API error");
+    }
+    return (await response.json()) as DeveloperAvailabilitySlot[];
+  } catch (error) {
+    throw error;
+  }
+}
+
+// ── Interviews ──────────────────────────────────────────────────────────────
+
+export async function fetchDeveloperInterviews(
+  token: string | null,
+): Promise<DeveloperInterview[] | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/developers/interviews`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as DeveloperInterview[];
+  } catch {
+    return null;
+  }
+}
+
+export async function respondToInterview(
+  token: string | null,
+  interviewId: string,
+  data: {
+    action: "confirm" | "decline" | "propose_alternatives";
+    selectedSlot?: string;
+    declineReason?: string;
+    alternativeSlots?: Array<{ start: string; end: string }>;
+  },
+): Promise<unknown> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/developers/interviews/${interviewId}/respond`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        cache: "no-store",
+      },
+    );
     if (!response.ok) {
       const err = await response.json().catch(() => null);
       throw new Error(err?.message ?? "API error");

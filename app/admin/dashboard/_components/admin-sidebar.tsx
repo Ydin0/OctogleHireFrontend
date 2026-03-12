@@ -15,6 +15,7 @@ import {
   Shield,
   Store,
   Users,
+  Video,
   Wallet,
 } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
@@ -34,6 +35,7 @@ const navItems = [
   { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
   { href: "/admin/dashboard/requirements", label: "Requirements", icon: Store },
   { href: "/admin/dashboard/agencies", label: "Agencies", icon: Briefcase },
+  { href: "/admin/dashboard/interviews", label: "Interviews", icon: Video },
   { href: "/admin/dashboard/agencies/pitches", label: "Agency Pitches", icon: Send },
   { href: "/admin/dashboard/time-entries", label: "Timesheets", icon: Clock },
   { href: "/admin/dashboard/change-requests", label: "Requests", icon: GitPullRequestArrow },

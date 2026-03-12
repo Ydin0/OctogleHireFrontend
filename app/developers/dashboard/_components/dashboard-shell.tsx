@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Calendar,
   FileText,
   FolderKanban,
   Globe2,
@@ -12,6 +13,7 @@ import {
   Rocket,
   ShieldCheck,
   UserCircle2,
+  Video,
   Wallet,
 } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
@@ -57,6 +59,16 @@ const sidebarItems = [
     href: "/developers/dashboard/opportunities",
     label: "Opportunities",
     icon: Rocket,
+  },
+  {
+    href: "/developers/dashboard/interviews",
+    label: "Interviews",
+    icon: Video,
+  },
+  {
+    href: "/developers/dashboard/availability",
+    label: "Availability",
+    icon: Calendar,
   },
   {
     href: "/developers/dashboard/engagements",

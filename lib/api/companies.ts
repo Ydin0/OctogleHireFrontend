@@ -15,6 +15,8 @@ export type RequirementStatus =
 export type MatchStatus =
   | "proposed"
   | "accepted"
+  | "interview_requested"
+  | "interview_scheduled"
   | "declined"
   | "rejected"
   | "active"
@@ -59,6 +61,40 @@ export interface TeamMember {
   joinedAt: string;
 }
 
+export interface CompanyInterview {
+  id: string;
+  matchId: string;
+  developerId: string;
+  developerName: string;
+  developerRole: string;
+  developerAvatar: string;
+  requirementTitle: string;
+  scheduledAt: string | null;
+  durationMinutes: number;
+  type: string;
+  meetingLink: string | null;
+  status: string;
+  proposedSlots: Array<{ start: string; end: string }> | null;
+  selectedSlot: string | null;
+  alternativeSlots: Array<{ start: string; end: string }> | null;
+  companyNotes: string | null;
+  companyRating: number | null;
+  outcome: string | null;
+  createdAt: string;
+}
+
+export interface AvailableSlotsResponse {
+  availabilityNotSet: boolean;
+  developerTimezone?: string;
+  companyTimezone?: string;
+  slots: Array<{
+    start: string;
+    end: string;
+    developerLocalTime: string;
+    companyLocalTime: string;
+  }>;
+}
+
 export interface ProposedMatch {
   id: string;
   requirementId: string;
@@ -71,6 +107,7 @@ export interface ProposedMatch {
   rejectionReason?: string;
   proposedAt: string;
   respondedAt?: string;
+  interview?: CompanyInterview;
 }
 
 export interface JobRequirement {
@@ -1402,6 +1439,156 @@ export async function fetchCompanyDeveloperProfile(
     if (!response.ok) return null;
     const data = (await response.json()) as { developer: CompanyDeveloperProfile };
     return data.developer;
+  } catch {
+    return null;
+  }
+}
+
+// ── Interview API Functions ─────────────────────────────────────────────────
+
+export async function fetchAvailableSlots(
+  token: string | null,
+  matchId: string,
+  params?: { companyTimezone?: string; durationMinutes?: number; weeksAhead?: number },
+): Promise<AvailableSlotsResponse | null> {
+  if (!token) return null;
+
+  try {
+    const sp = new URLSearchParams();
+    if (params?.companyTimezone) sp.set("companyTimezone", params.companyTimezone);
+    if (params?.durationMinutes) sp.set("durationMinutes", String(params.durationMinutes));
+    if (params?.weeksAhead) sp.set("weeksAhead", String(params.weeksAhead));
+    const qs = sp.toString();
+
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/matches/${matchId}/available-slots${qs ? `?${qs}` : ""}`,
+      { method: "GET", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as AvailableSlotsResponse;
+  } catch {
+    return null;
+  }
+}
+
+export async function requestInterview(
+  token: string | null,
+  matchId: string,
+  data: {
+    proposedSlots: Array<{ start: string; end: string }>;
+    durationMinutes?: number;
+    type?: string;
+    companyTimezone?: string;
+    meetingLink?: string;
+    location?: string;
+  },
+): Promise<CompanyInterview | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/matches/${matchId}/request-interview`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const err = await response.json().catch(() => null);
+      throw new Error(err?.message ?? "Failed to request interview");
+    }
+    return (await response.json()) as CompanyInterview;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function fetchCompanyInterviews(
+  token: string | null,
+): Promise<CompanyInterview[] | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/companies/interviews`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      next: { revalidate: 60 },
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as CompanyInterview[];
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchCompanyInterview(
+  token: string | null,
+  interviewId: string,
+): Promise<CompanyInterview | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/interviews/${interviewId}`,
+      { method: "GET", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as CompanyInterview;
+  } catch {
+    return null;
+  }
+}
+
+export async function updateCompanyInterview(
+  token: string | null,
+  interviewId: string,
+  data: {
+    meetingLink?: string;
+    companyNotes?: string;
+    companyRating?: number;
+    acceptAlternativeSlot?: string;
+  },
+): Promise<CompanyInterview | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/interviews/${interviewId}`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as CompanyInterview;
+  } catch {
+    return null;
+  }
+}
+
+export async function completeInterview(
+  token: string | null,
+  interviewId: string,
+  data: { outcome: "passed" | "failed" | "undecided"; companyNotes?: string; companyRating?: number },
+): Promise<CompanyInterview | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/companies/interviews/${interviewId}/complete`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as CompanyInterview;
   } catch {
     return null;
   }

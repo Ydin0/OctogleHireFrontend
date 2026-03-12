@@ -26,10 +26,19 @@ export type RequirementStatus =
 export type MatchStatus =
   | "proposed"
   | "accepted"
+  | "interview_requested"
+  | "interview_scheduled"
   | "declined"
   | "rejected"
   | "active"
   | "ended";
+
+export type InterviewStatus =
+  | "requested"
+  | "confirmed"
+  | "completed"
+  | "declined"
+  | "rescheduled";
 
 // ── Pipeline stages (ordered) ────────────────────────────────────────────────
 
@@ -149,6 +158,8 @@ export const requirementStatusBadgeClass = (status: RequirementStatus) => {
 export const matchStatusLabel: Record<MatchStatus, string> = {
   proposed: "Proposed",
   accepted: "Applicant Accepted",
+  interview_requested: "Interview Requested",
+  interview_scheduled: "Interview Scheduled",
   declined: "Declined",
   rejected: "Rejected",
   active: "Active",
@@ -161,6 +172,10 @@ export const matchStatusBadgeClass = (status: MatchStatus) => {
       return "bg-amber-500/10 text-amber-700 border-amber-600/20";
     case "accepted":
       return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    case "interview_requested":
+      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+    case "interview_scheduled":
+      return "bg-sky-500/10 text-sky-600 border-sky-600/20";
     case "declined":
       return "bg-red-500/10 text-red-600 border-red-600/20";
     case "active":
@@ -169,6 +184,31 @@ export const matchStatusBadgeClass = (status: MatchStatus) => {
       return "bg-red-500/10 text-red-600 border-red-600/20";
     case "ended":
       return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+    default:
+      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+  }
+};
+
+export const interviewStatusLabel: Record<InterviewStatus, string> = {
+  requested: "Requested",
+  confirmed: "Confirmed",
+  completed: "Completed",
+  declined: "Declined",
+  rescheduled: "Rescheduled",
+};
+
+export const interviewStatusBadgeClass = (status: InterviewStatus) => {
+  switch (status) {
+    case "requested":
+      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+    case "confirmed":
+      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+    case "completed":
+      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+    case "declined":
+      return "bg-red-500/10 text-red-600 border-red-600/20";
+    case "rescheduled":
+      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
     default:
       return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
   }

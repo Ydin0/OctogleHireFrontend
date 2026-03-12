@@ -14,6 +14,7 @@ import {
   LogOut,
   Settings,
   UsersRound,
+  Video,
 } from "lucide-react";
 import { useAuth, useClerk } from "@clerk/nextjs";
 
@@ -38,6 +39,7 @@ const sidebarItems = [
   { href: "/companies/dashboard/requirements", label: "Requirements", icon: ClipboardList },
   { href: "/companies/dashboard/invoices", label: "Invoices", icon: FileText },
   { href: "/companies/dashboard/team", label: "Team", icon: UsersRound },
+  { href: "/companies/dashboard/interviews", label: "Interviews", icon: Video },
   { href: "/companies/dashboard/engagements", label: "Engagements", icon: Briefcase },
   { href: "/companies/dashboard/timesheets", label: "Timesheets", icon: Clock },
   { href: "/companies/dashboard/settings", label: "Settings", icon: Settings },

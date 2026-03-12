@@ -5,13 +5,16 @@ import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import {
   ArrowLeft,
+  Calendar,
   Check,
   ChevronDown,
   ChevronUp,
+  Clock,
   ExternalLink,
   Loader2,
   MapPin,
   Star,
+  Video,
   X,
 } from "lucide-react";
 
@@ -20,6 +23,9 @@ import {
   type ProposedMatch,
   fetchCompanyRequirement,
   respondToMatch,
+  fetchAvailableSlots,
+  requestInterview,
+  type AvailableSlotsResponse,
 } from "@/lib/api/companies";
 import { getTimezoneLabel } from "@/lib/constants/timezones";
 import {
@@ -79,6 +85,12 @@ const ProposedMatchesClient = ({
   const [rejectionReason, setRejectionReason] = useState("");
   const [respondingId, setRespondingId] = useState<string | null>(null);
   const [descriptionExpanded, setDescriptionExpanded] = useState<boolean>(false);
+  const [interviewDialog, setInterviewDialog] = useState<ProposedMatch | null>(null);
+  const [availableSlots, setAvailableSlots] = useState<AvailableSlotsResponse | null>(null);
+  const [selectedSlots, setSelectedSlots] = useState<Set<string>>(new Set());
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [interviewType, setInterviewType] = useState<"video" | "phone" | "in_person">("video");
+  const [requestingInterview, setRequestingInterview] = useState(false);
 
   const load = useCallback(async () => {
     const token = await getToken();
@@ -140,6 +152,46 @@ const ProposedMatchesClient = ({
     setRejectDialog(null);
     setRejectionReason("");
     setRespondingId(null);
+  };
+
+  const openInterviewDialog = async (match: ProposedMatch) => {
+    setInterviewDialog(match);
+    setSelectedSlots(new Set());
+    setLoadingSlots(true);
+    const token = await getToken();
+    const companyTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const result = await fetchAvailableSlots(token, match.id, { companyTimezone: companyTz });
+    setAvailableSlots(result);
+    setLoadingSlots(false);
+  };
+
+  const handleRequestInterview = async () => {
+    if (!interviewDialog || selectedSlots.size === 0) return;
+    setRequestingInterview(true);
+    const token = await getToken();
+    const slots = Array.from(selectedSlots).map((start) => {
+      const end = new Date(new Date(start).getTime() + 30 * 60 * 1000).toISOString();
+      return { start, end };
+    });
+    await requestInterview(token, interviewDialog.id, {
+      proposedSlots: slots,
+      type: interviewType,
+      companyTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    setRequirement((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        proposedMatches: prev.proposedMatches?.map((m) =>
+          m.id === interviewDialog.id
+            ? { ...m, status: "interview_requested" as const }
+            : m,
+        ),
+      };
+    });
+    setInterviewDialog(null);
+    setSelectedSlots(new Set());
+    setRequestingInterview(false);
   };
 
   if (loading) {
@@ -273,7 +325,55 @@ const ProposedMatchesClient = ({
                     </p>
 
                     {match.status === "accepted" && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Button
+                          size="sm"
+                          className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+                          disabled={respondingId === match.id}
+                          onClick={() => handleAccept(match)}
+                        >
+                          {respondingId === match.id ? (
+                            <Loader2 className="size-3.5 animate-spin" />
+                          ) : (
+                            <Check className="size-3.5" />
+                          )}
+                          Confirm Hire
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5"
+                          onClick={() => openInterviewDialog(match)}
+                        >
+                          <Video className="size-3.5" />
+                          Request Interview
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+                          disabled={respondingId === match.id}
+                          onClick={() => setRejectDialog(match)}
+                        >
+                          <X className="size-3.5" />
+                          Decline
+                        </Button>
+                      </div>
+                    )}
+
+                    {match.status === "interview_requested" && (
+                      <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-600/20">
+                        <Clock className="mr-1 size-3" />
+                        Awaiting Developer Response
+                      </Badge>
+                    )}
+
+                    {match.status === "interview_scheduled" && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className="bg-sky-500/10 text-sky-600 border-sky-600/20">
+                          <Calendar className="mr-1 size-3" />
+                          Interview Scheduled
+                        </Badge>
                         <Button
                           size="sm"
                           className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
@@ -446,6 +546,119 @@ const ProposedMatchesClient = ({
                 <Loader2 className="mr-2 size-4 animate-spin" />
               )}
               Reject
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={interviewDialog !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setInterviewDialog(null);
+            setSelectedSlots(new Set());
+                  }
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Request Interview</DialogTitle>
+            <DialogDescription>
+              Select time slots to propose to {interviewDialog?.developer.name}.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+                Interview Type
+              </p>
+              <div className="flex gap-2">
+                {(["video", "phone", "in_person"] as const).map((t) => (
+                  <Button
+                    key={t}
+                    size="sm"
+                    variant={interviewType === t ? "default" : "outline"}
+                    onClick={() => setInterviewType(t)}
+                    className="text-xs capitalize"
+                  >
+                    {t.replace("_", " ")}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+                Available Slots
+              </p>
+              {loadingSlots && (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                </div>
+              )}
+              {!loadingSlots && availableSlots?.availabilityNotSet && (
+                <p className="text-sm text-muted-foreground">
+                  This developer hasn&apos;t set their availability yet. You can still propose times manually.
+                </p>
+              )}
+              {!loadingSlots && availableSlots && !availableSlots.availabilityNotSet && (
+                <div className="max-h-60 space-y-1 overflow-y-auto">
+                  {availableSlots.slots.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No available slots found.</p>
+                  ) : (
+                    availableSlots.slots.slice(0, 30).map((slot) => (
+                      <button
+                        key={slot.start}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSlots((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(slot.start)) next.delete(slot.start);
+                            else next.add(slot.start);
+                            return next;
+                          });
+                        }}
+                        className={`w-full rounded-md border px-3 py-2 text-left text-xs transition-colors ${
+                          selectedSlots.has(slot.start)
+                            ? "border-pulse/40 bg-pulse/10 text-foreground"
+                            : "border-border hover:bg-muted/50"
+                        }`}
+                      >
+                        <span className="font-mono">
+                          {new Date(slot.start).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                          {" "}
+                          {new Date(slot.start).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+              {selectedSlots.size > 0 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {selectedSlots.size} slot{selectedSlots.size !== 1 ? "s" : ""} selected
+                </p>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setInterviewDialog(null);
+                setSelectedSlots(new Set());
+                          }}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={selectedSlots.size === 0 || requestingInterview}
+              onClick={handleRequestInterview}
+            >
+              {requestingInterview && <Loader2 className="mr-2 size-4 animate-spin" />}
+              Send Request
             </Button>
           </DialogFooter>
         </DialogContent>
