@@ -283,23 +283,16 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
       }
     }
 
-    // Auto-import profile photo
-    // _profilePhotoR2Url is already a public R2 URL → fetch directly
-    // LinkedIn CDN URLs need the backend proxy to bypass CORS
-    const r2PhotoUrl = profile._profilePhotoR2Url as string | undefined;
-    const linkedinPhotoUrl =
+    // Auto-import profile photo via backend proxy to avoid CORS issues
+    const photoUrl =
+      (profile._profilePhotoR2Url as string | undefined) ??
       (profile.profilePicHighQuality as string | undefined) ??
       (profile.profilePic as string | undefined) ??
       (profile.profilePicture as string | undefined);
-
-    const photoUrl = r2PhotoUrl || linkedinPhotoUrl;
     if (photoUrl && typeof photoUrl === "string" && photoUrl.startsWith("http")) {
       try {
-        // R2 URLs are already public; LinkedIn URLs must go through the proxy
-        const fetchUrl = r2PhotoUrl
-          ? r2PhotoUrl
-          : `${apiBaseUrl}/api/public/linkedin/image-proxy?url=${encodeURIComponent(photoUrl)}`;
-        const response = await fetch(fetchUrl);
+        const proxyUrl = `${apiBaseUrl}/api/public/linkedin/image-proxy?url=${encodeURIComponent(photoUrl)}`;
+        const response = await fetch(proxyUrl);
         if (response.ok) {
           const blob = await response.blob();
           const extension = blob.type === "image/png" ? ".png" : ".jpg";
