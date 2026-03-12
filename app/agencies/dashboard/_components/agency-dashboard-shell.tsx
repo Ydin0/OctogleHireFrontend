@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/card";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { NotificationsDropdown } from "@/app/companies/dashboard/_components/notifications-dropdown";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 
 const sidebarItems = [
   { href: "/agencies/dashboard", label: "Overview", icon: Layers },

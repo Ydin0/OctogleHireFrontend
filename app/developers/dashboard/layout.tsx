@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { DashboardShell } from "./_components/dashboard-shell";
+import { DeveloperSidebar } from "./_components/developer-sidebar";
+import { DeveloperHeader } from "./_components/developer-header";
 import { DeveloperProfileProvider } from "./_components/developer-profile-context";
 import { PendingDashboard } from "./_components/pending-dashboard";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
@@ -43,7 +44,7 @@ export default async function DeveloperDashboardLayout({
   const isApproved = applicationStatus?.approved ?? false;
 
   if (!isApproved) {
-    const user = await currentUser();
+    const clerkUser = await currentUser();
     const status = applicationStatus?.status ?? "hr_communication_round";
 
     // If offer_extended, fetch offers so developer can accept/decline
@@ -54,8 +55,8 @@ export default async function DeveloperDashboardLayout({
 
     return (
       <PendingDashboard
-        displayName={user?.firstName ?? user?.username ?? "Developer"}
-        avatarUrl={user?.imageUrl ?? null}
+        displayName={clerkUser?.firstName ?? clerkUser?.username ?? "Developer"}
+        avatarUrl={clerkUser?.imageUrl ?? null}
         status={status}
         timeline={applicationStatus?.timeline ?? buildDefaultTimeline()}
         offers={offers}
@@ -63,17 +64,36 @@ export default async function DeveloperDashboardLayout({
     );
   }
 
+  const clerkUser = await currentUser();
+  const user = {
+    fullName: clerkUser
+      ? [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+        null
+      : null,
+    imageUrl: clerkUser?.imageUrl ?? null,
+  };
+
   const profile = await fetchDeveloperProfile(token);
 
+  const content = (
+    <div className="min-h-screen bg-background">
+      <DeveloperSidebar user={user} />
+      <DeveloperHeader user={user} />
+      <main className="lg:ml-64">
+        <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 lg:py-8">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+
   if (!profile) {
-    return (
-      <DashboardShell token={token}>{children}</DashboardShell>
-    );
+    return content;
   }
 
   return (
     <DeveloperProfileProvider profile={profile}>
-      <DashboardShell token={token}>{children}</DashboardShell>
+      {content}
     </DeveloperProfileProvider>
   );
 }

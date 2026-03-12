@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { DashboardShell } from "./_components/dashboard-shell";
+import { CompanySidebar } from "./_components/company-sidebar";
+import { CompanyHeader } from "./_components/company-header";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
+import { fetchCompanyProfile } from "@/lib/api/companies";
 
 export const metadata: Metadata = {
   title: "Company Dashboard | OctogleHire",
@@ -31,5 +33,27 @@ export default async function CompanyDashboardLayout({
     redirect(destination);
   }
 
-  return <DashboardShell>{children}</DashboardShell>;
+  const clerkUser = await currentUser();
+  const user = {
+    fullName: clerkUser
+      ? [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
+        null
+      : null,
+    email: clerkUser?.emailAddresses?.[0]?.emailAddress ?? null,
+    imageUrl: clerkUser?.imageUrl ?? null,
+  };
+
+  const companyProfile = await fetchCompanyProfile(token);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <CompanySidebar user={user} companyProfile={companyProfile} />
+      <CompanyHeader user={user} companyProfile={companyProfile} />
+      <main className="lg:ml-64">
+        <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 lg:py-8">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
 }
