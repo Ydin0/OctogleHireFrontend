@@ -176,13 +176,14 @@ const RequirementsListClient = () => {
   );
 };
 
-function formatBudget(min?: number, max?: number): string | null {
+function formatBudget(min?: number, max?: number, budgetType?: string): string | null {
   if (min == null && max == null) return null;
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
-  if (min != null && max != null) return `${fmt(min)}–${fmt(max)}/hr`;
-  if (min != null) return `${fmt(min)}+/hr`;
-  return `up to ${fmt(max!)}/hr`;
+  const suffix = budgetType === "annual" ? "/yr" : budgetType === "monthly" ? "/mo" : "/hr";
+  if (min != null && max != null) return `${fmt(min)}–${fmt(max)}${suffix}`;
+  if (min != null) return `${fmt(min)}+${suffix}`;
+  return `up to ${fmt(max!)}${suffix}`;
 }
 
 function RequirementCard({ req }: { req: JobRequirement }) {
@@ -194,7 +195,7 @@ function RequirementCard({ req }: { req: JobRequirement }) {
   const toReviewMatches = matches.filter((m) => m.status === "accepted");
   const otherMatches = matches.filter((m) => m.status !== "accepted" && m.status !== "rejected");
   const avatarMatches = [...toReviewMatches, ...otherMatches];
-  const budget = formatBudget(req.budgetMin, req.budgetMax);
+  const budget = formatBudget(req.budgetMin, req.budgetMax, req.budgetType);
 
   return (
     <Link

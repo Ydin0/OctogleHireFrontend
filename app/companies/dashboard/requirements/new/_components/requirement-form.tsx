@@ -119,6 +119,7 @@ const RequirementForm = () => {
       engagementType: "full-time",
       timezonePreference: "any",
       priority: "medium",
+      budgetType: "hourly",
     },
   });
 
@@ -127,6 +128,10 @@ const RequirementForm = () => {
   const description = watch("description");
   const yearsMin = watch("experienceYearsMin");
   const yearsMax = watch("experienceYearsMax");
+  const budgetType = watch("budgetType");
+
+  const budgetLabel =
+    budgetType === "annual" ? "/yr" : budgetType === "monthly" ? "/mo" : "/hr";
 
   const derivedLevel =
     yearsMin != null && yearsMax != null && yearsMax >= yearsMin
@@ -204,6 +209,7 @@ const RequirementForm = () => {
         experienceYearsMax: data.experienceYearsMax,
         budgetMin: data.budgetMin ? Number(data.budgetMin) : undefined,
         budgetMax: data.budgetMax ? Number(data.budgetMax) : undefined,
+        budgetType: data.budgetType,
       });
       router.push("/companies/dashboard/requirements");
     } finally {
@@ -536,9 +542,27 @@ const RequirementForm = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="space-y-2">
-                <Label htmlFor="budgetMin">Budget Min ($/hr, optional)</Label>
+                <Label>Budget Type</Label>
+                <Select
+                  value={budgetType}
+                  onValueChange={(v) =>
+                    setValue("budgetType", v as "hourly" | "monthly" | "annual", { shouldValidate: true })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hourly">Hourly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="annual">Annual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="budgetMin">Budget Min ({budgetLabel}, optional)</Label>
                 <Input
                   id="budgetMin"
                   type="number"
@@ -548,7 +572,7 @@ const RequirementForm = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="budgetMax">Budget Max ($/hr, optional)</Label>
+                <Label htmlFor="budgetMax">Budget Max ({budgetLabel}, optional)</Label>
                 <Input
                   id="budgetMax"
                   type="number"

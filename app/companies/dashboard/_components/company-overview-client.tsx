@@ -9,8 +9,11 @@ import {
   ClipboardList,
   DollarSign,
   Download,
+  Mail,
+  Phone,
   Plus,
   Search,
+  Shield,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -27,7 +30,11 @@ import type {
   CompanyProfileSummary,
 } from "@/lib/api/companies";
 import { CountryFlags } from "@/lib/utils/country-flags";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -95,6 +102,7 @@ export function CompanyOverviewClient({
 }) {
   const [bannerDismissed, setBannerDismissed] = useState(true);
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
+  const [accountManagerOpen, setAccountManagerOpen] = useState(false);
 
   useEffect(() => {
     setBannerDismissed(localStorage.getItem(DISMISS_KEY) === "true");
@@ -249,6 +257,107 @@ export function CompanyOverviewClient({
           </Card>
         ))}
       </section>
+
+      {/* Account Manager */}
+      {profile?.accountManager && (
+        <>
+          <Card className="border-foreground/10">
+            <CardContent className="flex items-center justify-between gap-4 p-5">
+              <div className="flex items-center gap-4">
+                <Avatar className="size-12">
+                  {profile.accountManager.profilePhotoUrl && (
+                    <AvatarImage
+                      src={profile.accountManager.profilePhotoUrl}
+                      alt={profile.accountManager.name}
+                    />
+                  )}
+                  <AvatarFallback>
+                    {getInitials(profile.accountManager.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Your Account Manager
+                  </p>
+                  <p className="text-sm font-semibold">
+                    {profile.accountManager.name}
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => setAccountManagerOpen(true)}
+              >
+                <Shield className="size-3.5" />
+                View Details
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Dialog open={accountManagerOpen} onOpenChange={setAccountManagerOpen}>
+            <DialogContent className="sm:max-w-sm">
+              <DialogHeader>
+                <DialogTitle>Your Account Manager</DialogTitle>
+                <DialogDescription>
+                  Your dedicated point of contact at OctogleHire.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col items-center gap-4 py-4">
+                <Avatar className="size-20">
+                  {profile.accountManager.profilePhotoUrl && (
+                    <AvatarImage
+                      src={profile.accountManager.profilePhotoUrl}
+                      alt={profile.accountManager.name}
+                    />
+                  )}
+                  <AvatarFallback className="text-2xl">
+                    {getInitials(profile.accountManager.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-center">
+                  <p className="text-lg font-semibold">
+                    {profile.accountManager.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Account Manager
+                  </p>
+                </div>
+                <div className="w-full space-y-3 rounded-lg border p-4">
+                  <div className="flex items-center gap-3 text-sm">
+                    <Mail className="size-4 text-muted-foreground" />
+                    <a
+                      href={`mailto:${profile.accountManager.email}`}
+                      className="text-foreground hover:underline"
+                    >
+                      {profile.accountManager.email}
+                    </a>
+                  </div>
+                  {profile.accountManager.phone && (
+                    <div className="flex items-center gap-3 text-sm">
+                      <Phone className="size-4 text-muted-foreground" />
+                      <a
+                        href={`tel:${profile.accountManager.phone}`}
+                        className="text-foreground hover:underline"
+                      >
+                        {profile.accountManager.phone}
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setAccountManagerOpen(false)}
+              >
+                Close
+              </Button>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
 
       {/* Active Team */}
       {topActiveEngagements.length > 0 && (

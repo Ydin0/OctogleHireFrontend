@@ -14,6 +14,7 @@ import {
   Loader2,
   Mail,
   Phone,
+  Shield,
   TrendingUp,
   UserPlus,
   Users,
@@ -44,6 +45,7 @@ import {
   AvatarFallback,
   AvatarGroup,
   AvatarGroupCount,
+  AvatarImage,
 } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -86,13 +88,30 @@ const CompanyDetailPage = ({
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [activateOpen, setActivateOpen] = useState(false);
   const [activating, setActivating] = useState(false);
+  const [adminUsers, setAdminUsers] = useState<Array<{
+    clerkUserId: string;
+    email: string | null;
+    firstName: string | null;
+    lastName: string | null;
+    profilePhotoUrl: string | null;
+    phone: string | null;
+  }>>([]);
+  const [assigningManager, setAssigningManager] = useState(false);
+
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
   const load = useCallback(async () => {
     const token = await getToken();
-    const data = await fetchCompany(token, id);
+    const [data, teamRes] = await Promise.all([
+      fetchCompany(token, id),
+      fetch(`${apiBase}/api/admin/team`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then((r) => r.json()).then((d: { admins: typeof adminUsers }) => d.admins).catch(() => []),
+    ]);
     setCompany(data);
+    setAdminUsers(teamRes);
     setLoading(false);
-  }, [getToken, id]);
+  }, [getToken, id, apiBase]);
 
   useEffect(() => {
     load();
@@ -120,6 +139,28 @@ const CompanyDetailPage = ({
     setCompany({ ...company, invoiceCurrency: newCurrency });
     const token = await getToken();
     await updateCompanyCurrency(token, company.id, newCurrency);
+  };
+
+  const handleAssignManager = async (accountManagerId: string) => {
+    if (!company) return;
+    setAssigningManager(true);
+    try {
+      const token = await getToken();
+      await fetch(`${apiBase}/api/admin/companies/${company.id}/account-manager`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ accountManagerId: accountManagerId || null }),
+      });
+      // Reload to get updated account manager data
+      await load();
+    } catch {
+      // Assignment failed
+    } finally {
+      setAssigningManager(false);
+    }
   };
 
   const handleActivate = async () => {
@@ -526,7 +567,7 @@ const CompanyDetailPage = ({
                               </span>
                               {req.budgetMin && req.budgetMax ? (
                                 <span className="font-mono">
-                                  ${req.budgetMin}–${req.budgetMax}/hr
+                                  ${req.budgetMin}–${req.budgetMax}{req.budgetType === "annual" ? "/yr" : req.budgetType === "monthly" ? "/mo" : "/hr"}
                                 </span>
                               ) : (
                                 <span>Flexible budget</span>
@@ -558,6 +599,69 @@ const CompanyDetailPage = ({
 
         {/* Right column — 1/3 */}
         <div className="space-y-6">
+          {/* Account Manager */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Shield className="size-4" />
+                Account Manager
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {company.accountManager ? (
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    {company.accountManager.profilePhotoUrl && (
+                      <AvatarImage
+                        src={company.accountManager.profilePhotoUrl}
+                        alt={company.accountManager.name}
+                      />
+                    )}
+                    <AvatarFallback>
+                      {getInitials(company.accountManager.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">
+                      {company.accountManager.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {company.accountManager.email}
+                    </p>
+                    {company.accountManager.phone && (
+                      <p className="text-xs text-muted-foreground">
+                        {company.accountManager.phone}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No account manager assigned.
+                </p>
+              )}
+              <div className="mt-3">
+                <Select
+                  value={company.accountManagerId ?? "none"}
+                  onValueChange={(v) => handleAssignManager(v === "none" ? "" : v)}
+                  disabled={assigningManager}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Assign account manager..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Unassigned</SelectItem>
+                    {adminUsers.map((admin) => (
+                      <SelectItem key={admin.clerkUserId} value={admin.clerkUserId}>
+                        {[admin.firstName, admin.lastName].filter(Boolean).join(" ") || admin.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Team Members */}
           <Card>
             <CardHeader>

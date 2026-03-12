@@ -14,6 +14,8 @@ interface Admin {
   firstName: string | null;
   lastName: string | null;
   imageUrl: string | null;
+  phone: string | null;
+  profilePhotoUrl: string | null;
   createdAt: string;
 }
 

@@ -124,6 +124,7 @@ export interface JobRequirement {
   hiringCountries: string[];
   budgetMin?: number;
   budgetMax?: number;
+  budgetType?: "hourly" | "monthly" | "annual";
   description: string;
   startDate: string;
   priority: Priority;
@@ -214,6 +215,13 @@ export interface CompanyTimeEntryFull {
   createdAt: string;
 }
 
+export interface AccountManager {
+  name: string;
+  email: string;
+  phone: string | null;
+  profilePhotoUrl: string | null;
+}
+
 export interface CompanyProfileSummary {
   id: string;
   companyName: string;
@@ -227,6 +235,7 @@ export interface CompanyProfileSummary {
   logoUrl?: string | null;
   status: CompanyStatus;
   invoiceCurrency: string;
+  accountManager?: AccountManager | null;
   createdAt: string;
 }
 
@@ -242,6 +251,8 @@ export interface CompanyProfile {
   logoUrl?: string | null;
   status: CompanyStatus;
   invoiceCurrency: string;
+  accountManagerId?: string | null;
+  accountManager?: AccountManager | null;
   requirements: JobRequirement[];
   teamMembers: TeamMember[];
   createdAt: string;
@@ -259,6 +270,7 @@ export interface CreateJobRequirementPayload {
   hiringCountries: string[];
   budgetMin?: number;
   budgetMax?: number;
+  budgetType?: "hourly" | "monthly" | "annual";
   description: string;
   startDate: string;
   priority: Priority;
@@ -287,6 +299,7 @@ export interface ParsedJobData {
   hiringCountries: string[];
   budgetMin?: number;
   budgetMax?: number;
+  budgetType?: "hourly" | "monthly" | "annual";
   description: string;
   startDate?: string;
   priority: string;
@@ -918,6 +931,7 @@ export async function importDiscoveredJobs(
     hiringCountries?: string[];
     budgetMin?: number;
     budgetMax?: number;
+    budgetType?: "hourly" | "monthly" | "annual";
     description: string;
     startDate?: string;
     priority?: string;

@@ -466,7 +466,7 @@ const ProposedMatchesClient = ({
               </p>
               <p className="font-mono">
                 {requirement.budgetMin && requirement.budgetMax
-                  ? `$${requirement.budgetMin}–$${requirement.budgetMax}/hr`
+                  ? `$${requirement.budgetMin}–$${requirement.budgetMax}${requirement.budgetType === "annual" ? "/yr" : requirement.budgetType === "monthly" ? "/mo" : "/hr"}`
                   : "Flexible"}
               </p>
             </div>
