@@ -15,7 +15,6 @@ import {
   HandCoins,
   Clock,
   CircleDollarSign,
-  Video,
 } from "lucide-react";
 
 import { fetchApplication } from "@/lib/api/admin";
@@ -47,6 +46,7 @@ import { NotesSection } from "./_components/notes-section";
 import { FeaturedToggle } from "./_components/featured-toggle";
 import { MarketplaceProfileEditor } from "./_components/marketplace-profile-editor";
 import { EditProfileDialog } from "./_components/edit-profile-dialog";
+import { VideoIntroButton } from "./_components/video-intro-button";
 
 const getInitials = (name: string | null) => {
   if (!name) return "??";
@@ -288,6 +288,12 @@ export default async function ApplicantDetailPage({
             </div>
 
             <div className="flex items-end gap-3">
+              <VideoIntroButton
+                applicationId={applicant.id}
+                introVideoPath={applicant.introVideoPath}
+                applicantName={applicant.fullName ?? "Applicant"}
+                applicantEmail={applicant.email}
+              />
               <StatusChanger
                 applicationId={applicant.id}
                 currentStatus={applicant.status}
@@ -393,33 +399,6 @@ export default async function ApplicantDetailPage({
                   View Interview
                 </a>
               </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ── Video Introduction ──────────────────────────────────────── */}
-      {applicant.introVideoPath && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Video className="size-4" />
-              Video Introduction
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-hidden rounded-lg border border-border bg-black">
-              <video
-                src={applicant.introVideoPath}
-                controls
-                playsInline
-                className="aspect-video w-full"
-              />
-            </div>
-            {applicant.introVideoOriginalName && (
-              <p className="mt-2 text-xs text-muted-foreground">
-                {applicant.introVideoOriginalName}
-              </p>
             )}
           </CardContent>
         </Card>
