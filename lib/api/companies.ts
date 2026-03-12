@@ -96,6 +96,24 @@ export interface JobRequirement {
   updatedAt: string;
 }
 
+/** Normalise a requirement from the API so array/string fields are never null */
+function normalizeRequirement(r: JobRequirement): JobRequirement {
+  return {
+    ...r,
+    techStack: r.techStack ?? [],
+    hiringCountries: r.hiringCountries ?? [],
+    proposedMatches: (r.proposedMatches ?? []).map((m) => ({
+      ...m,
+      developer: m.developer
+        ? { ...m.developer, skills: m.developer.skills ?? [] }
+        : m.developer,
+    })),
+    engagementType: r.engagementType ?? ("" as EngagementType),
+    timezonePreference: r.timezonePreference ?? "",
+    description: r.description ?? "",
+  };
+}
+
 export interface CompanyEngagement {
   id: string;
   developerId: string;
@@ -494,7 +512,8 @@ export async function fetchCompanyRequirements(
     );
 
     if (!response.ok) throw new Error("API error");
-    return (await response.json()) as JobRequirement[];
+    const data = (await response.json()) as JobRequirement[];
+    return data.map(normalizeRequirement);
   } catch {
     return null;
   }
@@ -517,7 +536,7 @@ export async function fetchCompanyRequirement(
     );
 
     if (!response.ok) throw new Error("API error");
-    return (await response.json()) as JobRequirement;
+    return normalizeRequirement((await response.json()) as JobRequirement);
   } catch {
     return null;
   }
@@ -547,7 +566,7 @@ export async function createJobRequirement(
     throw new Error(body.message || "Failed to create requirement");
   }
 
-  return (await response.json()) as JobRequirement;
+  return normalizeRequirement((await response.json()) as JobRequirement);
 }
 
 export async function respondToMatch(
@@ -887,7 +906,8 @@ export async function importDiscoveredJobs(
     throw new Error(body.message || "Failed to import jobs");
   }
 
-  return (await response.json()) as JobRequirement[];
+  const data = (await response.json()) as JobRequirement[];
+  return data.map(normalizeRequirement);
 }
 
 // ── Admin-side API functions ─────────────────────────────────────────────────
@@ -931,7 +951,11 @@ export async function fetchCompany(
     );
 
     if (!response.ok) throw new Error("API error");
-    return (await response.json()) as CompanyProfile;
+    const data = (await response.json()) as CompanyProfile;
+    if (data.requirements) {
+      data.requirements = data.requirements.map(normalizeRequirement);
+    }
+    return data;
   } catch {
     return null;
   }
@@ -954,7 +978,7 @@ export async function fetchCompanyRequirementAdmin(
     );
 
     if (!response.ok) throw new Error("API error");
-    return (await response.json()) as JobRequirement;
+    return normalizeRequirement((await response.json()) as JobRequirement);
   } catch {
     return null;
   }
