@@ -60,7 +60,7 @@ const CurrentMatches = ({
 
                 {/* Skill badges */}
                 <div className="flex flex-wrap gap-1">
-                  {match.developer.skills.slice(0, 3).map((skill) => (
+                  {(match.developer.skills ?? []).slice(0, 3).map((skill) => (
                     <Badge
                       key={skill}
                       variant="secondary"
@@ -69,7 +69,7 @@ const CurrentMatches = ({
                       {skill}
                     </Badge>
                   ))}
-                  {match.developer.skills.length > 3 && (
+                  {(match.developer.skills ?? []).length > 3 && (
                     <Badge variant="secondary" className="text-xs">
                       +{match.developer.skills.length - 3}
                     </Badge>

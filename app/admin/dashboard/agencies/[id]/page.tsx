@@ -549,7 +549,7 @@ const AgencyDetailPage = ({
                         )}
                       </div>
                       <Badge variant="outline" className="shrink-0 text-[10px]">
-                        {c.status.replace(/_/g, " ")}
+                        {c.status?.replace(/_/g, " ") ?? "-"}
                       </Badge>
                     </Link>
                   ))}

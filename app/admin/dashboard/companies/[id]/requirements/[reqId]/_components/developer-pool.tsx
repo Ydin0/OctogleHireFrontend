@@ -102,7 +102,8 @@ function computeMatchScore(
   requirement: JobRequirement,
 ): { score: number; matchingSkills: string[] } {
   const reqSkillsLower = requirement.techStack.map((s) => s.toLowerCase());
-  const matchingSkills = dev.skills.filter((s) =>
+  const devSkills = dev.skills ?? [];
+  const matchingSkills = devSkills.filter((s) =>
     reqSkillsLower.includes(s.toLowerCase()),
   );
 
@@ -242,7 +243,7 @@ const DeveloperPool = ({
   const allSkills = useMemo(() => {
     const skillSet = new Set<string>();
     for (const dev of allDevs) {
-      for (const skill of dev.skills) skillSet.add(skill);
+      for (const skill of dev.skills ?? []) skillSet.add(skill);
     }
     return [...skillSet].sort();
   }, [allDevs]);
@@ -270,9 +271,9 @@ const DeveloperPool = ({
       const q = debouncedSearch.toLowerCase();
       result = result.filter(
         ({ dev }) =>
-          dev.name.toLowerCase().includes(q) ||
-          dev.role.toLowerCase().includes(q) ||
-          dev.skills.some((s) => s.toLowerCase().includes(q)),
+          (dev.name ?? "").toLowerCase().includes(q) ||
+          (dev.role ?? "").toLowerCase().includes(q) ||
+          dev.skills?.some((s) => s.toLowerCase().includes(q)),
       );
     }
 
@@ -280,7 +281,7 @@ const DeveloperPool = ({
       const filterSkillsLower = filters.skills.map((s) => s.toLowerCase());
       result = result.filter(({ dev }) =>
         filterSkillsLower.some((fs) =>
-          dev.skills.some((ds) => ds.toLowerCase() === fs),
+          (dev.skills ?? []).some((ds) => ds.toLowerCase() === fs),
         ),
       );
     }
@@ -304,7 +305,7 @@ const DeveloperPool = ({
     if (filters.location) {
       const loc = filters.location.toLowerCase();
       result = result.filter(({ dev }) =>
-        dev.location.toLowerCase().includes(loc),
+        (dev.location ?? "").toLowerCase().includes(loc),
       );
     }
 
@@ -700,7 +701,7 @@ const DeveloperPool = ({
                             </td>
                             <td className="px-3 py-2.5">
                               <div className="flex flex-wrap gap-1">
-                                {dev.skills.slice(0, 4).map((skill) => (
+                                {(dev.skills ?? []).slice(0, 4).map((skill) => (
                                   <Badge
                                     key={skill}
                                     variant={
@@ -717,7 +718,7 @@ const DeveloperPool = ({
                                     {skill}
                                   </Badge>
                                 ))}
-                                {dev.skills.length > 4 && (
+                                {(dev.skills ?? []).length > 4 && (
                                   <Badge
                                     variant="secondary"
                                     className="text-[11px] px-2 py-0.5"

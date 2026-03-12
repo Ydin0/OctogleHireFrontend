@@ -35,6 +35,7 @@ const labelMap = new Map<string, string>(
   TIMEZONE_OPTIONS.map((tz) => [tz.value, tz.label]),
 );
 
-export function getTimezoneLabel(value: string): string {
+export function getTimezoneLabel(value?: string | null): string {
+  if (!value) return "Any";
   return labelMap.get(value) ?? value.replace(/-/g, " ");
 }
