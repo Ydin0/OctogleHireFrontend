@@ -237,8 +237,8 @@ export function CompanyOverviewClient({
           <Card key={kpi.label} className={kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className={`flex size-8 items-center justify-center rounded-full ${kpi.highlight ? "bg-amber-500/15" : "bg-accent"}`}>
-                  <kpi.icon className={`size-4 ${kpi.highlight ? "text-amber-600" : "text-muted-foreground"}`} />
+                <div className={`flex size-8 items-center justify-center rounded-full ${kpi.highlight ? "bg-amber-500/15" : "bg-pulse/10"}`}>
+                  <kpi.icon className={`size-4 ${kpi.highlight ? "text-amber-600" : "text-pulse"}`} />
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{kpi.label}</p>

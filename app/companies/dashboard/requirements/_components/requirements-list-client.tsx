@@ -144,8 +144,8 @@ const RequirementsListClient = () => {
           <Card key={kpi.label} className={kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className={`flex size-8 items-center justify-center rounded-full ${kpi.highlight ? "bg-amber-500/15" : "bg-accent"}`}>
-                  <kpi.icon className={`size-4 ${kpi.highlight ? "text-amber-600" : "text-muted-foreground"}`} />
+                <div className={`flex size-8 items-center justify-center rounded-full ${kpi.highlight ? "bg-amber-500/15" : "bg-pulse/10"}`}>
+                  <kpi.icon className={`size-4 ${kpi.highlight ? "text-amber-600" : "text-pulse"}`} />
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{kpi.label}</p>
@@ -165,8 +165,8 @@ const RequirementsListClient = () => {
             onClick={() => setStatusFilter(f.value)}
             className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
               statusFilter === f.value
-                ? "border-foreground bg-foreground text-background"
-                : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                ? "border-pulse/40 bg-pulse/10 text-pulse"
+                : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
             }`}
           >
             {f.label} ({f.count})

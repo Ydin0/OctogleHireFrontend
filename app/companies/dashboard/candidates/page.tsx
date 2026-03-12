@@ -161,8 +161,8 @@ export default function CandidatesPage() {
             onClick={() => setStatusFilter(f.value)}
             className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
               statusFilter === f.value
-                ? "border-foreground bg-foreground text-background"
-                : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                ? "border-pulse/40 bg-pulse/10 text-pulse"
+                : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
             }`}
           >
             {f.label} ({f.count})

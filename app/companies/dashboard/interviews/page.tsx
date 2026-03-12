@@ -239,8 +239,8 @@ export default function InterviewsPage() {
           <Card key={kpi.label}>
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
-                <div className="flex size-8 items-center justify-center rounded-full bg-accent">
-                  <kpi.icon className="size-4 text-muted-foreground" />
+                <div className="flex size-8 items-center justify-center rounded-full bg-pulse/10">
+                  <kpi.icon className="size-4 text-pulse" />
                 </div>
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{kpi.label}</p>

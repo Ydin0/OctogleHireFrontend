@@ -423,8 +423,8 @@ function ProfileTab({ developer }: { developer: CompanyDeveloperProfile }) {
           <div className="space-y-4">
             {developer.awards.map((award, i) => (
               <div key={i} className="flex gap-3">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent">
-                  <Award className="size-5 text-muted-foreground" />
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-pulse/10">
+                  <Award className="size-5 text-pulse" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold">{award.title}</p>
@@ -445,8 +445,8 @@ function ProfileTab({ developer }: { developer: CompanyDeveloperProfile }) {
           <ul className="space-y-3">
             {developer.achievements.map((achievement) => (
               <li key={achievement} className="flex items-start gap-3">
-                <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent">
-                  <Trophy className="size-3.5 text-muted-foreground" />
+                <div className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-pulse/10">
+                  <Trophy className="size-3.5 text-pulse" />
                 </div>
                 <span className="text-sm text-muted-foreground">
                   {achievement}

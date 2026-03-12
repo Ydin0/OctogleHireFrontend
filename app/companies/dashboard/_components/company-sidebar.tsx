@@ -108,8 +108,8 @@ function CompanySidebarContent({ user, companyProfile }: CompanySidebarProps) {
             className="size-8 rounded-full object-cover"
           />
         ) : (
-          <div className="flex size-8 items-center justify-center rounded-full bg-accent">
-            <Building2 className="size-4 text-muted-foreground" />
+          <div className="flex size-8 items-center justify-center rounded-full bg-pulse/15">
+            <Building2 className="size-4 text-pulse" />
           </div>
         )}
         <p className="min-w-0 flex-1 truncate text-sm font-medium">{companyName}</p>
@@ -128,13 +128,13 @@ function CompanySidebarContent({ user, companyProfile }: CompanySidebarProps) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors ${
+                    className={`flex items-center gap-3 rounded-md border px-3 py-2 text-sm transition-colors ${
                       active
-                        ? "bg-accent font-medium text-foreground"
-                        : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                        ? "border-pulse/35 bg-pulse/10 font-medium text-foreground"
+                        : "border-transparent text-muted-foreground hover:border-pulse/25 hover:bg-pulse/5 hover:text-foreground"
                     }`}
                   >
-                    <item.icon className={`size-4 ${active ? "text-foreground" : "text-muted-foreground"}`} />
+                    <item.icon className="size-4 text-pulse" />
                     {item.label}
                   </Link>
                 );

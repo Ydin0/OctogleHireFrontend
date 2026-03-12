@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import {
   ArrowLeft,
+  Briefcase,
   Calendar,
   Check,
   ChevronDown,
@@ -14,6 +15,7 @@ import {
   Loader2,
   MapPin,
   Star,
+  Users,
   Video,
   X,
 } from "lucide-react";
@@ -45,13 +47,7 @@ import {
 import { CountryFlags } from "@/lib/utils/country-flags";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -60,6 +56,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { MarkdownDisplay } from "@/components/markdown-display";
 import { experienceLabel } from "@/lib/utils/experience";
@@ -107,7 +104,6 @@ const ProposedMatchesClient = ({
     setRespondingId(match.id);
     const token = await getToken();
     await respondToMatch(token, match.id, "accepted");
-    // Optimistic update — backend sets to "active" when company confirms
     const newStatus = match.status === "accepted" ? "active" : "accepted";
     setRequirement((prev) => {
       if (!prev) return prev;
@@ -213,9 +209,13 @@ const ProposedMatchesClient = ({
   }
 
   const matches = requirement.proposedMatches ?? [];
+  const activeMatches = matches.filter(
+    (m) => m.status !== "rejected" && m.status !== "declined" && m.status !== "ended",
+  );
 
   return (
     <>
+      {/* Page header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" className="size-8" asChild>
           <Link href="/companies/dashboard/requirements">
@@ -244,266 +244,146 @@ const ProposedMatchesClient = ({
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Matched Candidates</CardTitle>
-          <CardDescription>
-            {matches.length === 0
-              ? "No candidates available yet. Our team is reviewing and matching engineers."
-              : `${matches.length} interested engineer${matches.length !== 1 ? "s" : ""} ready for your review.`}
-          </CardDescription>
-        </CardHeader>
-        {matches.length > 0 && (
-          <CardContent className="space-y-4">
-            {matches.map((match) => (
-              <div
-                key={match.id}
-                className="rounded-lg border border-border/70 p-4"
-              >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex items-start gap-3">
-                    <Avatar>
-                      <AvatarImage
-                        src={match.developer.avatar}
-                        alt={match.developer.name}
-                      />
-                      <AvatarFallback>
-                        {getInitials(match.developer.name)}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="min-w-0 space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-semibold">
-                          {match.developer.name}
-                        </p>
-                        <Badge
-                          variant="outline"
-                          className={matchStatusBadgeClass(match.status)}
-                        >
-                          {matchStatusLabel[match.status]}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {match.developer.role}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="size-3" />
-                          {match.developer.location}
-                        </span>
-                        <span>{match.developer.yearsOfExperience} yrs exp</span>
-                        <span className="flex items-center gap-0.5">
-                          <Star className="size-3 fill-amber-400 text-amber-400" />
-                          {match.developer.rating}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {match.developer.skills.slice(0, 3).map((skill) => (
-                          <Badge
-                            key={skill}
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {skill}
-                          </Badge>
-                        ))}
-                        {match.developer.skills.length > 3 && (
-                          <Badge variant="secondary" className="text-xs">
-                            +{match.developer.skills.length - 3}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col items-end gap-2">
-                    <p className="font-mono text-sm font-semibold">
-                      ${match.proposedHourlyRate}/hr{" "}
-                      <span className="text-muted-foreground">|</span>{" "}
-                      ${match.proposedMonthlyRate.toLocaleString()}/mo
-                    </p>
-
-                    {match.status === "accepted" && (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Button
-                          size="sm"
-                          className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
-                          disabled={respondingId === match.id}
-                          onClick={() => handleAccept(match)}
-                        >
-                          {respondingId === match.id ? (
-                            <Loader2 className="size-3.5 animate-spin" />
-                          ) : (
-                            <Check className="size-3.5" />
-                          )}
-                          Confirm Hire
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5"
-                          onClick={() => openInterviewDialog(match)}
-                        >
-                          <Video className="size-3.5" />
-                          Request Interview
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
-                          disabled={respondingId === match.id}
-                          onClick={() => setRejectDialog(match)}
-                        >
-                          <X className="size-3.5" />
-                          Decline
-                        </Button>
-                      </div>
-                    )}
-
-                    {match.status === "interview_requested" && (
-                      <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-600/20">
-                        <Clock className="mr-1 size-3" />
-                        Awaiting Developer Response
-                      </Badge>
-                    )}
-
-                    {match.status === "interview_scheduled" && (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline" className="bg-sky-500/10 text-sky-600 border-sky-600/20">
-                          <Calendar className="mr-1 size-3" />
-                          Interview Scheduled
-                        </Badge>
-                        <Button
-                          size="sm"
-                          className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
-                          disabled={respondingId === match.id}
-                          onClick={() => handleAccept(match)}
-                        >
-                          {respondingId === match.id ? (
-                            <Loader2 className="size-3.5 animate-spin" />
-                          ) : (
-                            <Check className="size-3.5" />
-                          )}
-                          Confirm Hire
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
-                          disabled={respondingId === match.id}
-                          onClick={() => setRejectDialog(match)}
-                        >
-                          <X className="size-3.5" />
-                          Decline
-                        </Button>
-                      </div>
-                    )}
-
-                    {match.status === "rejected" && match.rejectionReason && (
-                      <p className="max-w-[240px] text-right text-xs text-muted-foreground">
-                        Reason: {match.rejectionReason}
-                      </p>
-                    )}
-
-                    <Link
-                      href={`/companies/dashboard/developers/${match.developerId}`}
-                      className="inline-flex items-center gap-1 text-xs text-pulse hover:underline"
-                    >
-                      View Profile
-                      <ExternalLink className="size-3" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        )}
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Requirement Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {requirement.techStack.map((tech) => (
-              <Badge key={tech} variant="secondary" className="text-xs">
-                {tech}
-              </Badge>
-            ))}
-            {requirement.hiringCountries?.length > 0 && (
-              <CountryFlags codes={requirement.hiringCountries} />
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Experience
-              </p>
-              <p>{experienceLabel(requirement.experienceYearsMin, requirement.experienceYearsMax, requirement.experienceLevel)}</p>
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_380px]">
+        {/* ─── Left column: Requirement details ─── */}
+        <div className="space-y-6">
+          {/* Matched candidates banner */}
+          <div className="flex items-center gap-3 rounded-lg border border-pulse/25 bg-pulse/5 p-4">
+            <div className="flex size-8 items-center justify-center rounded-full bg-pulse/10">
+              <Users className="size-4 text-pulse" />
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Engagement
+              <p className="text-sm font-medium">
+                {matches.length === 0
+                  ? "No candidates matched yet"
+                  : `${matches.length} matched candidate${matches.length !== 1 ? "s" : ""}`}
               </p>
-              <p className="capitalize">
-                {requirement.engagementType?.replace("-", " ") ?? "-"}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Timezone
-              </p>
-              <p>
-                {getTimezoneLabel(requirement.timezonePreference)}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Budget
-              </p>
-              <p className="font-mono">
-                {requirement.budgetMin && requirement.budgetMax
-                  ? `$${requirement.budgetMin}–$${requirement.budgetMax}${requirement.budgetType === "annual" ? "/yr" : requirement.budgetType === "monthly" ? "/mo" : "/hr"}`
-                  : "Flexible"}
+              <p className="text-xs text-muted-foreground">
+                {matches.length === 0
+                  ? "Our team is reviewing and matching engineers to this requirement."
+                  : `${activeMatches.length} active · ${matches.length - activeMatches.length} closed`}
               </p>
             </div>
           </div>
 
-          <div className="text-sm text-muted-foreground">
-            <div className={descriptionExpanded ? undefined : "line-clamp-3"}>
-              <MarkdownDisplay content={requirement.description} />
-            </div>
-            <button
-              type="button"
-              onClick={() => setDescriptionExpanded((prev) => !prev)}
-              className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-foreground hover:underline"
-            >
-              {descriptionExpanded ? (
-                <>
-                  Show less <ChevronUp className="size-3" />
-                </>
-              ) : (
-                <>
-                  Show full description <ChevronDown className="size-3" />
-                </>
+          {/* Requirement details */}
+          <section>
+            <h2 className="text-base font-semibold">Requirement Details</h2>
+            <Separator className="my-3" />
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              {requirement.techStack.map((tech) => (
+                <Badge key={tech} variant="secondary" className="text-xs">
+                  {tech}
+                </Badge>
+              ))}
+              {requirement.hiringCountries?.length > 0 && (
+                <CountryFlags codes={requirement.hiringCountries} />
               )}
-            </button>
-          </div>
-        </CardContent>
-      </Card>
+            </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Activity Timeline</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ActivityTimeline requirement={requirement} />
-        </CardContent>
-      </Card>
+            <div className="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Experience
+                </p>
+                <p>{experienceLabel(requirement.experienceYearsMin, requirement.experienceYearsMax, requirement.experienceLevel)}</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Engagement
+                </p>
+                <p className="capitalize">
+                  {requirement.engagementType?.replace("-", " ") ?? "-"}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Timezone
+                </p>
+                <p>
+                  {getTimezoneLabel(requirement.timezonePreference)}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Budget
+                </p>
+                <p className="font-mono">
+                  {requirement.budgetMin && requirement.budgetMax
+                    ? `$${requirement.budgetMin}–$${requirement.budgetMax}${requirement.budgetType === "annual" ? "/yr" : requirement.budgetType === "monthly" ? "/mo" : "/hr"}`
+                    : "Flexible"}
+                </p>
+              </div>
+            </div>
+          </section>
 
+          {/* Description */}
+          <section>
+            <div className="text-sm text-muted-foreground">
+              <div className={descriptionExpanded ? undefined : "line-clamp-4"}>
+                <MarkdownDisplay content={requirement.description} />
+              </div>
+              <button
+                type="button"
+                onClick={() => setDescriptionExpanded((prev) => !prev)}
+                className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-pulse hover:underline"
+              >
+                {descriptionExpanded ? (
+                  <>
+                    Show less <ChevronUp className="size-3" />
+                  </>
+                ) : (
+                  <>
+                    Show full description <ChevronDown className="size-3" />
+                  </>
+                )}
+              </button>
+            </div>
+          </section>
+
+          {/* Activity Timeline */}
+          <section>
+            <h2 className="text-base font-semibold">Activity Timeline</h2>
+            <Separator className="my-3" />
+            <ActivityTimeline requirement={requirement} />
+          </section>
+        </div>
+
+        {/* ─── Right column: Matched Candidates panel ─── */}
+        <div className="space-y-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Matched Candidates
+          </p>
+
+          {matches.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+                  <Users className="size-5 text-muted-foreground" />
+                </div>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  No candidates matched yet.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            matches.map((match) => (
+              <CandidateCard
+                key={match.id}
+                match={match}
+                respondingId={respondingId}
+                onAccept={handleAccept}
+                onReject={setRejectDialog}
+                onInterview={openInterviewDialog}
+              />
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Reject dialog */}
       <Dialog
         open={rejectDialog !== null}
         onOpenChange={(open) => {
@@ -551,13 +431,14 @@ const ProposedMatchesClient = ({
         </DialogContent>
       </Dialog>
 
+      {/* Interview dialog */}
       <Dialog
         open={interviewDialog !== null}
         onOpenChange={(open) => {
           if (!open) {
             setInterviewDialog(null);
             setSelectedSlots(new Set());
-                  }
+          }
         }}
       >
         <DialogContent className="max-w-lg">
@@ -649,7 +530,7 @@ const ProposedMatchesClient = ({
               onClick={() => {
                 setInterviewDialog(null);
                 setSelectedSlots(new Set());
-                          }}
+              }}
             >
               Cancel
             </Button>
@@ -666,5 +547,186 @@ const ProposedMatchesClient = ({
     </>
   );
 };
+
+/* ─── Candidate Card ────────────────────────────────────────────── */
+
+function CandidateCard({
+  match,
+  respondingId,
+  onAccept,
+  onReject,
+  onInterview,
+}: {
+  match: ProposedMatch;
+  respondingId: string | null;
+  onAccept: (match: ProposedMatch) => void;
+  onReject: (match: ProposedMatch) => void;
+  onInterview: (match: ProposedMatch) => void;
+}) {
+  const dev = match.developer;
+
+  return (
+    <Card className={match.status === "accepted" ? "border-pulse/30" : ""}>
+      <CardContent className="p-4 space-y-3">
+        {/* Developer info */}
+        <div className="flex items-start gap-3">
+          <div className="relative shrink-0">
+            <Avatar className="size-10">
+              <AvatarImage src={dev.avatar} alt={dev.name} />
+              <AvatarFallback className="text-xs">
+                {getInitials(dev.name)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-sm font-semibold">{dev.name}</p>
+              <Badge
+                variant="outline"
+                className={`shrink-0 text-[10px] ${matchStatusBadgeClass(match.status)}`}
+              >
+                {matchStatusLabel[match.status]}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">{dev.role}</p>
+          </div>
+        </div>
+
+        {/* Meta */}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          {dev.location && (
+            <span className="flex items-center gap-1">
+              <MapPin className="size-3" />
+              {dev.location}
+            </span>
+          )}
+          <span>{dev.yearsOfExperience} yrs exp</span>
+          {dev.rating > 0 && (
+            <span className="flex items-center gap-0.5">
+              <Star className="size-3 fill-amber-400 text-amber-400" />
+              {dev.rating}
+            </span>
+          )}
+        </div>
+
+        {/* Skills */}
+        <div className="flex flex-wrap gap-1">
+          {dev.skills.slice(0, 4).map((skill) => (
+            <Badge key={skill} variant="secondary" className="text-[10px] px-1.5 py-0">
+              {skill}
+            </Badge>
+          ))}
+          {dev.skills.length > 4 && (
+            <span className="text-[10px] text-muted-foreground">
+              +{dev.skills.length - 4}
+            </span>
+          )}
+        </div>
+
+        {/* Rate */}
+        <div className="font-mono text-sm">
+          ${match.proposedHourlyRate}/hr
+          <span className="text-muted-foreground"> | </span>
+          ${match.proposedMonthlyRate.toLocaleString()}/mo
+        </div>
+
+        <Separator />
+
+        {/* Actions */}
+        <div className="flex flex-wrap items-center gap-2">
+          {match.status === "accepted" && (
+            <>
+              <Button
+                size="sm"
+                className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+                disabled={respondingId === match.id}
+                onClick={() => onAccept(match)}
+              >
+                {respondingId === match.id ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Check className="size-3.5" />
+                )}
+                Confirm Hire
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5"
+                onClick={() => onInterview(match)}
+              >
+                <Video className="size-3.5" />
+                Interview
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+                disabled={respondingId === match.id}
+                onClick={() => onReject(match)}
+              >
+                <X className="size-3.5" />
+                Decline
+              </Button>
+            </>
+          )}
+
+          {match.status === "interview_requested" && (
+            <Badge variant="outline" className="bg-violet-500/10 text-violet-600 border-violet-600/20">
+              <Clock className="mr-1 size-3" />
+              Awaiting Developer Response
+            </Badge>
+          )}
+
+          {match.status === "interview_scheduled" && (
+            <>
+              <Badge variant="outline" className="bg-sky-500/10 text-sky-600 border-sky-600/20">
+                <Calendar className="mr-1 size-3" />
+                Interview Scheduled
+              </Badge>
+              <Button
+                size="sm"
+                className="gap-1.5 bg-emerald-600 text-white hover:bg-emerald-700"
+                disabled={respondingId === match.id}
+                onClick={() => onAccept(match)}
+              >
+                {respondingId === match.id ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Check className="size-3.5" />
+                )}
+                Confirm Hire
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-red-600 hover:bg-red-50 hover:text-red-700"
+                disabled={respondingId === match.id}
+                onClick={() => onReject(match)}
+              >
+                <X className="size-3.5" />
+                Decline
+              </Button>
+            </>
+          )}
+
+          {match.status === "rejected" && match.rejectionReason && (
+            <p className="text-xs text-muted-foreground">
+              Reason: {match.rejectionReason}
+            </p>
+          )}
+
+          <Link
+            href={`/companies/dashboard/developers/${match.developerId}`}
+            className="ml-auto inline-flex items-center gap-1 text-xs text-pulse hover:underline"
+          >
+            View Profile
+            <ExternalLink className="size-3" />
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export { ProposedMatchesClient };
