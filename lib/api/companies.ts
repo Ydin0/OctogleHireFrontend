@@ -978,7 +978,15 @@ export async function fetchCompanyRequirementAdmin(
     );
 
     if (!response.ok) throw new Error("API error");
-    return normalizeRequirement((await response.json()) as JobRequirement);
+    const data = await response.json();
+    // Admin endpoint wraps in { requirement: { ... } } and returns cents
+    const raw = data.requirement ?? data;
+    const req: JobRequirement = {
+      ...raw,
+      budgetMin: raw.budgetMin ?? (raw.budgetMinCents ? raw.budgetMinCents / 100 : undefined),
+      budgetMax: raw.budgetMax ?? (raw.budgetMaxCents ? raw.budgetMaxCents / 100 : undefined),
+    };
+    return normalizeRequirement(req);
   } catch {
     return null;
   }
