@@ -4,22 +4,20 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import {
-  ArrowRight,
   Bell,
   CheckCircle2,
+  ChevronRight,
   ClipboardList,
   Clock,
   Download,
   Loader2,
   Plus,
   Search,
-  UserCheck,
   Users,
 } from "lucide-react";
 
 import {
   type JobRequirement,
-  type ProposedMatch,
   fetchCompanyRequirements,
 } from "@/lib/api/companies";
 import {
@@ -29,23 +27,20 @@ import {
   requirementStatusBadgeClass,
   requirementStatusLabel,
 } from "@/app/admin/dashboard/_components/dashboard-data";
-import { CountryFlags } from "@/lib/utils/country-flags";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function countToReview(req: JobRequirement): number {
   return (req.proposedMatches ?? []).filter((m) => m.status === "accepted").length;
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }
 
 type StatusFilter = "all" | "open" | "closed" | "filled";
@@ -179,172 +174,116 @@ const RequirementsListClient = () => {
         ))}
       </div>
 
-      <div className="space-y-4">
-        {filteredRequirements.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <ClipboardList className="mx-auto mb-3 size-10 text-muted-foreground/50" />
-              <p className="text-sm text-muted-foreground">
-                {requirements.length === 0
-                  ? 'No requirements posted yet. Click "Post New Requirement" to get started.'
-                  : "No requirements match this filter."}
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredRequirements.map((req) => (
-            <RequirementCard key={req.id} req={req} />
-          ))
-        )}
-      </div>
+      {filteredRequirements.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <ClipboardList className="mx-auto mb-3 size-10 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              {requirements.length === 0
+                ? 'No requirements posted yet. Click "Post New Requirement" to get started.'
+                : "No requirements match this filter."}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Requirement</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Priority</TableHead>
+                  <TableHead className="text-center">Candidates</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Posted</TableHead>
+                  <TableHead className="w-8" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredRequirements.map((req) => {
+                  const matches = req.proposedMatches ?? [];
+                  const reviewCount = countToReview(req);
+                  const activeCount = matches.filter((m) => m.status === "active").length;
+
+                  return (
+                    <TableRow key={req.id} className="group">
+                      <TableCell>
+                        <Link
+                          href={`/companies/dashboard/requirements/${req.id}`}
+                          className="block space-y-1"
+                        >
+                          <p className="text-sm font-medium group-hover:underline">
+                            {req.title}
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {req.techStack.slice(0, 3).map((tech) => (
+                              <Badge key={tech} variant="secondary" className="text-[10px] font-normal px-1.5 py-0">
+                                {tech}
+                              </Badge>
+                            ))}
+                            {req.techStack.length > 3 && (
+                              <span className="text-[10px] text-muted-foreground">
+                                +{req.techStack.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        </Link>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={requirementStatusBadgeClass(req.status)}
+                        >
+                          {requirementStatusLabel[req.status]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={priorityBadgeClass(req.priority)}
+                        >
+                          {priorityLabel[req.priority]}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex flex-col items-center gap-0.5">
+                          <span className="text-sm font-medium">
+                            <Users className="mr-1 inline size-3 text-muted-foreground" />
+                            {activeCount}/{req.developersNeeded}
+                          </span>
+                          {reviewCount > 0 && (
+                            <span className="text-[10px] font-medium text-amber-600">
+                              {reviewCount} to review
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm capitalize text-muted-foreground">
+                          {req.engagementType?.replace("-", " ") ?? "-"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {formatDate(req.createdAt)}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Link href={`/companies/dashboard/requirements/${req.id}`}>
+                          <ChevronRight className="size-4 text-muted-foreground" />
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </>
   );
 };
-
-function formatBudget(min?: number, max?: number, budgetType?: string): string | null {
-  if (min == null && max == null) return null;
-  const fmt = (n: number) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
-  const suffix = budgetType === "annual" ? "/yr" : budgetType === "monthly" ? "/mo" : "/hr";
-  if (min != null && max != null) return `${fmt(min)}–${fmt(max)}${suffix}`;
-  if (min != null) return `${fmt(min)}+${suffix}`;
-  return `up to ${fmt(max!)}${suffix}`;
-}
-
-function RequirementCard({ req }: { req: JobRequirement }) {
-  const matches = req.proposedMatches ?? [];
-  const reviewCount = countToReview(req);
-  const activeCount = matches.filter((m) => m.status === "active").length;
-  const hasReviews = reviewCount > 0;
-
-  const toReviewMatches = matches.filter((m) => m.status === "accepted");
-  const otherMatches = matches.filter((m) => m.status !== "accepted" && m.status !== "rejected");
-  const avatarMatches = [...toReviewMatches, ...otherMatches];
-  const budget = formatBudget(req.budgetMin, req.budgetMax, req.budgetType);
-
-  return (
-    <Link
-      href={`/companies/dashboard/requirements/${req.id}`}
-      className="group block"
-    >
-      <Card className={`transition-all hover:border-foreground/15 hover:shadow-sm ${hasReviews ? "border-amber-500/35" : ""}`}>
-        <CardContent className="p-4 lg:p-5">
-          {/* Top row: title + badges + avatar stack */}
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-wrap items-start gap-x-3 gap-y-2 min-w-0">
-              <h3 className="text-base font-semibold tracking-tight">
-                {req.title}
-              </h3>
-              <div className="flex flex-wrap items-center gap-1.5">
-                <Badge
-                  variant="outline"
-                  className={requirementStatusBadgeClass(req.status)}
-                >
-                  {requirementStatusLabel[req.status]}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className={priorityBadgeClass(req.priority)}
-                >
-                  {priorityLabel[req.priority]}
-                </Badge>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-2.5">
-              {avatarMatches.length > 0 && <AvatarStack matches={avatarMatches} />}
-              <span className="whitespace-nowrap text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">{matches.length}</span>{" "}
-                match{matches.length !== 1 ? "es" : ""}
-              </span>
-            </div>
-          </div>
-
-          {/* Meta row */}
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-            <span>
-              {req.experienceYearsMin != null && req.experienceYearsMax != null
-                ? `${req.experienceYearsMin}–${req.experienceYearsMax} yrs exp`
-                : <span className="capitalize">{req.experienceLevel} level</span>}
-            </span>
-            <span className="text-border">|</span>
-            <span className="capitalize">{req.engagementType?.replace("-", " ") ?? "-"}</span>
-            <span className="text-border">|</span>
-            <span>Start {formatDate(req.startDate)}</span>
-            <span className="text-border">|</span>
-            <span className="flex items-center gap-1">
-              <Users className="size-3" />
-              {activeCount}/{req.developersNeeded} filled
-            </span>
-            {budget && (
-              <>
-                <span className="text-border">|</span>
-                <span className="font-mono">{budget}</span>
-              </>
-            )}
-          </div>
-
-          {/* Tech stack + flags */}
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {req.techStack.slice(0, 5).map((tech) => (
-              <Badge key={tech} variant="secondary" className="text-xs font-normal">
-                {tech}
-              </Badge>
-            ))}
-            {req.techStack.length > 5 && (
-              <Badge variant="secondary" className="text-xs font-normal">
-                +{req.techStack.length - 5}
-              </Badge>
-            )}
-            {req.hiringCountries?.length > 0 && (
-              <CountryFlags codes={req.hiringCountries} max={4} />
-            )}
-          </div>
-
-          {/* Review alert */}
-          {hasReviews && (
-            <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/8 px-3 py-1.5">
-              <UserCheck className="size-3.5 text-amber-600" />
-              <span className="text-xs font-medium text-amber-700">
-                {reviewCount} developer{reviewCount !== 1 ? "s" : ""} awaiting your review
-              </span>
-              <ArrowRight className="size-3 text-amber-600" />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </Link>
-  );
-}
-
-function AvatarStack({ matches }: { matches: ProposedMatch[] }) {
-  const visible = matches.slice(0, 4);
-  const remaining = matches.length - visible.length;
-
-  return (
-    <div className="flex -space-x-2">
-      {visible.map((m) => {
-        const dev = m.developer;
-        const isToReview = m.status === "accepted";
-
-        return (
-          <Avatar
-            key={m.id}
-            className={`size-9 border-2 border-background ${isToReview ? "ring-2 ring-amber-400" : ""}`}
-          >
-            <AvatarImage src={dev?.avatar} alt={dev?.name ?? ""} className="object-cover" />
-            <AvatarFallback className="text-[10px] font-medium">
-              {dev?.name ? getInitials(dev.name) : "?"}
-            </AvatarFallback>
-          </Avatar>
-        );
-      })}
-      {remaining > 0 && (
-        <div className="flex size-9 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground">
-          +{remaining}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export { RequirementsListClient };

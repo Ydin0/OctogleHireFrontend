@@ -12,6 +12,7 @@ import {
   Layers,
   LogOut,
   Settings,
+  UserSearch,
   UsersRound,
   Video,
 } from "lucide-react";
@@ -38,6 +39,7 @@ const navGroups = [
     label: "HIRING",
     items: [
       { href: "/companies/dashboard/requirements", label: "Requirements", icon: ClipboardList },
+      { href: "/companies/dashboard/candidates", label: "Candidates", icon: UserSearch },
       { href: "/companies/dashboard/interviews", label: "Interviews", icon: Video },
     ],
   },
