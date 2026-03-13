@@ -29,20 +29,45 @@ import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminCurrency } from "./admin-currency-context";
 
-const navItems = [
-  { href: "/admin/dashboard", label: "Overview", icon: Layers },
-  { href: "/admin/dashboard/applicants", label: "Applicants", icon: Users },
-  { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
-  { href: "/admin/dashboard/requirements", label: "Requirements", icon: Store },
-  { href: "/admin/dashboard/agencies", label: "Agencies", icon: Briefcase },
-  { href: "/admin/dashboard/interviews", label: "Interviews", icon: Video },
-  { href: "/admin/dashboard/agencies/pitches", label: "Agency Pitches", icon: Send },
-  { href: "/admin/dashboard/time-entries", label: "Timesheets", icon: Clock },
-  { href: "/admin/dashboard/change-requests", label: "Requests", icon: GitPullRequestArrow },
-  { href: "/admin/dashboard/invoices", label: "Invoices", icon: Receipt },
-  { href: "/admin/dashboard/payouts", label: "Payouts", icon: Wallet },
-  { href: "/admin/dashboard/team", label: "Team", icon: Shield },
-  { href: "/admin/dashboard/aeo", label: "AEO Monitoring", icon: Bot },
+const navGroups = [
+  {
+    label: "WORKSPACE",
+    items: [
+      { href: "/admin/dashboard", label: "Overview", icon: Layers },
+    ],
+  },
+  {
+    label: "PIPELINE",
+    items: [
+      { href: "/admin/dashboard/applicants", label: "Applicants", icon: Users },
+      { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
+      { href: "/admin/dashboard/requirements", label: "Requirements", icon: Store },
+      { href: "/admin/dashboard/interviews", label: "Interviews", icon: Video },
+    ],
+  },
+  {
+    label: "PARTNERS",
+    items: [
+      { href: "/admin/dashboard/agencies", label: "Agencies", icon: Briefcase },
+      { href: "/admin/dashboard/agencies/pitches", label: "Agency Pitches", icon: Send },
+    ],
+  },
+  {
+    label: "OPERATIONS",
+    items: [
+      { href: "/admin/dashboard/time-entries", label: "Timesheets", icon: Clock },
+      { href: "/admin/dashboard/change-requests", label: "Requests", icon: GitPullRequestArrow },
+      { href: "/admin/dashboard/invoices", label: "Invoices", icon: Receipt },
+      { href: "/admin/dashboard/payouts", label: "Payouts", icon: Wallet },
+    ],
+  },
+  {
+    label: "SETTINGS",
+    items: [
+      { href: "/admin/dashboard/team", label: "Team", icon: Shield },
+      { href: "/admin/dashboard/aeo", label: "AEO Monitoring", icon: Bot },
+    ],
+  },
 ] as const;
 
 const isItemActive = (pathname: string, href: string) => {
@@ -107,24 +132,33 @@ function SidebarContent({ user }: AdminSidebarProps) {
         </p>
       </Link>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map((item) => {
-          const active = isItemActive(pathname, item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors ${
-                active
-                  ? "border-pulse/35 bg-pulse/10 font-medium text-foreground"
-                  : "border-transparent text-muted-foreground hover:border-pulse/25 hover:bg-pulse/5 hover:text-foreground"
-              }`}
-            >
-              <item.icon className="size-4 text-pulse" />
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto px-3 py-2">
+        {navGroups.map((group, gi) => (
+          <div key={group.label}>
+            <p className={`px-3 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground ${gi === 0 ? "mt-2" : "mt-6"}`}>
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const active = isItemActive(pathname, item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-2.5 rounded-md border px-3 py-2 text-sm transition-colors ${
+                      active
+                        ? "border-pulse/35 bg-pulse/10 font-medium text-foreground"
+                        : "border-transparent text-muted-foreground hover:border-pulse/25 hover:bg-pulse/5 hover:text-foreground"
+                    }`}
+                  >
+                    <item.icon className="size-4 text-pulse" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="border-t border-border/70 px-4 py-4 space-y-3">

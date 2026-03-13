@@ -4,11 +4,18 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import type { AdminApplication, FilterOptions, Pagination } from "@/lib/api/admin";
+import { cn } from "@/lib/utils";
 import { DataTable } from "../../_components/data-table";
 import { getColumns } from "./columns";
 import { FiltersBar } from "./filters-bar";
 import { BulkActionsBar } from "./bulk-actions-bar";
 import { QuickNoteDialog } from "./quick-note-dialog";
+
+const TABS = [
+  { value: "in_progress", label: "In Progress" },
+  { value: "draft", label: "Draft" },
+  { value: "all", label: "All" },
+] as const;
 
 interface ApplicantsClientProps {
   applications: AdminApplication[];
@@ -31,6 +38,7 @@ function ApplicantsClient({
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [quickNoteApp, setQuickNoteApp] = useState<AdminApplication | null>(null);
 
+  const currentTab = searchParams.get("tab") ?? "in_progress";
   const currentSortBy = searchParams.get("sortBy") ?? "";
   const currentSortOrder = searchParams.get("sortOrder") ?? "";
 
@@ -71,6 +79,21 @@ function ApplicantsClient({
     enableSelection: true,
   });
 
+  const switchTab = (tab: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    // Reset page, status selection when switching tabs
+    params.delete("page");
+    params.delete("status");
+    if (tab === "in_progress") {
+      params.delete("tab"); // default, keep URL clean
+    } else {
+      params.set("tab", tab);
+    }
+    startTransition(() => {
+      router.push(`?${params.toString()}`);
+    });
+  };
+
   return (
     <>
       <div>
@@ -78,6 +101,29 @@ function ApplicantsClient({
         <p className="text-sm text-muted-foreground">
           Review and manage developer applications through the pipeline.
         </p>
+      </div>
+
+      <div className="flex gap-0 border-b border-border">
+        {TABS.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => switchTab(tab.value)}
+            className={cn(
+              "relative px-4 py-2.5 text-sm font-medium transition-colors",
+              currentTab === tab.value
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tab.label}
+            <span
+              className={cn(
+                "absolute bottom-0 left-0 h-0.5 w-full bg-foreground transition-all duration-300",
+                currentTab === tab.value ? "opacity-100" : "opacity-0",
+              )}
+            />
+          </button>
+        ))}
       </div>
 
       <FiltersBar filterOptions={filterOptions} token={token} />

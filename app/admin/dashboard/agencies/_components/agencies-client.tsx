@@ -17,8 +17,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -29,6 +27,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const statusBadge: Record<string, string> = {
   new: "border-blue-600/20 bg-blue-500/10 text-blue-700",
@@ -199,73 +205,69 @@ function AgenciesClient({ agencies, enquiries, token }: AgenciesClientProps) {
               </CardContent>
             </Card>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {agencies.length} agenc{agencies.length === 1 ? "y" : "ies"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border text-[10px] uppercase tracking-wider text-muted-foreground">
-                        <th className="pb-2 pr-4 text-left font-medium">Name</th>
-                        <th className="pb-2 pr-4 text-left font-medium">Contact</th>
-                        <th className="pb-2 pr-4 text-left font-medium">Referral Code</th>
-                        <th className="pb-2 pr-4 text-right font-medium">Rate</th>
-                        <th className="pb-2 pr-4 text-right font-medium">Status</th>
-                        <th className="pb-2 text-right font-medium">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {agencies.map((a) => (
-                        <tr key={a.id} className="group">
-                          <td className="py-3 pr-4">
-                            <Link
-                              href={`/admin/dashboard/agencies/${a.id}`}
-                              className="font-medium hover:underline"
-                            >
-                              {a.name}
+            <>
+              <p className="text-sm text-muted-foreground">
+                {agencies.length} agenc{agencies.length === 1 ? "y" : "ies"}
+              </p>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Referral Code</TableHead>
+                      <TableHead className="text-right">Rate</TableHead>
+                      <TableHead className="text-right">Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {agencies.map((a) => (
+                      <TableRow key={a.id}>
+                        <TableCell>
+                          <Link
+                            href={`/admin/dashboard/agencies/${a.id}`}
+                            className="font-medium hover:underline"
+                          >
+                            {a.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {a.contactName}
+                          <br />
+                          <span className="text-xs">{a.email}</span>
+                        </TableCell>
+                        <TableCell>
+                          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                            {a.referralCode}
+                          </code>
+                        </TableCell>
+                        <TableCell className="text-right font-mono">
+                          {a.commissionRate}%
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Badge
+                            variant="outline"
+                            className={statusBadge[a.status] ?? statusBadge.pending}
+                          >
+                            {a.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {a.status === "pending" && !a.clerkOrgId && (
+                            <Link href={`/admin/dashboard/agencies/${a.id}`}>
+                              <Button size="sm" variant="outline">
+                                Activate
+                              </Button>
                             </Link>
-                          </td>
-                          <td className="py-3 pr-4 text-muted-foreground">
-                            {a.contactName}
-                            <br />
-                            <span className="text-xs">{a.email}</span>
-                          </td>
-                          <td className="py-3 pr-4">
-                            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
-                              {a.referralCode}
-                            </code>
-                          </td>
-                          <td className="py-3 pr-4 text-right font-mono">
-                            {a.commissionRate}%
-                          </td>
-                          <td className="py-3 pr-4 text-right">
-                            <Badge
-                              variant="outline"
-                              className={statusBadge[a.status] ?? statusBadge.pending}
-                            >
-                              {a.status}
-                            </Badge>
-                          </td>
-                          <td className="py-3 text-right">
-                            {a.status === "pending" && !a.clerkOrgId && (
-                              <Link href={`/admin/dashboard/agencies/${a.id}`}>
-                                <Button size="sm" variant="outline">
-                                  Activate
-                                </Button>
-                              </Link>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </>
       )}
@@ -281,88 +283,84 @@ function AgenciesClient({ agencies, enquiries, token }: AgenciesClientProps) {
               </CardContent>
             </Card>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">
-                  {enquiries.length} registration{enquiries.length === 1 ? "" : "s"}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border text-[10px] uppercase tracking-wider text-muted-foreground">
-                        <th className="pb-2 pr-4 text-left font-medium">Agency</th>
-                        <th className="pb-2 pr-4 text-left font-medium">Contact</th>
-                        <th className="pb-2 pr-4 text-left font-medium">Team Size</th>
-                        <th className="pb-2 pr-4 text-left font-medium">Status</th>
-                        <th className="pb-2 text-right font-medium">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {enquiries.map((e) => (
-                        <tr key={e.id}>
-                          <td className="py-3 pr-4">
-                            <span className="font-medium">{e.agencyName}</span>
-                            {e.website && (
-                              <>
-                                <br />
-                                <a
-                                  href={e.website}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs text-muted-foreground hover:underline"
-                                >
-                                  {e.website}
-                                </a>
-                              </>
-                            )}
-                          </td>
-                          <td className="py-3 pr-4 text-muted-foreground">
-                            {e.contactName}
-                            <br />
-                            <span className="text-xs">{e.email}</span>
-                            <br />
-                            <span className="text-xs">{e.phone}</span>
-                          </td>
-                          <td className="py-3 pr-4 text-muted-foreground">
-                            {e.teamSize ?? "—"}
-                          </td>
-                          <td className="py-3 pr-4">
-                            <Badge
-                              variant="outline"
-                              className={statusBadge[e.status] ?? statusBadge.pending}
-                            >
-                              {e.status}
-                            </Badge>
-                          </td>
-                          <td className="py-3 text-right">
-                            {e.status === "new" && (
-                              <div className="flex items-center justify-end gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleReject(e.id)}
-                                >
-                                  Reject
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  disabled={converting === e.id}
-                                  onClick={() => handleConvert(e.id)}
-                                >
-                                  {converting === e.id ? "Converting..." : "Approve"}
-                                </Button>
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
+            <>
+              <p className="text-sm text-muted-foreground">
+                {enquiries.length} registration{enquiries.length === 1 ? "" : "s"}
+              </p>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Agency</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead>Team Size</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {enquiries.map((e) => (
+                      <TableRow key={e.id}>
+                        <TableCell>
+                          <span className="font-medium">{e.agencyName}</span>
+                          {e.website && (
+                            <>
+                              <br />
+                              <a
+                                href={e.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-muted-foreground hover:underline"
+                              >
+                                {e.website}
+                              </a>
+                            </>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {e.contactName}
+                          <br />
+                          <span className="text-xs">{e.email}</span>
+                          <br />
+                          <span className="text-xs">{e.phone}</span>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {e.teamSize ?? "—"}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={statusBadge[e.status] ?? statusBadge.pending}
+                          >
+                            {e.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {e.status === "new" && (
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleReject(e.id)}
+                              >
+                                Reject
+                              </Button>
+                              <Button
+                                size="sm"
+                                disabled={converting === e.id}
+                                onClick={() => handleConvert(e.id)}
+                              >
+                                {converting === e.id ? "Converting..." : "Approve"}
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </>
       )}

@@ -139,6 +139,65 @@ export interface FilterOptions {
   availabilities: string[];
 }
 
+export interface ScoringCategory {
+  name: string;
+  score: number;
+  maxScore: number;
+  notes: string;
+}
+
+export interface InterviewScoring {
+  categories: ScoringCategory[];
+  overallScore: number;
+  overallNotes: string;
+}
+
+export interface AdminInterview {
+  id: string;
+  matchId: string | null;
+  applicationId: string | null;
+  source: "pipeline" | "company_request";
+  companyId: string | null;
+  companyName: string | null;
+  developerId: string;
+  developerName: string;
+  developerEmail: string;
+  developerRole: string;
+  developerAvatar: string;
+  requirementTitle: string | null;
+  scheduledAt: string | null;
+  durationMinutes: number;
+  type: "video" | "phone" | "in_person";
+  meetingLink: string | null;
+  location: string | null;
+  status: string;
+  outcome: string | null;
+  proposedSlots: Array<{ start: string; end: string }> | null;
+  selectedSlot: string | null;
+  alternativeSlots: Array<{ start: string; end: string }> | null;
+  adminHostId: string | null;
+  adminHostName: string | null;
+  adminNotes: string | null;
+  companyNotes: string | null;
+  companyRating: number | null;
+  transcriptPath: string | null;
+  transcriptOriginalName: string | null;
+  transcriptUrl: string | null;
+  scoring: InterviewScoring | null;
+  createdAt: string;
+}
+
+export interface AdminTeamMember {
+  clerkUserId: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  imageUrl: string | null;
+  phone: string | null;
+  profilePhotoUrl: string | null;
+  createdAt: string;
+}
+
 export interface AdminStats {
   total: number;
   liveCount: number;
@@ -822,5 +881,55 @@ export async function reofferApplication(
   if (!response.ok) {
     const err = await response.json().catch(() => null);
     throw new Error(err?.message ?? "Failed to re-offer");
+  }
+}
+
+// ── Interviews ──────────────────────────────────────────────────────────────
+
+export async function fetchInterviews(
+  token: string | null,
+  params: { status?: string; source?: string } = {},
+): Promise<AdminInterview[]> {
+  if (!token) return [];
+
+  try {
+    const searchParams = new URLSearchParams();
+    if (params.status) searchParams.set("status", params.status);
+    if (params.source) searchParams.set("source", params.source);
+
+    const qs = searchParams.toString();
+    const url = `${apiBaseUrl}/api/admin/interviews${qs ? `?${qs}` : ""}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data as AdminInterview[];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchAdminTeam(
+  token: string | null,
+): Promise<AdminTeamMember[]> {
+  if (!token) return [];
+
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/admin/team`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.admins ?? [];
+  } catch {
+    return [];
   }
 }

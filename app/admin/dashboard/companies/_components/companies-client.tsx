@@ -7,6 +7,7 @@ import { Plus } from "lucide-react";
 import type { CompanyProfile } from "@/lib/api/companies";
 import { deleteCompany, createCompany, type CreateCompanyPayload } from "@/lib/api/companies";
 import type { Pagination } from "@/lib/api/admin";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,14 @@ import { DataTable } from "../../_components/data-table";
 import { getColumns } from "./columns";
 import { FiltersBar } from "./filters-bar";
 import { BulkActionsBar } from "./bulk-actions-bar";
+
+const TABS = [
+  { value: "active", label: "Active" },
+  { value: "enquiries", label: "Enquiries" },
+  { value: "all", label: "All" },
+] as const;
+
+const ENQUIRY_STATUSES = new Set(["enquired", "pending", "contacted"]);
 
 interface CompaniesClientProps {
   companies: CompanyProfile[];
@@ -54,6 +63,7 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
     location: "",
   });
 
+  const currentTab = searchParams.get("tab") ?? "active";
   const currentSearch = searchParams.get("search") ?? "";
   const currentStatus = searchParams.get("status") ?? "all";
   const currentReqStatus = searchParams.get("reqStatus") ?? "all";
@@ -81,6 +91,14 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
   // Client-side filtering
   const filteredCompanies = useMemo(() => {
     let result = companies;
+
+    // Tab filter
+    if (currentTab === "active") {
+      result = result.filter((c) => c.status === "active");
+    } else if (currentTab === "enquiries") {
+      result = result.filter((c) => ENQUIRY_STATUSES.has(c.status));
+    }
+    // "all" → no tab filter
 
     // Search
     if (currentSearch) {
@@ -135,6 +153,7 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
     return result;
   }, [
     companies,
+    currentTab,
     currentSearch,
     currentStatus,
     currentReqStatus,
@@ -261,6 +280,20 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
     },
   });
 
+  const switchTab = (tab: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("page");
+    params.delete("status");
+    if (tab === "active") {
+      params.delete("tab");
+    } else {
+      params.set("tab", tab);
+    }
+    startTransition(() => {
+      router.push(`?${params.toString()}`);
+    });
+  };
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -274,6 +307,29 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
           <Plus className="mr-1.5 size-3.5" />
           Add Company
         </Button>
+      </div>
+
+      <div className="flex gap-0 border-b border-border">
+        {TABS.map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => switchTab(tab.value)}
+            className={cn(
+              "relative px-4 py-2.5 text-sm font-medium transition-colors",
+              currentTab === tab.value
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tab.label}
+            <span
+              className={cn(
+                "absolute bottom-0 left-0 h-0.5 w-full bg-foreground transition-all duration-300",
+                currentTab === tab.value ? "opacity-100" : "opacity-0",
+              )}
+            />
+          </button>
+        ))}
       </div>
 
       <FiltersBar

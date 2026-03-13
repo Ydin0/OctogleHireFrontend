@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft,
   BotMessageSquare,
   Briefcase,
   Calendar,
@@ -40,6 +38,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "./_components/back-button";
 import { StatusChanger } from "./_components/status-changer";
 import { ActivateButton } from "./_components/activate-button";
 import { NotesSection } from "./_components/notes-section";
@@ -213,13 +212,7 @@ export default async function ApplicantDetailPage({
 
   return (
     <>
-      <Link
-        href="/admin/dashboard/applicants"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to Applicants
-      </Link>
+      <BackButton />
 
       {/* ── Header card ─────────────────────────────────────────────── */}
       <Card>
