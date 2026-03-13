@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Save, Plus, X } from "lucide-react";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,7 +111,7 @@ const MarketplaceProfileEditor = ({
     setSaved(false);
 
     try {
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/marketplace-profile`,
         {
           method: "PATCH",

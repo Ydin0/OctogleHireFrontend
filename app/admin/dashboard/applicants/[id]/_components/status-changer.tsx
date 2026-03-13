@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -95,7 +96,7 @@ function StatusChanger({
         const hourlyRateCents = Math.round(parseFloat(hourlyRate) * 100);
         const monthlyRateCents = Math.round((monthlyRate ?? 0) * 100);
 
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `${apiBaseUrl}/api/admin/applications/${applicationId}/offer`,
           {
             method: "POST",
@@ -122,7 +123,7 @@ function StatusChanger({
         }
       } else {
         // Regular status change
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `${apiBaseUrl}/api/admin/applications/${applicationId}/status`,
           {
             method: "PATCH",

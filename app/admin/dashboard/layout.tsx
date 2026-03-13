@@ -49,7 +49,7 @@ export default async function AdminDashboardLayout({
         <AdminSidebar user={user} />
         <AdminHeader user={user} />
         <main className="lg:ml-64">
-          <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 lg:py-8">
+          <div className="space-y-6 px-6 py-6 lg:py-8">
             {children}
           </div>
         </main>

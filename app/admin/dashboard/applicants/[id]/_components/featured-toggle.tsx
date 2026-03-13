@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -31,7 +32,7 @@ const FeaturedToggle = ({
     setIsLoading(true);
     setError(false);
     try {
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/featured`,
         {
           method: "PATCH",

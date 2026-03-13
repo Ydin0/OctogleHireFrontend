@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -95,7 +96,7 @@ function NotesSection({
     if (!content.trim()) return;
 
     try {
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/notes`,
         {
           method: "POST",
@@ -125,7 +126,7 @@ function NotesSection({
     if (!editContent.trim()) return;
 
     try {
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/notes/${noteId}`,
         {
           method: "PATCH",
@@ -151,7 +152,7 @@ function NotesSection({
 
   const handleDelete = async (noteId: string) => {
     try {
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/notes/${noteId}`,
         {
           method: "DELETE",

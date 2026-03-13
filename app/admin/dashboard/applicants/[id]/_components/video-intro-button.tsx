@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { Loader2, Mail, Video } from "lucide-react";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +38,7 @@ export function VideoIntroButton({
     setRequesting(true);
     try {
       const token = await getToken();
-      const res = await fetch(
+      const res = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/request-video`,
         {
           method: "POST",
@@ -66,13 +67,13 @@ export function VideoIntroButton({
         </Button>
 
         <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
-          <DialogContent className="max-w-4xl p-0 overflow-hidden">
-            <DialogHeader className="px-6 pt-6 pb-0">
+          <DialogContent className="sm:max-w-5xl p-0 overflow-hidden">
+            <DialogHeader className="px-6 pt-5 pb-0">
               <DialogTitle>
                 Video Introduction — {applicantName}
               </DialogTitle>
             </DialogHeader>
-            <div className="px-6 pb-6">
+            <div className="px-4 pb-4">
               <div className="overflow-hidden rounded-lg bg-black">
                 <video
                   src={introVideoPath}

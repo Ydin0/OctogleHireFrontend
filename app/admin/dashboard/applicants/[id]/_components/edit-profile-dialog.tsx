@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -105,7 +106,7 @@ function EditProfileDialog({
         certifications: certifications.trim(),
       };
 
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/profile`,
         {
           method: "PATCH",

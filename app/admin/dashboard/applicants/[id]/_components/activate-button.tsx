@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +44,7 @@ function ActivateButton({
       process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
     try {
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${applicationId}/activate`,
         {
           method: "POST",

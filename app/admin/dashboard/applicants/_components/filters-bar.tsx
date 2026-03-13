@@ -58,7 +58,7 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
   const [, startTransition] = useTransition();
 
   const currentSearch = searchParams.get("search") ?? "";
-  const currentStatus = searchParams.get("status") ?? "all";
+  const currentStatusParam = searchParams.get("status") ?? "";
   const currentIsLive = searchParams.get("isLive") ?? "all";
   const currentTitle = searchParams.get("professionalTitle") ?? "";
   const currentStack = searchParams.get("stack") ?? "";
@@ -73,6 +73,16 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [titleOpen, setTitleOpen] = useState(false);
   const [stackOpen, setStackOpen] = useState(false);
+  const [statusOpen, setStatusOpen] = useState(false);
+
+  // Multi-select helpers for status
+  const selectedStatuses = currentStatusParam ? currentStatusParam.split(",") : [];
+  const toggleStatus = (status: string) => {
+    const set = new Set(selectedStatuses);
+    if (set.has(status)) set.delete(status);
+    else set.add(status);
+    pushParams({ status: [...set].join(",") });
+  };
 
   const activeFilterCount = [
     currentTitle,
@@ -128,7 +138,7 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
 
     const exportParams = new URLSearchParams();
     if (currentSearch) exportParams.set("search", currentSearch);
-    if (currentStatus && currentStatus !== "all") exportParams.set("status", currentStatus);
+    if (currentStatusParam) exportParams.set("status", currentStatusParam);
     if (currentIsLive && currentIsLive !== "all") exportParams.set("isLive", currentIsLive);
     if (currentTitle) exportParams.set("professionalTitle", currentTitle);
     if (currentCategory && currentCategory !== "all") exportParams.set("professionalCategory", currentCategory);
@@ -200,22 +210,58 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
             className="pl-9"
           />
         </div>
-        <Select
-          value={currentStatus}
-          onValueChange={(v) => pushParams({ status: v })}
-        >
-          <SelectTrigger className="w-full sm:w-[200px]">
-            <SelectValue placeholder="Filter by status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
-            {ALL_STATUSES.map((status) => (
-              <SelectItem key={status} value={status}>
-                {applicationStatusLabel[status]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover open={statusOpen} onOpenChange={setStatusOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              className="w-full sm:w-[220px] justify-between font-normal"
+            >
+              <span className="truncate">
+                {selectedStatuses.length === 0
+                  ? "All Statuses"
+                  : selectedStatuses.length === 1
+                    ? applicationStatusLabel[selectedStatuses[0] as keyof typeof applicationStatusLabel] ?? selectedStatuses[0]
+                    : `${selectedStatuses.length} statuses`}
+              </span>
+              <ChevronDown className="ml-2 size-3.5 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[240px] p-0" align="start">
+            <Command>
+              <CommandInput placeholder="Search statuses..." />
+              <CommandList>
+                <CommandEmpty>No statuses found.</CommandEmpty>
+                <CommandGroup>
+                  {ALL_STATUSES.map((status) => (
+                    <CommandItem
+                      key={status}
+                      onSelect={() => toggleStatus(status)}
+                    >
+                      <Check className={`mr-2 size-3.5 ${selectedStatuses.includes(status) ? "opacity-100" : "opacity-0"}`} />
+                      {applicationStatusLabel[status]}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+              {selectedStatuses.length > 0 && (
+                <div className="border-t p-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-center text-xs"
+                    onClick={() => {
+                      pushParams({ status: "" });
+                      setStatusOpen(false);
+                    }}
+                  >
+                    Clear selection
+                  </Button>
+                </div>
+              )}
+            </Command>
+          </PopoverContent>
+        </Popover>
         <Select
           value={currentIsLive}
           onValueChange={(v) => pushParams({ isLive: v })}
