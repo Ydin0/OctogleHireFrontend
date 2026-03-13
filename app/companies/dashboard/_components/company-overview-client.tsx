@@ -252,17 +252,20 @@ export function CompanyOverviewClient({
       {profile?.accountManager && (
         <div className="flex items-center justify-between rounded-lg border px-4 py-2.5">
           <div className="flex items-center gap-3">
-            <Avatar className="size-8">
-              {profile.accountManager.profilePhotoUrl && (
-                <AvatarImage
-                  src={profile.accountManager.profilePhotoUrl}
-                  alt={profile.accountManager.name}
-                />
-              )}
-              <AvatarFallback className="text-[10px]">
-                {getInitials(profile.accountManager.name)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative shrink-0">
+              <Avatar className="size-8">
+                {profile.accountManager.profilePhotoUrl && (
+                  <AvatarImage
+                    src={profile.accountManager.profilePhotoUrl}
+                    alt={profile.accountManager.name}
+                  />
+                )}
+                <AvatarFallback className="text-[10px]">
+                  {getInitials(profile.accountManager.name)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background bg-emerald-500" />
+            </div>
             <div className="flex items-center gap-3 text-sm">
               <span className="font-medium">{profile.accountManager.name}</span>
               <span className="hidden text-muted-foreground sm:inline">&middot;</span>

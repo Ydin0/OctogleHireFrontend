@@ -60,11 +60,39 @@ function formatMessageTime(iso: string): string {
   });
 }
 
+function OnlineAvatar({
+  src,
+  alt,
+  fallback,
+  size = "size-10",
+  online = false,
+}: {
+  src?: string | null;
+  alt: string;
+  fallback: string;
+  size?: string;
+  online?: boolean;
+}) {
+  return (
+    <div className="relative shrink-0">
+      <Avatar className={size}>
+        {src && <AvatarImage src={src} alt={alt} />}
+        <AvatarFallback className="text-xs">{fallback}</AvatarFallback>
+      </Avatar>
+      {online && (
+        <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-background bg-emerald-500" />
+      )}
+    </div>
+  );
+}
+
 interface ChatWidgetProps {
   accountManagerId?: string;
   accountManagerName?: string;
   accountManagerAvatar?: string | null;
 }
+
+type View = "list" | "conversation" | "compose-am";
 
 export function ChatWidget({
   accountManagerId,
@@ -73,6 +101,7 @@ export function ChatWidget({
 }: ChatWidgetProps) {
   const { getToken } = useAuth();
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<View>("list");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] =
     useState<Conversation | null>(null);
@@ -108,7 +137,6 @@ export function ChatWidget({
     const data = await fetchMessages(token, activeConversation.id);
     setMessages(data);
     markConversationRead(token, activeConversation.id);
-    // Update unread count locally
     setConversations((prev) =>
       prev.map((c) =>
         c.id === activeConversation.id ? { ...c, unreadCount: 0 } : c,
@@ -142,7 +170,6 @@ export function ChatWidget({
   useEffect(() => {
     if (!open) {
       const interval = setInterval(loadConversations, 15000);
-      // Initial load on mount
       loadConversations();
       return () => clearInterval(interval);
     }
@@ -153,12 +180,30 @@ export function ChatWidget({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Focus textarea when conversation opens
+  // Focus textarea when entering a conversation or compose view
   useEffect(() => {
-    if (activeConversation) {
+    if (view === "conversation" || view === "compose-am") {
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
-  }, [activeConversation]);
+  }, [view]);
+
+  const openConversation = (convo: Conversation) => {
+    setActiveConversation(convo);
+    setView("conversation");
+  };
+
+  const openAmConversation = () => {
+    const existing = conversations.find(
+      (c) => c.participantId === accountManagerId,
+    );
+    if (existing) {
+      openConversation(existing);
+    } else {
+      setActiveConversation(null);
+      setMessages([]);
+      setView("compose-am");
+    }
+  };
 
   const handleSend = async () => {
     const text = draft.trim();
@@ -172,13 +217,13 @@ export function ChatWidget({
       if (msg) {
         setMessages((prev) => [...prev, msg]);
       }
-    } else if (accountManagerId) {
-      // Start new conversation with AM
+    } else if (view === "compose-am" && accountManagerId) {
       const result = await startConversation(token, accountManagerId, text);
       if (result) {
         setConversations((prev) => [result.conversation, ...prev]);
         setActiveConversation(result.conversation);
         setMessages([result.message]);
+        setView("conversation");
       }
     }
     setSending(false);
@@ -191,35 +236,37 @@ export function ChatWidget({
     }
   };
 
-  const openAmConversation = () => {
-    // Check if there's already an AM conversation
-    const existing = conversations.find(
-      (c) => c.participantId === accountManagerId,
-    );
-    if (existing) {
-      setActiveConversation(existing);
-    } else {
-      // Show compose view for AM
-      setActiveConversation(null);
-    }
-  };
-
   const handleClose = () => {
     setOpen(false);
     setActiveConversation(null);
     setMessages([]);
+    setView("list");
   };
 
   const handleBack = () => {
     setActiveConversation(null);
     setMessages([]);
     setDraft("");
+    setView("list");
   };
 
-  // Show the "new message to AM" compose view
-  const isComposing = !activeConversation && open && accountManagerId;
-  const showConvoList =
-    !activeConversation && open && !isComposing;
+  const headerTitle =
+    view === "conversation"
+      ? activeConversation?.participantName ?? "Conversation"
+      : view === "compose-am"
+        ? accountManagerName ?? "Account Manager"
+        : "Messages";
+
+  const showBackButton = view !== "list";
+
+  // Find AM conversation from the list (to show last message preview)
+  const amConversation = conversations.find(
+    (c) => c.participantId === accountManagerId,
+  );
+  // Other conversations (non-AM)
+  const otherConversations = conversations.filter(
+    (c) => c.participantId !== accountManagerId,
+  );
 
   return (
     <>
@@ -245,7 +292,7 @@ export function ChatWidget({
           {/* Header */}
           <div className="flex items-center justify-between border-b px-4 py-3">
             <div className="flex items-center gap-2">
-              {(activeConversation || isComposing) && (
+              {showBackButton && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -255,13 +302,16 @@ export function ChatWidget({
                   <ArrowLeft className="size-4" />
                 </Button>
               )}
-              <h3 className="text-sm font-semibold">
-                {activeConversation
-                  ? activeConversation.participantName
-                  : isComposing
-                    ? accountManagerName ?? "Account Manager"
-                    : "Messages"}
-              </h3>
+              {(view === "conversation" || view === "compose-am") && (
+                <OnlineAvatar
+                  src={activeConversation?.participantAvatar ?? accountManagerAvatar}
+                  alt={headerTitle}
+                  fallback={getInitials(headerTitle)}
+                  size="size-7"
+                  online
+                />
+              )}
+              <h3 className="text-sm font-semibold">{headerTitle}</h3>
             </div>
             <Button
               variant="ghost"
@@ -273,107 +323,113 @@ export function ChatWidget({
             </Button>
           </div>
 
-          {/* Conversation List View */}
-          {showConvoList && (
+          {/* ── List View ── */}
+          {view === "list" && (
             <div className="flex-1 overflow-y-auto">
-              {/* Quick action: Message AM */}
+              {/* Account Manager — always shown at top */}
               {accountManagerId && accountManagerName && (
                 <button
                   type="button"
                   onClick={openAmConversation}
                   className="flex w-full items-center gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted/50"
                 >
-                  <div className="relative">
-                    <Avatar className="size-10">
-                      {accountManagerAvatar && (
-                        <AvatarImage
-                          src={accountManagerAvatar}
-                          alt={accountManagerName}
-                        />
-                      )}
-                      <AvatarFallback className="text-xs">
-                        {getInitials(accountManagerName)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-background bg-emerald-500" />
-                  </div>
+                  <OnlineAvatar
+                    src={accountManagerAvatar}
+                    alt={accountManagerName}
+                    fallback={getInitials(accountManagerName)}
+                    online
+                  />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium">{accountManagerName}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Account Manager
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="truncate text-sm font-medium">
+                        {accountManagerName}
+                      </p>
+                      {amConversation?.lastMessage && (
+                        <span className="shrink-0 text-[10px] text-muted-foreground">
+                          {formatTime(amConversation.lastMessage.createdAt)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="truncate text-xs text-muted-foreground">
+                        {amConversation?.lastMessage?.body ?? "Account Manager"}
+                      </p>
+                      {amConversation && amConversation.unreadCount > 0 && (
+                        <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-pulse text-[10px] font-bold text-pulse-foreground">
+                          {amConversation.unreadCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <Send className="size-4 text-muted-foreground" />
                 </button>
               )}
 
-              {loading ? (
+              {loading && (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="size-5 animate-spin text-muted-foreground" />
                 </div>
-              ) : conversations.length === 0 ? (
+              )}
+
+              {/* Other conversations */}
+              {!loading &&
+                otherConversations.map((convo) => (
+                  <button
+                    key={convo.id}
+                    type="button"
+                    onClick={() => openConversation(convo)}
+                    className="flex w-full items-center gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted/50"
+                  >
+                    <Avatar className="size-10 shrink-0">
+                      {convo.participantAvatar && (
+                        <AvatarImage
+                          src={convo.participantAvatar}
+                          alt={convo.participantName}
+                        />
+                      )}
+                      <AvatarFallback className="text-xs">
+                        {getInitials(convo.participantName)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-sm font-medium">
+                          {convo.participantName}
+                        </p>
+                        {convo.lastMessage && (
+                          <span className="shrink-0 text-[10px] text-muted-foreground">
+                            {formatTime(convo.lastMessage.createdAt)}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="truncate text-xs text-muted-foreground">
+                          {convo.lastMessage?.body ?? "No messages yet"}
+                        </p>
+                        {convo.unreadCount > 0 && (
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-pulse text-[10px] font-bold text-pulse-foreground">
+                            {convo.unreadCount}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+
+              {/* Empty state — only when no AM and no conversations */}
+              {!loading && !accountManagerId && conversations.length === 0 && (
                 <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
                   <MessageCircle className="mb-3 size-8 text-muted-foreground/40" />
                   <p className="text-sm font-medium">No messages yet</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {accountManagerId
-                      ? "Send a message to your account manager to get started."
-                      : "Your conversations will appear here."}
+                    Your conversations will appear here.
                   </p>
                 </div>
-              ) : (
-                conversations
-                  .filter(
-                    (c) => c.participantId !== accountManagerId,
-                  )
-                  .map((convo) => (
-                    <button
-                      key={convo.id}
-                      type="button"
-                      onClick={() => setActiveConversation(convo)}
-                      className="flex w-full items-center gap-3 border-b px-4 py-3 text-left transition-colors hover:bg-muted/50"
-                    >
-                      <Avatar className="size-10 shrink-0">
-                        {convo.participantAvatar && (
-                          <AvatarImage
-                            src={convo.participantAvatar}
-                            alt={convo.participantName}
-                          />
-                        )}
-                        <AvatarFallback className="text-xs">
-                          {getInitials(convo.participantName)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-sm font-medium">
-                            {convo.participantName}
-                          </p>
-                          {convo.lastMessage && (
-                            <span className="shrink-0 text-[10px] text-muted-foreground">
-                              {formatTime(convo.lastMessage.createdAt)}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="truncate text-xs text-muted-foreground">
-                            {convo.lastMessage?.body ?? "No messages yet"}
-                          </p>
-                          {convo.unreadCount > 0 && (
-                            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-pulse text-[10px] font-bold text-pulse-foreground">
-                              {convo.unreadCount}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))
               )}
             </div>
           )}
 
-          {/* Messages View (active conversation or composing to AM) */}
-          {(activeConversation || isComposing) && (
+          {/* ── Messages View (active conversation or composing to AM) ── */}
+          {(view === "conversation" || view === "compose-am") && (
             <>
               <div className="flex-1 overflow-y-auto px-4 py-3">
                 {loadingMessages ? (
@@ -382,30 +438,22 @@ export function ChatWidget({
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Avatar className="mb-3 size-12">
-                      {(activeConversation?.participantAvatar ??
-                        accountManagerAvatar) && (
-                        <AvatarImage
-                          src={
-                            (activeConversation?.participantAvatar ??
-                              accountManagerAvatar)!
-                          }
-                          alt={
-                            activeConversation?.participantName ??
-                            accountManagerName ??
-                            ""
-                          }
-                        />
+                    <OnlineAvatar
+                      src={activeConversation?.participantAvatar ?? accountManagerAvatar}
+                      alt={
+                        activeConversation?.participantName ??
+                        accountManagerName ??
+                        ""
+                      }
+                      fallback={getInitials(
+                        activeConversation?.participantName ??
+                          accountManagerName ??
+                          "AM",
                       )}
-                      <AvatarFallback>
-                        {getInitials(
-                          activeConversation?.participantName ??
-                            accountManagerName ??
-                            "AM",
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
-                    <p className="text-sm font-medium">
+                      size="size-12"
+                      online
+                    />
+                    <p className="mt-3 text-sm font-medium">
                       {activeConversation?.participantName ??
                         accountManagerName}
                     </p>
