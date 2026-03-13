@@ -56,8 +56,10 @@ export interface TeamMember {
   id: string;
   name: string;
   email: string;
+  phone: string | null;
+  title: string | null;
   role: string;
-  avatar?: string;
+  avatar: string | null;
   joinedAt: string;
 }
 
@@ -711,7 +713,7 @@ export async function respondToMatch(
 
 export async function inviteCompanyTeamMember(
   token: string | null,
-  payload: { email: string; name: string; role: string },
+  payload: { email: string; name: string; role: string; phone?: string; title?: string },
 ): Promise<TeamMember> {
   if (!token) throw new Error("Not authenticated");
 
@@ -752,6 +754,63 @@ export async function removeCompanyTeamMember(
   );
 
   return response.ok;
+}
+
+export async function updateCompanyTeamMember(
+  token: string | null,
+  memberId: string,
+  payload: { name?: string; email?: string; phone?: string; title?: string; role?: string },
+): Promise<TeamMember> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/team/${memberId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to update team member");
+  }
+
+  return (await response.json()) as TeamMember;
+}
+
+export async function uploadTeamMemberAvatar(
+  token: string | null,
+  memberId: string,
+  file: File,
+): Promise<string> {
+  if (!token) throw new Error("Not authenticated");
+
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/team/${memberId}/avatar`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to upload avatar");
+  }
+
+  const data = (await response.json()) as { avatar: string };
+  return data.avatar;
 }
 
 // ── LinkedIn + Document Parsing API functions ────────────────────────────────
