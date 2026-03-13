@@ -7,7 +7,7 @@ import { CompanyHeader } from "./_components/company-header";
 import { ChatWidget } from "./_components/chat-widget";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
-import { fetchCompanyProfile } from "@/lib/api/companies";
+import { fetchCompanyProfile, fetchCompanyTeam } from "@/lib/api/companies";
 
 export const metadata: Metadata = {
   title: "Company Dashboard | OctogleHire",
@@ -35,16 +35,27 @@ export default async function CompanyDashboardLayout({
   }
 
   const clerkUser = await currentUser();
+  const [companyProfile, teamMembers] = await Promise.all([
+    fetchCompanyProfile(token),
+    fetchCompanyTeam(token),
+  ]);
+
+  const userEmail = clerkUser?.emailAddresses?.[0]?.emailAddress ?? null;
+  // Prefer team member avatar (uploaded via team page) over Clerk default
+  const teamMemberAvatar = userEmail
+    ? teamMembers?.find(
+        (m) => m.email.toLowerCase() === userEmail.toLowerCase(),
+      )?.avatar
+    : null;
+
   const user = {
     fullName: clerkUser
       ? [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
         null
       : null,
-    email: clerkUser?.emailAddresses?.[0]?.emailAddress ?? null,
-    imageUrl: clerkUser?.imageUrl ?? null,
+    email: userEmail,
+    imageUrl: teamMemberAvatar || clerkUser?.imageUrl || null,
   };
-
-  const companyProfile = await fetchCompanyProfile(token);
 
   return (
     <div className="min-h-screen bg-background">
