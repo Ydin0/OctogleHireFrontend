@@ -27,6 +27,7 @@ import {
   requirementStatusBadgeClass,
   requirementStatusLabel,
 } from "@/app/admin/dashboard/_components/dashboard-data";
+import { CountryFlags } from "@/lib/utils/country-flags";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -195,6 +196,8 @@ const RequirementsListClient = () => {
                   <TableHead>Status</TableHead>
                   <TableHead>Priority</TableHead>
                   <TableHead className="text-center">Candidates</TableHead>
+                  <TableHead>Budget</TableHead>
+                  <TableHead>Countries</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Posted</TableHead>
                   <TableHead className="w-8" />
@@ -258,6 +261,27 @@ const RequirementsListClient = () => {
                             </span>
                           )}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {req.budgetMin || req.budgetMax ? (
+                          <span className="font-mono text-sm text-muted-foreground">
+                            {req.budgetMin && req.budgetMax
+                              ? `$${req.budgetMin}–$${req.budgetMax}`
+                              : req.budgetMin
+                                ? `$${req.budgetMin}+`
+                                : `Up to $${req.budgetMax}`}
+                            <span className="text-[10px]">/{req.budgetType === "monthly" ? "mo" : req.budgetType === "annual" ? "yr" : "hr"}</span>
+                          </span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {req.hiringCountries?.length > 0 ? (
+                          <CountryFlags codes={req.hiringCountries} max={3} />
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <span className="text-sm capitalize text-muted-foreground">
