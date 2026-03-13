@@ -10,23 +10,14 @@ import {
   Clock,
   FileText,
   Layers,
-  LogOut,
   Settings,
   UserSearch,
   UsersRound,
   Video,
 } from "lucide-react";
-import { useClerk } from "@clerk/nextjs";
 
 import type { CompanyProfileSummary } from "@/lib/api/companies";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
 import { Logo } from "@/components/logo";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { NotificationsDropdown } from "@/components/notifications-dropdown";
 
 const navGroups = [
   {
@@ -74,19 +65,10 @@ interface CompanySidebarProps {
   companyProfile: CompanyProfileSummary | null;
 }
 
-function CompanySidebarContent({ user, companyProfile }: CompanySidebarProps) {
+function CompanySidebarContent({ companyProfile }: CompanySidebarProps) {
   const pathname = usePathname();
-  const { signOut } = useClerk();
 
   const companyName = companyProfile?.companyName ?? "Company";
-  const initials = user.fullName
-    ? user.fullName
-        .split(" ")
-        .map((p) => p[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
-    : "CO";
 
   return (
     <div className="flex h-full flex-col">
@@ -143,45 +125,6 @@ function CompanySidebarContent({ user, companyProfile }: CompanySidebarProps) {
           </div>
         ))}
       </nav>
-
-      {companyProfile?.accountManager && (
-        <div className="border-t border-border/70 px-4 py-3">
-          <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-            Account Manager
-          </p>
-          <p className="mt-1 truncate text-sm">{companyProfile.accountManager.name}</p>
-        </div>
-      )}
-
-      <div className="border-t border-border/70 px-4 py-4">
-        <div className="flex items-center gap-3">
-          <Avatar size="sm">
-            {user.imageUrl && (
-              <AvatarImage src={user.imageUrl} alt={user.fullName ?? ""} />
-            )}
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">
-              {user.fullName ?? "User"}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {user.email}
-            </p>
-          </div>
-          <div className="flex items-center gap-1">
-            <NotificationsDropdown />
-            <ThemeToggle />
-            <button
-              onClick={() => signOut({ redirectUrl: "/" })}
-              className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <LogOut className="size-4" />
-              <span className="sr-only">Sign out</span>
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

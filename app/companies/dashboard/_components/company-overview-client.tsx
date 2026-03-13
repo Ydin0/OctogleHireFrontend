@@ -9,8 +9,6 @@ import {
   ClipboardList,
   DollarSign,
   Download,
-  Mail,
-  Phone,
   Plus,
   Search,
   UserCheck,
@@ -247,49 +245,6 @@ export function CompanyOverviewClient({
           </Card>
         ))}
       </section>
-
-      {/* Account Manager — compact inline strip */}
-      {profile?.accountManager && (
-        <div className="flex items-center justify-between rounded-lg border px-4 py-2.5">
-          <div className="flex items-center gap-3">
-            <div className="relative shrink-0">
-              <Avatar className="size-8">
-                {profile.accountManager.profilePhotoUrl && (
-                  <AvatarImage
-                    src={profile.accountManager.profilePhotoUrl}
-                    alt={profile.accountManager.name}
-                  />
-                )}
-                <AvatarFallback className="text-[10px]">
-                  {getInitials(profile.accountManager.name)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background bg-emerald-500" />
-            </div>
-            <div className="flex items-center gap-3 text-sm">
-              <span className="font-medium">{profile.accountManager.name}</span>
-              <span className="hidden text-muted-foreground sm:inline">&middot;</span>
-              <span className="hidden text-muted-foreground sm:inline">Account Manager</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <a
-              href={`mailto:${profile.accountManager.email}`}
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              <Mail className="size-4" />
-            </a>
-            {profile.accountManager.phone && (
-              <a
-                href={`tel:${profile.accountManager.phone}`}
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                <Phone className="size-4" />
-              </a>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Active Team */}
       {topActiveEngagements.length > 0 && (
