@@ -212,6 +212,10 @@ export interface CompanyTimeEntryFull {
   description: string | null;
   status: string;
   approvedAt: string | null;
+  adminApproved: boolean;
+  adminApprovedAt: string | null;
+  companyApproved: boolean;
+  companyApprovedAt: string | null;
   createdAt: string;
 }
 
@@ -1435,6 +1439,9 @@ export interface CompanyInvoiceLineItem {
 export interface CompanyInvoice {
   id: string;
   invoiceNumber: string;
+  developerId: string | null;
+  developerName: string | null;
+  developerRole: string | null;
   periodStart: string;
   periodEnd: string;
   issuedAt: string | null;

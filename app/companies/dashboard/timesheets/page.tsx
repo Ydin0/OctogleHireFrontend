@@ -39,6 +39,16 @@ const statusBadgeVariant: Record<string, "default" | "secondary" | "destructive"
   rejected: "destructive",
 };
 
+function getApprovalLabel(entry: CompanyTimeEntryFull): { text: string; variant: "default" | "secondary" | "destructive" | "outline" } {
+  if (entry.status === "approved") return { text: "Approved", variant: "default" };
+  if (entry.status === "rejected") return { text: "Rejected", variant: "destructive" };
+  // status === "submitted" — show granular state
+  if (entry.adminApproved && entry.companyApproved) return { text: "Approved", variant: "default" };
+  if (entry.companyApproved) return { text: "Awaiting Admin", variant: "outline" };
+  if (entry.adminApproved) return { text: "Admin Approved", variant: "secondary" };
+  return { text: "Pending", variant: "outline" };
+}
+
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -86,7 +96,18 @@ export default function TimesheetsPage() {
       const token = await getToken();
       await approveCompanyTimeEntry(token, id);
       setEntries((prev) =>
-        prev.map((e) => (e.id === id ? { ...e, status: "approved", approvedAt: new Date().toISOString() } : e))
+        prev.map((e) => {
+          if (e.id !== id) return e;
+          const companyApproved = true;
+          const companyApprovedAt = new Date().toISOString();
+          const bothApproved = e.adminApproved && companyApproved;
+          return {
+            ...e,
+            companyApproved,
+            companyApprovedAt,
+            ...(bothApproved ? { status: "approved", approvedAt: companyApprovedAt } : {}),
+          };
+        })
       );
     } catch {
       // silently fail — the entry stays in its current state
@@ -254,12 +275,17 @@ export default function TimesheetsPage() {
                           {entry.hours}h
                         </TableCell>
                         <TableCell>
-                          <Badge variant={statusBadgeVariant[entry.status] ?? "outline"}>
-                            {entry.status}
-                          </Badge>
+                          {(() => {
+                            const label = getApprovalLabel(entry);
+                            return (
+                              <Badge variant={label.variant}>
+                                {label.text}
+                              </Badge>
+                            );
+                          })()}
                         </TableCell>
                         <TableCell className="text-right">
-                          {entry.status === "submitted" ? (
+                          {entry.status === "submitted" && !entry.companyApproved ? (
                             <div className="flex items-center justify-end gap-1.5">
                               <Button
                                 variant="outline"
@@ -284,9 +310,11 @@ export default function TimesheetsPage() {
                             </div>
                           ) : (
                             <span className="text-xs text-muted-foreground">
-                              {entry.status === "approved" && entry.approvedAt
-                                ? `Approved ${new Date(entry.approvedAt).toLocaleDateString()}`
-                                : "\u2014"}
+                              {entry.companyApproved && entry.companyApprovedAt
+                                ? `You approved ${new Date(entry.companyApprovedAt).toLocaleDateString()}`
+                                : entry.status === "approved" && entry.approvedAt
+                                  ? `Approved ${new Date(entry.approvedAt).toLocaleDateString()}`
+                                  : "\u2014"}
                             </span>
                           )}
                         </TableCell>

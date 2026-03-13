@@ -222,6 +222,14 @@ const InvoicesPage = () => {
                         <span className="font-mono text-sm font-medium">
                           {inv.invoiceNumber}
                         </span>
+                        <span className="text-sm font-medium">
+                          {inv.developerName ?? "Multiple Developers"}
+                        </span>
+                        {inv.developerRole && (
+                          <span className="text-xs text-muted-foreground">
+                            {inv.developerRole}
+                          </span>
+                        )}
                         <span className="text-sm text-muted-foreground">
                           {formatDate(inv.periodStart)} –{" "}
                           {formatDate(inv.periodEnd)}
