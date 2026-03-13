@@ -80,9 +80,12 @@ function currentMonthIndicator(engagement: CompanyEngagement) {
 interface EngagementRowProps {
   engagement: CompanyEngagement;
   token: string;
+  companyId?: string;
+  companyName?: string;
+  companyLogoUrl?: string | null;
 }
 
-function EngagementRow({ engagement, token }: EngagementRowProps) {
+function EngagementRow({ engagement, token, companyId, companyName, companyLogoUrl }: EngagementRowProps) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -148,7 +151,7 @@ function EngagementRow({ engagement, token }: EngagementRowProps) {
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="border-t">
-            <EngagementDetails engagement={engagement} token={token} />
+            <EngagementDetails engagement={engagement} token={token} companyId={companyId} companyName={companyName} companyLogoUrl={companyLogoUrl} />
           </div>
         </CollapsibleContent>
       </div>

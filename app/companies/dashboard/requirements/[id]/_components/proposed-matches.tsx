@@ -14,6 +14,7 @@ import {
   ExternalLink,
   Loader2,
   MapPin,
+  Pencil,
   Star,
   Users,
   Video,
@@ -23,10 +24,12 @@ import {
 import {
   type JobRequirement,
   type ProposedMatch,
+  type RequirementStatus,
   fetchCompanyRequirement,
   respondToMatch,
   fetchAvailableSlots,
   requestInterview,
+  updateRequirementStatus,
   type AvailableSlotsResponse,
 } from "@/lib/api/companies";
 import { getTimezoneLabel } from "@/lib/constants/timezones";
@@ -56,6 +59,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { MarkdownDisplay } from "@/components/markdown-display";
@@ -88,6 +98,7 @@ const ProposedMatchesClient = ({
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [interviewType, setInterviewType] = useState<"video" | "phone" | "in_person">("video");
   const [requestingInterview, setRequestingInterview] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const load = useCallback(async () => {
     const token = await getToken();
@@ -190,6 +201,20 @@ const ProposedMatchesClient = ({
     setRequestingInterview(false);
   };
 
+  const handleStatusChange = async (newStatus: RequirementStatus) => {
+    if (!requirement || newStatus === requirement.status) return;
+    setUpdatingStatus(true);
+    try {
+      const token = await getToken();
+      const updated = await updateRequirementStatus(token, requirementId, newStatus);
+      setRequirement(updated);
+    } catch {
+      // silently fail — status stays as-is
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -227,12 +252,6 @@ const ProposedMatchesClient = ({
             <h1 className="text-lg font-semibold">{requirement.title}</h1>
             <Badge
               variant="outline"
-              className={requirementStatusBadgeClass(requirement.status)}
-            >
-              {requirementStatusLabel[requirement.status]}
-            </Badge>
-            <Badge
-              variant="outline"
               className={priorityBadgeClass(requirement.priority)}
             >
               {priorityLabel[requirement.priority]}
@@ -241,6 +260,30 @@ const ProposedMatchesClient = ({
           <p className="text-xs text-muted-foreground">
             Posted {formatDate(requirement.createdAt)}
           </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Select
+            value={requirement.status}
+            onValueChange={(val) => handleStatusChange(val as RequirementStatus)}
+            disabled={updatingStatus}
+          >
+            <SelectTrigger className="h-8 w-[160px] text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(["open", "matching", "partially_filled", "filled", "closed"] as RequirementStatus[]).map((s) => (
+                <SelectItem key={s} value={s} className="text-xs">
+                  {requirementStatusLabel[s]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" className="gap-1.5" asChild>
+            <Link href={`/companies/dashboard/requirements/${requirementId}/edit`}>
+              <Pencil className="size-3.5" />
+              Edit
+            </Link>
+          </Button>
         </div>
       </div>
 

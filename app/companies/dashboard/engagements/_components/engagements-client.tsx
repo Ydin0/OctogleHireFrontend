@@ -9,6 +9,9 @@ import { EngagementRow } from "./engagement-row";
 interface EngagementsClientProps {
   engagements: CompanyEngagement[];
   token: string;
+  companyId?: string;
+  companyName?: string;
+  companyLogoUrl?: string | null;
 }
 
 const formatCurrency = (amount: number, currency = "USD") =>
@@ -27,7 +30,7 @@ function computeMonthlyBill(engagements: CompanyEngagement[]): number {
     }, 0);
 }
 
-function EngagementsClient({ engagements, token }: EngagementsClientProps) {
+function EngagementsClient({ engagements, token, companyId, companyName, companyLogoUrl }: EngagementsClientProps) {
   const activeEngagements = engagements.filter((e) => e.status === "active");
   const uniqueDevIds = new Set(activeEngagements.map((e) => e.developerId));
   const predictedBill = computeMonthlyBill(engagements);
@@ -86,7 +89,7 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
             </div>
           ) : (
             engagements.map((eng) => (
-              <EngagementRow key={eng.id} engagement={eng} token={token} />
+              <EngagementRow key={eng.id} engagement={eng} token={token} companyId={companyId} companyName={companyName} companyLogoUrl={companyLogoUrl} />
             ))
           )}
         </CardContent>

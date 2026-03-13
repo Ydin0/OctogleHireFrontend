@@ -76,9 +76,12 @@ const typeLabel: Record<string, string> = {
 interface EngagementDetailsProps {
   engagement: CompanyEngagement;
   token: string;
+  companyId?: string;
+  companyName?: string;
+  companyLogoUrl?: string | null;
 }
 
-function EngagementDetails({ engagement, token }: EngagementDetailsProps) {
+function EngagementDetails({ engagement, token, companyId, companyName, companyLogoUrl }: EngagementDetailsProps) {
   const [timeEntries, setTimeEntries] = useState<CompanyTimeEntry[] | null>(null);
   const [changeRequests, setChangeRequests] = useState<EngagementChangeRequest[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -88,7 +91,9 @@ function EngagementDetails({ engagement, token }: EngagementDetailsProps) {
   const [extensionDialogOpen, setExtensionDialogOpen] = useState(false);
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
 
-  const { reviews, addReview, hasReviewed } = useReviews(engagement.developerId);
+  const { reviews, addReview, updateReview, deleteReview, hasCompanyReviewed, getCompanyReview } = useReviews(engagement.developerId);
+  const existingCompanyReview = companyId ? getCompanyReview(companyId) : null;
+  const [editingReview, setEditingReview] = useState<import("@/lib/reviews/types").DeveloperReview | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -343,12 +348,28 @@ function EngagementDetails({ engagement, token }: EngagementDetailsProps) {
               <MessageSquarePlus className="size-3.5 text-muted-foreground" />
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Developer Review</p>
             </div>
-            {!hasReviewed(engagement.id) && (
+            {existingCompanyReview ? (
               <Button
                 variant="outline"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => setReviewDialogOpen(true)}
+                onClick={() => {
+                  setEditingReview(existingCompanyReview);
+                  setReviewDialogOpen(true);
+                }}
+              >
+                <MessageSquarePlus className="size-3.5" />
+                Edit Review
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => {
+                  setEditingReview(null);
+                  setReviewDialogOpen(true);
+                }}
               >
                 <MessageSquarePlus className="size-3.5" />
                 Leave Review
@@ -356,7 +377,15 @@ function EngagementDetails({ engagement, token }: EngagementDetailsProps) {
             )}
           </div>
           {reviews.length > 0 ? (
-            <DeveloperReviewsDisplay reviews={reviews} />
+            <DeveloperReviewsDisplay
+              reviews={reviews}
+              ownCompanyId={companyId}
+              onEdit={(review) => {
+                setEditingReview(review);
+                setReviewDialogOpen(true);
+              }}
+              onDelete={(reviewId) => deleteReview(reviewId)}
+            />
           ) : (
             <p className="text-sm text-muted-foreground">
               No reviews yet. Share your experience with this developer.
@@ -366,7 +395,16 @@ function EngagementDetails({ engagement, token }: EngagementDetailsProps) {
             open={reviewDialogOpen}
             onOpenChange={setReviewDialogOpen}
             developerName={engagement.developerName}
-            onSubmit={(data) => addReview({ ...data, engagementId: engagement.id })}
+            mode={editingReview ? "edit" : "create"}
+            initialValues={editingReview ? { rating: editingReview.rating, tags: editingReview.tags, text: editingReview.text } : undefined}
+            onSubmit={(data) => {
+              if (editingReview) {
+                updateReview(editingReview.id, data);
+              } else {
+                addReview({ ...data, engagementId: engagement.id, companyId, companyName, companyLogoUrl });
+              }
+              setEditingReview(null);
+            }}
           />
         </div>
       )}

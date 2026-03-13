@@ -23,11 +23,13 @@ import { TIMEZONE_OPTIONS } from "@/lib/constants/timezones";
 import { MARKETPLACE_TECH_STACK_OPTIONS } from "@/lib/data/developers";
 import {
   createJobRequirement,
+  updateJobRequirement,
   fetchLinkedInJobs,
   parseLinkedInJob,
   parseJobDocument,
   type LinkedInJob,
   type ParsedJobData,
+  type CreateJobRequirementPayload,
 } from "@/lib/api/companies";
 import { yearsToLevel } from "@/lib/utils/experience";
 import { TechStackSelector } from "@/app/apply/_components/tech-stack-selector";
@@ -87,10 +89,17 @@ function prefillForm(
     setValue("priority", parsed.priority as JobRequirementFormData["priority"], { shouldValidate: true });
 }
 
-const RequirementForm = () => {
+interface RequirementFormProps {
+  mode?: "create" | "edit";
+  requirementId?: string;
+  initialValues?: Partial<JobRequirementFormData>;
+}
+
+const RequirementForm = ({ mode = "create", requirementId, initialValues }: RequirementFormProps) => {
   const router = useRouter();
   const { getToken } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const isEdit = mode === "edit";
 
   // LinkedIn import state
   const [linkedinUrl, setLinkedinUrl] = useState("");
@@ -120,6 +129,7 @@ const RequirementForm = () => {
       timezonePreference: "any",
       priority: "medium",
       budgetType: "hourly",
+      ...initialValues,
     },
   });
 
@@ -129,6 +139,10 @@ const RequirementForm = () => {
   const yearsMin = watch("experienceYearsMin");
   const yearsMax = watch("experienceYearsMax");
   const budgetType = watch("budgetType");
+  const developersNeeded = watch("developersNeeded");
+  const engagementType = watch("engagementType");
+  const timezonePreference = watch("timezonePreference");
+  const priority = watch("priority");
 
   const budgetLabel =
     budgetType === "annual" ? "/yr" : budgetType === "monthly" ? "/mo" : "/hr";
@@ -202,7 +216,7 @@ const RequirementForm = () => {
         data.experienceYearsMin,
         data.experienceYearsMax,
       );
-      await createJobRequirement(token, {
+      const payload: CreateJobRequirementPayload = {
         ...data,
         experienceLevel: derivedExperienceLevel,
         experienceYearsMin: data.experienceYearsMin,
@@ -210,8 +224,14 @@ const RequirementForm = () => {
         budgetMin: data.budgetMin ? Number(data.budgetMin) : undefined,
         budgetMax: data.budgetMax ? Number(data.budgetMax) : undefined,
         budgetType: data.budgetType,
-      });
-      router.push("/companies/dashboard/requirements");
+      };
+      if (isEdit && requirementId) {
+        await updateJobRequirement(token, requirementId, payload);
+        router.push(`/companies/dashboard/requirements/${requirementId}`);
+      } else {
+        await createJobRequirement(token, payload);
+        router.push("/companies/dashboard/requirements");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -221,20 +241,20 @@ const RequirementForm = () => {
     <>
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" className="size-8" asChild>
-          <Link href="/companies/dashboard/requirements">
+          <Link href={isEdit && requirementId ? `/companies/dashboard/requirements/${requirementId}` : "/companies/dashboard/requirements"}>
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
         <div>
-          <h1 className="text-lg font-semibold">Post New Requirement</h1>
+          <h1 className="text-lg font-semibold">{isEdit ? "Edit Requirement" : "Post New Requirement"}</h1>
           <p className="text-sm text-muted-foreground">
-            Describe the role and we&apos;ll match you with engineers.
+            {isEdit ? "Update the details for this requirement." : "Describe the role and we\u2019ll match you with engineers."}
           </p>
         </div>
       </div>
 
       {/* ── Import Methods ─────────────────────────────────────────────── */}
-      <Card>
+      {!isEdit && <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Sparkles className="size-4" />
@@ -338,7 +358,7 @@ const RequirementForm = () => {
             )}
           </div>
         </CardContent>
-      </Card>
+      </Card>}
 
       {/* ── Manual Form ────────────────────────────────────────────────── */}
       <Card>
@@ -429,7 +449,7 @@ const RequirementForm = () => {
               <div className="space-y-2">
                 <Label htmlFor="developersNeeded">Number of Developers</Label>
                 <Select
-                  defaultValue="1"
+                  value={String(developersNeeded)}
                   onValueChange={(val) =>
                     setValue("developersNeeded", Number(val), {
                       shouldValidate: true,
@@ -452,7 +472,7 @@ const RequirementForm = () => {
               <div className="space-y-2">
                 <Label htmlFor="engagementType">Engagement Type</Label>
                 <Select
-                  defaultValue="full-time"
+                  value={engagementType}
                   onValueChange={(val) =>
                     setValue(
                       "engagementType",
@@ -478,7 +498,7 @@ const RequirementForm = () => {
               <div className="space-y-2">
                 <Label htmlFor="timezonePreference">Timezone Preference</Label>
                 <Select
-                  defaultValue="any"
+                  value={timezonePreference}
                   onValueChange={(val) =>
                     setValue(
                       "timezonePreference",
@@ -503,7 +523,7 @@ const RequirementForm = () => {
               <div className="space-y-2">
                 <Label htmlFor="priority">Priority</Label>
                 <Select
-                  defaultValue="medium"
+                  value={priority}
                   onValueChange={(val) =>
                     setValue(
                       "priority",
@@ -610,7 +630,7 @@ const RequirementForm = () => {
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <Button variant="outline" asChild>
-                <Link href="/companies/dashboard/requirements">Cancel</Link>
+                <Link href={isEdit && requirementId ? `/companies/dashboard/requirements/${requirementId}` : "/companies/dashboard/requirements"}>Cancel</Link>
               </Button>
               <Button
                 type="submit"
@@ -618,7 +638,7 @@ const RequirementForm = () => {
                 className="gap-2 bg-pulse text-pulse-foreground hover:bg-pulse/90"
               >
                 {submitting && <Loader2 className="size-4 animate-spin" />}
-                Submit Requirement
+                {isEdit ? "Save Changes" : "Submit Requirement"}
               </Button>
             </div>
           </form>

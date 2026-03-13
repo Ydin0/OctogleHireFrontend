@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 
 import { type ReviewTag, reviewTagLabels } from "@/lib/reviews/types";
@@ -30,6 +30,8 @@ interface ReviewDialogProps {
   onOpenChange: (open: boolean) => void;
   developerName: string;
   onSubmit: (data: { rating: number; tags: ReviewTag[]; text: string }) => void;
+  initialValues?: { rating: number; tags: ReviewTag[]; text: string };
+  mode?: "create" | "edit";
 }
 
 export function ReviewDialog({
@@ -37,11 +39,21 @@ export function ReviewDialog({
   onOpenChange,
   developerName,
   onSubmit,
+  initialValues,
+  mode = "create",
 }: ReviewDialogProps) {
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState(initialValues?.rating ?? 0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [selectedTags, setSelectedTags] = useState<ReviewTag[]>([]);
-  const [text, setText] = useState("");
+  const [selectedTags, setSelectedTags] = useState<ReviewTag[]>(initialValues?.tags ?? []);
+  const [text, setText] = useState(initialValues?.text ?? "");
+
+  useEffect(() => {
+    if (open && initialValues) {
+      setRating(initialValues.rating);
+      setSelectedTags(initialValues.tags);
+      setText(initialValues.text);
+    }
+  }, [open, initialValues]);
 
   const reset = () => {
     setRating(0);
@@ -73,9 +85,11 @@ export function ReviewDialog({
     >
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Review {developerName}</DialogTitle>
+          <DialogTitle>{mode === "edit" ? "Edit Review" : `Review ${developerName}`}</DialogTitle>
           <DialogDescription>
-            Share your experience working with this developer.
+            {mode === "edit"
+              ? "Update your review for this developer."
+              : "Share your experience working with this developer."}
           </DialogDescription>
         </DialogHeader>
 
@@ -145,7 +159,7 @@ export function ReviewDialog({
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={rating === 0}>
-            Submit Review
+            {mode === "edit" ? "Save Changes" : "Submit Review"}
           </Button>
         </DialogFooter>
       </DialogContent>

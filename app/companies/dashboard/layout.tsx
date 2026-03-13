@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { CompanySidebar } from "./_components/company-sidebar";
 import { CompanyHeader } from "./_components/company-header";
+import { ChatWidget } from "./_components/chat-widget";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 import { fetchCompanyProfile } from "@/lib/api/companies";
@@ -54,6 +55,11 @@ export default async function CompanyDashboardLayout({
           {children}
         </div>
       </main>
+      <ChatWidget
+        accountManagerId={companyProfile?.accountManagerId ?? undefined}
+        accountManagerName={companyProfile?.accountManager?.name}
+        accountManagerAvatar={companyProfile?.accountManager?.profilePhotoUrl}
+      />
     </div>
   );
 }

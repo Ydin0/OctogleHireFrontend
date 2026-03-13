@@ -19,6 +19,9 @@ export interface DeveloperReview {
   id: string;
   developerId: string;
   engagementId?: string;
+  companyId?: string;
+  companyName?: string;
+  companyLogoUrl?: string | null;
   rating: number;
   tags: ReviewTag[];
   text: string;

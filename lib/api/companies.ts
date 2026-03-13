@@ -235,6 +235,7 @@ export interface CompanyProfileSummary {
   logoUrl?: string | null;
   status: CompanyStatus;
   invoiceCurrency: string;
+  accountManagerId?: string | null;
   accountManager?: AccountManager | null;
   createdAt: string;
 }
@@ -614,6 +615,62 @@ export async function createJobRequirement(
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new Error(body.message || "Failed to create requirement");
+  }
+
+  return normalizeRequirement((await response.json()) as JobRequirement);
+}
+
+export async function updateJobRequirement(
+  token: string | null,
+  requirementId: string,
+  payload: Partial<CreateJobRequirementPayload>,
+): Promise<JobRequirement> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/requirements/${requirementId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to update requirement");
+  }
+
+  return normalizeRequirement((await response.json()) as JobRequirement);
+}
+
+export async function updateRequirementStatus(
+  token: string | null,
+  requirementId: string,
+  status: RequirementStatus,
+): Promise<JobRequirement> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/companies/requirements/${requirementId}/status`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to update requirement status");
   }
 
   return normalizeRequirement((await response.json()) as JobRequirement);

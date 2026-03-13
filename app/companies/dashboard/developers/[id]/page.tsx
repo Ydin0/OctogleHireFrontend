@@ -17,9 +17,11 @@ import {
 import {
   fetchCompanyDeveloperProfile,
   fetchCompanyTimeEntries,
+  fetchCompanyProfile,
   type CompanyDeveloperProfile,
   type CompanyDeveloperMatch,
   type CompanyTimeEntryFull,
+  type CompanyProfileSummary,
 } from "@/lib/api/companies";
 import {
   matchStatusBadgeClass,
@@ -67,9 +69,10 @@ export default async function CompanyDeveloperProfilePage({
   const { id } = await params;
   const { getToken } = await auth();
   const token = await getToken();
-  const [developer, allTimeEntries] = await Promise.all([
+  const [developer, allTimeEntries, companyProfile] = await Promise.all([
     fetchCompanyDeveloperProfile(token, id),
     fetchCompanyTimeEntries(token),
+    fetchCompanyProfile(token),
   ]);
 
   if (!developer) return notFound();
@@ -124,7 +127,7 @@ export default async function CompanyDeveloperProfilePage({
             </TabsList>
 
             <TabsContent value="profile" className="mt-6 space-y-8">
-              <ProfileTab developer={developer} />
+              <ProfileTab developer={developer} companyProfile={companyProfile} />
             </TabsContent>
 
             {timeEntries.length > 0 && (
@@ -304,7 +307,7 @@ function InfoRow({
 
 /* ─── Profile Tab ───────────────────────────────────────────────── */
 
-function ProfileTab({ developer }: { developer: CompanyDeveloperProfile }) {
+function ProfileTab({ developer, companyProfile }: { developer: CompanyDeveloperProfile; companyProfile: CompanyProfileSummary | null }) {
   return (
     <>
       {/* Intro / About */}
@@ -499,6 +502,9 @@ function ProfileTab({ developer }: { developer: CompanyDeveloperProfile }) {
         <DeveloperReviewSection
           developerId={developer.id}
           developerName={developer.name}
+          companyId={companyProfile?.id}
+          companyName={companyProfile?.companyName}
+          companyLogoUrl={companyProfile?.logoUrl}
         />
       </section>
     </>
