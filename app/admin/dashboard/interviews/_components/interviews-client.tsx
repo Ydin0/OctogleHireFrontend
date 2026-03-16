@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 import type {
   AdminInterview,
   AdminTeamMember,
@@ -198,7 +199,7 @@ function InterviewsClient({ interviews, team, token }: InterviewsClientProps) {
     setSaving(true);
 
     try {
-      await fetch(`${apiBaseUrl}/api/admin/interviews/${selected.id}`, {
+      await fetchWithRetry(`${apiBaseUrl}/api/admin/interviews/${selected.id}`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -234,7 +235,7 @@ function InterviewsClient({ interviews, team, token }: InterviewsClientProps) {
       const formData = new FormData();
       formData.append("transcript", file);
 
-      const res = await fetch(
+      const res = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/interviews/${selected.id}/transcript`,
         {
           method: "POST",

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -33,7 +34,7 @@ function QuickNoteDialog({ application, token, onClose }: QuickNoteDialogProps) 
       process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
     try {
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${apiBaseUrl}/api/admin/applications/${application.id}/notes`,
         {
           method: "POST",

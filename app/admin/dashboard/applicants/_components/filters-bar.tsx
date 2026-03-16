@@ -11,6 +11,7 @@ import {
   Check,
 } from "lucide-react";
 
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -153,7 +154,7 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
     const url = `${apiBaseUrl}/api/admin/applications/export${qs ? `?${qs}` : ""}`;
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithRetry(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) return;
