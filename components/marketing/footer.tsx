@@ -47,6 +47,7 @@ const sections = [
     title: "Company",
     links: [
       { name: "About", href: "/about" },
+      { name: "Team", href: "/about#team" },
       { name: "How We Vet", href: "/how-we-vet" },
       { name: "Blog", href: "/blog" },
       { name: "Contact", href: "mailto:hello@octoglehire.com" },

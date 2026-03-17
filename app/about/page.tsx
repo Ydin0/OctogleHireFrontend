@@ -18,10 +18,48 @@ export const metadata: Metadata = {
 const stats = [
   { value: "1,000+", label: "Engineers Vetted" },
   { value: "300+", label: "Companies Served" },
-  { value: "150+", label: "Countries Covered" },
+  { value: "30+", label: "Countries Covered" },
   { value: "1 in 25", label: "Acceptance Rate" },
   { value: "48h", label: "Average Match Time" },
   { value: "94%", label: "6-Month Retention" },
+];
+
+const team = [
+  {
+    name: "Yaseen Deen",
+    role: "Co-Founder",
+    image: "/Yaseen Founder.jpg",
+    linkedin: "https://www.linkedin.com/in/yaseen-deen-52249219b/",
+    bio: "Leads company strategy, product, and growth. Built OctogleHire to fix how companies access global engineering talent.",
+  },
+  {
+    name: "Milo",
+    role: "Sales & Partnerships",
+    image: "/MiloSales.jpg",
+    linkedin: null,
+    bio: "Manages client relationships and helps companies find the right engineering talent for their teams.",
+  },
+  {
+    name: "Coming Soon",
+    role: "Head of Vetting",
+    image: null,
+    linkedin: null,
+    bio: "Oversees our 5-stage vetting process and maintains quality standards across 20+ technical assessment tracks.",
+  },
+  {
+    name: "Coming Soon",
+    role: "India Operations Lead",
+    image: null,
+    linkedin: null,
+    bio: "Manages our largest talent hub — onboarding, compliance, and developer success across the India region.",
+  },
+  {
+    name: "Coming Soon",
+    role: "Account Manager",
+    image: null,
+    linkedin: null,
+    bio: "Works directly with companies post-match to ensure smooth onboarding, performance tracking, and long-term retention.",
+  },
 ];
 
 const values = [
@@ -113,56 +151,82 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Founder */}
+        {/* Team */}
+        <section id="team" className="container mx-auto px-6 pb-24">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Our Team
+          </span>
+          <h2 className="mt-4 text-2xl font-semibold tracking-tight">
+            The people behind OctogleHire
+          </h2>
+          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {team.map((member) => (
+              <div
+                key={`${member.name}-${member.role}`}
+                className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 p-6 text-center"
+              >
+                {member.image ? (
+                  <Image
+                    src={member.image}
+                    alt={member.name}
+                    width={120}
+                    height={120}
+                    className="size-28 rounded-full object-cover ring-2 ring-border"
+                  />
+                ) : (
+                  <div className="flex size-28 items-center justify-center rounded-full bg-muted ring-2 ring-border">
+                    <span className="text-2xl font-semibold text-muted-foreground">
+                      {member.role.split(" ").map((w) => w[0]).join("").slice(0, 2)}
+                    </span>
+                  </div>
+                )}
+                <p className="mt-4 text-sm font-semibold">{member.name}</p>
+                <p className="text-xs text-muted-foreground">{member.role}</p>
+                <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+                  {member.bio}
+                </p>
+                {member.linkedin && (
+                  <Link
+                    href={member.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  >
+                    LinkedIn
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Our Story */}
         <section className="container mx-auto px-6 pb-24">
           <div className="rounded-3xl border border-border bg-muted/30 p-8 md:p-12">
-            <div className="grid gap-10 lg:grid-cols-[200px_1fr] lg:items-start">
-              <div className="flex flex-col items-center lg:items-start">
-                <Image
-                  src="/Yaseen Founder.jpg"
-                  alt="Yaseen Deen"
-                  width={160}
-                  height={160}
-                  className="size-40 rounded-2xl object-cover ring-2 ring-border"
-                />
-                <p className="mt-4 text-sm font-semibold">Yaseen Deen</p>
-                <p className="text-xs text-muted-foreground">
-                  Co-Founder
-                </p>
-                <Link
-                  href="https://www.linkedin.com/in/yaseen-deen-52249219b/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
-                >
-                  LinkedIn
-                </Link>
-              </div>
-              <div className="space-y-4">
-                <h2 className="text-2xl font-semibold tracking-tight">
-                  Our Story
-                </h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  OctogleHire was founded on a simple observation: the best
-                  engineering talent is everywhere, but access to it is broken.
-                  Traditional agencies charge $20K–$40K placement fees and take
-                  months. Freelance platforms offer quantity over quality. Neither
-                  model serves companies or developers well.
-                </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  We built OctogleHire to fix this. Our 5-stage vetting process
-                  ensures only 1 in 25 applicants join the network. Our
-                  compliance infrastructure covers 30+ countries. And our
-                  matching engine delivers 3–5 curated profiles within 48 hours —
-                  not weeks.
-                </p>
-                <p className="text-muted-foreground leading-relaxed">
-                  Today, over 300 companies trust OctogleHire to build their
-                  engineering teams. 94% of our placements extend beyond 6
-                  months. We&apos;re proving that global hiring can be fast,
-                  affordable, and high-quality — all at once.
-                </p>
-              </div>
+            <div className="space-y-4 max-w-3xl">
+              <h2 className="text-2xl font-semibold tracking-tight">
+                Our Story
+              </h2>
+              <p className="text-muted-foreground leading-relaxed">
+                OctogleHire was founded on a simple observation: the best
+                engineering talent is everywhere, but access to it is broken.
+                Traditional agencies charge $20K–$40K placement fees and take
+                months. Freelance platforms offer quantity over quality. Neither
+                model serves companies or developers well.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                We built OctogleHire to fix this. Our 5-stage vetting process
+                ensures only 1 in 25 applicants join the network. Our
+                compliance infrastructure covers 30+ countries. And our
+                matching engine delivers 3&ndash;5 curated profiles within 48 hours &mdash;
+                not weeks.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                Today, over 300 companies trust OctogleHire to build their
+                engineering teams. 94% of our placements extend beyond 6
+                months. We&apos;re proving that global hiring can be fast,
+                affordable, and high-quality &mdash; all at once.
+              </p>
             </div>
           </div>
         </section>
