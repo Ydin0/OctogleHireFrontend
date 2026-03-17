@@ -300,7 +300,7 @@ export function ApplyPageLayout({
                       key={s.label}
                       className="rounded-lg border border-white/10 bg-white/5 p-6 text-center"
                     >
-                      <p className="font-mono text-3xl font-semibold text-pulse">
+                      <p className="font-mono text-2xl font-semibold text-pulse lg:text-3xl whitespace-nowrap">
                         {s.value}
                       </p>
                       <p className="mt-1 font-mono text-xs uppercase tracking-wider text-white/60">

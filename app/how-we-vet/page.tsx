@@ -15,6 +15,15 @@ import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { Button } from "@/components/ui/button";
 import { absoluteUrl } from "@/lib/seo";
+import {
+  FadeUp,
+  Stagger,
+  StaggerItem,
+  ScaleIn,
+  SlideIn,
+  CountUp,
+  FillBar,
+} from "@/components/marketing/animated";
 
 export const metadata: Metadata = {
   title: "How We Vet — Our 5-Stage Process",
@@ -46,6 +55,7 @@ const stages = [
     icon: FileSearch,
     duration: "24–48 hours",
     passRate: "~40% advance",
+    passPercent: 40,
     description:
       "Every developer submits a detailed application covering work history, tech stack proficiency, portfolio projects, and salary expectations. Our recruitment team manually reviews each profile against role-specific criteria.",
     whatWeLookFor: [
@@ -68,6 +78,7 @@ const stages = [
     icon: Zap,
     duration: "3–5 hours (self-paced)",
     passRate: "~35% advance",
+    passPercent: 35,
     description:
       "Shortlisted candidates complete a rigorous, stack-specific coding assessment designed by senior engineers. These aren't trivial algorithm puzzles — they're real-world scenarios that test how a developer actually works.",
     whatWeLookFor: [
@@ -91,6 +102,7 @@ const stages = [
     icon: MessageSquare,
     duration: "60–90 minutes",
     passRate: "~50% advance",
+    passPercent: 50,
     description:
       "Candidates join a live interview with our engineering panel. This is a two-part session: a system design deep-dive followed by a soft-skills and communication evaluation. We assess how they think, not just what they know.",
     whatWeLookFor: [
@@ -114,6 +126,7 @@ const stages = [
     icon: ShieldCheck,
     duration: "3–5 business days",
     passRate: "~85% advance",
+    passPercent: 85,
     description:
       "We verify employment history, contact professional references, and confirm identity. Only candidates with a proven track record of consistent delivery and positive team feedback make it through.",
     whatWeLookFor: [
@@ -137,6 +150,7 @@ const stages = [
     icon: UserCheck,
     duration: "Ongoing",
     passRate: "Final 1 in 25",
+    passPercent: 100,
     description:
       "Approved developers join our verified talent network and are immediately eligible for matching. We match based on skill fit, timezone overlap, rate alignment, and availability. Performance is tracked continuously.",
     whatHappensNext: [
@@ -158,32 +172,44 @@ export default function HowWeVetPage() {
         <section className="border-b py-24 lg:py-32">
           <div className="container mx-auto px-6">
             <div className="mx-auto max-w-3xl text-center">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                How We Vet
-              </span>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight lg:text-6xl">
-                25,000+ applicants reviewed.{" "}
-                <span className="text-muted-foreground">1,000 accepted.</span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-                Every engineer on OctogleHire has passed a rigorous 5-stage
-                vetting process. No shortcuts, no self-reported skills — just
-                verified, exceptional talent.
-              </p>
-              <div className="mt-8 flex justify-center gap-3">
-                <Button asChild className="rounded-full gap-2">
-                  <a href="/companies/signup">
-                    Hire Vetted Engineers
-                    <ArrowRight className="size-4" />
-                  </a>
-                </Button>
-                <Button asChild variant="outline" className="rounded-full gap-2">
-                  <a href="/marketplace">
-                    Browse Profiles
-                    <ArrowRight className="size-4" />
-                  </a>
-                </Button>
-              </div>
+              <FadeUp>
+                <span className="inline-block rounded-full border border-border px-4 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  How We Vet
+                </span>
+              </FadeUp>
+              <FadeUp delay={0.1}>
+                <h1 className="mt-6 text-4xl font-semibold tracking-tight lg:text-6xl">
+                  25,000+ applicants reviewed.{" "}
+                  <span className="text-muted-foreground">1,000 accepted.</span>
+                </h1>
+              </FadeUp>
+              <FadeUp delay={0.2}>
+                <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
+                  Every engineer on OctogleHire has passed a rigorous 5-stage
+                  vetting process. No shortcuts, no self-reported skills — just
+                  verified, exceptional talent.
+                </p>
+              </FadeUp>
+              <FadeUp delay={0.3}>
+                <div className="mt-8 flex justify-center gap-3">
+                  <Button asChild className="rounded-full gap-2">
+                    <a href="/companies/signup">
+                      Hire Vetted Engineers
+                      <ArrowRight className="size-4" />
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="rounded-full gap-2"
+                  >
+                    <a href="/marketplace">
+                      Browse Profiles
+                      <ArrowRight className="size-4" />
+                    </a>
+                  </Button>
+                </div>
+              </FadeUp>
             </div>
           </div>
         </section>
@@ -191,208 +217,313 @@ export default function HowWeVetPage() {
         {/* Stats bar */}
         <section className="border-b bg-muted/30 py-10">
           <div className="container mx-auto px-6">
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+            <Stagger
+              className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6"
+              stagger={0.06}
+            >
               {stats.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <p className="font-mono text-2xl font-semibold lg:text-3xl">
-                    {stat.value}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {stat.label}
-                  </p>
-                </div>
+                <StaggerItem key={stat.label}>
+                  <div className="text-center">
+                    <CountUp
+                      value={stat.value}
+                      className="block font-mono text-2xl font-semibold lg:text-3xl"
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {stat.label}
+                    </p>
+                  </div>
+                </StaggerItem>
               ))}
-            </div>
+            </Stagger>
           </div>
         </section>
 
-        {/* Stages */}
-        <section className="py-24">
-          <div className="container mx-auto px-6">
-            <div className="mx-auto max-w-3xl">
-              <div className="space-y-20">
-                {stages.map((stage) => (
-                  <div key={stage.num} className="relative">
-                    {/* Stage number line */}
-                    <div className="mb-6 flex items-center gap-4">
-                      <span className="flex size-10 items-center justify-center rounded-full border font-mono text-sm font-semibold">
-                        {stage.num}
-                      </span>
-                      <div>
-                        <h2 className="text-xl font-semibold">{stage.title}</h2>
-                        <p className="text-sm text-muted-foreground">
-                          {stage.headline}
-                        </p>
-                      </div>
+        {/* Funnel visual */}
+        <section className="container mx-auto px-6 py-16">
+          <FadeUp>
+            <div className="mx-auto max-w-2xl">
+              <p className="mb-6 text-center text-sm font-medium text-muted-foreground">
+                Applicant funnel — from 25,000 down to 1,000
+              </p>
+              <div className="space-y-3">
+                {[
+                  { label: "Applications received", pct: 100, count: "25,000+" },
+                  { label: "Pass screening", pct: 40, count: "~10,000" },
+                  { label: "Pass assessment", pct: 14, count: "~3,500" },
+                  { label: "Pass interview", pct: 7, count: "~1,750" },
+                  { label: "Pass background check", pct: 6, count: "~1,500" },
+                  { label: "Approved & matched", pct: 4, count: "1,000" },
+                ].map((step, i) => (
+                  <div key={step.label} className="flex items-center gap-4">
+                    <span className="w-40 shrink-0 text-right text-xs text-muted-foreground">
+                      {step.label}
+                    </span>
+                    <div className="flex-1">
+                      <FillBar
+                        percent={step.pct}
+                        delay={i * 0.12}
+                        color={step.pct === 4 ? "bg-pulse" : "bg-foreground/20"}
+                      />
                     </div>
-
-                    {/* Meta row */}
-                    <div className="mb-4 flex flex-wrap gap-4">
-                      <div className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
-                        <Clock className="size-3 text-muted-foreground" />
-                        {stage.duration}
-                      </div>
-                      <div className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
-                        <Shield className="size-3 text-muted-foreground" />
-                        {stage.passRate}
-                      </div>
-                    </div>
-
-                    <p className="text-muted-foreground">{stage.description}</p>
-
-                    {/* What we look for */}
-                    {stage.whatWeLookFor && (
-                      <div className="mt-6">
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          What We Evaluate
-                        </h3>
-                        <ul className="mt-3 space-y-2">
-                          {stage.whatWeLookFor.map((item) => (
-                            <li
-                              key={item}
-                              className="flex items-start gap-2.5 text-sm"
-                            >
-                              <CheckCircle className="mt-0.5 size-4 shrink-0 text-emerald-600" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* What gets rejected (stage 1) */}
-                    {"whatGetsRejected" in stage && stage.whatGetsRejected && (
-                      <div className="mt-5">
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          Common Rejection Reasons
-                        </h3>
-                        <ul className="mt-3 space-y-2">
-                          {stage.whatGetsRejected.map((item) => (
-                            <li
-                              key={item}
-                              className="flex items-start gap-2.5 text-sm text-muted-foreground"
-                            >
-                              <span className="mt-0.5 size-4 shrink-0 text-center text-red-500">
-                                &times;
-                              </span>
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Assessment types (stage 2) */}
-                    {"assessmentTypes" in stage && stage.assessmentTypes && (
-                      <div className="mt-5">
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          Example Assessment Tasks
-                        </h3>
-                        <ul className="mt-3 space-y-2">
-                          {stage.assessmentTypes.map((item) => (
-                            <li
-                              key={item}
-                              className="flex items-start gap-2.5 text-sm text-muted-foreground"
-                            >
-                              <Zap className="mt-0.5 size-3.5 shrink-0 text-amber-600" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Interview format (stage 3) */}
-                    {"interviewFormat" in stage && stage.interviewFormat && (
-                      <div className="mt-5">
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          Interview Format
-                        </h3>
-                        <ul className="mt-3 space-y-2">
-                          {stage.interviewFormat.map((item) => (
-                            <li
-                              key={item}
-                              className="flex items-start gap-2.5 text-sm text-muted-foreground"
-                            >
-                              <Clock className="mt-0.5 size-3.5 shrink-0 text-sky-600" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Reference questions (stage 4) */}
-                    {"referenceQuestions" in stage && stage.referenceQuestions && (
-                      <div className="mt-5">
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          What We Ask References
-                        </h3>
-                        <ul className="mt-3 space-y-2">
-                          {stage.referenceQuestions.map((item) => (
-                            <li
-                              key={item}
-                              className="flex items-start gap-2.5 text-sm text-muted-foreground italic"
-                            >
-                              <MessageSquare className="mt-0.5 size-3.5 shrink-0 text-violet-600" />
-                              &ldquo;{item}&rdquo;
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* What happens next (stage 5) */}
-                    {"whatHappensNext" in stage && stage.whatHappensNext && (
-                      <div className="mt-5">
-                        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                          After Approval
-                        </h3>
-                        <ul className="mt-3 space-y-2">
-                          {stage.whatHappensNext.map((item) => (
-                            <li
-                              key={item}
-                              className="flex items-start gap-2.5 text-sm"
-                            >
-                              <CheckCircle className="mt-0.5 size-4 shrink-0 text-emerald-600" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    <span className="w-16 font-mono text-xs tabular-nums">
+                      {step.count}
+                    </span>
                   </div>
                 ))}
+              </div>
+            </div>
+          </FadeUp>
+        </section>
+
+        {/* Stages */}
+        <section className="py-12">
+          <div className="container mx-auto px-6">
+            <div className="mx-auto max-w-3xl">
+              <div className="space-y-24">
+                {stages.map((stage, stageIdx) => {
+                  const Icon = stage.icon;
+                  const isEven = stageIdx % 2 === 0;
+
+                  return (
+                    <div key={stage.num}>
+                      {/* Stage header */}
+                      <SlideIn from={isEven ? "left" : "right"}>
+                        <div className="mb-8 flex items-start gap-5">
+                          <div className="flex size-14 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted/50">
+                            <Icon className="size-6 text-pulse" />
+                          </div>
+                          <div>
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              Stage {stage.num}
+                            </span>
+                            <h2 className="text-2xl font-semibold tracking-tight lg:text-3xl">
+                              {stage.title}
+                            </h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {stage.headline}
+                            </p>
+                          </div>
+                        </div>
+                      </SlideIn>
+
+                      {/* Meta pills + pass rate bar */}
+                      <FadeUp delay={0.1}>
+                        <div className="mb-2 flex flex-wrap items-center gap-3">
+                          <div className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
+                            <Clock className="size-3 text-muted-foreground" />
+                            {stage.duration}
+                          </div>
+                          <div className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
+                            <Shield className="size-3 text-muted-foreground" />
+                            {stage.passRate}
+                          </div>
+                        </div>
+                        <FillBar
+                          percent={stage.passPercent}
+                          delay={0.2}
+                          color="bg-pulse"
+                        />
+                      </FadeUp>
+
+                      <FadeUp delay={0.15}>
+                        <p className="mt-6 text-muted-foreground leading-relaxed">
+                          {stage.description}
+                        </p>
+                      </FadeUp>
+
+                      {/* What we look for */}
+                      {stage.whatWeLookFor && (
+                        <FadeUp delay={0.2}>
+                          <div className="mt-8">
+                            <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              What We Evaluate
+                            </h3>
+                            <Stagger
+                              className="mt-4 space-y-2.5"
+                              stagger={0.06}
+                              delay={0.1}
+                            >
+                              {stage.whatWeLookFor.map((item) => (
+                                <StaggerItem key={item}>
+                                  <div className="flex items-start gap-2.5 text-sm">
+                                    <CheckCircle className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                                    {item}
+                                  </div>
+                                </StaggerItem>
+                              ))}
+                            </Stagger>
+                          </div>
+                        </FadeUp>
+                      )}
+
+                      {/* What gets rejected (stage 1) */}
+                      {"whatGetsRejected" in stage &&
+                        stage.whatGetsRejected && (
+                          <FadeUp delay={0.25}>
+                            <div className="mt-6">
+                              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                Common Rejection Reasons
+                              </h3>
+                              <Stagger
+                                className="mt-4 space-y-2.5"
+                                stagger={0.06}
+                              >
+                                {stage.whatGetsRejected.map((item) => (
+                                  <StaggerItem key={item}>
+                                    <div className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                                      <span className="mt-0.5 size-4 shrink-0 text-center text-red-500">
+                                        &times;
+                                      </span>
+                                      {item}
+                                    </div>
+                                  </StaggerItem>
+                                ))}
+                              </Stagger>
+                            </div>
+                          </FadeUp>
+                        )}
+
+                      {/* Assessment types (stage 2) */}
+                      {"assessmentTypes" in stage &&
+                        stage.assessmentTypes && (
+                          <FadeUp delay={0.25}>
+                            <div className="mt-6">
+                              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                Example Assessment Tasks
+                              </h3>
+                              <Stagger
+                                className="mt-4 space-y-2.5"
+                                stagger={0.06}
+                              >
+                                {stage.assessmentTypes.map((item) => (
+                                  <StaggerItem key={item}>
+                                    <div className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                                      <Zap className="mt-0.5 size-3.5 shrink-0 text-amber-600" />
+                                      {item}
+                                    </div>
+                                  </StaggerItem>
+                                ))}
+                              </Stagger>
+                            </div>
+                          </FadeUp>
+                        )}
+
+                      {/* Interview format (stage 3) */}
+                      {"interviewFormat" in stage &&
+                        stage.interviewFormat && (
+                          <FadeUp delay={0.25}>
+                            <div className="mt-6">
+                              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                Interview Format
+                              </h3>
+                              <Stagger
+                                className="mt-4 space-y-2.5"
+                                stagger={0.06}
+                              >
+                                {stage.interviewFormat.map((item) => (
+                                  <StaggerItem key={item}>
+                                    <div className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                                      <Clock className="mt-0.5 size-3.5 shrink-0 text-sky-600" />
+                                      {item}
+                                    </div>
+                                  </StaggerItem>
+                                ))}
+                              </Stagger>
+                            </div>
+                          </FadeUp>
+                        )}
+
+                      {/* Reference questions (stage 4) */}
+                      {"referenceQuestions" in stage &&
+                        stage.referenceQuestions && (
+                          <FadeUp delay={0.25}>
+                            <div className="mt-6">
+                              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                What We Ask References
+                              </h3>
+                              <Stagger
+                                className="mt-4 space-y-2.5"
+                                stagger={0.06}
+                              >
+                                {stage.referenceQuestions.map((item) => (
+                                  <StaggerItem key={item}>
+                                    <div className="flex items-start gap-2.5 text-sm text-muted-foreground italic">
+                                      <MessageSquare className="mt-0.5 size-3.5 shrink-0 text-violet-600" />
+                                      &ldquo;{item}&rdquo;
+                                    </div>
+                                  </StaggerItem>
+                                ))}
+                              </Stagger>
+                            </div>
+                          </FadeUp>
+                        )}
+
+                      {/* What happens next (stage 5) */}
+                      {"whatHappensNext" in stage &&
+                        stage.whatHappensNext && (
+                          <FadeUp delay={0.2}>
+                            <div className="mt-8">
+                              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                                After Approval
+                              </h3>
+                              <Stagger
+                                className="mt-4 space-y-2.5"
+                                stagger={0.06}
+                                delay={0.1}
+                              >
+                                {stage.whatHappensNext.map((item) => (
+                                  <StaggerItem key={item}>
+                                    <div className="flex items-start gap-2.5 text-sm">
+                                      <CheckCircle className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                                      {item}
+                                    </div>
+                                  </StaggerItem>
+                                ))}
+                              </Stagger>
+                            </div>
+                          </FadeUp>
+                        )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="border-t bg-muted/30 py-20">
-          <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl font-semibold tracking-tight">
-              Hire engineers who have already been vetted
-            </h2>
-            <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-              Skip months of screening. Every engineer on OctogleHire has
-              passed all 5 stages. Book a demo and receive your first
-              matched profiles within 48 hours.
-            </p>
-            <div className="mt-8 flex justify-center gap-3">
-              <Button asChild className="rounded-full gap-2">
-                <a href="/companies/signup">
-                  Book a Demo
-                  <ArrowRight className="size-4" />
-                </a>
-              </Button>
-              <Button asChild variant="outline" className="rounded-full gap-2">
-                <a href="/apply">
-                  Apply as a Developer
-                  <ArrowRight className="size-4" />
-                </a>
-              </Button>
-            </div>
+        <section className="border-t py-20">
+          <div className="container mx-auto px-6">
+            <ScaleIn>
+              <div className="mx-auto max-w-2xl rounded-3xl border border-border bg-muted/30 p-10 text-center md:p-16">
+                <h2 className="text-3xl font-semibold tracking-tight lg:text-4xl">
+                  Hire engineers who have already been vetted
+                </h2>
+                <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
+                  Skip months of screening. Every engineer on OctogleHire has
+                  passed all 5 stages. Book a demo and receive your first
+                  matched profiles within 48 hours.
+                </p>
+                <div className="mt-8 flex justify-center gap-3">
+                  <Button asChild className="rounded-full gap-2">
+                    <a href="/companies/signup">
+                      Book a Demo
+                      <ArrowRight className="size-4" />
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="rounded-full gap-2"
+                  >
+                    <a href="/apply">
+                      Apply as a Developer
+                      <ArrowRight className="size-4" />
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </ScaleIn>
           </div>
         </section>
       </main>
