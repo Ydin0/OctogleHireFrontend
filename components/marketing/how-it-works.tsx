@@ -363,10 +363,10 @@ const stepContent: Record<
 > = {
   post: {
     num: "01",
-    title: "Tell us what you need",
+    title: "Book a Demo",
     description:
-      "Describe your role, tech stack, timeline, and budget in under 5 minutes. We match against 1,000+ pre-vetted engineers across 40+ stacks. No lengthy intake forms or calls required.",
-    cta: "Post a Role Free",
+      "Jump on a quick call with our team to walk through your requirements — role, tech stack, timeline, and budget. We'll show you how we match against 1,000+ pre-vetted engineers across 40+ stacks.",
+    cta: "Book a Demo",
     href: "/companies/signup",
   },
   match: {

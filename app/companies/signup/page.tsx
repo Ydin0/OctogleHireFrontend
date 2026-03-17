@@ -7,7 +7,7 @@ import { Navbar } from "@/components/marketing/navbar";
 import { CompanySignupForm } from "./_components/company-signup-form";
 
 export const metadata: Metadata = {
-  title: "Book a Discovery Call",
+  title: "Book a Demo",
   description:
     "Tell us about your hiring needs and we'll match you with pre-vetted engineers in 48 hours.",
   keywords: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: `${SITE_URL}/companies/signup` },
   openGraph: {
-    title: "Book a Discovery Call — OctogleHire",
+    title: "Book a Demo — OctogleHire",
     description:
       "Tell us about your hiring needs and we'll match you with pre-vetted engineers in 48 hours.",
     url: `${SITE_URL}/companies/signup`,
@@ -134,7 +134,7 @@ export default function CompanySignupPage() {
 
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold">
-                    Book a free discovery call
+                    Book a free demo
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
                     30 minutes · No commitment · Results in 48h

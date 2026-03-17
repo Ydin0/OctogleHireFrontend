@@ -685,7 +685,7 @@ function HeroForm() {
 
       <div className="mb-6">
         <h2 className="text-lg font-semibold">
-          Book a free discovery call
+          Book a free demo
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           30 minutes · No commitment · Results in 48h

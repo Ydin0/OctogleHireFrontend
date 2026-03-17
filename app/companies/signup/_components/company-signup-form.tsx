@@ -62,7 +62,7 @@ const CompanySignupForm = () => {
     return (
       <div className="animate-in fade-in duration-500">
         <p className="mb-4 text-sm text-muted-foreground">
-          Thanks {contactName.split(" ")[0]}! Pick a time below to book your discovery call.
+          Thanks {contactName.split(" ")[0]}! Pick a time below to book your demo.
         </p>
         <div
           className="calendly-inline-widget"

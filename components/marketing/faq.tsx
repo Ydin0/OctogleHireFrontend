@@ -12,7 +12,7 @@ interface FaqProps {
 const faqs = [
   {
     q: "How quickly can I hire a developer?",
-    a: "You'll receive 3–5 vetted candidate profiles within 48 hours of your discovery call. Most companies go from first intro to signed contract in under 5 business days — compared to 6–12 weeks with traditional agencies.",
+    a: "You'll receive 3–5 vetted candidate profiles within 48 hours of your demo call. Most companies go from first intro to signed contract in under 5 business days — compared to 6–12 weeks with traditional agencies.",
   },
   {
     q: "How are developers vetted?",
