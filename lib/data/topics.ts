@@ -17,7 +17,7 @@ export const topics: Topic[] = [
     title: "Remote Hiring",
     headline: "The Complete Guide to Remote Hiring",
     description:
-      "Everything you need to hire remote developers — from sourcing and vetting to onboarding and retention. Based on 300+ placements across 150+ countries.",
+      "Everything you need to hire remote developers — from sourcing and vetting to onboarding and retention. Based on 300+ placements across 30+ countries.",
     posts: [
       "how-to-hire-remote-developers",
       "state-of-remote-hiring-2026",
@@ -36,7 +36,7 @@ export const topics: Topic[] = [
     cta: {
       title: "Start hiring remotely",
       description:
-        "OctogleHire delivers 3–5 pre-vetted profiles within 48 hours from 150+ countries. Zero upfront fees.",
+        "OctogleHire delivers 3–5 pre-vetted profiles within 48 hours from 30+ countries. Zero upfront fees.",
       href: "/companies/signup",
       label: "Start Hiring",
     },
@@ -46,7 +46,7 @@ export const topics: Topic[] = [
     title: "Developer Vetting",
     headline: "How to Vet and Assess Software Developers",
     description:
-      "Deep dives into technical assessment, interview design, and quality assurance for engineering hires. Learn how top-3% vetting works in practice.",
+      "Deep dives into technical assessment, interview design, and quality assurance for engineering hires. Learn how rigorous 5-stage vetting works in practice.",
     posts: [
       "inside-our-vetting-process",
       "technical-interviews-are-broken",
@@ -61,7 +61,7 @@ export const topics: Topic[] = [
     cta: {
       title: "Skip the vetting",
       description:
-        "Every developer on OctogleHire has already passed a 5-stage vetting process with a 3% acceptance rate.",
+        "Every developer on OctogleHire has already passed a 5-stage vetting process — 25,000+ applicants reviewed, 1,000 accepted.",
       href: "/marketplace",
       label: "Browse Pre-Vetted Engineers",
     },
@@ -71,7 +71,7 @@ export const topics: Topic[] = [
     title: "International Compliance & Payroll",
     headline: "Compliance, Payroll, and Contracts for Global Teams",
     description:
-      "Navigate international employment law, payroll, tax compliance, and IP protection when hiring across borders. OctogleHire manages compliance in 150+ countries.",
+      "Navigate international employment law, payroll, tax compliance, and IP protection when hiring across borders. OctogleHire manages compliance in 30+ countries.",
     posts: [
       "what-ctos-get-wrong-about-offshore-development",
       "staff-augmentation-vs-full-time-hiring",
@@ -88,7 +88,7 @@ export const topics: Topic[] = [
     cta: {
       title: "Compliance handled",
       description:
-        "OctogleHire acts as Employer of Record across 150+ countries. Single invoice, zero legal complexity.",
+        "OctogleHire acts as Employer of Record across 30+ countries. Single invoice, zero legal complexity.",
       href: "/companies/signup",
       label: "Start Hiring Compliantly",
     },

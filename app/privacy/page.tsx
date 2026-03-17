@@ -130,7 +130,7 @@ export default function PrivacyPage() {
 
           <h2>7. International Transfers</h2>
           <p>
-            OctogleHire operates globally across 150+ countries. Your data may be
+            OctogleHire operates globally across 30+ countries. Your data may be
             transferred to and processed in countries other than your own. We
             ensure appropriate safeguards are in place for all international data
             transfers in compliance with applicable data protection laws.

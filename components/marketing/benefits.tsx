@@ -19,13 +19,13 @@ const benefits = [
     icon: Shield,
     title: "Pre-Vetted Talent",
     description:
-      "Only 3% of applicants pass our 5-stage vetting — technical assessment, live interview, and background check. 1,000+ engineers are active in the network today.",
+      "Only 1 in 25 applicants pass our 5-stage vetting — from over 25,000 reviewed. 1,000+ engineers are active in the network today.",
   },
   {
     icon: Globe,
-    title: "150+ Countries Covered",
+    title: "30+ Countries Covered",
     description:
-      "Access engineers across 150+ countries with 4–6 hours of timezone overlap guaranteed. Every major tech hub, every specialisation covered.",
+      "Access engineers across 30+ countries with 4–6 hours of timezone overlap guaranteed. Every major tech hub, every specialisation covered.",
   },
   {
     icon: Zap,
@@ -37,7 +37,7 @@ const benefits = [
     icon: Scale,
     title: "Compliance Handled",
     description:
-      "Contracts, payroll, tax, and local employment law — fully managed across 150+ countries. We act as Employer of Record so you get a single invoice.",
+      "Contracts, payroll, tax, and local employment law — fully managed across 30+ countries. We act as Employer of Record so you get a single invoice.",
   },
   {
     icon: Users,

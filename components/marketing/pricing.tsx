@@ -80,6 +80,9 @@ const Pricing = ({ className }: PricingProps) => {
               <p className="mt-1 text-xs text-background/40">
                 Monthly rate per developer begins on their start date
               </p>
+              <p className="mt-1.5 text-xs font-medium text-background/50">
+                14-day replacement guarantee included
+              </p>
             </div>
 
             <Button
@@ -125,6 +128,9 @@ const Pricing = ({ className }: PricingProps) => {
               </span>
               <p className="mt-1 text-xs text-muted-foreground">
                 Custom monthly rates · Volume pricing available
+              </p>
+              <p className="mt-1.5 text-xs font-medium text-muted-foreground">
+                30-day replacement guarantee included
               </p>
             </div>
 

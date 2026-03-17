@@ -373,7 +373,7 @@ const stepContent: Record<
     num: "02",
     title: "Receive 3–5 vetted profiles within 48 hours",
     description:
-      "Within 48 hours, receive 3–5 pre-vetted profiles matched to your exact requirements. Every candidate has passed our 5-stage process (3% acceptance rate). Review skills, rates, and availability.",
+      "Within 48 hours, receive 3–5 pre-vetted profiles matched to your exact requirements. Every candidate has passed our 5-stage process (25,000+ reviewed, 1,000 accepted). Review skills, rates, and availability.",
     cta: "See Sample Profiles",
     href: "/marketplace",
   },
@@ -381,7 +381,7 @@ const stepContent: Record<
     num: "03",
     title: "Interview, select, and onboard instantly",
     description:
-      "Interview your shortlist and choose your hire. We handle contracts, compliance, and payroll across 150+ countries. Most companies go from brief to signed contract in under 5 business days.",
+      "Interview your shortlist and choose your hire. We handle contracts, compliance, and payroll across 30+ countries. Most companies go from brief to signed contract in under 5 business days.",
     cta: "Start Hiring Today",
     href: "/companies/signup",
   },

@@ -8,7 +8,7 @@ import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "Developer Marketplace",
   description:
-    "Search and hire pre-vetted developers from 150+ countries. Filter by tech stack, skills, and experience to find your perfect engineering match.",
+    "Search and hire pre-vetted developers from 30+ countries. Filter by tech stack, skills, and experience to find your perfect engineering match.",
   keywords: [
     "hire remote developers",
     "vetted engineers",
@@ -24,7 +24,7 @@ export default function MarketplaceRoute() {
     "@type": "ItemList",
     name: "Developer Marketplace",
     description:
-      "Browse and hire pre-vetted software developers from 150+ countries.",
+      "Browse and hire pre-vetted software developers from 30+ countries.",
     url: absoluteUrl("/marketplace"),
     itemListElement: [
       {

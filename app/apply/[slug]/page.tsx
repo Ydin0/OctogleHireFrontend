@@ -156,7 +156,7 @@ function TechPage({ tech, slug }: { tech: string; slug: string }) {
         label={`${tech} Developer Jobs`}
         title={`Remote ${tech} Developer Jobs`}
         titleAccent={tech}
-        description={`Join the top 3% of ${tech} engineers on OctogleHire. Get matched with 300+ vetted companies within 48 hours, earn 40–60% above local rates, and let us handle contracts and compliance across 150+ countries.`}
+        description={`Join the best ${tech} engineers on OctogleHire. Get matched with 300+ vetted companies within 48 hours, earn 40–60% above local rates, and let us handle contracts and compliance across 30+ countries.`}
         benefits={benefits}
         techCrossLinks={related}
         hireSlug={slug}
@@ -214,7 +214,7 @@ function RolePage({ role, slug }: { role: string; slug: string }) {
         label={`${role} Jobs`}
         title={`${role} — Remote & Freelance`}
         titleAccent={role}
-        description={`Join the top 3% of ${role} professionals on OctogleHire. Get matched with 300+ vetted companies within 48 hours, earn 40–60% above local rates, and let us handle contracts and compliance.`}
+        description={`Join the best ${role} professionals on OctogleHire. Get matched with 300+ vetted companies within 48 hours, earn 40–60% above local rates, and let us handle contracts and compliance.`}
         benefits={benefits}
         roleCrossLinks={relatedRoles}
         hireSlug={slug}

@@ -48,7 +48,7 @@ const faqs = [
   },
   {
     q: "What countries do you operate in?",
-    a: "OctogleHire operates in 150+ countries. You can source candidates from anywhere — OctogleHire handles all contracts, compliance, payroll, and local employment law on behalf of the hiring company.",
+    a: "OctogleHire operates in 30+ countries. You can source candidates from anywhere — OctogleHire handles all contracts, compliance, payroll, and local employment law on behalf of the hiring company.",
   },
 ];
 

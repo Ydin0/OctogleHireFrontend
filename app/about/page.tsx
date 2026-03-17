@@ -11,7 +11,7 @@ import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
 export const metadata: Metadata = {
   title: "About OctogleHire",
   description:
-    "OctogleHire connects companies with the top 3% of pre-vetted engineers from 150+ countries. Learn about our mission, team, and the platform behind 300+ successful placements.",
+    "OctogleHire connects companies with rigorously vetted engineers from 30+ countries. Learn about our mission, team, and the platform behind 300+ successful placements.",
   alternates: { canonical: absoluteUrl("/about") },
 };
 
@@ -19,7 +19,7 @@ const stats = [
   { value: "1,000+", label: "Engineers Vetted" },
   { value: "300+", label: "Companies Served" },
   { value: "150+", label: "Countries Covered" },
-  { value: "3%", label: "Acceptance Rate" },
+  { value: "1 in 25", label: "Acceptance Rate" },
   { value: "48h", label: "Average Match Time" },
   { value: "94%", label: "6-Month Retention" },
 ];
@@ -38,7 +38,7 @@ const values = [
   {
     title: "Global by Default",
     description:
-      "We operate across 150+ countries because talent is everywhere. We handle compliance, payroll, and contracts so geography is never a barrier.",
+      "We operate across 30+ countries because talent is everywhere. We handle compliance, payroll, and contracts so geography is never a barrier.",
   },
   {
     title: "Speed Without Compromise",
@@ -87,8 +87,8 @@ export default function AboutPage() {
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
             OctogleHire is a global talent platform that has vetted 1,000+
-            engineers across 150+ countries through a rigorous 5-stage process
-            with a 3% acceptance rate. Over 300 companies use OctogleHire to
+            engineers across 30+ countries through a rigorous 5-stage process
+            with only 1 in 25 applicants accepted. Over 300 companies use OctogleHire to
             build engineering teams in days, not months — at 40–60% below
             US/UK rates.
           </p>
@@ -151,8 +151,8 @@ export default function AboutPage() {
                 </p>
                 <p className="text-muted-foreground leading-relaxed">
                   We built OctogleHire to fix this. Our 5-stage vetting process
-                  ensures only the top 3% of applicants join the network. Our
-                  compliance infrastructure covers 150+ countries. And our
+                  ensures only 1 in 25 applicants join the network. Our
+                  compliance infrastructure covers 30+ countries. And our
                   matching engine delivers 3–5 curated profiles within 48 hours —
                   not weeks.
                 </p>

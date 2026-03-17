@@ -16,7 +16,7 @@ const faqs = [
   },
   {
     q: "How are developers vetted?",
-    a: "Every developer passes a 5-stage process: application screening, stack-specific technical assessment, live system design interview, soft-skills and communication evaluation, and reference checks. Only the top 3% of over 1,000 annual applicants make it into our network.",
+    a: "Every developer passes a 5-stage process: application screening, stack-specific technical assessment, live system design interview, soft-skills and communication evaluation, and reference checks. From over 25,000 applicants reviewed, only 1,000 have been accepted into our network.",
   },
   {
     q: "What roles and tech stacks do you cover?",
@@ -28,7 +28,7 @@ const faqs = [
   },
   {
     q: "What happens if a developer isn't the right fit?",
-    a: "Every placement includes a risk-free guarantee period. If a developer doesn't meet your expectations, we'll find a replacement at no additional cost and manage the entire transition for you.",
+    a: "Every placement includes a risk-free replacement guarantee — 14 days on our On-Demand plan and 30 days on our Marketplace plan. If a developer doesn't meet your expectations, we'll find a replacement at no additional cost and manage the entire transition for you.",
   },
   {
     q: "Can I hire full-time or only contractors?",
@@ -44,7 +44,7 @@ const faqs = [
   },
   {
     q: "How many developers are in the network?",
-    a: "Our active network includes 1,000+ pre-vetted engineers across 40+ tech stacks. We maintain a 3% acceptance rate — meaning we've reviewed over 30,000 applicants to build the current network.",
+    a: "Our active network includes 1,000+ pre-vetted engineers across 40+ tech stacks. From over 25,000 applicants reviewed, only 1,000 have been accepted into our active network.",
   },
   {
     q: "What is the developer retention rate?",
@@ -56,7 +56,7 @@ const faqs = [
   },
   {
     q: "Is there a trial or guarantee period?",
-    a: "Every placement includes a risk-free guarantee period. Our replacement rate is under 6%, but if a developer isn't the right fit, we handle the entire transition at no additional cost.",
+    a: "Yes. On-Demand placements include a 14-day replacement guarantee, and Marketplace placements include a 30-day guarantee. Our replacement rate is under 6%, but if a developer isn't the right fit, we handle the entire transition at no additional cost.",
   },
 ];
 

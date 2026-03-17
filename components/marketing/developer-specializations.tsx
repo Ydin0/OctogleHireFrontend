@@ -188,7 +188,7 @@ const DeveloperSpecializations = ({ className }: DeveloperSpecializationsProps) 
               <p className="text-sm text-muted-foreground">Vetted developers</p>
             </div>
             <div className="rounded-2xl border border-border bg-background p-6 space-y-1">
-              <p className="font-mono text-4xl font-semibold">Top 3%</p>
+              <p className="font-mono text-4xl font-semibold">1 in 25</p>
               <p className="text-sm text-muted-foreground">Acceptance rate</p>
             </div>
             <div className="rounded-2xl border border-border bg-background p-6 space-y-1">

@@ -46,7 +46,7 @@ const competitors = [
     tagline: "Elite network",
     traits: [
       { label: "Vetting", value: "Rigorous screening", pass: true },
-      { label: "Talent Quality", value: "Top 3%", pass: true },
+      { label: "Talent Quality", value: "Top talent", pass: true },
       { label: "Time to Hire", value: "1–3 weeks", pass: false },
       { label: "Pricing", value: "Premium — $150+/hr", pass: false },
       { label: "Compliance", value: "Managed for you", pass: true },
@@ -60,7 +60,7 @@ const octogle = {
   tagline: "Best of both worlds",
   traits: [
     { label: "Vetting", value: "5-stage technical vetting" },
-    { label: "Talent Quality", value: "Top 3% — verified" },
+    { label: "Talent Quality", value: "Top talent — verified" },
     { label: "Time to Hire", value: "48 hours average" },
     { label: "Pricing", value: "Competitive & transparent" },
     { label: "Compliance", value: "Fully managed globally" },

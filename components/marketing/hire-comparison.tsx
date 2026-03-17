@@ -11,7 +11,7 @@ const dimensions = [
     label: "Vetting",
     agency: "Resume screening only",
     freelance: "Self-reported skills",
-    octogle: "5-stage technical vetting (3% pass rate)",
+    octogle: "5-stage technical vetting (1 in 25 pass rate)",
   },
   {
     label: "Time to Hire",
@@ -29,13 +29,13 @@ const dimensions = [
     label: "Compliance",
     agency: "You manage it",
     freelance: "You manage it",
-    octogle: "Fully managed (150+ countries)",
+    octogle: "Fully managed (30+ countries)",
   },
   {
     label: "Replacement",
     agency: "30–90 days (if any)",
     freelance: "None",
-    octogle: "Risk-free guarantee period",
+    octogle: "14–30 day replacement guarantee",
   },
   {
     label: "Support",

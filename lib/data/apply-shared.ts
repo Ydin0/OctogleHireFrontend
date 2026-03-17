@@ -25,7 +25,7 @@ export const devBenefits: DevBenefit[] = [
     icon: Globe,
     title: "Work with Global Teams",
     description:
-      "Access roles at 300+ companies in the US, EU, UK, and Australia — without relocating. Build your career at scale across 150+ countries.",
+      "Access roles at 300+ companies in the US, EU, UK, and Australia — without relocating. Build your career at scale across 30+ countries.",
   },
   {
     icon: HandCoins,
@@ -150,7 +150,7 @@ export interface FaqItem {
 export const devFaqs: FaqItem[] = [
   {
     q: "What does the vetting process involve?",
-    a: "Every application goes through 5 stages: profile review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only the top 3% of applicants are approved.",
+    a: "Every application goes through 5 stages: profile review, stack-specific technical assessment, live system design interview, background check, and reference verification. Only 1 in 25 applicants are approved.",
   },
   {
     q: "How long until I start receiving role matches?",
@@ -178,7 +178,7 @@ export const devFaqs: FaqItem[] = [
   },
   {
     q: "What is the acceptance rate?",
-    a: "Only the top 3% of applicants are accepted into the network. We've reviewed over 30,000 applications to build our current pool of 1,000+ active engineers.",
+    a: "From over 25,000 applicants reviewed, only 1,000 have been accepted into our network of active engineers.",
   },
   {
     q: "Is invoicing handled for me?",

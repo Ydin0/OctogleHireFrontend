@@ -347,7 +347,7 @@ const FeaturesShowcase = ({ className }: FeaturesShowcaseProps) => {
           Introducing OctogleHire
         </span>
         <h2 className="max-w-2xl text-4xl font-medium tracking-tight lg:text-5xl xl:text-6xl">
-          1,000+ engineers vetted through a 5-stage process with a 3% acceptance rate
+          1,000+ engineers vetted through a 5-stage process — 25,000+ applicants reviewed, 1,000 accepted
         </h2>
       </div>
 
@@ -417,7 +417,7 @@ const FeaturesShowcase = ({ className }: FeaturesShowcaseProps) => {
               Hire with total confidence — every time
             </h3>
             <p className="text-muted-foreground">
-              Our 5-stage vetting process means only the top 3% of applicants
+              Our 5-stage vetting process means only 1 in 25 applicants
               join the network. Every developer on your shortlist has been
               technically assessed, interviewed, and background-checked —
               before they ever reach you.
@@ -435,12 +435,20 @@ const FeaturesShowcase = ({ className }: FeaturesShowcaseProps) => {
                 </li>
               ))}
             </ul>
-            <Button asChild variant="outline" className="rounded-full gap-2">
-              <a href="/marketplace">
-                View Developer Profiles
-                <ArrowRight className="size-4" />
-              </a>
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild variant="outline" className="rounded-full gap-2">
+                <a href="/how-we-vet">
+                  See How We Vet
+                  <ArrowRight className="size-4" />
+                </a>
+              </Button>
+              <Button asChild variant="ghost" className="rounded-full gap-2">
+                <a href="/marketplace">
+                  Browse Profiles
+                  <ArrowRight className="size-4" />
+                </a>
+              </Button>
+            </div>
           </div>
 
           <VettingMockup />

@@ -954,7 +954,7 @@ const ApplyHero = ({ onStart }: ApplyHeroProps) => {
               <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
                 {[
                   { value: "1,000+", label: "Engineers vetted" },
-                  { value: "Top 3%", label: "Acceptance rate" },
+                  { value: "1 in 25", label: "Acceptance rate" },
                   { value: "48h", label: "Match timeline" },
                   { value: "30+", label: "Countries" },
                 ].map((s) => (

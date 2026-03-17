@@ -15,7 +15,7 @@ export default async function OgImage({
   if (tech) {
     return generateOgImage(
       `Hire Top ${tech} Developers`,
-      `Pre-vetted ${tech} engineers from 150+ countries. Start in days.`,
+      `Pre-vetted ${tech} engineers from 30+ countries. Start in days.`,
     );
   }
 
@@ -29,6 +29,6 @@ export default async function OgImage({
 
   return generateOgImage(
     "Hire Top Developer Talent",
-    "Pre-vetted engineers from 150+ countries.",
+    "Pre-vetted engineers from 30+ countries.",
   );
 }

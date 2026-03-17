@@ -917,7 +917,7 @@ export function HirePageLayout({
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Post a role and receive 3&ndash;5 curated profiles from our
                   1,000+ engineer network within 48 hours. Every match has
-                  passed a 5-stage vetting process with a 3% acceptance rate.
+                  passed a 5-stage vetting process — 25,000+ reviewed, 1,000 accepted.
                 </p>
               </div>
             </div>
@@ -980,12 +980,12 @@ export function HirePageLayout({
                   </span>
                 </div>
                 <h3 className="text-3xl font-medium tracking-tight">
-                  Only the <span className="text-pulse">top 3%</span> make the
+                  Only <span className="text-pulse">1 in 25</span> make the
                   cut
                 </h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Our 5-stage vetting process screens over 1,000 applicants
-                  annually to maintain a 3% acceptance rate. Every developer on
+                  Our 5-stage vetting process has screened over 25,000
+                  applicants — only 1,000 have been accepted. Every developer on
                   your shortlist has been technically assessed, interviewed, and
                   background-checked &mdash; before they ever reach you.
                 </p>
@@ -1132,8 +1132,8 @@ export function HirePageLayout({
                 </p>
                 <ul className="grid max-w-lg grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
                   {[
-                    { icon: Shield, text: "Pre-vetted top 3% engineers" },
-                    { icon: Globe, text: "Talent from 150+ countries" },
+                    { icon: Shield, text: "Rigorously vetted engineers" },
+                    { icon: Globe, text: "Talent from 30+ countries" },
                     { icon: Scale, text: "Compliance & payroll handled" },
                     { icon: Zap, text: "48-hour candidate delivery" },
                     { icon: Users, text: "Dedicated account management" },
@@ -1177,7 +1177,7 @@ export function HirePageLayout({
                     { value: "150+", label: "Countries" },
                     { value: "1,000+", label: "Developers" },
                     { value: "48h", label: "Delivery" },
-                    { value: "Top 3%", label: "Engineers" },
+                    { value: "1 in 25", label: "Acceptance rate" },
                   ].map((s) => (
                     <div
                       key={s.label}

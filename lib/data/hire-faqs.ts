@@ -14,7 +14,7 @@ export const hireFaqs: HireFaqItem[] = [
   },
   {
     q: "How are developers vetted?",
-    a: "Every developer passes a 5-stage process: application screening, stack-specific technical assessment, live system design interview, soft-skills evaluation, and reference checks. Only the top 3% of applicants make it into our network — from over 30,000 applications reviewed annually.",
+    a: "Every developer passes a 5-stage process: application screening, stack-specific technical assessment, live system design interview, soft-skills evaluation, and reference checks. From over 25,000 applicants reviewed, only 1,000 have been accepted into our network.",
   },
   {
     q: "How much does it cost?",
@@ -22,15 +22,15 @@ export const hireFaqs: HireFaqItem[] = [
   },
   {
     q: "What if a developer isn't the right fit?",
-    a: "Every placement includes a risk-free guarantee period. If a developer doesn't meet your expectations, we'll find a replacement at no additional cost and manage the transition for you. Our replacement rate is under 6%.",
+    a: "Every placement includes a risk-free replacement guarantee — 14 days on our On-Demand plan and 30 days on our Marketplace plan. If a developer doesn't meet your expectations, we'll find a replacement at no additional cost and manage the transition for you. Our replacement rate is under 6%.",
   },
   {
     q: "Do you handle contracts and compliance?",
-    a: "Yes. We manage all contracts, IP agreements, payroll, and tax compliance end-to-end across 150+ countries. You get a single invoice — no need to set up foreign entities or navigate international employment law.",
+    a: "Yes. We manage all contracts, IP agreements, payroll, and tax compliance end-to-end across 30+ countries. You get a single invoice — no need to set up foreign entities or navigate international employment law.",
   },
   {
     q: "How many developers are in the network?",
-    a: "Our active network includes 1,000+ pre-vetted engineers across 40+ tech stacks. We maintain a 3% acceptance rate — meaning we've reviewed over 30,000 applicants to build the current network.",
+    a: "Our active network includes 1,000+ pre-vetted engineers across 40+ tech stacks. From over 25,000 applicants reviewed, only 1,000 have been accepted into our active network.",
   },
   {
     q: "What is the developer retention rate?",
@@ -42,7 +42,7 @@ export const hireFaqs: HireFaqItem[] = [
   },
   {
     q: "Can I hire from a specific country?",
-    a: "Yes. Our network spans 150+ countries. During matching, we prioritise developers whose working hours overlap with yours by at least 4–6 hours, so real-time collaboration is seamless.",
+    a: "Yes. Our network spans 30+ countries. During matching, we prioritise developers whose working hours overlap with yours by at least 4–6 hours, so real-time collaboration is seamless.",
   },
   {
     q: "How does OctogleHire pricing compare to agencies?",
@@ -54,6 +54,6 @@ export const hireFaqs: HireFaqItem[] = [
   },
   {
     q: "Is there a replacement guarantee?",
-    a: "Yes. Every placement includes a risk-free guarantee period. Our replacement rate is under 6% — but if you need a swap, we handle the entire transition at no additional cost.",
+    a: "Yes. On-Demand placements include a 14-day replacement guarantee, and Marketplace placements include a 30-day guarantee. Our replacement rate is under 6% — but if you need a swap, we handle the entire transition at no additional cost.",
   },
 ];

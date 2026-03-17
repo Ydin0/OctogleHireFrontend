@@ -76,7 +76,7 @@ export default function TermsPage() {
             For engagements facilitated through OctogleHire, we may act as
             Employer of Record, managing contracts, payroll, tax compliance, and
             local employment obligations on behalf of Company Clients across
-            150+ countries.
+            30+ countries.
           </p>
 
           <h2>4. Fees and Payment</h2>

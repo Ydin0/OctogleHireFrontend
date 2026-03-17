@@ -157,7 +157,7 @@ function TechPage({ tech, slug }: { tech: string; slug: string }) {
         label={`Hire ${tech} Developers`}
         title={`Hire Top ${tech} Developers`}
         titleAccent={tech}
-        description={`OctogleHire connects you with top-3%, pre-vetted ${tech} engineers from 150+ countries. Receive 3–5 matched profiles within 48 hours at 40–60% below market rates — no recruitment fees.`}
+        description={`OctogleHire connects you with rigorously vetted ${tech} engineers from 30+ countries. Receive 3–5 matched profiles within 48 hours at 40–60% below market rates — no recruitment fees.`}
         benefits={benefits}
         techCrossLinks={related}
         applySlug={slug}
@@ -185,7 +185,7 @@ function RolePage({ role, slug }: { role: string; slug: string }) {
     },
     {
       title: "Global Talent, Local Quality",
-      description: `Our ${role} professionals come from 150+ countries and bring diverse perspectives and world-class skills to your team.`,
+      description: `Our ${role} professionals come from 30+ countries and bring diverse perspectives and world-class skills to your team.`,
     },
     {
       title: "Risk-Free Engagement",
@@ -232,7 +232,7 @@ function RolePage({ role, slug }: { role: string; slug: string }) {
         label={`Hire a ${role}`}
         title={`Hire a ${role}`}
         titleAccent={role}
-        description={`OctogleHire connects you with top-3%, pre-vetted ${role} professionals from 150+ countries. Receive 3–5 matched profiles within 48 hours at 40–60% below market rates — no recruitment fees.`}
+        description={`OctogleHire connects you with rigorously vetted ${role} professionals from 30+ countries. Receive 3–5 matched profiles within 48 hours at 40–60% below market rates — no recruitment fees.`}
         benefits={benefits}
         roleCrossLinks={relatedRoles}
         applySlug={slug}

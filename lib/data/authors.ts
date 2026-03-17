@@ -12,7 +12,7 @@ export const authors: Author[] = [
     slug: "yaseen-deen",
     name: "Yaseen Deen",
     title: "Co-Founder, OctogleHire",
-    bio: "Yaseen built OctogleHire to connect companies with the world's best engineering talent. He has personally reviewed thousands of developer profiles and helped over 300 companies build remote teams across 150+ countries.",
+    bio: "Yaseen built OctogleHire to connect companies with the world's best engineering talent. He has personally reviewed thousands of developer profiles and helped over 300 companies build remote teams across 30+ countries.",
     avatar: "/Yaseen Founder.jpg",
     social: {
       linkedin: "https://www.linkedin.com/in/yaseen-deen-52249219b/",

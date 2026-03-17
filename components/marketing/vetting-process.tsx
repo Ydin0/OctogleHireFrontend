@@ -37,11 +37,14 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
       <div className="container mx-auto px-6">
         <div className="mx-auto mb-12 max-w-2xl text-center">
           <h2 className="text-4xl font-semibold tracking-tight lg:text-5xl">
-            Only the <span className="text-pulse">Top 3%</span> Make the Cut
+            Only <span className="text-pulse">1 in 25</span> Make the Cut
           </h2>
           <p className="mt-4 text-muted-foreground">
             Every developer goes through our rigorous 5-stage vetting process.
-            No shortcuts — just verified, exceptional talent you can trust.
+            No shortcuts — just verified, exceptional talent you can trust.{" "}
+            <a href="/how-we-vet" className="underline underline-offset-4 hover:text-foreground transition-colors">
+              See the full process
+            </a>
           </p>
         </div>
         <Tabs
@@ -203,7 +206,7 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                     <p className="text-sm text-muted-foreground">applications reviewed monthly</p>
                   </div>
                   <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
-                    <p className="font-mono text-4xl font-medium lg:text-5xl">Top 3%</p>
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">1 in 25</p>
                     <p className="text-sm text-muted-foreground">acceptance rate</p>
                   </div>
                 </div>
@@ -263,7 +266,7 @@ const VettingProcess = ({ className }: VettingProcessProps) => {
                     <p className="text-sm text-muted-foreground">average time to first match</p>
                   </div>
                   <div className="flex flex-col gap-1.5 rounded-2xl border border-border bg-muted p-6">
-                    <p className="font-mono text-4xl font-medium lg:text-5xl">150+</p>
+                    <p className="font-mono text-4xl font-medium lg:text-5xl">30+</p>
                     <p className="text-sm text-muted-foreground">countries in our network</p>
                   </div>
                 </div>

@@ -61,7 +61,7 @@ export default function OgImage() {
               lineHeight: 1.5,
             }}
           >
-            Pre-vetted engineers from 150+ countries. Build your dream team in
+            Pre-vetted engineers from 30+ countries. Build your dream team in
             days, not months.
           </div>
         </div>

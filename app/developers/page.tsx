@@ -7,7 +7,7 @@ import { DevelopersPage } from "./_components/developers-page";
 export const metadata: Metadata = {
   title: "Browse Developers | OctogleHire",
   description:
-    "Search and hire pre-vetted developers from 150+ countries. Filter by tech stack, skills, and experience to find your perfect engineering match.",
+    "Search and hire pre-vetted developers from 30+ countries. Filter by tech stack, skills, and experience to find your perfect engineering match.",
 };
 
 export default function DevelopersRoute() {

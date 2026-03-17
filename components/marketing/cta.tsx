@@ -21,11 +21,11 @@ const list = [
   },
   {
     icon: Shield,
-    text: "Pre-vetted top 3% engineers",
+    text: "Rigorously vetted engineers",
   },
   {
     icon: Globe,
-    text: "Talent from 150+ countries",
+    text: "Talent from 30+ countries",
   },
   {
     icon: Scale,
@@ -117,8 +117,8 @@ const Cta = ({ className }: CtaProps) => {
                 <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Delivery</p>
               </div>
               <div className="rounded-lg border border-white/10 bg-white/5 p-6 text-center">
-                <p className="text-3xl font-semibold font-mono text-pulse">Top 3%</p>
-                <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Engineers</p>
+                <p className="text-3xl font-semibold font-mono text-pulse">1 in 25</p>
+                <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">Acceptance rate</p>
               </div>
             </div>
           </div>
