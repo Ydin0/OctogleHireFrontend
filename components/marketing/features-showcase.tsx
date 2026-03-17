@@ -347,8 +347,11 @@ const FeaturesShowcase = ({ className }: FeaturesShowcaseProps) => {
           Introducing OctogleHire
         </span>
         <h2 className="max-w-2xl text-4xl font-medium tracking-tight lg:text-5xl xl:text-6xl">
-          1,000+ engineers vetted through a 5-stage process — 25,000+ applicants reviewed, 1,000 accepted
+          1,000+ pre-vetted engineers from 25,000+ applicants
         </h2>
+        <p className="max-w-xl text-lg text-muted-foreground">
+          Every developer passes our 5-stage vetting process. Only 1 in 25 make the cut.
+        </p>
       </div>
 
       {/* Top row */}
