@@ -27,17 +27,24 @@ const stats = [
 const team = [
   {
     name: "Yaseen Deen",
-    role: "Co-Founder",
+    role: "CEO",
     image: "/Yaseen Founder.jpg",
     linkedin: "https://www.linkedin.com/in/yaseen-deen-52249219b/",
     bio: "Leads company strategy, product, and growth. Built OctogleHire to fix how companies access global engineering talent.",
   },
   {
-    name: "Milo",
-    role: "Client Success Manager",
-    image: "/MiloSales.jpg",
+    name: "Stergios Pappos",
+    role: "Head of Technology",
+    image: "/Stergios-Technology.jpg",
     linkedin: null,
-    bio: "Manages client relationships end-to-end — from onboarding to ongoing success — ensuring every company gets the right talent and a seamless experience.",
+    bio: "Oversees platform architecture, engineering, and infrastructure. Stergios ensures OctogleHire's technology scales reliably as our network and client base grow.",
+  },
+  {
+    name: "Dimitris Pappos",
+    role: "Head of Marketing",
+    image: "/Dimitris-Marketing.jpg",
+    linkedin: null,
+    bio: "Drives brand strategy, demand generation, and market positioning. Dimitris builds the channels that connect companies with OctogleHire's vetted talent network.",
   },
   {
     name: "Anil Wadghule",
@@ -47,25 +54,18 @@ const team = [
     bio: "18 years of engineering experience across full-stack, architecture, and Elixir. A recognised speaker at Elixir conferences, Anil leads our technical vetting and assessment design — ensuring only truly exceptional engineers make it through.",
   },
   {
+    name: "Milo",
+    role: "Client Success Manager",
+    image: "/MiloSales.jpg",
+    linkedin: null,
+    bio: "Manages client relationships end-to-end — from onboarding to ongoing success — ensuring every company gets the right talent and a seamless experience.",
+  },
+  {
     name: "Ricardo Machado",
     role: "Recruitment Partner",
     image: "/Ricardo-Recruitment.jpg",
     linkedin: null,
     bio: "Leads our global talent sourcing and candidate pipeline. Ricardo identifies, screens, and shortlists engineering talent across 30+ countries to keep our network stocked with top-tier professionals.",
-  },
-  {
-    name: "Coming Soon",
-    role: "India Operations Lead",
-    image: null,
-    linkedin: null,
-    bio: "Manages our largest talent hub — onboarding, compliance, and developer success across the India region.",
-  },
-  {
-    name: "Coming Soon",
-    role: "Account Manager",
-    image: null,
-    linkedin: null,
-    bio: "Works directly with companies post-match to ensure smooth onboarding, performance tracking, and long-term retention.",
   },
 ];
 
