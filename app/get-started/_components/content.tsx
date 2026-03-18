@@ -3,11 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import Script from "next/script";
 import AutoScroll from "embla-carousel-auto-scroll";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowDownRight,
   ArrowRight,
   Briefcase,
+  Calendar,
   Check,
   CheckCircle,
   ChevronRight,
@@ -18,10 +22,12 @@ import {
   FileText,
   Globe,
   Layers,
+  Loader2,
   MessageSquare,
   Settings,
   Shield,
   ShieldCheck,
+  Sparkles,
   Star,
   UserCheck,
   UserSearch,
@@ -58,18 +64,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { PhoneInput } from "@/components/phone-input";
+import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
 import { HiringCalculator } from "@/components/marketing/hiring-calculator";
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+
+const CALENDLY_URL = "https://calendly.com/yaseen-octogle/30min";
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    DATA
@@ -309,101 +315,225 @@ function StepMark(props: React.SVGProps<SVGSVGElement>) {
 export function GetStartedContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"shortlist" | "consultation">("shortlist");
+  const [modalView, setModalView] = useState<"form" | "calendly">("form");
+  const [contactFirstName, setContactFirstName] = useState("");
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CompanyLead>({
+    resolver: zodResolver(companyLeadSchema),
+    mode: "onTouched",
+  });
+
+  const phoneValue = watch("phone") ?? "";
 
   const openModal = (type: "shortlist" | "consultation") => {
     setModalType(type);
+    setModalView("form");
+    setApiError(null);
+    reset();
     setModalOpen(true);
+  };
+
+  const onLeadSubmit = async (data: CompanyLead) => {
+    setApiError(null);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/public/company-enquiries`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { message?: string };
+        setApiError(body.message ?? "Something went wrong. Please try again.");
+        return;
+      }
+
+      setContactFirstName(data.contactName.split(" ")[0]);
+      setModalView("calendly");
+    } catch {
+      setApiError("Unable to connect. Please check your connection and try again.");
+    }
   };
 
   return (
     <>
       {/* ─── Lead Capture Modal ────────────────────────────────────────── */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {modalType === "shortlist"
-                ? "Get Your Free Shortlist"
-                : "Book a Free Consultation"}
-            </DialogTitle>
-            <DialogDescription>
-              {modalType === "shortlist"
-                ? "Tell us what you need and we'll send 3–5 vetted profiles within 48 hours."
-                : "Schedule a call with our team to discuss your hiring needs."}
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            className="space-y-4 pt-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              window.location.href = "/companies/signup";
-            }}
-          >
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First name</Label>
-                <Input id="firstName" placeholder="Jane" required />
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden gap-0">
+          {modalView === "form" ? (
+            <>
+              {/* Header with accent bar */}
+              <div className="border-b border-border bg-muted/30 px-6 pt-6 pb-5">
+                <DialogHeader className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex size-8 items-center justify-center rounded-full bg-pulse/10">
+                      {modalType === "shortlist" ? (
+                        <Sparkles className="size-4 text-pulse" />
+                      ) : (
+                        <Calendar className="size-4 text-pulse" />
+                      )}
+                    </div>
+                    <DialogTitle className="text-lg font-semibold">
+                      {modalType === "shortlist"
+                        ? "Get Your Free Shortlist"
+                        : "Book a Free Consultation"}
+                    </DialogTitle>
+                  </div>
+                  <DialogDescription className="text-sm text-muted-foreground">
+                    {modalType === "shortlist"
+                      ? "Tell us what you need and we'll send 3-5 vetted profiles within 48 hours."
+                      : "Share your details and book a call with our team."}
+                  </DialogDescription>
+                </DialogHeader>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last name</Label>
-                <Input id="lastName" placeholder="Smith" required />
+
+              {/* Form */}
+              <form
+                className="px-6 py-5 space-y-4"
+                onSubmit={handleSubmit(onLeadSubmit)}
+                noValidate
+              >
+                {/* Honeypot — hidden from real users */}
+                <input type="text" className="hidden" tabIndex={-1} autoComplete="off" {...register("website")} />
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="contactName" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Full Name</Label>
+                  <Input
+                    id="contactName"
+                    placeholder="Jane Smith"
+                    className="h-10"
+                    {...register("contactName")}
+                  />
+                  {errors.contactName && (
+                    <p className="text-xs text-destructive">{errors.contactName.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="companyName" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Company Name</Label>
+                  <Input
+                    id="companyName"
+                    placeholder="Acme Inc."
+                    className="h-10"
+                    {...register("companyName")}
+                  />
+                  {errors.companyName && (
+                    <p className="text-xs text-destructive">{errors.companyName.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="leadEmail" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Work Email</Label>
+                  <Input
+                    id="leadEmail"
+                    type="email"
+                    placeholder="jane@acme.com"
+                    className="h-10"
+                    {...register("email")}
+                  />
+                  {errors.email && (
+                    <p className="text-xs text-destructive">{errors.email.message}</p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="leadPhone" className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Phone Number</Label>
+                  <input type="hidden" {...register("phone")} />
+                  <PhoneInput
+                    id="leadPhone"
+                    value={phoneValue}
+                    onChange={(v) => setValue("phone", v, { shouldValidate: true })}
+                  />
+                  {errors.phone && (
+                    <p className="text-xs text-destructive">{errors.phone.message}</p>
+                  )}
+                </div>
+
+                {apiError && (
+                  <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2">
+                    <p className="text-sm text-destructive">{apiError}</p>
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full rounded-full gap-2 h-11"
+                  size="lg"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : modalType === "shortlist" ? (
+                    <>
+                      Get My Free Shortlist
+                      <ArrowRight className="size-4" />
+                    </>
+                  ) : (
+                    <>
+                      Continue to Booking
+                      <ArrowRight className="size-4" />
+                    </>
+                  )}
+                </Button>
+
+                <div className="flex items-center justify-center gap-4 pt-1 pb-1">
+                  <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <ShieldCheck className="size-3" />
+                    No spam, ever
+                  </span>
+                  <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <Clock className="size-3" />
+                    Response in 24h
+                  </span>
+                  <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                    <Check className="size-3" />
+                    No commitment
+                  </span>
+                </div>
+              </form>
+            </>
+          ) : (
+            /* ─── Calendly Booking View ─── */
+            <div className="animate-in fade-in slide-in-from-right-2 duration-300">
+              <div className="border-b border-border bg-muted/30 px-6 pt-6 pb-5">
+                <DialogHeader className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="flex size-8 items-center justify-center rounded-full bg-green-500/10">
+                      <CheckCircle className="size-4 text-green-500" />
+                    </div>
+                    <DialogTitle className="text-lg font-semibold">
+                      Thanks{contactFirstName ? `, ${contactFirstName}` : ""}!
+                    </DialogTitle>
+                  </div>
+                  <DialogDescription className="text-sm text-muted-foreground">
+                    Your details have been received. Book a time below to speak with our team.
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+              <div className="px-2 py-2">
+                <div
+                  className="calendly-inline-widget rounded-lg overflow-hidden"
+                  data-url={CALENDLY_URL}
+                  style={{ minWidth: "100%", height: "580px" }}
+                />
+                <Script
+                  src="https://assets.calendly.com/assets/external/widget.js"
+                  strategy="lazyOnload"
+                />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Work email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="jane@company.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="company">Company name</Label>
-              <Input id="company" placeholder="Acme Inc." required />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="role">Role you&apos;re hiring for</Label>
-                <Select>
-                  <SelectTrigger id="role">
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="frontend">Frontend Engineer</SelectItem>
-                    <SelectItem value="backend">Backend Engineer</SelectItem>
-                    <SelectItem value="fullstack">Full-Stack Engineer</SelectItem>
-                    <SelectItem value="devops">DevOps Engineer</SelectItem>
-                    <SelectItem value="mobile">Mobile Developer</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="devs">How many developers?</Label>
-                <Select>
-                  <SelectTrigger id="devs">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="2-3">2–3</SelectItem>
-                    <SelectItem value="4-5">4–5</SelectItem>
-                    <SelectItem value="6+">6+</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Button type="submit" className="w-full rounded-full gap-2" size="lg">
-              {modalType === "shortlist"
-                ? "Get My Free Shortlist"
-                : "Book My Consultation"}
-              <ArrowRight className="size-4" />
-            </Button>
-            <p className="text-center text-[10px] text-muted-foreground">
-              No commitment required. We&apos;ll respond within 24 hours.
-            </p>
-          </form>
+          )}
         </DialogContent>
       </Dialog>
 
