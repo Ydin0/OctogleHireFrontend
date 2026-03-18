@@ -159,7 +159,7 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
               <img
                 src={s.logo}
                 alt={s.company}
-                className="h-6 w-auto opacity-40 dark:brightness-0 dark:invert hidden sm:block"
+                className="h-6 w-auto opacity-40 invert dark:invert-0 hidden sm:block"
               />
             </div>
 

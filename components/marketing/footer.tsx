@@ -136,7 +136,7 @@ const Footer = ({ className }: FooterProps) => {
                     alt={badge.alt}
                     width={80}
                     height={80}
-                    className="h-12 w-auto dark:brightness-0 dark:invert opacity-60 hover:opacity-100 transition-opacity"
+                    className="h-12 w-auto invert dark:invert-0 opacity-60 hover:opacity-100 transition-opacity"
                   />
                 ))}
               </div>

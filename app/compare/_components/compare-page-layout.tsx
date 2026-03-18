@@ -127,7 +127,7 @@ export function ComparePageLayout({ data }: { data: ComparePageData }) {
                       alt={data.competitorName}
                       width={140}
                       height={40}
-                      className="h-7 w-auto dark:brightness-0 dark:invert opacity-60"
+                      className="h-7 w-auto invert dark:invert-0 opacity-60"
                     />
                   ) : (
                     <span className="text-sm font-medium text-muted-foreground">
@@ -208,7 +208,7 @@ export function ComparePageLayout({ data }: { data: ComparePageData }) {
                                 alt={data.competitorName}
                                 width={80}
                                 height={24}
-                                className="h-5 w-auto dark:brightness-0 dark:invert opacity-60"
+                                className="h-5 w-auto invert dark:invert-0 opacity-60"
                               />
                             ) : (
                               <span className="text-[10px] uppercase tracking-wider text-muted-foreground">

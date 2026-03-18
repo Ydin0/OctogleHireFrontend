@@ -93,7 +93,7 @@ const Hero = ({ className }: HeroProps) => {
               alt={badge.alt}
               width={80}
               height={80}
-              className="h-14 w-auto dark:brightness-0 dark:invert opacity-70 hover:opacity-100 transition-opacity"
+              className="h-14 w-auto invert dark:invert-0 opacity-70 hover:opacity-100 transition-opacity"
             />
           ))}
         </div>

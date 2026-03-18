@@ -589,7 +589,7 @@ export function GetStartedContent() {
                     alt={badge.alt}
                     width={80}
                     height={80}
-                    className="h-14 w-auto dark:brightness-0 dark:invert opacity-70 hover:opacity-100 transition-opacity"
+                    className="h-14 w-auto invert dark:invert-0 opacity-70 hover:opacity-100 transition-opacity"
                   />
                 ))}
               </div>
@@ -810,7 +810,7 @@ export function GetStartedContent() {
                         <img
                           src={logo.image}
                           alt={logo.name}
-                          className="max-h-7 max-w-[120px] w-auto object-contain dark:brightness-0 dark:invert opacity-50 hover:opacity-100 transition-opacity"
+                          className="max-h-7 max-w-[120px] w-auto object-contain invert dark:invert-0 opacity-50 hover:opacity-100 transition-opacity"
                         />
                       </div>
                     </CarouselItem>
