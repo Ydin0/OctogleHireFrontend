@@ -28,7 +28,7 @@ const data: ComparePageData = {
   heroTitle: (
     <>
       Same elite talent.{" "}
-      <span className="text-muted-foreground">Half the cost.</span>
+      <span className="text-pulse">Half the cost.</span>
     </>
   ),
   heroDescription:

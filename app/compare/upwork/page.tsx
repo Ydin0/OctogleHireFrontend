@@ -28,7 +28,7 @@ const data: ComparePageData = {
   heroTitle: (
     <>
       Stop filtering.{" "}
-      <span className="text-muted-foreground">Start building.</span>
+      <span className="text-pulse">Start building.</span>
     </>
   ),
   heroDescription:

@@ -27,7 +27,7 @@ const data: ComparePageData = {
   heroTitle: (
     <>
       Months of recruiting.{" "}
-      <span className="text-muted-foreground">Or 48 hours.</span>
+      <span className="text-pulse">Or 48 hours.</span>
     </>
   ),
   heroDescription:
