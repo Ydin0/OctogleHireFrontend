@@ -1174,16 +1174,16 @@ export function HirePageLayout({
               <div className="hidden xl:flex items-center justify-center">
                 <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
                   {[
-                    { value: "150+", label: "Countries" },
+                    { value: "30+", label: "Countries" },
                     { value: "1,000+", label: "Developers" },
                     { value: "48h", label: "Delivery" },
-                    { value: "1 in 25", label: "Acceptance rate" },
+                    { value: "4%", label: "Acceptance rate" },
                   ].map((s) => (
                     <div
                       key={s.label}
                       className="rounded-lg border border-white/10 bg-white/5 p-6 text-center"
                     >
-                      <p className="text-3xl font-semibold font-mono text-pulse">
+                      <p className="text-2xl font-semibold font-mono text-pulse lg:text-3xl whitespace-nowrap">
                         {s.value}
                       </p>
                       <p className="mt-1 text-xs font-mono uppercase tracking-wider text-white/60">

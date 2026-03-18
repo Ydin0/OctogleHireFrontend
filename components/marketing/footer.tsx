@@ -54,10 +54,20 @@ const sections = [
     ],
   },
   {
+    title: "Compare",
+    links: [
+      { name: "vs Toptal", href: "/compare/toptal" },
+      { name: "vs Upwork", href: "/compare/upwork" },
+      { name: "vs Turing", href: "/compare/turing" },
+      { name: "vs Direct Hiring", href: "/compare/direct-hiring" },
+    ],
+  },
+  {
     title: "Legal",
     links: [
       { name: "Privacy Policy", href: "/privacy" },
       { name: "Terms of Service", href: "/terms" },
+      { name: "Security", href: "/security" },
     ],
   },
 ];
@@ -105,8 +115,8 @@ const Footer = ({ className }: FooterProps) => {
         <footer className="pb-16">
           <Separator className="my-14" />
           <div className="flex flex-col items-start justify-between gap-10 lg:flex-row">
-            <div className="max-w-xs space-y-4">
-              <Link href="/">
+            <div className="max-w-xs">
+              <Link href="/" className="mb-8 block">
                 <Logo width={140} height={32} />
               </Link>
               <p className="text-sm text-muted-foreground">

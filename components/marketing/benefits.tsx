@@ -43,7 +43,7 @@ const benefits = [
     icon: Users,
     title: "Dedicated Account Manager",
     description:
-      "A human account manager supports 300+ companies on the platform — handling onboarding, replacements, and ongoing success.",
+      "Every client is assigned a dedicated account manager who handles onboarding, ongoing support, and replacements.",
   },
   {
     icon: Clock,
