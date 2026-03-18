@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -123,6 +124,22 @@ const Footer = ({ className }: FooterProps) => {
                 The global talent platform for pre-vetted developers from 30+
                 countries. Build world-class engineering teams in days, not months.
               </p>
+              <div className="mt-6 flex items-center gap-4">
+                {[
+                  { src: "/security/ISO copy.png", alt: "ISO 27001 Certified" },
+                  { src: "/security/GDPR copy.png", alt: "GDPR Compliant" },
+                  { src: "/security/CCPA copy.png", alt: "CCPA Compliant" },
+                ].map((badge) => (
+                  <Image
+                    key={badge.alt}
+                    src={badge.src}
+                    alt={badge.alt}
+                    width={80}
+                    height={80}
+                    className="h-12 w-auto dark:brightness-0 dark:invert opacity-60 hover:opacity-100 transition-opacity"
+                  />
+                ))}
+              </div>
             </div>
             <div className="flex flex-wrap gap-12">
               {sections.map((section) => (

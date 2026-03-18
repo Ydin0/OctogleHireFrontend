@@ -2,6 +2,7 @@
 
 import AutoScroll from "embla-carousel-auto-scroll";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
@@ -78,6 +79,23 @@ const Hero = ({ className }: HeroProps) => {
           <Button asChild variant="outline" size="lg" className="rounded-full px-6">
             <a href="/marketplace">Browse Developers</a>
           </Button>
+        </div>
+
+        <div className="mt-6 flex items-center justify-center gap-5 flex-wrap">
+          {[
+            { src: "/security/ISO copy.png", alt: "ISO 27001 Certified" },
+            { src: "/security/GDPR copy.png", alt: "GDPR Compliant" },
+            { src: "/security/CCPA copy.png", alt: "CCPA Compliant" },
+          ].map((badge) => (
+            <Image
+              key={badge.alt}
+              src={badge.src}
+              alt={badge.alt}
+              width={80}
+              height={80}
+              className="h-14 w-auto dark:brightness-0 dark:invert opacity-70 hover:opacity-100 transition-opacity"
+            />
+          ))}
         </div>
 
         <p className="mt-6 text-center text-[10px] text-muted-foreground">

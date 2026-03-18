@@ -63,7 +63,7 @@ const team = [
     bio: "18 years of engineering experience across full-stack, architecture, and Elixir. A recognised speaker at Elixir conferences, Anil leads our technical vetting and assessment design — ensuring only truly exceptional engineers make it through.",
   },
   {
-    name: "Milo",
+    name: "Milo Clarke",
     role: "Client Success Manager",
     image: "/MiloSales.jpg",
     linkedin: null,
