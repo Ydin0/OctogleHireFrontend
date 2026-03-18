@@ -98,6 +98,7 @@ const companyLogos = [
   { id: "logo-6", name: "SquareLogik", image: "/company-logos/SquareLogik.svg" },
   { id: "logo-7", name: "Unichats", image: "/company-logos/Unichats.svg" },
   { id: "logo-8", name: "Workchats", image: "/company-logos/Workchats.svg" },
+  { id: "logo-9", name: "The Care App", image: "/company-logos/thecareapp.svg" },
 ];
 
 const processSteps = [
