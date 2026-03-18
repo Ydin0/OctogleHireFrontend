@@ -90,54 +90,14 @@ const avatars = [
 ];
 
 const companyLogos = [
-  {
-    id: "logo-1",
-    name: "Nextera",
-    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/nextjs-wordmark.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-2",
-    name: "Synthetica",
-    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/react-wordmark.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-3",
-    name: "Luminar",
-    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/vercel-wordmark.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-4",
-    name: "Axiom",
-    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/supabase-wordmark.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-5",
-    name: "Vertex AI",
-    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/tailwind-wordmark.svg",
-    className: "h-4 w-auto",
-  },
-  {
-    id: "logo-6",
-    name: "Polaris",
-    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/astro-wordmark.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-7",
-    name: "Figma",
-    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/figma-wordmark.svg",
-    className: "h-7 w-auto",
-  },
-  {
-    id: "logo-8",
-    name: "Shadcn",
-    image: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcn-ui-wordmark.svg",
-    className: "h-7 w-auto",
-  },
+  { id: "logo-1", name: "1VA", image: "/company-logos/1VA.svg" },
+  { id: "logo-2", name: "Beekey", image: "/company-logos/Beekey.svg" },
+  { id: "logo-3", name: "Corpwise", image: "/company-logos/Corpwise.svg" },
+  { id: "logo-4", name: "DNO Investments", image: "/company-logos/DNO Investments.svg" },
+  { id: "logo-5", name: "Solidus", image: "/company-logos/Solidus.svg" },
+  { id: "logo-6", name: "SquareLogik", image: "/company-logos/SquareLogik.svg" },
+  { id: "logo-7", name: "Unichats", image: "/company-logos/Unichats.svg" },
+  { id: "logo-8", name: "Workchats", image: "/company-logos/Workchats.svg" },
 ];
 
 const processSteps = [
@@ -849,7 +809,7 @@ export function GetStartedContent() {
                         <img
                           src={logo.image}
                           alt={logo.name}
-                          className={logo.className}
+                          className="h-8 w-auto dark:brightness-0 dark:invert opacity-60 hover:opacity-100 transition-opacity"
                         />
                       </div>
                     </CarouselItem>
