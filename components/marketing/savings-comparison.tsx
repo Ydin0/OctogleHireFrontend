@@ -16,7 +16,7 @@ const stories = [
     name: "Sarah Chen",
     role: "CTO",
     company: "Nextera Technologies",
-    logo: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-1.svg",
+    logo: "/company-logos/Solidus.svg",
     avatar:
       "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop&crop=face",
     quote:
@@ -33,7 +33,7 @@ const stories = [
     name: "Marcus Rivera",
     role: "VP of Engineering",
     company: "Cloudshift",
-    logo: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-2.svg",
+    logo: "/company-logos/Corpwise.svg",
     avatar:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
     quote:
@@ -50,7 +50,7 @@ const stories = [
     name: "Priya Sharma",
     role: "Head of People",
     company: "Finova",
-    logo: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-3.svg",
+    logo: "/company-logos/1VA.svg",
     avatar:
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop&crop=face",
     quote:
@@ -67,7 +67,7 @@ const stories = [
     name: "James Okafor",
     role: "CTO",
     company: "DataPulse Analytics",
-    logo: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/company/fictional-company-logo-4.svg",
+    logo: "/company-logos/DNO Investments.svg",
     avatar:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
     quote:
@@ -159,7 +159,7 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
               <img
                 src={s.logo}
                 alt={s.company}
-                className="h-6 w-auto opacity-40 hidden sm:block"
+                className="h-6 w-auto opacity-40 dark:brightness-0 dark:invert hidden sm:block"
               />
             </div>
 
