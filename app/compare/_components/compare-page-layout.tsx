@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Check, X as XIcon } from "lucide-react";
 
@@ -32,6 +33,8 @@ interface FAQ {
 export interface ComparePageData {
   competitorName: string;
   competitorTagline: string;
+  /** Path to competitor logo image (e.g. "/competitor-logos/turing.svg") */
+  competitorLogo?: string;
   heroTitle: React.ReactNode;
   heroDescription: string;
   /** Short verdict paragraph shown above the table */
@@ -117,12 +120,22 @@ export function ComparePageLayout({ data }: { data: ComparePageData }) {
                     Feature
                   </span>
                 </div>
-                <div className="bg-muted/30 p-5">
+                <div className="bg-muted/30 p-5 flex items-center gap-2.5">
+                  {data.competitorLogo && (
+                    <Image
+                      src={data.competitorLogo}
+                      alt={data.competitorName}
+                      width={80}
+                      height={32}
+                      className="h-5 w-auto dark:brightness-0 dark:invert opacity-50"
+                    />
+                  )}
                   <span className="text-sm font-medium text-muted-foreground">
                     {data.competitorName}
                   </span>
                 </div>
-                <div className="bg-muted/30 p-5">
+                <div className="bg-muted/30 p-5 flex items-center gap-2.5">
+                  <Logo width={20} height={20} />
                   <span className="text-sm font-semibold text-pulse">
                     OctogleHire
                   </span>
@@ -191,7 +204,16 @@ export function ComparePageLayout({ data }: { data: ComparePageData }) {
                             />
                           )}
                           <div>
-                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+                              {data.competitorLogo && (
+                                <Image
+                                  src={data.competitorLogo}
+                                  alt={data.competitorName}
+                                  width={48}
+                                  height={20}
+                                  className="h-3.5 w-auto dark:brightness-0 dark:invert opacity-50"
+                                />
+                              )}
                               {data.competitorName}
                             </span>
                             <p className="text-xs text-muted-foreground">

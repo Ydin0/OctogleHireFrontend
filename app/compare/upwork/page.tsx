@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 const data: ComparePageData = {
   competitorName: "Upwork",
   competitorTagline: "Open freelance marketplace",
+  competitorLogo: "/competitor-logos/upwork.svg",
   heroTitle: (
     <>
       Stop filtering.{" "}

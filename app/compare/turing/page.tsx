@@ -24,10 +24,11 @@ export const metadata: Metadata = {
 const data: ComparePageData = {
   competitorName: "Turing",
   competitorTagline: "AI-powered talent cloud",
+  competitorLogo: "/competitor-logos/turing.svg",
   heroTitle: (
     <>
       Human vetting.{" "}
-      <span className="text-muted-foreground">Better results.</span>
+      <span className="text-pulse">Better results.</span>
     </>
   ),
   heroDescription:
