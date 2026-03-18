@@ -793,16 +793,31 @@ export function GetStartedContent() {
               Trusted by engineering teams building with
             </p>
           </div>
-          <div className="container mx-auto px-6 pt-10">
-            <div className="flex flex-wrap items-center justify-center gap-x-16 gap-y-8">
-              {companyLogos.map((logo) => (
-                <img
-                  key={logo.id}
-                  src={logo.image}
-                  alt={logo.name}
-                  className="h-8 w-auto dark:brightness-0 dark:invert opacity-50 hover:opacity-100 transition-opacity"
-                />
-              ))}
+          <div className="pt-10">
+            <div className="relative mx-auto flex items-center justify-center">
+              <Carousel
+                opts={{ loop: true, align: "start" }}
+                plugins={[AutoScroll({ playOnInit: true, speed: 0.6, stopOnInteraction: false })]}
+              >
+                <CarouselContent className="ml-0">
+                  {[...companyLogos, ...companyLogos].map((logo, i) => (
+                    <CarouselItem
+                      key={`${logo.id}-${i}`}
+                      className="flex basis-1/3 items-center justify-center pl-0 sm:basis-1/4 md:basis-1/5 lg:basis-[12.5%]"
+                    >
+                      <div className="flex h-10 w-32 shrink-0 items-center justify-center">
+                        <img
+                          src={logo.image}
+                          alt={logo.name}
+                          className="max-h-7 max-w-[120px] w-auto object-contain dark:brightness-0 dark:invert opacity-50 hover:opacity-100 transition-opacity"
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-linear-to-r from-background to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-linear-to-l from-background to-transparent" />
             </div>
           </div>
         </section>
