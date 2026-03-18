@@ -120,25 +120,23 @@ export function ComparePageLayout({ data }: { data: ComparePageData }) {
                     Feature
                   </span>
                 </div>
-                <div className="bg-muted/30 p-5 flex items-center gap-2.5">
-                  {data.competitorLogo && (
+                <div className="bg-muted/30 p-5 flex items-center">
+                  {data.competitorLogo ? (
                     <Image
                       src={data.competitorLogo}
                       alt={data.competitorName}
-                      width={80}
-                      height={32}
-                      className="h-5 w-auto dark:brightness-0 dark:invert opacity-50"
+                      width={140}
+                      height={40}
+                      className="h-7 w-auto dark:brightness-0 dark:invert opacity-60"
                     />
+                  ) : (
+                    <span className="text-sm font-medium text-muted-foreground">
+                      {data.competitorName}
+                    </span>
                   )}
-                  <span className="text-sm font-medium text-muted-foreground">
-                    {data.competitorName}
-                  </span>
                 </div>
-                <div className="bg-muted/30 p-5 flex items-center gap-2.5">
-                  <Logo width={20} height={20} />
-                  <span className="text-sm font-semibold text-pulse">
-                    OctogleHire
-                  </span>
+                <div className="bg-muted/30 p-5 flex items-center">
+                  <Logo width={120} height={28} />
                 </div>
               </div>
 
@@ -204,18 +202,19 @@ export function ComparePageLayout({ data }: { data: ComparePageData }) {
                             />
                           )}
                           <div>
-                            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-                              {data.competitorLogo && (
-                                <Image
-                                  src={data.competitorLogo}
-                                  alt={data.competitorName}
-                                  width={48}
-                                  height={20}
-                                  className="h-3.5 w-auto dark:brightness-0 dark:invert opacity-50"
-                                />
-                              )}
-                              {data.competitorName}
-                            </span>
+                            {data.competitorLogo ? (
+                              <Image
+                                src={data.competitorLogo}
+                                alt={data.competitorName}
+                                width={80}
+                                height={24}
+                                className="h-5 w-auto dark:brightness-0 dark:invert opacity-60"
+                              />
+                            ) : (
+                              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                                {data.competitorName}
+                              </span>
+                            )}
                             <p className="text-xs text-muted-foreground">
                               {row.competitor}
                             </p>
@@ -227,9 +226,7 @@ export function ComparePageLayout({ data }: { data: ComparePageData }) {
                             strokeWidth={2.5}
                           />
                           <div>
-                            <span className="text-[10px] uppercase tracking-wider text-pulse">
-                              OctogleHire
-                            </span>
+                            <Logo width={80} height={18} />
                             <p className="text-xs font-medium">{row.octogle}</p>
                           </div>
                         </div>
