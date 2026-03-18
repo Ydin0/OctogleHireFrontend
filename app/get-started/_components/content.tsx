@@ -793,31 +793,16 @@ export function GetStartedContent() {
               Trusted by engineering teams building with
             </p>
           </div>
-          <div className="pt-8">
-            <div className="relative mx-auto flex items-center justify-center lg:max-w-5xl">
-              <Carousel
-                opts={{ loop: true }}
-                plugins={[AutoScroll({ playOnInit: true, speed: 0.8 })]}
-              >
-                <CarouselContent className="ml-0">
-                  {companyLogos.map((logo) => (
-                    <CarouselItem
-                      key={logo.id}
-                      className="flex basis-1/3 justify-center pl-0 sm:basis-1/4 md:basis-1/5 lg:basis-1/6"
-                    >
-                      <div className="mx-10 flex shrink-0 items-center justify-center">
-                        <img
-                          src={logo.image}
-                          alt={logo.name}
-                          className="h-8 w-auto dark:brightness-0 dark:invert opacity-60 hover:opacity-100 transition-opacity"
-                        />
-                      </div>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
-              <div className="absolute inset-y-0 left-0 w-12 bg-linear-to-r from-background to-transparent" />
-              <div className="absolute inset-y-0 right-0 w-12 bg-linear-to-l from-background to-transparent" />
+          <div className="container mx-auto px-6 pt-10">
+            <div className="flex flex-wrap items-center justify-center gap-x-16 gap-y-8">
+              {companyLogos.map((logo) => (
+                <img
+                  key={logo.id}
+                  src={logo.image}
+                  alt={logo.name}
+                  className="h-8 w-auto dark:brightness-0 dark:invert opacity-50 hover:opacity-100 transition-opacity"
+                />
+              ))}
             </div>
           </div>
         </section>
