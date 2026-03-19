@@ -27,11 +27,13 @@ export default async function CompanyDashboardLayout({
   }
 
   const token = await getToken();
-  const { accountType, orgId } = await fetchUserRole(token);
-  const destination = resolveDashboardPathFromRole(accountType, orgId);
+  const { accountType, orgId, roles } = await fetchUserRole(token);
 
-  if (destination !== "/companies/dashboard") {
-    redirect(destination);
+  if (!roles.includes("company")) {
+    const destination = resolveDashboardPathFromRole(accountType, orgId);
+    if (destination !== "/companies/dashboard") {
+      redirect(destination);
+    }
   }
 
   const clerkUser = await currentUser();
@@ -59,7 +61,7 @@ export default async function CompanyDashboardLayout({
 
   return (
     <div className="min-h-screen bg-background">
-      <CompanySidebar user={user} companyProfile={companyProfile} />
+      <CompanySidebar user={user} companyProfile={companyProfile} roles={roles} activeRole={accountType ?? "company"} />
       <CompanyHeader user={user} companyProfile={companyProfile} />
       <main className="lg:ml-64">
         <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 lg:py-8">

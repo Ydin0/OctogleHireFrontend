@@ -33,11 +33,13 @@ export default async function DeveloperDashboardLayout({
   }
 
   const token = await getToken();
-  const { accountType, orgId } = await fetchUserRole(token);
-  const destination = resolveDashboardPathFromRole(accountType, orgId);
+  const { accountType, orgId, roles } = await fetchUserRole(token);
 
-  if (destination !== "/developers/dashboard") {
-    redirect(destination);
+  if (!roles.includes("developer") && roles.length > 0) {
+    const destination = resolveDashboardPathFromRole(accountType, orgId);
+    if (destination !== "/developers/dashboard") {
+      redirect(destination);
+    }
   }
 
   const applicationStatus = await fetchDeveloperApplicationStatus(token);

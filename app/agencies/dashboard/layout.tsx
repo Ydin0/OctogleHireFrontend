@@ -24,12 +24,14 @@ export default async function AgencyDashboardLayout({
   }
 
   const token = await getToken();
-  const { accountType, orgId } = await fetchUserRole(token);
-  const destination = resolveDashboardPathFromRole(accountType, orgId);
+  const { accountType, orgId, roles } = await fetchUserRole(token);
 
-  if (destination !== "/agencies/dashboard") {
-    redirect(destination);
+  if (!roles.includes("agency")) {
+    const destination = resolveDashboardPathFromRole(accountType, orgId);
+    if (destination !== "/agencies/dashboard") {
+      redirect(destination);
+    }
   }
 
-  return <AgencyDashboardShell>{children}</AgencyDashboardShell>;
+  return <AgencyDashboardShell roles={roles} activeRole={accountType ?? "agency"}>{children}</AgencyDashboardShell>;
 }

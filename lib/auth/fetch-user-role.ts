@@ -4,12 +4,13 @@ const apiBaseUrl =
 interface UserRoleResponse {
   accountType: string | null;
   orgId: string | null;
+  roles: string[];
 }
 
 export const fetchUserRole = async (
   authToken: string | null
 ): Promise<UserRoleResponse> => {
-  if (!authToken) return { accountType: null, orgId: null };
+  if (!authToken) return { accountType: null, orgId: null, roles: [] };
 
   try {
     const response = await fetch(`${apiBaseUrl}/api/auth/session`, {
@@ -21,7 +22,7 @@ export const fetchUserRole = async (
     });
 
     if (!response.ok) {
-      return { accountType: null, orgId: null };
+      return { accountType: null, orgId: null, roles: [] };
     }
 
     const payload = await response.json();
@@ -30,8 +31,9 @@ export const fetchUserRole = async (
       accountType:
         typeof payload.accountType === "string" ? payload.accountType : null,
       orgId: typeof payload.orgId === "string" ? payload.orgId : null,
+      roles: Array.isArray(payload.roles) ? payload.roles : [],
     };
   } catch {
-    return { accountType: null, orgId: null };
+    return { accountType: null, orgId: null, roles: [] };
   }
 };

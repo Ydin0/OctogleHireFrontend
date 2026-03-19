@@ -30,6 +30,7 @@ import {
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
+import { RoleSwitcher } from "@/components/shared/role-switcher";
 
 const sidebarItems = [
   { href: "/agencies/dashboard", label: "Overview", icon: Layers },
@@ -55,7 +56,7 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-const AgencyDashboardShell = ({ children }: { children: React.ReactNode }) => {
+const AgencyDashboardShell = ({ children, roles, activeRole }: { children: React.ReactNode; roles?: string[]; activeRole?: string }) => {
   const pathname = usePathname();
   const { signOut } = useClerk();
   const { getToken } = useAuth();
@@ -100,6 +101,9 @@ const AgencyDashboardShell = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           <div className="flex items-center gap-2">
+            {roles && activeRole && (
+              <RoleSwitcher roles={roles} activeRole={activeRole} />
+            )}
             <Badge
               variant="outline"
               className="font-mono uppercase tracking-[0.08em]"

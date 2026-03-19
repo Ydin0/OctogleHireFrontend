@@ -18,6 +18,7 @@ import {
 
 import type { CompanyProfileSummary } from "@/lib/api/companies";
 import { Logo } from "@/components/logo";
+import { RoleSwitcher } from "@/components/shared/role-switcher";
 
 const navGroups = [
   {
@@ -63,21 +64,30 @@ interface CompanySidebarProps {
     imageUrl: string | null;
   };
   companyProfile: CompanyProfileSummary | null;
+  roles?: string[];
+  activeRole?: string;
 }
 
-function CompanySidebarContent({ companyProfile }: CompanySidebarProps) {
+function CompanySidebarContent({ companyProfile, roles, activeRole }: CompanySidebarProps) {
   const pathname = usePathname();
 
   const companyName = companyProfile?.companyName ?? "Company";
 
   return (
     <div className="flex h-full flex-col">
-      <Link href="/" className="flex flex-col gap-1 border-b border-border/70 px-6 py-5 transition-colors hover:bg-accent/50">
-        <Logo width={110} height={26} />
-        <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-          Company Portal
-        </p>
-      </Link>
+      <div className="border-b border-border/70">
+        <Link href="/" className="flex flex-col gap-1 px-6 py-5 transition-colors hover:bg-accent/50">
+          <Logo width={110} height={26} />
+          <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+            Company Portal
+          </p>
+        </Link>
+        {roles && activeRole && (
+          <div className="px-3 pb-3">
+            <RoleSwitcher roles={roles} activeRole={activeRole} />
+          </div>
+        )}
+      </div>
 
       <div className="flex items-center gap-3 border-b border-border/70 px-6 py-4">
         {companyProfile?.logoUrl ? (

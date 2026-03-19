@@ -26,11 +26,13 @@ export default async function AdminDashboardLayout({
   }
 
   const token = await getToken();
-  const { accountType, orgId } = await fetchUserRole(token);
-  const destination = resolveDashboardPathFromRole(accountType, orgId);
+  const { accountType, orgId, roles } = await fetchUserRole(token);
 
-  if (destination !== "/admin/dashboard") {
-    redirect(destination);
+  if (!roles.includes("admin")) {
+    const destination = resolveDashboardPathFromRole(accountType, orgId);
+    if (destination !== "/admin/dashboard") {
+      redirect(destination);
+    }
   }
 
   const clerkUser = await currentUser();
