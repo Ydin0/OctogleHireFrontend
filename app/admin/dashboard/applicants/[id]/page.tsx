@@ -46,6 +46,7 @@ import { FeaturedToggle } from "./_components/featured-toggle";
 import { MarketplaceProfileEditor } from "./_components/marketplace-profile-editor";
 import { EditProfileDialog } from "./_components/edit-profile-dialog";
 import { VideoIntroButton } from "./_components/video-intro-button";
+import { SendReminderButton } from "./_components/send-reminder-button";
 
 const getInitials = (name: string | null) => {
   if (!name) return "??";
@@ -286,6 +287,10 @@ export default async function ApplicantDetailPage({
                 introVideoPath={applicant.introVideoPath}
                 applicantName={applicant.fullName ?? "Applicant"}
                 applicantEmail={applicant.email}
+              />
+              <SendReminderButton
+                applicationId={applicant.id}
+                status={applicant.status}
               />
               <StatusChanger
                 applicationId={applicant.id}
