@@ -16,6 +16,7 @@ import type {
   ExperienceLevel,
   JobRequirement,
 } from "@/lib/api/companies";
+import { ArrowLeft, Briefcase, GraduationCap, Trophy, Award } from "lucide-react";
 import { getInitials } from "../../../../../_components/dashboard-data";
 import { cn } from "@/lib/utils";
 import {
@@ -175,6 +176,244 @@ const EMPTY_FILTERS: Filters = {
   location: "",
 };
 
+// ── Developer Profile Panel ──────────────────────────────────────────────────
+
+interface ProfilePanelProps {
+  scored: ScoredDeveloper;
+  reqSkillsLower: Set<string>;
+  onBack: () => void;
+  isSelected: boolean;
+  onToggleSelect: () => void;
+}
+
+function DeveloperProfilePanel({
+  scored,
+  reqSkillsLower,
+  onBack,
+  isSelected,
+  onToggleSelect,
+}: ProfilePanelProps) {
+  const { dev, score, matchingSkills } = scored;
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0">
+      {/* Header bar */}
+      <div className="shrink-0 flex items-center gap-3 border-b px-6 py-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-muted-foreground"
+          onClick={onBack}
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to results
+        </Button>
+        <div className="flex-1" />
+        <Badge
+          variant="outline"
+          className={cn("font-mono text-xs", scoreBadgeClass(score))}
+        >
+          {score}% match
+        </Badge>
+        <Button
+          variant={isSelected ? "default" : "outline"}
+          size="sm"
+          className="gap-1.5"
+          onClick={onToggleSelect}
+        >
+          {isSelected ? (
+            <>
+              <Check className="size-3.5" />
+              Selected
+            </>
+          ) : (
+            "Select for Proposal"
+          )}
+        </Button>
+      </div>
+
+      {/* Scrollable profile */}
+      <ScrollArea className="flex-1">
+        <div className="p-6 space-y-6 max-w-3xl">
+          {/* Identity */}
+          <div className="flex items-start gap-4">
+            <Avatar className="size-16 shrink-0">
+              <AvatarImage src={dev.avatar} alt={dev.name} />
+              <AvatarFallback>{getInitials(dev.name)}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0">
+              <h3 className="text-lg font-semibold">{dev.name}</h3>
+              <p className="text-sm text-muted-foreground">{dev.role}</p>
+              <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <MapPin className="size-3" />
+                  {dev.location}
+                </span>
+                <span>{dev.yearsOfExperience}y experience</span>
+                {dev.hourlyRate > 0 && (
+                  <span className="font-mono">${dev.hourlyRate}/hr</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* About */}
+          {(dev.about || dev.bio) && (
+            <div className="space-y-1.5">
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                About
+              </h4>
+              <p className="text-sm leading-relaxed">
+                {dev.about || dev.bio}
+              </p>
+            </div>
+          )}
+
+          {/* Skills */}
+          <div className="space-y-1.5">
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Skills
+            </h4>
+            <div className="flex flex-wrap gap-1.5">
+              {(dev.skills ?? []).map((skill) => (
+                <Badge
+                  key={skill}
+                  variant={
+                    reqSkillsLower.has(skill.toLowerCase())
+                      ? "default"
+                      : "secondary"
+                  }
+                  className="text-xs"
+                >
+                  {skill}
+                  {matchingSkills.some(
+                    (ms) => ms.toLowerCase() === skill.toLowerCase(),
+                  ) && (
+                    <Check className="ml-1 size-2.5" />
+                  )}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          {/* Work History */}
+          {dev.workHistory && dev.workHistory.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Briefcase className="size-3" />
+                Work Experience
+              </h4>
+              <div className="space-y-3">
+                {dev.workHistory.map((job, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted">
+                      {job.companyLogoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={job.companyLogoUrl}
+                          alt={job.company}
+                          className="size-5 rounded-sm object-contain"
+                        />
+                      ) : job.companyDomain ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={`https://www.google.com/s2/favicons?domain=${job.companyDomain}&sz=32`}
+                          alt={job.company}
+                          className="size-4"
+                        />
+                      ) : (
+                        <Briefcase className="size-3.5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">{job.role}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {job.company}
+                        {job.duration && ` · ${job.duration}`}
+                      </p>
+                      {job.description && (
+                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                          {job.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Education */}
+          {dev.education && dev.education.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <GraduationCap className="size-3" />
+                Education
+              </h4>
+              <div className="space-y-3">
+                {dev.education.map((edu, i) => (
+                  <div key={i} className="flex gap-3">
+                    <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md border bg-muted">
+                      <GraduationCap className="size-3.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">{edu.degree}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {edu.institution}
+                        {edu.field && ` · ${edu.field}`}
+                        {edu.year && ` · ${edu.year}`}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Achievements */}
+          {dev.achievements && dev.achievements.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Trophy className="size-3" />
+                Achievements
+              </h4>
+              <ul className="space-y-1">
+                {dev.achievements.map((a, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm">
+                    <Check className="mt-0.5 size-3 shrink-0 text-emerald-500" />
+                    {a}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Awards */}
+          {dev.awards && dev.awards.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Award className="size-3" />
+                Awards
+              </h4>
+              <div className="space-y-2">
+                {dev.awards.map((a, i) => (
+                  <div key={i} className="text-sm">
+                    <p className="font-medium">{a.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {a.issuer}
+                      {a.year && ` · ${a.year}`}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 
 const apiBaseUrl =
@@ -223,6 +462,8 @@ const DeveloperPool = ({
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  const [profileDev, setProfileDev] = useState<ScoredDeveloper | null>(null);
 
   const [bulkDialogOpen, setBulkDialogOpen] = useState(false);
   const [workingDaysPerMonth, setWorkingDaysPerMonth] = useState("22");
@@ -608,9 +849,17 @@ const DeveloperPool = ({
               </div>
             </div>
 
-            {/* Right main area — table */}
+            {/* Right main area — table or profile */}
             <div className="flex-1 flex flex-col min-h-0">
-              {devsLoading ? (
+              {profileDev ? (
+                <DeveloperProfilePanel
+                  scored={profileDev}
+                  reqSkillsLower={reqSkillsLower}
+                  onBack={() => setProfileDev(null)}
+                  isSelected={selectedIds.has(profileDev.dev.id)}
+                  onToggleSelect={() => toggleSelection(profileDev.dev.id)}
+                />
+              ) : devsLoading ? (
                 <div className="flex flex-1 flex-col items-center justify-center text-center">
                   <Loader2 className="size-6 animate-spin text-muted-foreground" />
                   <p className="mt-3 text-sm text-muted-foreground">
@@ -690,9 +939,16 @@ const DeveloperPool = ({
                                   </AvatarFallback>
                                 </Avatar>
                                 <div className="min-w-0">
-                                  <p className="text-sm font-medium truncate">
+                                  <button
+                                    type="button"
+                                    className="text-sm font-medium truncate hover:underline underline-offset-4 text-left"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setProfileDev({ dev, score, matchingSkills });
+                                    }}
+                                  >
                                     {dev.name}
-                                  </p>
+                                  </button>
                                   <p className="text-xs text-muted-foreground truncate">
                                     {dev.role}
                                   </p>

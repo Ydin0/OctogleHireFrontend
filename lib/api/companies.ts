@@ -37,6 +37,30 @@ export type EngagementType =
 
 export type Priority = "low" | "medium" | "high" | "urgent";
 
+export interface WorkHistoryEntry {
+  company: string;
+  role: string;
+  duration: string;
+  description: string;
+  techUsed: string[];
+  companyDomain?: string;
+  companyLogoUrl?: string;
+}
+
+export interface EducationEntry {
+  institution: string;
+  degree: string;
+  field: string;
+  year: string;
+  institutionLogoUrl?: string;
+}
+
+export interface AwardEntry {
+  title: string;
+  issuer: string;
+  year: string;
+}
+
 export interface DeveloperSummary {
   id: string;
   name: string;
@@ -50,6 +74,11 @@ export interface DeveloperSummary {
   location: string;
   yearsOfExperience: number;
   bio: string;
+  about?: string;
+  workHistory?: WorkHistoryEntry[];
+  education?: EducationEntry[];
+  achievements?: string[];
+  awards?: AwardEntry[];
 }
 
 export interface TeamMember {
