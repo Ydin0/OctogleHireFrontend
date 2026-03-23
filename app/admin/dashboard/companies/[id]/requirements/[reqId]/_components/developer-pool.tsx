@@ -549,14 +549,6 @@ const DeveloperPool = ({
     return [...skillSet].sort();
   }, [allDevs]);
 
-  const allRoles = useMemo(() => {
-    const roleSet = new Set<string>();
-    for (const dev of allDevs) {
-      if (dev.role) roleSet.add(dev.role);
-    }
-    return [...roleSet].sort();
-  }, [allDevs]);
-
   // Compute match scores once
   const scoredDevs = useMemo(
     (): ScoredDeveloper[] =>
@@ -571,6 +563,14 @@ const DeveloperPool = ({
         }),
     [allDevs, excludeDevIds, requirement],
   );
+
+  const allRoles = useMemo(() => {
+    const roleSet = new Set<string>();
+    for (const { dev } of scoredDevs) {
+      if (dev.role) roleSet.add(dev.role);
+    }
+    return [...roleSet].sort();
+  }, [scoredDevs]);
 
   // Apply filters + search
   const filteredDevs = useMemo(() => {
@@ -818,6 +818,7 @@ const DeveloperPool = ({
                           {allSkills.map((skill) => (
                             <CommandItem
                               key={skill}
+                              value={skill}
                               onSelect={() => toggleSkill(skill)}
                             >
                               <Check
@@ -884,15 +885,16 @@ const DeveloperPool = ({
                       <ChevronDown className="ml-2 size-3.5 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[220px] p-0" align="start">
+                  <PopoverContent className="w-[260px] p-0" align="start">
                     <Command>
                       <CommandInput placeholder="Search roles..." />
-                      <CommandList>
+                      <CommandList className="max-h-[400px]">
                         <CommandEmpty>No roles found.</CommandEmpty>
                         <CommandGroup>
                           {allRoles.map((role) => (
                             <CommandItem
                               key={role}
+                              value={role}
                               onSelect={() => toggleRole(role)}
                             >
                               <Check
