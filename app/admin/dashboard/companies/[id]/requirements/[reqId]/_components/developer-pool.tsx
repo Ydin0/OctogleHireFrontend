@@ -809,10 +809,14 @@ const DeveloperPool = ({
                       <ChevronDown className="ml-2 size-3.5 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[220px] p-0" align="start">
+                  <PopoverContent
+                    className="w-[220px] p-0"
+                    align="start"
+                    onWheel={(e) => e.stopPropagation()}
+                  >
                     <Command>
                       <CommandInput placeholder="Search skills..." />
-                      <CommandList>
+                      <CommandList className="overscroll-contain">
                         <CommandEmpty>No skills found.</CommandEmpty>
                         <CommandGroup>
                           {allSkills.map((skill) => (
@@ -885,10 +889,14 @@ const DeveloperPool = ({
                       <ChevronDown className="ml-2 size-3.5 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[260px] p-0" align="start">
+                  <PopoverContent
+                    className="w-[260px] p-0"
+                    align="start"
+                    onWheel={(e) => e.stopPropagation()}
+                  >
                     <Command>
                       <CommandInput placeholder="Search roles..." />
-                      <CommandList className="max-h-[400px]">
+                      <CommandList className="max-h-[300px] overflow-y-auto overscroll-contain">
                         <CommandEmpty>No roles found.</CommandEmpty>
                         <CommandGroup>
                           {allRoles.map((role) => (
