@@ -82,11 +82,10 @@ const CALENDLY_URL = "https://calendly.com/yaseen-octogle/30min";
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 const avatars = [
-  { src: "/Yaseen Founder.jpg", alt: "Yaseen" },
-  { src: "/Anil-TechLead.jpg", alt: "Anil" },
-  { src: "/Ricardo-Recruitment.jpg", alt: "Ricardo" },
-  { src: "/Stergios-Technology.jpg", alt: "Stergios" },
-  { src: "/Dimitris-Marketing.jpg", alt: "Dimitris" },
+  { src: "/review-1.jpg", alt: "Client" },
+  { src: "/review-2.jpg", alt: "Client" },
+  { src: "/review-3.jpg", alt: "Client" },
+  { src: "/review-4.jpg", alt: "Client" },
 ];
 
 const companyLogos = [
@@ -531,28 +530,34 @@ export function GetStartedContent() {
                 placement fees. Compliance handled across 30+ countries.
               </p>
 
-              {/* Avatar stack + rating */}
-              <div className="mb-12 flex w-fit flex-col items-center gap-4 sm:flex-row">
-                <span className="inline-flex items-center -space-x-4">
-                  {avatars.map((avatar) => (
-                    <Avatar key={avatar.alt} className="size-12 border">
+              {/* Avatar stack + Clutch rating */}
+              <div className="mb-12 flex w-fit items-center gap-4 rounded-full border border-border/60 bg-background/80 py-2.5 pl-3 pr-5 shadow-sm backdrop-blur">
+                <span className="inline-flex items-center -space-x-3">
+                  {avatars.map((avatar, i) => (
+                    <Avatar key={i} className="size-9 border-2 border-background ring-1 ring-border/40">
                       <AvatarImage src={avatar.src} alt={avatar.alt} />
                     </Avatar>
                   ))}
                 </span>
-                <div>
-                  <div className="flex items-center gap-1">
+                <span className="h-6 w-px bg-border/60" />
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0.5">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className="size-5 fill-yellow-400 text-yellow-400"
+                        className="size-3.5 fill-yellow-400 text-yellow-400"
                       />
                     ))}
-                    <span className="mr-1 font-semibold">5.0</span>
                   </div>
-                  <p className="text-left font-medium text-muted-foreground">
-                    from 200+ client reviews
-                  </p>
+                  <span className="text-sm font-semibold">5.0</span>
+                  <span className="text-xs text-muted-foreground">on</span>
+                  <span className="flex items-center gap-1">
+                    <svg viewBox="0 0 24 24" className="size-4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="12" fill="#E41E2E" />
+                      <circle cx="12" cy="12" r="4" fill="white" />
+                    </svg>
+                    <span className="text-sm font-bold tracking-tight">Clutch</span>
+                  </span>
                 </div>
               </div>
 

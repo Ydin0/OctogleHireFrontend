@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 124" fill="none">
+  <path d="M104.5 62c0 34.2-27.8 62-62 62C8.3 124-19.5 96.2-19.5 62S8.3 0 42.5 0c34.2 0 62 27.8 62 62z" fill="#E41E2E" transform="translate(19.5)"/>
+  <circle cx="62" cy="62" r="20" fill="white"/>
+  <text x="140" y="88" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="82" fill="currentColor">Clutch</text>
+</svg>
