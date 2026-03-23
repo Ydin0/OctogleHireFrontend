@@ -7,9 +7,9 @@ import { Navbar } from "@/components/marketing/navbar";
 import { CompanySignupForm } from "./_components/company-signup-form";
 
 export const metadata: Metadata = {
-  title: "Book a Demo",
+  title: "Sign Up — Start Hiring",
   description:
-    "Tell us about your hiring needs and we'll match you with pre-vetted engineers in 48 hours.",
+    "Create your free account and get matched with pre-vetted engineers in 48 hours.",
   keywords: [
     "hire developers",
     "book hiring call",
@@ -134,10 +134,10 @@ export default function CompanySignupPage() {
 
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold">
-                    Book a free demo
+                    Create your account
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    30 minutes · No commitment · Results in 48h
+                    Free to sign up · No commitment · Start hiring in 48h
                   </p>
                 </div>
                 <CompanySignupForm />

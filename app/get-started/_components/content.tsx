@@ -578,14 +578,17 @@ export function GetStartedContent() {
                 </span>
               </div>
 
-              {/* CTAs — open modal */}
+              {/* CTAs */}
               <div className="flex w-full flex-col justify-center gap-2 sm:flex-row lg:justify-start">
                 <Button
+                  asChild
                   size="lg"
                   className="w-full rounded-full sm:w-auto"
-                  onClick={() => openModal("shortlist")}
                 >
-                  Get Your Free Shortlist
+                  <Link href="/companies/signup">
+                    Sign Up — It&apos;s Free
+                    <ArrowRight className="ml-1 size-4" />
+                  </Link>
                 </Button>
                 <Button
                   variant="outline"
@@ -593,7 +596,7 @@ export function GetStartedContent() {
                   className="w-full rounded-full sm:w-auto"
                   onClick={() => openModal("consultation")}
                 >
-                  Book a Free Consultation
+                  Book a Demo
                   <ArrowDownRight className="ml-1 size-4" />
                 </Button>
               </div>
