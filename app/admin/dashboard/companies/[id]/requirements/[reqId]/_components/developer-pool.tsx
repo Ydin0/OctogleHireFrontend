@@ -81,6 +81,7 @@ interface ScoredDeveloper {
 
 interface Filters {
   skills: string[];
+  roles: string[];
   expMin: string;
   expMax: string;
   rateMin: string;
@@ -169,6 +170,7 @@ function scoreBadgeClass(score: number) {
 const PAGE_SIZE = 50;
 const EMPTY_FILTERS: Filters = {
   skills: [],
+  roles: [],
   expMin: "",
   expMax: "",
   rateMin: "",
@@ -547,6 +549,14 @@ const DeveloperPool = ({
     return [...skillSet].sort();
   }, [allDevs]);
 
+  const allRoles = useMemo(() => {
+    const roleSet = new Set<string>();
+    for (const dev of allDevs) {
+      if (dev.role) roleSet.add(dev.role);
+    }
+    return [...roleSet].sort();
+  }, [allDevs]);
+
   // Compute match scores once
   const scoredDevs = useMemo(
     (): ScoredDeveloper[] =>
@@ -582,6 +592,13 @@ const DeveloperPool = ({
         filterSkillsLower.some((fs) =>
           (dev.skills ?? []).some((ds) => ds.toLowerCase() === fs),
         ),
+      );
+    }
+
+    if (filters.roles.length > 0) {
+      const filterRolesLower = filters.roles.map((r) => r.toLowerCase());
+      result = result.filter(({ dev }) =>
+        filterRolesLower.includes((dev.role ?? "").toLowerCase()),
       );
     }
 
@@ -621,6 +638,7 @@ const DeveloperPool = ({
 
   const activeFilterCount = [
     filters.skills.length > 0,
+    filters.roles.length > 0,
     filters.expMin,
     filters.expMax,
     filters.rateMin,
@@ -658,6 +676,17 @@ const DeveloperPool = ({
       return { ...prev, skills: [...set] };
     });
   }, []);
+
+  const toggleRole = useCallback((role: string) => {
+    setFilters((prev) => {
+      const set = new Set(prev.roles);
+      if (set.has(role)) set.delete(role);
+      else set.add(role);
+      return { ...prev, roles: [...set] };
+    });
+  }, []);
+
+  const [rolesPopoverOpen, setRolesPopoverOpen] = useState(false);
 
   const clearAllFilters = useCallback(() => {
     setFilters(EMPTY_FILTERS);
@@ -825,6 +854,73 @@ const DeveloperPool = ({
                         onClick={() => toggleSkill(skill)}
                       >
                         {skill}
+                        <X className="size-2.5" />
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Roles */}
+              <div className="space-y-1.5">
+                <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Role
+                </Label>
+                <Popover
+                  open={rolesPopoverOpen}
+                  onOpenChange={setRolesPopoverOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      className="w-full justify-between font-normal"
+                    >
+                      <span className="truncate">
+                        {filters.roles.length > 0
+                          ? `${filters.roles.length} selected`
+                          : "Any role"}
+                      </span>
+                      <ChevronDown className="ml-2 size-3.5 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[220px] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search roles..." />
+                      <CommandList>
+                        <CommandEmpty>No roles found.</CommandEmpty>
+                        <CommandGroup>
+                          {allRoles.map((role) => (
+                            <CommandItem
+                              key={role}
+                              onSelect={() => toggleRole(role)}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 size-3.5",
+                                  filters.roles.includes(role)
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+                              {role}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                {filters.roles.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-1">
+                    {filters.roles.map((role) => (
+                      <Badge
+                        key={role}
+                        variant="secondary"
+                        className="gap-1 text-xs cursor-pointer"
+                        onClick={() => toggleRole(role)}
+                      >
+                        {role}
                         <X className="size-2.5" />
                       </Badge>
                     ))}
