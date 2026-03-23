@@ -79,6 +79,10 @@ export interface DeveloperSummary {
   education?: EducationEntry[];
   achievements?: string[];
   awards?: AwardEntry[];
+  introVideoUrl?: string | null;
+  resumeUrl?: string | null;
+  engagementType?: string | null;
+  availability?: string | null;
 }
 
 export interface TeamMember {

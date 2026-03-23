@@ -16,7 +16,7 @@ import type {
   ExperienceLevel,
   JobRequirement,
 } from "@/lib/api/companies";
-import { ArrowLeft, Briefcase, GraduationCap, Trophy, Award } from "lucide-react";
+import { ArrowLeft, Briefcase, FileText, GraduationCap, Trophy, Award, Video } from "lucide-react";
 import { getInitials } from "../../../../../_components/dashboard-data";
 import { cn } from "@/lib/utils";
 import {
@@ -196,7 +196,7 @@ function DeveloperProfilePanel({
   const { dev, score, matchingSkills } = scored;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {/* Header bar */}
       <div className="shrink-0 flex items-center gap-3 border-b px-6 py-3">
         <Button
@@ -232,8 +232,8 @@ function DeveloperProfilePanel({
         </Button>
       </div>
 
-      {/* Scrollable profile */}
-      <ScrollArea className="flex-1">
+      {/* Scrollable profile — native overflow for reliable scrolling */}
+      <div className="flex-1 overflow-y-auto">
         <div className="p-6 space-y-6 max-w-3xl">
           {/* Identity */}
           <div className="flex items-start gap-4">
@@ -241,10 +241,10 @@ function DeveloperProfilePanel({
               <AvatarImage src={dev.avatar} alt={dev.name} />
               <AvatarFallback>{getInitials(dev.name)}</AvatarFallback>
             </Avatar>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h3 className="text-lg font-semibold">{dev.name}</h3>
               <p className="text-sm text-muted-foreground">{dev.role}</p>
-              <div className="mt-1.5 flex items-center gap-3 text-xs text-muted-foreground">
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <MapPin className="size-3" />
                   {dev.location}
@@ -253,9 +253,67 @@ function DeveloperProfilePanel({
                 {dev.hourlyRate > 0 && (
                   <span className="font-mono">${dev.hourlyRate}/hr</span>
                 )}
+                {dev.engagementType && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {dev.engagementType}
+                  </Badge>
+                )}
+                {dev.availability && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {dev.availability === "immediate" ? "Available now" : dev.availability}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
+
+          {/* Quick actions — resume + video */}
+          {(dev.resumeUrl || dev.introVideoUrl) && (
+            <div className="flex flex-wrap gap-2">
+              {dev.resumeUrl && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  asChild
+                >
+                  <a href={dev.resumeUrl} target="_blank" rel="noopener noreferrer">
+                    <FileText className="size-3.5" />
+                    View Resume
+                  </a>
+                </Button>
+              )}
+              {dev.introVideoUrl && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  asChild
+                >
+                  <a href={dev.introVideoUrl} target="_blank" rel="noopener noreferrer">
+                    <Video className="size-3.5" />
+                    Watch Intro Video
+                  </a>
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Intro Video — inline player */}
+          {dev.introVideoUrl && (
+            <div className="space-y-1.5">
+              <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                <Video className="size-3" />
+                Intro Video
+              </h4>
+              <video
+                src={dev.introVideoUrl}
+                controls
+                preload="metadata"
+                className="w-full max-w-lg rounded-lg border bg-black"
+              />
+            </div>
+          )}
 
           {/* About */}
           {(dev.about || dev.bio) && (
@@ -263,7 +321,7 @@ function DeveloperProfilePanel({
               <h4 className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                 About
               </h4>
-              <p className="text-sm leading-relaxed">
+              <p className="text-sm leading-relaxed whitespace-pre-line">
                 {dev.about || dev.bio}
               </p>
             </div>
@@ -409,7 +467,7 @@ function DeveloperProfilePanel({
             </div>
           )}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }
