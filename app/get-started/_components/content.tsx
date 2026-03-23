@@ -530,35 +530,43 @@ export function GetStartedContent() {
                 placement fees. Compliance handled across 30+ countries.
               </p>
 
-              {/* Avatar stack + Clutch rating */}
-              <div className="mb-12 flex w-fit items-center gap-4 rounded-full border border-border/60 bg-background/80 py-2.5 pl-3 pr-5 shadow-sm backdrop-blur">
-                <span className="inline-flex items-center -space-x-3">
+              {/* Clutch rating badge */}
+              <div className="mb-12 flex w-fit items-center gap-5 rounded-xl border border-border/60 bg-background/80 px-5 py-4 shadow-sm backdrop-blur">
+                {/* Left side — Reviewed on + Clutch logo */}
+                <div className="flex flex-col items-start">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Reviewed on
+                  </span>
+                  <Image
+                    src="/clutch-badge.png"
+                    alt="Clutch"
+                    width={100}
+                    height={28}
+                    className="mt-0.5 dark:brightness-0 dark:invert"
+                  />
+                </div>
+                <span className="h-10 w-px bg-border/60" />
+                {/* Right side — Stars + rating */}
+                <div className="flex flex-col items-center gap-0.5">
+                  <div className="flex items-center gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="size-4 fill-[#E62415] text-[#E62415]"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-bold tracking-tight">5.0 Rating</span>
+                </div>
+                <span className="h-10 w-px bg-border/60" />
+                {/* Avatar stack */}
+                <span className="inline-flex items-center -space-x-2.5">
                   {avatars.map((avatar, i) => (
                     <Avatar key={i} className="size-9 border-2 border-background ring-1 ring-border/40">
                       <AvatarImage src={avatar.src} alt={avatar.alt} />
                     </Avatar>
                   ))}
                 </span>
-                <span className="h-6 w-px bg-border/60" />
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="size-3.5 fill-yellow-400 text-yellow-400"
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm font-semibold">5.0</span>
-                  <span className="text-xs text-muted-foreground">on</span>
-                  <span className="flex items-center gap-1">
-                    <svg viewBox="0 0 24 24" className="size-4" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="12" fill="#E41E2E" />
-                      <circle cx="12" cy="12" r="4" fill="white" />
-                    </svg>
-                    <span className="text-sm font-bold tracking-tight">Clutch</span>
-                  </span>
-                </div>
               </div>
 
               {/* CTAs — open modal */}
