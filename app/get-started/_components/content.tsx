@@ -599,7 +599,7 @@ export function GetStartedContent() {
               </div>
 
               {/* Certification badges */}
-              <div className="mt-8 flex items-center gap-5 flex-wrap justify-center lg:justify-start">
+              <div className="mt-8 flex items-center gap-6 flex-wrap justify-center lg:justify-start">
                 {[
                   { src: "/security/ISO copy.png", alt: "ISO 27001 Certified" },
                   { src: "/security/GDPR copy.png", alt: "GDPR Compliant" },
@@ -609,9 +609,9 @@ export function GetStartedContent() {
                     key={badge.alt}
                     src={badge.src}
                     alt={badge.alt}
-                    width={80}
-                    height={80}
-                    className="h-14 w-auto invert dark:invert-0 opacity-70 hover:opacity-100 transition-opacity"
+                    width={120}
+                    height={120}
+                    className="h-20 w-auto opacity-80 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
                   />
                 ))}
               </div>
