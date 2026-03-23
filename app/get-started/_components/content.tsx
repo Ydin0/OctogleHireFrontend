@@ -538,11 +538,20 @@ export function GetStartedContent() {
                     Reviewed on
                   </span>
                   <Image
-                    src="/clutch-badge.png"
+                    src="/company-logos/Clutch.co Logo Dark.svg"
                     alt="Clutch"
                     width={100}
                     height={28}
-                    className="mt-0.5 dark:brightness-0 dark:invert"
+                    unoptimized
+                    className="mt-0.5 block dark:hidden"
+                  />
+                  <Image
+                    src="/company-logos/Clutch.co Logo.svg"
+                    alt="Clutch"
+                    width={100}
+                    height={28}
+                    unoptimized
+                    className="mt-0.5 hidden dark:block"
                   />
                 </div>
                 <span className="h-10 w-px bg-border/60" />
