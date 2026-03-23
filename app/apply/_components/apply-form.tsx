@@ -6,6 +6,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { ArrowLeft, ArrowRight, Send } from "lucide-react";
 
+import { trackMetaEvent } from "@/lib/analytics/meta-events";
 import { applicationSchema, type Application } from "@/lib/schemas/application";
 import type { LinkedInFormValues, ApifyProfile } from "@/lib/linkedin";
 import { Button } from "@/components/ui/button";
@@ -416,6 +417,11 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
       if (!response.ok) {
         throw new Error(await readErrorMessage(response));
       }
+
+      trackMetaEvent("CompleteRegistration", {
+        content_name: "Developer Application",
+        content_category: "developer",
+      });
 
       window.localStorage.removeItem(APPLICATION_DRAFT_STORAGE_KEY);
       window.localStorage.removeItem(REFERRAL_CODE_STORAGE_KEY);

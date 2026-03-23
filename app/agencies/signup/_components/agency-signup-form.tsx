@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, CheckCircle } from "lucide-react";
 
+import { trackMetaEvent } from "@/lib/analytics/meta-events";
 import {
   agencyLeadSchema,
   type AgencyLead,
@@ -60,6 +61,11 @@ const AgencySignupForm = () => {
         );
         return;
       }
+
+      trackMetaEvent("Lead", {
+        content_name: "Agency Signup",
+        content_category: "agency",
+      });
 
       setContactName(data.contactName);
       setView("success");

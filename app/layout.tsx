@@ -5,6 +5,7 @@ import { DM_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
+import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { AIReferralTracker } from "@/components/analytics/ai-referral-tracker";
 import { SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION } from "@/lib/seo";
 import "./globals.css";
@@ -97,6 +98,7 @@ export default function RootLayout({
         className={`${volksans.variable} ${dmMono.variable} antialiased`}
       >
         <GoogleAnalytics />
+        <MetaPixel />
         <ClerkProvider signInUrl="/login">
           <ThemeProvider
             attribute="class"

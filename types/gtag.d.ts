@@ -5,4 +5,9 @@ interface Window {
     params?: Record<string, unknown>,
   ) => void;
   dataLayer: Record<string, unknown>[];
+  fbq: (
+    command: "track" | "trackCustom" | "init",
+    eventOrPixelId: string,
+    params?: Record<string, unknown>,
+  ) => void;
 }

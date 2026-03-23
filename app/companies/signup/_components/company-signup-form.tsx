@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Calendar, Check } from "lucide-react";
 
+import { trackMetaEvent } from "@/lib/analytics/meta-events";
 import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,11 @@ const CompanySignupForm = () => {
         setApiError(body.message ?? "Something went wrong. Please try again.");
         return;
       }
+
+      trackMetaEvent("Lead", {
+        content_name: "Company Signup",
+        content_category: "company",
+      });
 
       setContactName(data.contactName);
       setView("success");
