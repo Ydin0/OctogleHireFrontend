@@ -200,14 +200,22 @@ export interface UnifiedCandidate {
 export interface UnifiedCandidateDetail extends UnifiedCandidate {
   headline?: string | null;
   about?: string | null;
+  bio?: string | null;
+  phone?: string | null;
   experience?: SavedCandidateExperience[] | null;
   education?: SavedCandidateEducation[] | null;
+  workExperience?: unknown[] | null;
   skills?: string[] | null;
   profileImageUrl?: string | null;
   locationCity?: string | null;
   locationState?: string | null;
   availability?: string | null;
   engagementType?: string[] | null;
+  englishProficiency?: string | null;
+  hourlyRateCents?: number | null;
+  monthlyRateCents?: number | null;
+  salaryCurrency?: string | null;
+  secondarySkills?: string | null;
   updatedAt?: string;
 }
 
@@ -861,6 +869,36 @@ export async function addAgencyCandidate(
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     throw new Error((body as { message?: string }).message ?? "Failed to add candidate");
+  }
+
+  return (await response.json()) as Record<string, unknown>;
+}
+
+export async function updateAgencyCandidate(
+  token: string | null,
+  candidateId: string,
+  payload: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/agencies/candidates/${candidateId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(
+      (body as { message?: string }).message ?? "Failed to update candidate"
+    );
   }
 
   return (await response.json()) as Record<string, unknown>;

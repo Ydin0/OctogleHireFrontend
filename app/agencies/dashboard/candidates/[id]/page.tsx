@@ -33,6 +33,7 @@ import {
   PIPELINE_STAGES,
 } from "@/app/admin/dashboard/_components/dashboard-data";
 import { AgencyStatusChanger } from "./_components/agency-status-changer";
+import { CandidateEditForm } from "./_components/candidate-edit-form";
 
 const getInitials = (name: string | null) => {
   if (!name) return "??";
@@ -263,6 +264,29 @@ export default async function AgencyCandidateDetailPage({
               </CardContent>
             </Card>
           </div>
+
+          {/* Editable profile details — only for application candidates */}
+          {!isSaved && (
+            <CandidateEditForm
+              candidateId={candidate.id}
+              initialData={{
+                email: candidate.email,
+                fullName: candidate.fullName,
+                phone: candidate.phone ?? null,
+                professionalTitle: candidate.professionalTitle,
+                bio: candidate.bio ?? null,
+                locationCity: candidate.locationCity ?? null,
+                locationState: candidate.locationState ?? null,
+                yearsOfExperience: candidate.yearsOfExperience,
+                availability: candidate.availability ?? null,
+                englishProficiency: candidate.englishProficiency ?? null,
+                salaryCurrency: candidate.salaryCurrency ?? null,
+                hourlyRateCents: candidate.hourlyRateCents ?? null,
+                monthlyRateCents: candidate.monthlyRateCents ?? null,
+                primaryStack: candidate.primaryStack,
+              }}
+            />
+          )}
 
           {/* Professional Summary / About */}
           <Card>

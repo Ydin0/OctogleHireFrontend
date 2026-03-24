@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { MoreHorizontal } from "lucide-react";
+import { AlertTriangle, MoreHorizontal } from "lucide-react";
 
 import type { UnifiedCandidate } from "@/lib/api/agencies";
 import {
@@ -70,6 +70,24 @@ export function getColumns(): ColumnDef<UnifiedCandidate>[] {
                 {email ?? professionalTitle ?? "-"}
               </p>
             </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: "completeness",
+      header: "",
+      size: 36,
+      cell: ({ row }) => {
+        const { email, professionalTitle, primaryStack } = row.original;
+        const missing: string[] = [];
+        if (!email || email.includes("@linkedin-import.placeholder") || email.includes("@import.placeholder")) missing.push("email");
+        if (!professionalTitle) missing.push("title");
+        if (!primaryStack || primaryStack.length === 0) missing.push("skills");
+        if (missing.length === 0) return null;
+        return (
+          <div title={`Missing: ${missing.join(", ")}`}>
+            <AlertTriangle className={`size-4 ${missing.includes("email") ? "text-red-500" : "text-amber-500"}`} />
           </div>
         );
       },

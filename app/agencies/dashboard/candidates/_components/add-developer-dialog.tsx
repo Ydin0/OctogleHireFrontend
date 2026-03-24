@@ -279,10 +279,9 @@ const AddDeveloperDialog = () => {
   // ── Submit new candidate ─────────────────────────────────────────────────
 
   const canSubmit =
-    form.email.trim() &&
     !submitting &&
     !emailChecking &&
-    (!emailCheck || emailCheck.status === "available");
+    (!emailCheck || emailCheck.status === "available" || !form.email.trim());
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -295,7 +294,7 @@ const AddDeveloperDialog = () => {
 
       await addAgencyCandidate(token, {
         fullName: form.fullName.trim() || undefined,
-        email: form.email.trim(),
+        email: form.email.trim() || "",
         professionalTitle: form.professionalTitle.trim() || undefined,
         bio: form.bio.trim() || undefined,
         primaryStack: form.primaryStack.length > 0 ? form.primaryStack : undefined,
