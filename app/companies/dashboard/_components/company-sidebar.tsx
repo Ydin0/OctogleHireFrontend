@@ -139,10 +139,10 @@ function CompanySidebarContent({ companyProfile, roles, activeRole }: CompanySid
   );
 }
 
-function CompanySidebar({ user, companyProfile }: CompanySidebarProps) {
+function CompanySidebar({ user, companyProfile, roles, activeRole }: CompanySidebarProps) {
   return (
     <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-border/70 lg:bg-background">
-      <CompanySidebarContent user={user} companyProfile={companyProfile} />
+      <CompanySidebarContent user={user} companyProfile={companyProfile} roles={roles} activeRole={activeRole} />
     </aside>
   );
 }

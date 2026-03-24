@@ -163,7 +163,7 @@ function UserMenu({ user }: { user: CompanySidebarProps["user"] }) {
   );
 }
 
-function CompanyHeader({ user, companyProfile }: CompanySidebarProps) {
+function CompanyHeader({ user, companyProfile, roles, activeRole }: CompanySidebarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -195,7 +195,7 @@ function CompanyHeader({ user, companyProfile }: CompanySidebarProps) {
           <SheetContent side="left" className="w-64 p-0" showCloseButton={false}>
             <SheetTitle className="sr-only">Navigation</SheetTitle>
             <div onClick={() => setOpen(false)}>
-              <CompanySidebarContent user={user} companyProfile={companyProfile} />
+              <CompanySidebarContent user={user} companyProfile={companyProfile} roles={roles} activeRole={activeRole} />
             </div>
           </SheetContent>
         </Sheet>
