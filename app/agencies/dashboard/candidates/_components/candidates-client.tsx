@@ -8,6 +8,7 @@ import { DataTable } from "@/app/admin/dashboard/_components/data-table";
 import { getColumns } from "./columns";
 import { FiltersBar } from "./filters-bar";
 import { AddDeveloperDialog } from "./add-developer-dialog";
+import { BulkImportDialog } from "./bulk-import-dialog";
 
 interface CandidatesClientProps {
   candidates: UnifiedCandidate[];
@@ -59,7 +60,10 @@ function CandidatesClient({ candidates, pagination }: CandidatesClientProps) {
             All candidates from referrals and LinkedIn prospecting.
           </p>
         </div>
-        <AddDeveloperDialog />
+        <div className="flex items-center gap-2">
+          <BulkImportDialog />
+          <AddDeveloperDialog />
+        </div>
       </div>
 
       <FiltersBar />
