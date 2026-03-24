@@ -726,6 +726,49 @@ export interface FetchAdminRequirementsParams {
   sortOrder?: string;
 }
 
+export interface CreateAdminRequirementPayload {
+  companyId: string;
+  title: string;
+  techStack?: string[];
+  experienceLevel?: string;
+  developersNeeded?: number;
+  engagementType: string;
+  timezonePreference?: string;
+  budgetMinCents?: number | null;
+  budgetMaxCents?: number | null;
+  description: string;
+  startDate?: string;
+  priority?: string;
+  status?: string;
+}
+
+export async function createAdminRequirement(
+  token: string | null,
+  payload: CreateAdminRequirementPayload,
+): Promise<{ requirement: AdminRequirement } | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/requirements`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) return null;
+    return (await response.json()) as { requirement: AdminRequirement };
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchAdminRequirements(
   token: string | null,
   params: FetchAdminRequirementsParams = {}
