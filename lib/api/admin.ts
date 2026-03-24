@@ -731,11 +731,15 @@ export interface CreateAdminRequirementPayload {
   title: string;
   techStack?: string[];
   experienceLevel?: string;
+  experienceYearsMin?: number;
+  experienceYearsMax?: number;
   developersNeeded?: number;
   engagementType: string;
   timezonePreference?: string;
-  budgetMinCents?: number | null;
-  budgetMaxCents?: number | null;
+  hiringCountries?: string[];
+  budgetMin?: number;
+  budgetMax?: number;
+  budgetType?: string;
   description: string;
   startDate?: string;
   priority?: string;
