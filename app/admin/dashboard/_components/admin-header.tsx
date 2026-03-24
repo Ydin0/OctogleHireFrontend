@@ -13,7 +13,7 @@ import {
 import { Logo } from "@/components/logo";
 import { SidebarContent, type AdminSidebarProps } from "./admin-sidebar";
 
-function AdminHeader({ user }: AdminSidebarProps) {
+function AdminHeader({ user, isSuperAdmin, openRequirementCount }: AdminSidebarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -37,7 +37,11 @@ function AdminHeader({ user }: AdminSidebarProps) {
         <SheetContent side="left" className="w-64 p-0" showCloseButton={false}>
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <div onClick={() => setOpen(false)}>
-            <SidebarContent user={user} />
+            <SidebarContent
+              user={user}
+              isSuperAdmin={isSuperAdmin}
+              openRequirementCount={openRequirementCount}
+            />
           </div>
         </SheetContent>
       </Sheet>

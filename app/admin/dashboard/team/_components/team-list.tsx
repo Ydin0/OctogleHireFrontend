@@ -2,13 +2,14 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Camera, Loader2, Pencil, ShieldCheck, Trash2 } from "lucide-react";
 
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,6 +33,7 @@ interface Admin {
   imageUrl: string | null;
   phone: string | null;
   profilePhotoUrl: string | null;
+  isSuperAdmin: boolean;
   createdAt: string;
 }
 
@@ -39,9 +41,10 @@ interface TeamListProps {
   admins: Admin[];
   currentUserId: string;
   token: string;
+  currentUserIsSuperAdmin: boolean;
 }
 
-function TeamList({ admins, currentUserId, token }: TeamListProps) {
+function TeamList({ admins, currentUserId, token, currentUserIsSuperAdmin }: TeamListProps) {
   const router = useRouter();
   const [removing, setRemoving] = useState<string | null>(null);
   const [confirmAdmin, setConfirmAdmin] = useState<Admin | null>(null);
@@ -56,6 +59,7 @@ function TeamList({ admins, currentUserId, token }: TeamListProps) {
   const [editPhotoPreview, setEditPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [togglingSuper, setTogglingSuper] = useState<string | null>(null);
 
   const openEdit = (admin: Admin) => {
     setEditAdmin(admin);
@@ -145,6 +149,37 @@ function TeamList({ admins, currentUserId, token }: TeamListProps) {
     }
   };
 
+  const handleToggleSuperAdmin = async (admin: Admin) => {
+    setTogglingSuper(admin.clerkUserId);
+
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/api/admin/team/${admin.clerkUserId}/super-admin`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ isSuperAdmin: !admin.isSuperAdmin }),
+        },
+      );
+
+      if (!response.ok) {
+        const payload = (await response.json().catch(() => null)) as {
+          message?: string;
+        } | null;
+        throw new Error(payload?.message ?? "Failed to update");
+      }
+
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setTogglingSuper(null);
+    }
+  };
+
   if (admins.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">No admins found.</p>
@@ -180,14 +215,25 @@ function TeamList({ admins, currentUserId, token }: TeamListProps) {
               </Avatar>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">
-                  {fullName}
-                  {isCurrentUser && (
-                    <span className="ml-1.5 text-xs text-muted-foreground">
-                      (you)
-                    </span>
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-medium">
+                    {fullName}
+                    {isCurrentUser && (
+                      <span className="ml-1.5 text-xs text-muted-foreground">
+                        (you)
+                      </span>
+                    )}
+                  </p>
+                  {admin.isSuperAdmin && (
+                    <Badge
+                      variant="outline"
+                      className="gap-1 border-pulse/40 bg-pulse/10 text-pulse text-[10px] px-1.5 py-0"
+                    >
+                      <ShieldCheck className="size-3" />
+                      Super Admin
+                    </Badge>
                   )}
-                </p>
+                </div>
                 <p className="truncate text-xs text-muted-foreground">
                   {admin.email}
                 </p>
@@ -198,7 +244,24 @@ function TeamList({ admins, currentUserId, token }: TeamListProps) {
                 )}
               </div>
 
-              <div className="flex gap-1">
+              <div className="flex items-center gap-1">
+                {currentUserIsSuperAdmin && (
+                  <Button
+                    variant={admin.isSuperAdmin ? "secondary" : "ghost"}
+                    size="sm"
+                    className="h-7 text-xs"
+                    disabled={isCurrentUser || togglingSuper === admin.clerkUserId}
+                    onClick={() => handleToggleSuperAdmin(admin)}
+                  >
+                    {togglingSuper === admin.clerkUserId ? (
+                      <Loader2 className="size-3 animate-spin" />
+                    ) : admin.isSuperAdmin ? (
+                      "Demote"
+                    ) : (
+                      "Promote"
+                    )}
+                  </Button>
+                )}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -226,6 +289,8 @@ function TeamList({ admins, currentUserId, token }: TeamListProps) {
           );
         })}
       </div>
+
+      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
 
       {/* Edit Dialog */}
       <Dialog

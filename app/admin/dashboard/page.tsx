@@ -12,18 +12,13 @@ import {
   Users,
 } from "lucide-react";
 
-import { fetchAdminStats, fetchApplications } from "@/lib/api/admin";
+import { fetchAdminStats, fetchAdminRequirements } from "@/lib/api/admin";
 import {
   type ApplicationStatus,
   applicationStatusBadgeClass,
   applicationStatusLabel,
   PIPELINE_STAGES,
 } from "./_components/dashboard-data";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,26 +30,23 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
-const getInitials = (name: string | null) => {
-  if (!name) return "??";
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+const priorityClass: Record<string, string> = {
+  urgent: "border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400",
+  high: "border-orange-500/40 bg-orange-500/10 text-orange-600 dark:text-orange-400",
+  medium: "border-yellow-500/40 bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+  low: "border-muted-foreground/30 bg-muted text-muted-foreground",
 };
 
 export default async function AdminOverviewPage() {
   const { getToken } = await auth();
   const token = await getToken();
 
-  const [stats, recentResult] = await Promise.all([
+  const [stats, openResult] = await Promise.all([
     fetchAdminStats(token),
-    fetchApplications(token, {
-      page: 1,
+    fetchAdminRequirements(token, {
+      status: "open,matching",
       limit: 5,
-      sortBy: "submittedAt",
+      sortBy: "createdAt",
       sortOrder: "desc",
     }),
   ]);
@@ -132,7 +124,7 @@ export default async function AdminOverviewPage() {
     1
   );
 
-  const recentApplicants = recentResult?.applications ?? [];
+  const openRequirements = openResult?.requirements ?? [];
 
   return (
     <>
@@ -221,45 +213,74 @@ export default async function AdminOverviewPage() {
 
         <Card className="border-pulse/25 xl:col-span-2">
           <CardHeader>
-            <CardTitle>Recent Applications</CardTitle>
-            <CardDescription>Latest applicant submissions.</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Open Requirements</CardTitle>
+                <CardDescription>Requirements needing attention.</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/admin/dashboard/requirements">View All</Link>
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {recentApplicants.length === 0 && (
+          <CardContent className="space-y-3">
+            {openRequirements.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                No applications yet.
+                No open requirements.
               </p>
             )}
-            {recentApplicants.map((applicant) => (
-              <div key={applicant.id} className="flex items-center gap-3">
-                <Avatar size="sm">
-                  {applicant.profilePhotoPath && (
-                    <AvatarImage
-                      src={applicant.profilePhotoPath}
-                      alt={applicant.fullName ?? ""}
-                    />
-                  )}
-                  <AvatarFallback>
-                    {getInitials(applicant.fullName)}
-                  </AvatarFallback>
-                </Avatar>
+            {openRequirements.map((req) => (
+              <Link
+                key={req.id}
+                href={`/admin/dashboard/requirements/${req.id}`}
+                className="flex items-start gap-3 rounded-md border border-transparent px-2 py-2 transition-colors hover:border-border hover:bg-accent/50"
+              >
+                {req.companyLogoUrl ? (
+                  <img
+                    src={req.companyLogoUrl}
+                    alt=""
+                    className="mt-0.5 size-8 shrink-0 rounded-md object-contain"
+                  />
+                ) : (
+                  <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
+                    {(req.companyName ?? "?")[0]?.toUpperCase()}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {applicant.fullName ?? "Unknown"}
-                  </p>
+                  <p className="truncate text-sm font-medium">{req.title}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {applicant.professionalTitle ?? "-"}
+                    {req.companyName ?? "Unknown"}
                   </p>
+                  {req.techStack.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {req.techStack.slice(0, 3).map((tech) => (
+                        <span
+                          key={tech}
+                          className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                      {req.techStack.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground">
+                          +{req.techStack.length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <Badge
-                  variant="outline"
-                  className={`shrink-0 text-[10px] ${applicationStatusBadgeClass(applicant.status as ApplicationStatus)}`}
-                >
-                  {applicationStatusLabel[
-                    applicant.status as ApplicationStatus
-                  ] ?? applicant.status}
-                </Badge>
-              </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] ${priorityClass[req.priority] ?? ""}`}
+                  >
+                    {req.priority}
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px]">
+                    {req.status}
+                  </Badge>
+                </div>
+              </Link>
             ))}
           </CardContent>
         </Card>

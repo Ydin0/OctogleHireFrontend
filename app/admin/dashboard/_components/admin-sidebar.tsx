@@ -25,6 +25,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAdminCurrency } from "./admin-currency-context";
@@ -32,21 +33,24 @@ import { useAdminCurrency } from "./admin-currency-context";
 const navGroups = [
   {
     label: "WORKSPACE",
+    superAdminOnly: false,
     items: [
       { href: "/admin/dashboard", label: "Overview", icon: Layers },
     ],
   },
   {
     label: "PIPELINE",
+    superAdminOnly: false,
     items: [
       { href: "/admin/dashboard/applicants", label: "Applicants", icon: Users },
       { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
-      { href: "/admin/dashboard/requirements", label: "Requirements", icon: Store },
+      { href: "/admin/dashboard/requirements", label: "Requirements", icon: Store, badgeKey: "requirements" as const },
       { href: "/admin/dashboard/interviews", label: "Interviews", icon: Video },
     ],
   },
   {
     label: "PARTNERS",
+    superAdminOnly: true,
     items: [
       { href: "/admin/dashboard/agencies", label: "Agencies", icon: Briefcase },
       { href: "/admin/dashboard/agencies/pitches", label: "Agency Pitches", icon: Send },
@@ -54,6 +58,7 @@ const navGroups = [
   },
   {
     label: "OPERATIONS",
+    superAdminOnly: false,
     items: [
       { href: "/admin/dashboard/time-entries", label: "Timesheets", icon: Clock },
       { href: "/admin/dashboard/change-requests", label: "Requests", icon: GitPullRequestArrow },
@@ -63,6 +68,7 @@ const navGroups = [
   },
   {
     label: "SETTINGS",
+    superAdminOnly: true,
     items: [
       { href: "/admin/dashboard/team", label: "Team", icon: Shield },
       { href: "/admin/dashboard/aeo", label: "AEO Monitoring", icon: Bot },
@@ -81,6 +87,8 @@ interface AdminSidebarProps {
     email: string | null;
     imageUrl: string | null;
   };
+  isSuperAdmin: boolean;
+  openRequirementCount: number;
 }
 
 const currencies = ["USD", "GBP", "AED"] as const;
@@ -110,7 +118,7 @@ function CurrencyToggle() {
   );
 }
 
-function SidebarContent({ user }: AdminSidebarProps) {
+function SidebarContent({ user, isSuperAdmin, openRequirementCount }: AdminSidebarProps) {
   const pathname = usePathname();
   const { signOut } = useClerk();
 
@@ -123,6 +131,10 @@ function SidebarContent({ user }: AdminSidebarProps) {
         .toUpperCase()
     : "AD";
 
+  const visibleGroups = navGroups.filter(
+    (group) => !group.superAdminOnly || isSuperAdmin,
+  );
+
   return (
     <div className="flex h-full flex-col">
       <Link href="/" className="flex flex-col gap-1 border-b border-border/70 px-6 py-5 transition-colors hover:bg-accent/50">
@@ -133,7 +145,7 @@ function SidebarContent({ user }: AdminSidebarProps) {
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-2">
-        {navGroups.map((group, gi) => (
+        {visibleGroups.map((group, gi) => (
           <div key={group.label}>
             <p className={`px-3 mb-1 text-[10px] uppercase tracking-wider text-muted-foreground ${gi === 0 ? "mt-2" : "mt-6"}`}>
               {group.label}
@@ -141,6 +153,11 @@ function SidebarContent({ user }: AdminSidebarProps) {
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const active = isItemActive(pathname, item.href);
+                const badgeCount =
+                  "badgeKey" in item && item.badgeKey === "requirements"
+                    ? openRequirementCount
+                    : 0;
+
                 return (
                   <Link
                     key={item.href}
@@ -153,6 +170,14 @@ function SidebarContent({ user }: AdminSidebarProps) {
                   >
                     <item.icon className="size-4 text-pulse" />
                     {item.label}
+                    {badgeCount > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-auto h-5 min-w-5 justify-center px-1.5 text-[10px] font-mono"
+                      >
+                        {badgeCount}
+                      </Badge>
+                    )}
                   </Link>
                 );
               })}
@@ -194,10 +219,10 @@ function SidebarContent({ user }: AdminSidebarProps) {
   );
 }
 
-function AdminSidebar({ user }: AdminSidebarProps) {
+function AdminSidebar({ user, isSuperAdmin, openRequirementCount }: AdminSidebarProps) {
   return (
     <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-border/70 lg:bg-background">
-      <SidebarContent user={user} />
+      <SidebarContent user={user} isSuperAdmin={isSuperAdmin} openRequirementCount={openRequirementCount} />
     </aside>
   );
 }

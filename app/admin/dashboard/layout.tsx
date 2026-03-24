@@ -7,6 +7,7 @@ import { AdminHeader } from "./_components/admin-header";
 import { AdminCurrencyProvider } from "./_components/admin-currency-context";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
+import { fetchOpenRequirementCount } from "@/lib/api/admin";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | OctogleHire",
@@ -26,7 +27,7 @@ export default async function AdminDashboardLayout({
   }
 
   const token = await getToken();
-  const { accountType, orgId, roles } = await fetchUserRole(token);
+  const { accountType, orgId, roles, isSuperAdmin } = await fetchUserRole(token);
 
   if (!roles.includes("admin")) {
     const destination = resolveDashboardPathFromRole(accountType, orgId);
@@ -34,6 +35,8 @@ export default async function AdminDashboardLayout({
       redirect(destination);
     }
   }
+
+  const openRequirementCount = await fetchOpenRequirementCount(token);
 
   const clerkUser = await currentUser();
   const user = {
@@ -48,8 +51,16 @@ export default async function AdminDashboardLayout({
   return (
     <AdminCurrencyProvider token={token}>
       <div className="min-h-screen bg-background">
-        <AdminSidebar user={user} />
-        <AdminHeader user={user} />
+        <AdminSidebar
+          user={user}
+          isSuperAdmin={isSuperAdmin}
+          openRequirementCount={openRequirementCount}
+        />
+        <AdminHeader
+          user={user}
+          isSuperAdmin={isSuperAdmin}
+          openRequirementCount={openRequirementCount}
+        />
         <main className="lg:ml-64">
           <div className="space-y-6 px-6 py-6 lg:py-8">
             {children}

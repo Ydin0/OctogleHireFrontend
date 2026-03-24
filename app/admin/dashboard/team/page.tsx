@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TeamList } from "./_components/team-list";
 import { AddAdminForm } from "./_components/add-admin-form";
+import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -16,6 +17,7 @@ interface Admin {
   imageUrl: string | null;
   phone: string | null;
   profilePhotoUrl: string | null;
+  isSuperAdmin: boolean;
   createdAt: string;
 }
 
@@ -38,7 +40,10 @@ export default async function TeamPage() {
     redirect("/login");
   }
 
-  const admins = await fetchTeam(token);
+  const [admins, { isSuperAdmin }] = await Promise.all([
+    fetchTeam(token),
+    fetchUserRole(token),
+  ]);
 
   return (
     <>
@@ -60,6 +65,7 @@ export default async function TeamPage() {
                 admins={admins}
                 currentUserId={userId}
                 token={token}
+                currentUserIsSuperAdmin={isSuperAdmin}
               />
             </CardContent>
           </Card>

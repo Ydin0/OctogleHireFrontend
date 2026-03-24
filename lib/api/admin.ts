@@ -200,6 +200,7 @@ export interface AdminTeamMember {
   imageUrl: string | null;
   phone: string | null;
   profilePhotoUrl: string | null;
+  isSuperAdmin: boolean;
   createdAt: string;
 }
 
@@ -917,6 +918,56 @@ export async function fetchInterviews(
     return data as AdminInterview[];
   } catch {
     return [];
+  }
+}
+
+export async function fetchOpenRequirementCount(
+  token: string | null,
+): Promise<number> {
+  if (!token) return 0;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/requirements/open-count`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) return 0;
+    const data = (await response.json()) as { count: number };
+    return data.count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function toggleSuperAdmin(
+  token: string | null,
+  clerkUserId: string,
+  isSuperAdmin: boolean,
+): Promise<boolean> {
+  if (!token) return false;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/team/${clerkUserId}/super-admin`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isSuperAdmin }),
+        cache: "no-store",
+      },
+    );
+
+    return response.ok;
+  } catch {
+    return false;
   }
 }
 

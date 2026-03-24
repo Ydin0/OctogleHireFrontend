@@ -5,12 +5,13 @@ interface UserRoleResponse {
   accountType: string | null;
   orgId: string | null;
   roles: string[];
+  isSuperAdmin: boolean;
 }
 
 export const fetchUserRole = async (
   authToken: string | null
 ): Promise<UserRoleResponse> => {
-  if (!authToken) return { accountType: null, orgId: null, roles: [] };
+  if (!authToken) return { accountType: null, orgId: null, roles: [], isSuperAdmin: false };
 
   try {
     const response = await fetch(`${apiBaseUrl}/api/auth/session`, {
@@ -22,7 +23,7 @@ export const fetchUserRole = async (
     });
 
     if (!response.ok) {
-      return { accountType: null, orgId: null, roles: [] };
+      return { accountType: null, orgId: null, roles: [], isSuperAdmin: false };
     }
 
     const payload = await response.json();
@@ -32,8 +33,9 @@ export const fetchUserRole = async (
         typeof payload.accountType === "string" ? payload.accountType : null,
       orgId: typeof payload.orgId === "string" ? payload.orgId : null,
       roles: Array.isArray(payload.roles) ? payload.roles : [],
+      isSuperAdmin: payload.isSuperAdmin === true,
     };
   } catch {
-    return { accountType: null, orgId: null, roles: [] };
+    return { accountType: null, orgId: null, roles: [], isSuperAdmin: false };
   }
 };
