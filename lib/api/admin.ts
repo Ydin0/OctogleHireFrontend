@@ -23,6 +23,9 @@ export interface AdminApplication {
   flowmingoStatus: string | null;
   flowmingoScore: string | null;
   flowmingoSubmissionUrl: string | null;
+  source: string;
+  agencyId: string | null;
+  agencyName: string | null;
 }
 
 export interface AdminApplicationFull {
@@ -128,6 +131,7 @@ export interface FetchApplicationsParams {
   expMax?: string;
   engagementType?: string;
   availability?: string;
+  agency?: string;
 }
 
 export interface FilterOptions {
@@ -137,6 +141,7 @@ export interface FilterOptions {
   locations: string[];
   engagementTypes: string[];
   availabilities: string[];
+  agencies: { id: string; name: string }[];
 }
 
 export interface ScoringCategory {
@@ -244,6 +249,7 @@ export async function fetchApplications(
     if (params.expMax) searchParams.set("expMax", params.expMax);
     if (params.engagementType) searchParams.set("engagementType", params.engagementType);
     if (params.availability) searchParams.set("availability", params.availability);
+    if (params.agency) searchParams.set("agency", params.agency);
 
     const qs = searchParams.toString();
     const url = `${apiBaseUrl}/api/admin/applications${qs ? `?${qs}` : ""}`;

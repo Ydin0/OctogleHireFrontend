@@ -32,6 +32,7 @@ interface ApplicantsPageProps {
     expMax?: string;
     engagementType?: string;
     availability?: string;
+    agency?: string;
   }>;
 }
 
@@ -67,6 +68,7 @@ export default async function ApplicantsPage({
       expMax: params.expMax,
       engagementType: params.engagementType,
       availability: params.availability,
+      agency: params.agency,
     }),
     fetchFilterOptions(token),
   ]);

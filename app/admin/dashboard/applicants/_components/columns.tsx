@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { ExternalLink, MoreHorizontal, StickyNote } from "lucide-react";
+import { Building2, ExternalLink, MoreHorizontal, StickyNote } from "lucide-react";
 
 import type { AdminApplication } from "@/lib/api/admin";
 import {
@@ -256,6 +256,28 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
           >
             {applicationStatusLabel[status] ?? status}
           </Badge>
+        );
+      },
+    },
+    {
+      id: "source",
+      header: "Source",
+      size: 140,
+      cell: ({ row }) => {
+        const { source, agencyName } = row.original;
+        if (source === "agency_referral" || source === "agency_manual") {
+          return (
+            <Badge
+              variant="outline"
+              className="gap-1 border-blue-200 bg-blue-50 text-blue-700 text-[10px] dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300"
+            >
+              <Building2 className="size-3" />
+              {agencyName ?? "Agency"}
+            </Badge>
+          );
+        }
+        return (
+          <span className="text-xs text-muted-foreground">Direct</span>
         );
       },
     },

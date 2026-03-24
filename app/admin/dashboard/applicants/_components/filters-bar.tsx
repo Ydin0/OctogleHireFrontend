@@ -71,10 +71,12 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
   const currentCategory = searchParams.get("professionalCategory") ?? "all";
 
   const [searchValue, setSearchValue] = useState(currentSearch);
+  const currentAgency = searchParams.get("agency") ?? "";
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [titleOpen, setTitleOpen] = useState(false);
   const [stackOpen, setStackOpen] = useState(false);
   const [statusOpen, setStatusOpen] = useState(false);
+  const [agencyOpen, setAgencyOpen] = useState(false);
 
   // Multi-select helpers for status
   const selectedStatuses = currentStatusParam ? currentStatusParam.split(",") : [];
@@ -94,6 +96,7 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
     currentEngagement,
     currentAvailability,
     currentCategory !== "all" ? currentCategory : "",
+    currentAgency,
   ].filter(Boolean).length;
 
   const pushParams = useCallback(
@@ -149,6 +152,7 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
     if (currentExpMax) exportParams.set("expMax", currentExpMax);
     if (currentEngagement) exportParams.set("engagementType", currentEngagement);
     if (currentAvailability) exportParams.set("availability", currentAvailability);
+    if (currentAgency) exportParams.set("agency", currentAgency);
 
     const qs = exportParams.toString();
     const url = `${apiBaseUrl}/api/admin/applications/export${qs ? `?${qs}` : ""}`;
@@ -196,6 +200,14 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
     if (set.has(val)) set.delete(val);
     else set.add(val);
     pushParams({ availability: [...set].join(",") });
+  };
+
+  const selectedAgencies = currentAgency ? currentAgency.split(",") : [];
+  const toggleAgency = (id: string) => {
+    const set = new Set(selectedAgencies);
+    if (set.has(id)) set.delete(id);
+    else set.add(id);
+    pushParams({ agency: [...set].join(",") });
   };
 
   return (
@@ -505,6 +517,49 @@ function FiltersBar({ filterOptions, token }: FiltersBarProps) {
                   <p className="text-xs text-muted-foreground">No options</p>
                 )}
               </div>
+            </div>
+
+            {/* Agency — multi-select */}
+            <div className="space-y-1.5">
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Agency
+              </Label>
+              <Popover open={agencyOpen} onOpenChange={setAgencyOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between font-normal"
+                  >
+                    <span className="truncate">
+                      {selectedAgencies.length > 0
+                        ? `${selectedAgencies.length} selected`
+                        : "All sources"}
+                    </span>
+                    <ChevronDown className="ml-2 size-3.5 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[250px] p-0" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search agencies..." />
+                    <CommandList>
+                      <CommandEmpty>No agencies found.</CommandEmpty>
+                      <CommandGroup>
+                        {(filterOptions?.agencies ?? []).map((agency) => (
+                          <CommandItem
+                            key={agency.id}
+                            value={agency.name}
+                            onSelect={() => toggleAgency(agency.id)}
+                          >
+                            <Check className={`mr-2 size-3.5 ${selectedAgencies.includes(agency.id) ? "opacity-100" : "opacity-0"}`} />
+                            {agency.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
         </CollapsibleContent>
