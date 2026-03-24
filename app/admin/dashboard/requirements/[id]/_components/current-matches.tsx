@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { MapPin, Trash2 } from "lucide-react";
 
 import type { ProposedMatch } from "@/lib/api/companies";
@@ -44,9 +45,13 @@ const CurrentMatches = ({
 
               <div className="min-w-0 space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-semibold">
+                  <Link
+                    href={`/admin/dashboard/applicants/${match.developerId}`}
+                    className="text-sm font-semibold hover:underline underline-offset-4"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {match.developer.name}
-                  </p>
+                  </Link>
                   <Badge
                     variant="outline"
                     className={matchStatusBadgeClass(match.status)}
