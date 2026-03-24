@@ -9,8 +9,6 @@ import {
   ArrowLeft,
   Building2,
   Calendar,
-  ChevronDown,
-  ChevronUp,
   Loader2,
   Pencil,
   Save,
@@ -48,7 +46,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -84,7 +81,6 @@ const RequirementDetailPage = ({
   const [saving, setSaving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -265,13 +261,6 @@ const RequirementDetailPage = ({
 
   const matches = requirement.proposedMatches ?? [];
   const matchedDevIds = new Set(matches.map((m) => m.developerId));
-  const acceptedCount = matches.filter(
-    (m) => m.status === "accepted" || m.status === "active",
-  ).length;
-  const fillPct =
-    requirement.developersNeeded > 0
-      ? Math.round((acceptedCount / requirement.developersNeeded) * 100)
-      : 0;
 
   return (
     <div className="space-y-6">
@@ -384,61 +373,6 @@ const RequirementDetailPage = ({
           <Calendar className="inline mr-1 size-3" />
           Created {formatDate(requirement.createdAt)}
         </span>
-      </div>
-
-      {/* ── Stat Cards ─────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <div className="rounded-lg border border-border/70 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Experience
-          </p>
-          <p className="mt-1 text-sm font-semibold">
-            {experienceLabel(
-              requirement.experienceYearsMin,
-              requirement.experienceYearsMax,
-              requirement.experienceLevel,
-            )}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-border/70 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Engagement
-          </p>
-          <p className="mt-1 text-sm font-semibold capitalize">
-            {requirement.engagementType?.replace("-", " ") ?? "-"}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-border/70 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Budget
-          </p>
-          <p className="mt-1 font-mono text-sm font-semibold">
-            {requirement.budgetMin && requirement.budgetMax
-              ? `$${requirement.budgetMin}\u2013$${requirement.budgetMax}/${requirement.budgetType === "annual" ? "yr" : requirement.budgetType === "monthly" ? "mo" : "hr"}`
-              : "Flexible"}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-border/70 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Start Date
-          </p>
-          <p className="mt-1 text-sm font-semibold">
-            {formatDate(requirement.startDate)}
-          </p>
-        </div>
-
-        <div className="rounded-lg border border-border/70 p-3">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Team Size
-          </p>
-          <p className="mt-1 font-mono text-sm font-semibold">
-            {acceptedCount}/{requirement.developersNeeded}
-          </p>
-          <Progress value={fillPct} className="mt-1.5 h-1.5" />
-        </div>
       </div>
 
       <Separator />
@@ -693,61 +627,108 @@ const RequirementDetailPage = ({
           </Card>
         </div>
       ) : (
-        <Card>
-          <CardHeader>
-            <button
-              type="button"
-              onClick={() => setDescriptionExpanded((prev) => !prev)}
-              className="flex w-full items-center justify-between text-left"
-            >
-              <CardTitle className="text-base">Description</CardTitle>
-              {descriptionExpanded ? (
-                <ChevronUp className="size-4 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="size-4 text-muted-foreground" />
-              )}
-            </button>
-            {!descriptionExpanded && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {requirement.techStack.slice(0, 8).map((tech) => (
-                  <Badge key={tech} variant="outline">
-                    {tech}
-                  </Badge>
-                ))}
-                {requirement.techStack.length > 8 && (
-                  <Badge variant="outline">
-                    +{requirement.techStack.length - 8}
-                  </Badge>
-                )}
-                {requirement.hiringCountries?.length > 0 && (
-                  <span className="ml-1">
-                    <CountryFlags codes={requirement.hiringCountries} />
-                  </span>
-                )}
-              </div>
-            )}
-          </CardHeader>
-          {descriptionExpanded && (
+        /* Detail View — two-column: description left, details + tech right */
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Description</CardTitle>
+            </CardHeader>
             <CardContent>
-              <div className="text-sm leading-relaxed text-muted-foreground">
+              <div className="text-sm whitespace-pre-wrap leading-relaxed">
                 <MarkdownDisplay content={requirement.description} />
               </div>
-              <Separator className="my-4" />
-              <div className="flex flex-wrap gap-1.5">
-                {requirement.techStack.map((tech) => (
-                  <Badge key={tech} variant="outline">
-                    {tech}
-                  </Badge>
-                ))}
-              </div>
-              {requirement.hiringCountries?.length > 0 && (
-                <div className="mt-2">
-                  <CountryFlags codes={requirement.hiringCountries} />
-                </div>
-              )}
             </CardContent>
-          )}
-        </Card>
+          </Card>
+
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Experience</dt>
+                    <dd>
+                      {experienceLabel(
+                        requirement.experienceYearsMin,
+                        requirement.experienceYearsMax,
+                        requirement.experienceLevel,
+                      )}
+                    </dd>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Engagement Type</dt>
+                    <dd className="capitalize">
+                      {requirement.engagementType?.replace(/-/g, " ") ?? "-"}
+                    </dd>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Developers Needed</dt>
+                    <dd className="font-mono">{requirement.developersNeeded}</dd>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Budget</dt>
+                    <dd className="font-mono">
+                      {requirement.budgetMin || requirement.budgetMax
+                        ? `$${requirement.budgetMin ?? "?"}–$${requirement.budgetMax ?? "?"}/${requirement.budgetType === "annual" ? "yr" : requirement.budgetType === "monthly" ? "mo" : "hr"}`
+                        : "Flexible"}
+                    </dd>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Timezone</dt>
+                    <dd>{getTimezoneLabel(requirement.timezonePreference)}</dd>
+                  </div>
+                  {requirement.startDate && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">Start Date</dt>
+                        <dd>{formatDate(requirement.startDate)}</dd>
+                      </div>
+                    </>
+                  )}
+                  {requirement.hiringCountries?.length > 0 && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between items-center">
+                        <dt className="text-muted-foreground">Hiring Countries</dt>
+                        <dd>
+                          <CountryFlags codes={requirement.hiringCountries} />
+                        </dd>
+                      </div>
+                    </>
+                  )}
+                </dl>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Tech Stack</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-1.5">
+                  {requirement.techStack.length > 0 ? (
+                    requirement.techStack.map((tech) => (
+                      <Badge key={tech} variant="secondary">
+                        {tech}
+                      </Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      No tech stack specified
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       )}
 
       {/* ── Delete Confirmation Dialog ──────────────────────────────── */}
