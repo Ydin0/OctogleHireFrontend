@@ -513,7 +513,7 @@ const CompanyDetailPage = ({
                     return (
                       <Link
                         key={req.id}
-                        href={`/admin/dashboard/companies/${company.id}/requirements/${req.id}`}
+                        href={`/admin/dashboard/requirements/${req.id}`}
                         className="block rounded-lg border border-border/70 p-4 transition-colors hover:border-pulse/30"
                       >
                         <div className="flex items-start justify-between gap-3">

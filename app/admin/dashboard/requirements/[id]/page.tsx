@@ -9,6 +9,8 @@ import {
   ArrowLeft,
   Building2,
   Calendar,
+  ChevronDown,
+  ChevronUp,
   Loader2,
   Pencil,
   Save,
@@ -18,13 +20,20 @@ import {
 } from "lucide-react";
 import { use } from "react";
 
-import type { AdminRequirement } from "@/lib/api/admin";
+import type { JobRequirement } from "@/lib/api/companies";
 import {
-  fetchAdminRequirement,
+  fetchCompanyRequirementAdmin,
+  proposeMatch,
+  removeMatch,
+} from "@/lib/api/companies";
+import {
   updateAdminRequirement,
   toggleRequirementFeatured,
   deleteAdminRequirement,
 } from "@/lib/api/admin";
+import { getTimezoneLabel } from "@/lib/constants/timezones";
+import { experienceLabel } from "@/lib/utils/experience";
+import { CountryFlags } from "@/lib/utils/country-flags";
 import {
   type RequirementStatus,
   requirementStatusBadgeClass,
@@ -33,11 +42,13 @@ import {
   priorityLabel,
   formatDate,
 } from "../../_components/dashboard-data";
+import { MarkdownDisplay } from "@/components/markdown-display";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -55,6 +66,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { CurrentMatches } from "./_components/current-matches";
+import { DeveloperPool } from "./_components/developer-pool";
 
 const RequirementDetailPage = ({
   params,
@@ -65,12 +78,13 @@ const RequirementDetailPage = ({
   const { getToken } = useAuth();
   const router = useRouter();
 
-  const [requirement, setRequirement] = useState<AdminRequirement | null>(null);
+  const [requirement, setRequirement] = useState<JobRequirement | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -80,8 +94,8 @@ const RequirementDetailPage = ({
     priority: "",
     status: "",
     engagementType: "",
-    budgetMinCents: "",
-    budgetMaxCents: "",
+    budgetMin: "",
+    budgetMax: "",
     developersNeeded: "",
     timezonePreference: "",
     startDate: "",
@@ -95,28 +109,23 @@ const RequirementDetailPage = ({
       return;
     }
 
-    const data = await fetchAdminRequirement(token, id);
-    const found = data?.requirement ?? null;
-    setRequirement(found);
+    const data = await fetchCompanyRequirementAdmin(token, id);
+    setRequirement(data);
 
-    if (found) {
+    if (data) {
       setEditForm({
-        title: found.title,
-        description: found.description,
-        experienceLevel: found.experienceLevel,
-        priority: found.priority,
-        status: found.status,
-        engagementType: found.engagementType,
-        budgetMinCents: found.budgetMinCents
-          ? String(found.budgetMinCents / 100)
-          : "",
-        budgetMaxCents: found.budgetMaxCents
-          ? String(found.budgetMaxCents / 100)
-          : "",
-        developersNeeded: String(found.developersNeeded),
-        timezonePreference: found.timezonePreference,
-        startDate: found.startDate ?? "",
-        techStack: found.techStack.join(", "),
+        title: data.title,
+        description: data.description,
+        experienceLevel: data.experienceLevel,
+        priority: data.priority,
+        status: data.status,
+        engagementType: data.engagementType,
+        budgetMin: data.budgetMin ? String(data.budgetMin) : "",
+        budgetMax: data.budgetMax ? String(data.budgetMax) : "",
+        developersNeeded: String(data.developersNeeded),
+        timezonePreference: data.timezonePreference,
+        startDate: data.startDate ?? "",
+        techStack: data.techStack.join(", "),
       });
     }
 
@@ -149,23 +158,23 @@ const RequirementDetailPage = ({
         .filter(Boolean),
     };
 
-    if (editForm.budgetMinCents) {
-      updates.budgetMinCents = Math.round(
-        parseFloat(editForm.budgetMinCents) * 100
-      );
+    if (editForm.budgetMin) {
+      updates.budgetMinCents = Math.round(parseFloat(editForm.budgetMin) * 100);
     } else {
       updates.budgetMinCents = null;
     }
 
-    if (editForm.budgetMaxCents) {
-      updates.budgetMaxCents = Math.round(
-        parseFloat(editForm.budgetMaxCents) * 100
-      );
+    if (editForm.budgetMax) {
+      updates.budgetMaxCents = Math.round(parseFloat(editForm.budgetMax) * 100);
     } else {
       updates.budgetMaxCents = null;
     }
 
-    const result = await updateAdminRequirement(token, requirement.id, updates as never);
+    const result = await updateAdminRequirement(
+      token,
+      requirement.id,
+      updates as never,
+    );
 
     if (result) {
       setEditing(false);
@@ -179,7 +188,11 @@ const RequirementDetailPage = ({
     const token = await getToken();
     if (!token || !requirement) return;
 
-    await toggleRequirementFeatured(token, requirement.id, !requirement.isFeatured);
+    await toggleRequirementFeatured(
+      token,
+      requirement.id,
+      !(requirement as unknown as { isFeatured: boolean }).isFeatured,
+    );
     await loadRequirement();
   };
 
@@ -188,12 +201,35 @@ const RequirementDetailPage = ({
     if (!token || !requirement) return;
 
     setDeleting(true);
-    const ok = await deleteAdminRequirement(token, requirement.id);
+    const ok = await deleteAdminRequirement(token, requirement.id, true);
 
     if (ok) {
       router.push("/admin/dashboard/requirements");
     }
     setDeleting(false);
+  };
+
+  const handlePropose = async (payload: {
+    developerId: string;
+    hourlyRate: number;
+    monthlyRate: number;
+    currency: string;
+  }) => {
+    const token = await getToken();
+    await proposeMatch(token, id, payload);
+    await loadRequirement();
+  };
+
+  const handleRemoveMatch = async (matchId: string) => {
+    const token = await getToken();
+    await removeMatch(token, matchId);
+    setRequirement((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        proposedMatches: prev.proposedMatches?.filter((m) => m.id !== matchId),
+      };
+    });
   };
 
   if (loading) {
@@ -219,9 +255,27 @@ const RequirementDetailPage = ({
     );
   }
 
+  const isFeatured = (requirement as unknown as { isFeatured?: boolean })
+    .isFeatured;
+  const companyLogoUrl = (
+    requirement as unknown as { companyLogoUrl?: string }
+  ).companyLogoUrl;
+  const companyName = (requirement as unknown as { companyName?: string })
+    .companyName;
+
+  const matches = requirement.proposedMatches ?? [];
+  const matchedDevIds = new Set(matches.map((m) => m.developerId));
+  const acceptedCount = matches.filter(
+    (m) => m.status === "accepted" || m.status === "active",
+  ).length;
+  const fillPct =
+    requirement.developersNeeded > 0
+      ? Math.round((acceptedCount / requirement.developersNeeded) * 100)
+      : 0;
+
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <Link
@@ -233,10 +287,10 @@ const RequirementDetailPage = ({
           </Link>
           <div className="flex items-center gap-3">
             <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
-              {requirement.companyLogoUrl ? (
+              {companyLogoUrl ? (
                 <Image
-                  src={requirement.companyLogoUrl}
-                  alt={requirement.companyName ?? ""}
+                  src={companyLogoUrl}
+                  alt={companyName ?? ""}
                   width={40}
                   height={40}
                   className="size-10 object-contain"
@@ -248,27 +302,19 @@ const RequirementDetailPage = ({
             </div>
             <div>
               <h1 className="text-lg font-semibold">{requirement.title}</h1>
-              <p className="text-sm text-muted-foreground">
-                {requirement.companyName}
-              </p>
+              <p className="text-sm text-muted-foreground">{companyName}</p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleToggleFeatured}
-          >
+          <Button variant="outline" size="sm" onClick={handleToggleFeatured}>
             <Star
               className={`mr-1.5 size-3.5 ${
-                requirement.isFeatured
-                  ? "fill-amber-400 text-amber-400"
-                  : ""
+                isFeatured ? "fill-amber-400 text-amber-400" : ""
               }`}
             />
-            {requirement.isFeatured ? "Unfeature" : "Feature"}
+            {isFeatured ? "Unfeature" : "Feature"}
           </Button>
           {!editing ? (
             <Button size="sm" onClick={() => setEditing(true)}>
@@ -308,23 +354,28 @@ const RequirementDetailPage = ({
         </div>
       </div>
 
-      {/* Status badges */}
+      {/* ── Status badges ──────────────────────────────────────────── */}
       <div className="flex items-center gap-2">
         <Badge
           variant="outline"
           className={requirementStatusBadgeClass(
-            requirement.status as RequirementStatus
+            requirement.status as RequirementStatus,
           )}
         >
-          {requirementStatusLabel[
-            requirement.status as RequirementStatus
-          ] ?? requirement.status}
+          {requirementStatusLabel[requirement.status as RequirementStatus] ??
+            requirement.status}
         </Badge>
-        <Badge variant="outline" className={priorityBadgeClass(requirement.priority)}>
+        <Badge
+          variant="outline"
+          className={priorityBadgeClass(requirement.priority)}
+        >
           {priorityLabel[requirement.priority] ?? requirement.priority}
         </Badge>
-        {requirement.isFeatured && (
-          <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-600/20">
+        {isFeatured && (
+          <Badge
+            variant="outline"
+            className="bg-amber-500/10 text-amber-600 border-amber-600/20"
+          >
             <Star className="mr-1 size-3 fill-current" />
             Featured
           </Badge>
@@ -335,10 +386,91 @@ const RequirementDetailPage = ({
         </span>
       </div>
 
+      {/* ── Stat Cards ─────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="rounded-lg border border-border/70 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Experience
+          </p>
+          <p className="mt-1 text-sm font-semibold">
+            {experienceLabel(
+              requirement.experienceYearsMin,
+              requirement.experienceYearsMax,
+              requirement.experienceLevel,
+            )}
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-border/70 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Engagement
+          </p>
+          <p className="mt-1 text-sm font-semibold capitalize">
+            {requirement.engagementType?.replace("-", " ") ?? "-"}
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-border/70 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Budget
+          </p>
+          <p className="mt-1 font-mono text-sm font-semibold">
+            {requirement.budgetMin && requirement.budgetMax
+              ? `$${requirement.budgetMin}\u2013$${requirement.budgetMax}/${requirement.budgetType === "annual" ? "yr" : requirement.budgetType === "monthly" ? "mo" : "hr"}`
+              : "Flexible"}
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-border/70 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Start Date
+          </p>
+          <p className="mt-1 text-sm font-semibold">
+            {formatDate(requirement.startDate)}
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-border/70 p-3">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+            Team Size
+          </p>
+          <p className="mt-1 font-mono text-sm font-semibold">
+            {acceptedCount}/{requirement.developersNeeded}
+          </p>
+          <Progress value={fillPct} className="mt-1.5 h-1.5" />
+        </div>
+      </div>
+
       <Separator />
 
+      {/* ── Current Matches ────────────────────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Current Matches</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {matches.length === 0
+                  ? "No engineers matched yet."
+                  : `${matches.length} engineer${matches.length !== 1 ? "s" : ""} matched.`}
+              </p>
+            </div>
+            <DeveloperPool
+              requirement={requirement}
+              excludeDevIds={matchedDevIds}
+              onPropose={handlePropose}
+            />
+          </div>
+        </CardHeader>
+        {matches.length > 0 && (
+          <CardContent>
+            <CurrentMatches matches={matches} onRemove={handleRemoveMatch} />
+          </CardContent>
+        )}
+      </Card>
+
+      {/* ── Edit Form / Description + Details ──────────────────────── */}
       {editing ? (
-        /* Edit Form */
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader>
@@ -403,7 +535,7 @@ const RequirementDetailPage = ({
                           <SelectItem key={l} value={l}>
                             {l.charAt(0).toUpperCase() + l.slice(1)}
                           </SelectItem>
-                        )
+                        ),
                       )}
                     </SelectContent>
                   </Select>
@@ -442,13 +574,17 @@ const RequirementDetailPage = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {["open", "matching", "partially_filled", "filled", "closed"].map(
-                        (s) => (
-                          <SelectItem key={s} value={s}>
-                            {requirementStatusLabel[s as RequirementStatus] ?? s}
-                          </SelectItem>
-                        )
-                      )}
+                      {[
+                        "open",
+                        "matching",
+                        "partially_filled",
+                        "filled",
+                        "closed",
+                      ].map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {requirementStatusLabel[s as RequirementStatus] ?? s}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -464,18 +600,19 @@ const RequirementDetailPage = ({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {["full-time", "part-time", "contract", "project-based"].map(
-                        (t) => (
-                          <SelectItem key={t} value={t}>
-                            {t
-                              .split("-")
-                              .map(
-                                (w) => w.charAt(0).toUpperCase() + w.slice(1)
-                              )
-                              .join("-")}
-                          </SelectItem>
-                        )
-                      )}
+                      {[
+                        "full-time",
+                        "part-time",
+                        "contract",
+                        "project-based",
+                      ].map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t
+                            .split("-")
+                            .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                            .join("-")}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -485,11 +622,11 @@ const RequirementDetailPage = ({
                   <Label>Budget Min ($)</Label>
                   <Input
                     type="number"
-                    value={editForm.budgetMinCents}
+                    value={editForm.budgetMin}
                     onChange={(e) =>
                       setEditForm((f) => ({
                         ...f,
-                        budgetMinCents: e.target.value,
+                        budgetMin: e.target.value,
                       }))
                     }
                     placeholder="0"
@@ -499,11 +636,11 @@ const RequirementDetailPage = ({
                   <Label>Budget Max ($)</Label>
                   <Input
                     type="number"
-                    value={editForm.budgetMaxCents}
+                    value={editForm.budgetMax}
                     onChange={(e) =>
                       setEditForm((f) => ({
                         ...f,
-                        budgetMaxCents: e.target.value,
+                        budgetMax: e.target.value,
                       }))
                     }
                     placeholder="0"
@@ -556,94 +693,64 @@ const RequirementDetailPage = ({
           </Card>
         </div>
       ) : (
-        /* Detail View */
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Description</CardTitle>
-            </CardHeader>
+        <Card>
+          <CardHeader>
+            <button
+              type="button"
+              onClick={() => setDescriptionExpanded((prev) => !prev)}
+              className="flex w-full items-center justify-between text-left"
+            >
+              <CardTitle className="text-base">Description</CardTitle>
+              {descriptionExpanded ? (
+                <ChevronUp className="size-4 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="size-4 text-muted-foreground" />
+              )}
+            </button>
+            {!descriptionExpanded && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {requirement.techStack.slice(0, 8).map((tech) => (
+                  <Badge key={tech} variant="outline">
+                    {tech}
+                  </Badge>
+                ))}
+                {requirement.techStack.length > 8 && (
+                  <Badge variant="outline">
+                    +{requirement.techStack.length - 8}
+                  </Badge>
+                )}
+                {requirement.hiringCountries?.length > 0 && (
+                  <span className="ml-1">
+                    <CountryFlags codes={requirement.hiringCountries} />
+                  </span>
+                )}
+              </div>
+            )}
+          </CardHeader>
+          {descriptionExpanded && (
             <CardContent>
-              <p className="text-sm whitespace-pre-wrap leading-relaxed">
-                {requirement.description}
-              </p>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Experience Level</dt>
-                    <dd className="capitalize">{requirement.experienceLevel}</dd>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Engagement Type</dt>
-                    <dd className="capitalize">
-                      {requirement.engagementType?.replace(/-/g, " ") ?? "-"}
-                    </dd>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Developers Needed</dt>
-                    <dd className="font-mono">{requirement.developersNeeded}</dd>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Budget</dt>
-                    <dd className="font-mono">
-                      {requirement.budgetMinCents || requirement.budgetMaxCents
-                        ? `$${requirement.budgetMinCents ? (requirement.budgetMinCents / 100).toLocaleString() : "?"} - $${requirement.budgetMaxCents ? (requirement.budgetMaxCents / 100).toLocaleString() : "?"}`
-                        : "-"}
-                    </dd>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Timezone</dt>
-                    <dd>{requirement.timezonePreference}</dd>
-                  </div>
-                  {requirement.startDate && (
-                    <>
-                      <Separator />
-                      <div className="flex justify-between">
-                        <dt className="text-muted-foreground">Start Date</dt>
-                        <dd>{requirement.startDate}</dd>
-                      </div>
-                    </>
-                  )}
-                </dl>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Tech Stack</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-1.5">
-                  {requirement.techStack.length > 0 ? (
-                    requirement.techStack.map((tech) => (
-                      <Badge key={tech} variant="secondary">
-                        {tech}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-sm text-muted-foreground">
-                      No tech stack specified
-                    </span>
-                  )}
+              <div className="text-sm leading-relaxed text-muted-foreground">
+                <MarkdownDisplay content={requirement.description} />
+              </div>
+              <Separator className="my-4" />
+              <div className="flex flex-wrap gap-1.5">
+                {requirement.techStack.map((tech) => (
+                  <Badge key={tech} variant="outline">
+                    {tech}
+                  </Badge>
+                ))}
+              </div>
+              {requirement.hiringCountries?.length > 0 && (
+                <div className="mt-2">
+                  <CountryFlags codes={requirement.hiringCountries} />
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              )}
+            </CardContent>
+          )}
+        </Card>
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* ── Delete Confirmation Dialog ──────────────────────────────── */}
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
           <DialogHeader>
