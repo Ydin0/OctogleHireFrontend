@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { AgencyDashboardShell } from "./_components/agency-dashboard-shell";
+import { AgencySidebar } from "./_components/agency-sidebar";
+import { AgencyHeader } from "./_components/agency-header";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
+import { fetchAgencyProfile } from "@/lib/api/agencies";
 
 export const metadata: Metadata = {
   title: "Agency Dashboard | OctogleHire",
@@ -33,5 +35,37 @@ export default async function AgencyDashboardLayout({
     }
   }
 
-  return <AgencyDashboardShell roles={roles} activeRole={accountType ?? "agency"}>{children}</AgencyDashboardShell>;
+  const [clerkUser, agencyProfile] = await Promise.all([
+    currentUser(),
+    fetchAgencyProfile(token),
+  ]);
+
+  const user = {
+    fullName: clerkUser
+      ? [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") || null
+      : null,
+    email: clerkUser?.emailAddresses?.[0]?.emailAddress ?? null,
+    imageUrl: clerkUser?.imageUrl ?? null,
+  };
+
+  const agencyName = agencyProfile?.name ?? "Agency";
+
+  const sidebarProps = {
+    user,
+    agencyName,
+    roles,
+    activeRole: accountType ?? "agency",
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <AgencySidebar {...sidebarProps} />
+      <AgencyHeader {...sidebarProps} />
+      <main className="lg:ml-64">
+        <div className="mx-auto max-w-7xl space-y-6 px-6 py-6 lg:py-8">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
 }

@@ -12,6 +12,10 @@ interface CandidatesPageProps {
     source?: string;
     sortBy?: string;
     sortOrder?: string;
+    stack?: string;
+    location?: string;
+    expMin?: string;
+    expMax?: string;
   }>;
 }
 
@@ -30,6 +34,10 @@ export default async function AgencyCandidatesPage({
     source: params.source,
     sortBy: params.sortBy,
     sortOrder: params.sortOrder,
+    stack: params.stack,
+    location: params.location,
+    expMin: params.expMin,
+    expMax: params.expMax,
   });
 
   const candidates = result?.candidates ?? [];

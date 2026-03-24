@@ -219,6 +219,10 @@ export interface UnifiedCandidatesParams {
   source?: string;
   sortBy?: string;
   sortOrder?: string;
+  stack?: string;
+  location?: string;
+  expMin?: string;
+  expMax?: string;
 }
 
 // ── API Functions ────────────────────────────────────────────────────────────
@@ -340,6 +344,10 @@ export async function fetchUnifiedCandidates(
     if (params.source) searchParams.set("source", params.source);
     if (params.sortBy) searchParams.set("sortBy", params.sortBy);
     if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
+    if (params.stack) searchParams.set("stack", params.stack);
+    if (params.location) searchParams.set("location", params.location);
+    if (params.expMin) searchParams.set("expMin", params.expMin);
+    if (params.expMax) searchParams.set("expMax", params.expMax);
     const qs = searchParams.toString();
 
     const response = await fetch(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useMemo, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import type { UnifiedCandidate, Pagination } from "@/lib/api/agencies";
@@ -51,6 +51,14 @@ function CandidatesClient({ candidates, pagination }: CandidatesClientProps) {
 
   const columns = getColumns();
 
+  const availableStacks = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of candidates) {
+      for (const s of c.primaryStack ?? []) set.add(s);
+    }
+    return [...set].sort();
+  }, [candidates]);
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -66,7 +74,7 @@ function CandidatesClient({ candidates, pagination }: CandidatesClientProps) {
         </div>
       </div>
 
-      <FiltersBar />
+      <FiltersBar availableStacks={availableStacks} />
 
       <DataTable
         columns={columns}
