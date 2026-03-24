@@ -15,6 +15,7 @@ import {
   Save,
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 import type { CompanyProfileSummary } from "@/lib/api/companies";
 import { updateCompanyProfile, uploadCompanyLogo } from "@/lib/api/companies";
@@ -88,9 +89,11 @@ const CompanySettingsForm = ({
         const result = await uploadCompanyLogo(token, file);
         setLogoUrl(result.logoUrl);
         setFeedback({ type: "success", message: "Logo updated." });
+        toast.success("Logo updated");
         router.refresh();
       } catch {
         setFeedback({ type: "error", message: "Failed to upload logo." });
+        toast.error("Failed to upload logo");
       } finally {
         setUploadingLogo(false);
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -107,9 +110,11 @@ const CompanySettingsForm = ({
       const token = await getToken();
       await updateCompanyProfile(token, data);
       setFeedback({ type: "success", message: "Profile saved." });
+      toast.success("Profile saved");
       router.refresh();
     } catch {
       setFeedback({ type: "error", message: "Failed to save. Please try again." });
+      toast.error("Failed to save profile");
     } finally {
       setSaving(false);
     }

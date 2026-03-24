@@ -13,6 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import type { UseFormSetValue } from "react-hook-form";
 import {
@@ -162,7 +163,7 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
       const jobs = await fetchLinkedInJobs(token, linkedinUrl);
       setLinkedinJobs(jobs);
     } catch {
-      // Error is handled by loading state reset
+      toast.error("Failed to fetch LinkedIn jobs");
     } finally {
       setFetchingJobs(false);
     }
@@ -181,8 +182,9 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
       });
       prefillForm(parsed, setValue);
       setLinkedinJobs([]);
+      toast.success("Job imported from LinkedIn");
     } catch {
-      // Error is handled by loading state reset
+      toast.error("Failed to parse LinkedIn job");
     } finally {
       setParsingJob(null);
     }
@@ -198,8 +200,9 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
       const token = await getToken();
       const parsed = await parseJobDocument(token, file);
       prefillForm(parsed, setValue);
+      toast.success("Document parsed successfully");
     } catch {
-      // Error is handled by loading state reset
+      toast.error("Failed to parse document");
     } finally {
       setParsingDoc(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -227,11 +230,15 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
       };
       if (isEdit && requirementId) {
         await updateJobRequirement(token, requirementId, payload);
+        toast.success("Requirement updated");
         router.push(`/companies/dashboard/requirements/${requirementId}`);
       } else {
         await createJobRequirement(token, payload);
+        toast.success("Requirement created");
         router.push("/companies/dashboard/requirements");
       }
+    } catch {
+      toast.error(isEdit ? "Failed to update requirement" : "Failed to create requirement");
     } finally {
       setSubmitting(false);
     }

@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 import type { CompanyProfile } from "@/lib/api/companies";
 import { deleteCompany, createCompany, type CreateCompanyPayload } from "@/lib/api/companies";
@@ -243,11 +244,13 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
     const result = await deleteCompany(token, deleteTarget.id);
 
     if (result.ok) {
+      toast.success("Company deleted");
       setDeleteTarget(null);
       startTransition(() => {
         router.refresh();
       });
     } else {
+      toast.error(result.message ?? "Failed to delete company");
       setDeleteError(result.message ?? "Failed to delete company");
     }
     setDeleting(false);
@@ -261,12 +264,14 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
     const result = await createCompany(token, createForm);
 
     if (result) {
+      toast.success("Company created");
       setCreateOpen(false);
       setCreateForm({ companyName: "", contactName: "", email: "", phone: "", website: "", location: "" });
       startTransition(() => {
         router.refresh();
       });
     } else {
+      toast.error("Failed to create company");
       setCreateError("Failed to create company");
     }
     setCreating(false);

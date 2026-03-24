@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { addAgencyCandidate } from "@/lib/api/agencies";
 import {
@@ -206,6 +207,12 @@ const BulkImportDialog = () => {
 
     setRunning(false);
     setDone(true);
+
+    const sc = rows.filter((r) => r.status === "success").length;
+    const ec = rows.filter((r) => r.status === "error").length;
+    if (sc > 0) toast.success(`${sc} profile${sc !== 1 ? "s" : ""} imported successfully`);
+    if (ec > 0) toast.error(`${ec} profile${ec !== 1 ? "s" : ""} failed to import`);
+
     router.refresh();
   };
 

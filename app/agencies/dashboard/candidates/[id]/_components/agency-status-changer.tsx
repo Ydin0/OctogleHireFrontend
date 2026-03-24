@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -83,9 +84,12 @@ function AgencyStatusChanger({
       }
 
       setDialogOpen(false);
+      toast.success("Status updated successfully");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      toast.error(message);
+      setError(message);
     } finally {
       setIsLoading(false);
     }

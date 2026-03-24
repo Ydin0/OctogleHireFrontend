@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 
+import { toast } from "sonner";
 import type { Agency, AgencyEnquiry } from "@/lib/api/agencies";
 import {
   createAdminAgency,
@@ -66,37 +67,55 @@ function AgenciesClient({ agencies, enquiries, token }: AgenciesClientProps) {
     e.preventDefault();
     setCreating(true);
 
-    const form = new FormData(e.currentTarget);
-    const result = await createAdminAgency(token, {
-      name: form.get("name") as string,
-      contactName: form.get("contactName") as string,
-      email: form.get("email") as string,
-      phone: (form.get("phone") as string) || undefined,
-      commissionRate: Number(form.get("commissionRate")) || 10,
-      status: "active",
-    });
+    try {
+      const form = new FormData(e.currentTarget);
+      const result = await createAdminAgency(token, {
+        name: form.get("name") as string,
+        contactName: form.get("contactName") as string,
+        email: form.get("email") as string,
+        phone: (form.get("phone") as string) || undefined,
+        commissionRate: Number(form.get("commissionRate")) || 10,
+        status: "active",
+      });
+
+      if (result) {
+        toast.success("Agency created");
+        setOpen(false);
+        router.refresh();
+      } else {
+        toast.error("Failed to create agency");
+      }
+    } catch {
+      toast.error("Failed to create agency");
+    }
 
     setCreating(false);
-
-    if (result) {
-      setOpen(false);
-      router.refresh();
-    }
   };
 
   const handleConvert = async (enquiryId: string) => {
     setConverting(enquiryId);
-    const result = await convertAgencyEnquiry(token, enquiryId);
-    setConverting(null);
-
-    if (result) {
-      router.refresh();
+    try {
+      const result = await convertAgencyEnquiry(token, enquiryId);
+      if (result) {
+        toast.success("Registration approved");
+        router.refresh();
+      } else {
+        toast.error("Failed to approve registration");
+      }
+    } catch {
+      toast.error("Failed to approve registration");
     }
+    setConverting(null);
   };
 
   const handleReject = async (enquiryId: string) => {
-    await updateAdminAgencyEnquiry(token, enquiryId, { status: "rejected" });
-    router.refresh();
+    try {
+      await updateAdminAgencyEnquiry(token, enquiryId, { status: "rejected" });
+      toast.success("Registration rejected");
+      router.refresh();
+    } catch {
+      toast.error("Failed to reject registration");
+    }
   };
 
   return (

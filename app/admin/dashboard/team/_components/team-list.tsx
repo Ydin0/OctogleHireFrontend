@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Camera, Loader2, Pencil, ShieldCheck, Trash2 } from "lucide-react";
 
 import {
@@ -110,9 +111,11 @@ function TeamList({ admins, currentUserId, token, currentUserIsSuperAdmin }: Tea
         throw new Error(payload?.message ?? "Failed to update");
       }
 
+      toast.success("Team member updated");
       setEditAdmin(null);
       router.refresh();
     } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setSaving(false);
@@ -140,9 +143,11 @@ function TeamList({ admins, currentUserId, token, currentUserIsSuperAdmin }: Tea
         throw new Error(payload?.message ?? "Failed to remove admin");
       }
 
+      toast.success("Admin removed");
       setConfirmAdmin(null);
       router.refresh();
     } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to remove admin");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setRemoving(null);
@@ -172,8 +177,10 @@ function TeamList({ admins, currentUserId, token, currentUserIsSuperAdmin }: Tea
         throw new Error(payload?.message ?? "Failed to update");
       }
 
+      toast.success(admin.isSuperAdmin ? "Demoted from super admin" : "Promoted to super admin");
       router.refresh();
     } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update role");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setTogglingSuper(null);

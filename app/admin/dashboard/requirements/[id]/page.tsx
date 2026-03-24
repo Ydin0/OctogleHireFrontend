@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { use } from "react";
+import { toast } from "sonner";
 
 import type { JobRequirement } from "@/lib/api/companies";
 import {
@@ -173,8 +174,11 @@ const RequirementDetailPage = ({
     );
 
     if (result) {
+      toast.success("Requirement updated");
       setEditing(false);
       await loadRequirement();
+    } else {
+      toast.error("Failed to update requirement");
     }
 
     setSaving(false);
@@ -184,12 +188,18 @@ const RequirementDetailPage = ({
     const token = await getToken();
     if (!token || !requirement) return;
 
-    await toggleRequirementFeatured(
-      token,
-      requirement.id,
-      !(requirement as unknown as { isFeatured: boolean }).isFeatured,
-    );
-    await loadRequirement();
+    try {
+      const isFeatured = (requirement as unknown as { isFeatured: boolean }).isFeatured;
+      await toggleRequirementFeatured(
+        token,
+        requirement.id,
+        !isFeatured,
+      );
+      toast.success(isFeatured ? "Requirement unfeatured" : "Requirement featured");
+      await loadRequirement();
+    } catch {
+      toast.error("Failed to update featured status");
+    }
   };
 
   const handleDelete = async () => {
@@ -200,7 +210,10 @@ const RequirementDetailPage = ({
     const ok = await deleteAdminRequirement(token, requirement.id, true);
 
     if (ok) {
+      toast.success("Requirement deleted");
       router.push("/admin/dashboard/requirements");
+    } else {
+      toast.error("Failed to delete requirement");
     }
     setDeleting(false);
   };
@@ -212,20 +225,30 @@ const RequirementDetailPage = ({
     currency: string;
   }) => {
     const token = await getToken();
-    await proposeMatch(token, id, payload);
-    await loadRequirement();
+    try {
+      await proposeMatch(token, id, payload);
+      toast.success("Match proposed");
+      await loadRequirement();
+    } catch {
+      toast.error("Failed to propose match");
+    }
   };
 
   const handleRemoveMatch = async (matchId: string) => {
     const token = await getToken();
-    await removeMatch(token, matchId);
-    setRequirement((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        proposedMatches: prev.proposedMatches?.filter((m) => m.id !== matchId),
-      };
-    });
+    try {
+      await removeMatch(token, matchId);
+      toast.success("Match removed");
+      setRequirement((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          proposedMatches: prev.proposedMatches?.filter((m) => m.id !== matchId),
+        };
+      });
+    } catch {
+      toast.error("Failed to remove match");
+    }
   };
 
   if (loading) {

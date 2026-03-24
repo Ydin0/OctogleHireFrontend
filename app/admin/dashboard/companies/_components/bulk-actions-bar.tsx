@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { toast } from "sonner";
 
 import type { CompanyStatus } from "@/app/admin/dashboard/_components/dashboard-data";
 import { companyStatusLabel } from "@/app/admin/dashboard/_components/dashboard-data";
@@ -55,13 +56,14 @@ function BulkActionsBar({
         ),
       );
 
+      toast.success("Status updated for selected companies");
       setDialogOpen(false);
       setStatus("");
       startTransition(() => {
         onComplete();
       });
     } catch {
-      // Error handling kept simple
+      toast.error("Failed to update company status");
     }
   };
 

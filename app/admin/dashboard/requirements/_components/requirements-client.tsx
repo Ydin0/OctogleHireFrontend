@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import type { AdminRequirement, Pagination } from "@/lib/api/admin";
 import {
@@ -75,10 +76,15 @@ function RequirementsClient({
   };
 
   const handleToggleFeatured = async (req: AdminRequirement) => {
-    await toggleRequirementFeatured(token, req.id, !req.isFeatured);
-    startTransition(() => {
-      router.refresh();
-    });
+    try {
+      await toggleRequirementFeatured(token, req.id, !req.isFeatured);
+      toast.success(req.isFeatured ? "Requirement unfeatured" : "Requirement featured");
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch {
+      toast.error("Failed to update featured status");
+    }
   };
 
   const handleDelete = async (force = false) => {
@@ -89,6 +95,7 @@ function RequirementsClient({
     const result = await deleteAdminRequirement(token, deleteTarget.id, force);
 
     if (result.success) {
+      toast.success("Requirement deleted");
       setDeleteTarget(null);
       setDeleteRefs(null);
       startTransition(() => {
@@ -97,6 +104,7 @@ function RequirementsClient({
     } else if (result.hasReferences && result.references) {
       setDeleteRefs(result.references);
     } else {
+      toast.error("Failed to delete requirement");
       setDeleteError("Failed to delete requirement.");
     }
     setDeleting(false);

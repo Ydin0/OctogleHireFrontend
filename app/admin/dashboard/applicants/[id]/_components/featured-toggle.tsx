@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
@@ -47,8 +48,10 @@ const FeaturedToggle = ({
       if (!response.ok) throw new Error();
 
       setIsFeatured(!isFeatured);
+      toast.success(isFeatured ? "Removed from featured" : "Marked as featured");
       router.refresh();
     } catch {
+      toast.error("Failed to update featured status");
       setError(true);
       setTimeout(() => setError(false), 3000);
     } finally {

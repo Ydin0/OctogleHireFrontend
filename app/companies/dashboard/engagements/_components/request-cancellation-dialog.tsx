@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { toast } from "sonner";
+
 import { createChangeRequest } from "@/lib/api/companies";
 import {
   Dialog,
@@ -58,10 +60,12 @@ function RequestCancellationDialog({
       });
       onOpenChange(false);
       setReason("");
+      toast.success("Cancellation request submitted");
       startTransition(() => {
         router.refresh();
       });
     } catch (err) {
+      toast.error("Failed to submit cancellation request");
       setError(err instanceof Error ? err.message : "Failed to submit request.");
     }
   };

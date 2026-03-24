@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { Loader2, MessageSquareWarning } from "lucide-react";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 const apiBaseUrl =
@@ -38,7 +39,12 @@ export function SendReminderButton({
       );
       if (res.ok) {
         setSent(true);
+        toast.success("Reminder sent");
+      } else {
+        toast.error("Failed to send reminder");
       }
+    } catch {
+      toast.error("Failed to send reminder");
     } finally {
       setSending(false);
     }

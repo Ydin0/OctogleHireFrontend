@@ -15,6 +15,7 @@ import {
   MessageSquare,
   RefreshCw,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import type { CompanyInterview } from "@/lib/api/companies";
 import {
@@ -174,53 +175,79 @@ export default function InterviewDetailPage() {
 
   async function handleSaveMeetingLink() {
     setSaving(true);
-    const token = await getToken();
-    const updated = await updateCompanyInterview(token, interviewId, {
-      meetingLink,
-    });
-    if (updated) {
-      setInterview(updated);
-      setMeetingLinkSaved(true);
-      setTimeout(() => setMeetingLinkSaved(false), 2000);
+    try {
+      const token = await getToken();
+      const updated = await updateCompanyInterview(token, interviewId, {
+        meetingLink,
+      });
+      if (updated) {
+        setInterview(updated);
+        setMeetingLinkSaved(true);
+        setTimeout(() => setMeetingLinkSaved(false), 2000);
+        toast.success("Meeting link saved");
+      }
+    } catch {
+      toast.error("Failed to save meeting link");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   async function handleSaveNotes() {
     setSaving(true);
-    const token = await getToken();
-    const updated = await updateCompanyInterview(token, interviewId, {
-      companyNotes: notes,
-    });
-    if (updated) {
-      setInterview(updated);
-      setNotesSaved(true);
-      setTimeout(() => setNotesSaved(false), 2000);
+    try {
+      const token = await getToken();
+      const updated = await updateCompanyInterview(token, interviewId, {
+        companyNotes: notes,
+      });
+      if (updated) {
+        setInterview(updated);
+        setNotesSaved(true);
+        setTimeout(() => setNotesSaved(false), 2000);
+        toast.success("Notes saved");
+      }
+    } catch {
+      toast.error("Failed to save notes");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   async function handleAcceptSlot(slotStart: string) {
     setAcceptingSlot(slotStart);
-    const token = await getToken();
-    const updated = await updateCompanyInterview(token, interviewId, {
-      acceptAlternativeSlot: slotStart,
-    });
-    if (updated) setInterview(updated);
-    setAcceptingSlot(null);
+    try {
+      const token = await getToken();
+      const updated = await updateCompanyInterview(token, interviewId, {
+        acceptAlternativeSlot: slotStart,
+      });
+      if (updated) {
+        setInterview(updated);
+        toast.success("Time slot accepted");
+      }
+    } catch {
+      toast.error("Failed to accept time slot");
+    } finally {
+      setAcceptingSlot(null);
+    }
   }
 
   async function handleComplete() {
     setCompleting(true);
-    const token = await getToken();
-    const updated = await completeInterview(token, interviewId, {
-      outcome,
-      companyNotes: completeNotes || undefined,
-      companyRating: completeRating > 0 ? completeRating : undefined,
-    });
-    if (updated) setInterview(updated);
-    setCompleting(false);
-    setCompleteOpen(false);
+    try {
+      const token = await getToken();
+      const updated = await completeInterview(token, interviewId, {
+        outcome,
+        companyNotes: completeNotes || undefined,
+        companyRating: completeRating > 0 ? completeRating : undefined,
+      });
+      if (updated) setInterview(updated);
+      toast.success("Interview marked as complete");
+      setCompleteOpen(false);
+    } catch {
+      toast.error("Failed to complete interview");
+    } finally {
+      setCompleting(false);
+    }
   }
 
   if (loading) {

@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 
+import { toast } from "sonner";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 import type {
   AdminInterview,
@@ -218,10 +219,13 @@ function InterviewsClient({ interviews, team, token }: InterviewsClientProps) {
         }),
       });
 
+      toast.success("Interview updated");
       setSelected(null);
       startTransition(() => {
         router.refresh();
       });
+    } catch {
+      toast.error("Failed to update interview");
     } finally {
       setSaving(false);
     }
@@ -248,7 +252,12 @@ function InterviewsClient({ interviews, team, token }: InterviewsClientProps) {
         const data = await res.json();
         setTranscriptName(file.name);
         setTranscriptUrl(data.transcriptUrl);
+        toast.success("Transcript uploaded");
+      } else {
+        toast.error("Failed to upload transcript");
       }
+    } catch {
+      toast.error("Failed to upload transcript");
     } finally {
       setUploading(false);
     }

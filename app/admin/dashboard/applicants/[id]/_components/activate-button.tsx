@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -63,8 +64,10 @@ function ActivateButton({
       }
 
       setDialogOpen(false);
+      toast.success("Invitation sent");
       router.refresh();
     } catch (err) {
+      toast.error("Failed to activate account");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);

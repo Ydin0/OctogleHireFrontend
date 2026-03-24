@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 import { Check, Loader2, X } from "lucide-react";
 
 import type { DeveloperOffer } from "@/lib/api/developer";
@@ -47,9 +48,12 @@ export function OffersClient({ offers }: { offers: DeveloperOffer[] }) {
     try {
       const token = await getToken();
       await respondToDeveloperOffer(token, offerId, action);
+      toast.success(`Offer ${action} successfully`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      const message = err instanceof Error ? err.message : "Something went wrong.";
+      toast.error(message);
+      setError(message);
     } finally {
       setLoadingId(null);
     }

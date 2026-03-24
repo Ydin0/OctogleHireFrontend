@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { Loader2, Mail, Video } from "lucide-react";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -47,7 +48,12 @@ export function VideoIntroButton({
       );
       if (res.ok) {
         setRequested(true);
+        toast.success("Video request sent");
+      } else {
+        toast.error("Failed to request video");
       }
+    } catch {
+      toast.error("Failed to request video");
     } finally {
       setRequesting(false);
     }

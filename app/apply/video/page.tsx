@@ -13,6 +13,7 @@ import {
   Upload,
 } from "lucide-react";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -98,9 +99,12 @@ export default function VideoUploadPage() {
         throw new Error(data?.message ?? "Failed to send verification code.");
       }
 
+      toast.success("Verification code sent");
       setPhase("otp");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
+      const message = err instanceof Error ? err.message : "Something went wrong.";
+      toast.error(message);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -138,11 +142,14 @@ export default function VideoUploadPage() {
         throw new Error(data.message ?? "Invalid or expired code.");
       }
 
+      toast.success("Email verified");
       setUploadToken(data.uploadToken ?? null);
       setApplicationId(data.applicationId ?? null);
       setPhase("record");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Verification failed.");
+      const message = err instanceof Error ? err.message : "Verification failed.";
+      toast.error(message);
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -256,9 +263,12 @@ export default function VideoUploadPage() {
         throw new Error(data?.message ?? "Upload failed.");
       }
 
+      toast.success("Video uploaded successfully");
       setPhase("done");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed.");
+      const message = err instanceof Error ? err.message : "Upload failed.";
+      toast.error(message);
+      setError(message);
       setPhase("record");
     }
   };

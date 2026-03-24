@@ -6,6 +6,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { ArrowLeft, ArrowRight, Send } from "lucide-react";
 
+import { toast } from "sonner";
 import { trackMetaEvent } from "@/lib/analytics/meta-events";
 import { applicationSchema, type Application } from "@/lib/schemas/application";
 import type { LinkedInFormValues, ApifyProfile } from "@/lib/linkedin";
@@ -371,12 +372,14 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
 
     try {
       await persistDraft(currentStep);
+      toast.success("Progress saved");
       setCurrentStep((prev) => prev + 1);
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : "Unable to save this step right now. Please try again.";
+      toast.error(message);
       setSubmitError(message);
     } finally {
       setIsSubmitting(false);
@@ -423,6 +426,8 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
         content_category: "developer",
       });
 
+      toast.success("Application submitted successfully");
+
       window.localStorage.removeItem(APPLICATION_DRAFT_STORAGE_KEY);
       window.localStorage.removeItem(REFERRAL_CODE_STORAGE_KEY);
 
@@ -432,6 +437,7 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
         error instanceof Error
           ? error.message
           : "Unable to submit your application right now. Please try again.";
+      toast.error(message);
       setSubmitError(message);
     } finally {
       setIsSubmitting(false);

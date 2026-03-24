@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Briefcase,
@@ -127,6 +128,7 @@ const CompanyDetailPage = ({
       newStatus as CompanyStatus,
     );
     if (updated) {
+      toast.success("Company status updated");
       setCompany(updated);
     } else {
       setCompany({ ...company, status: newStatus as CompanyStatus });
@@ -139,6 +141,7 @@ const CompanyDetailPage = ({
     setCompany({ ...company, invoiceCurrency: newCurrency });
     const token = await getToken();
     await updateCompanyCurrency(token, company.id, newCurrency);
+    toast.success("Invoice currency updated");
   };
 
   const handleAssignManager = async (accountManagerId: string) => {
@@ -154,10 +157,11 @@ const CompanyDetailPage = ({
         },
         body: JSON.stringify({ accountManagerId: accountManagerId || null }),
       });
+      toast.success("Account manager updated");
       // Reload to get updated account manager data
       await load();
     } catch {
-      // Assignment failed
+      toast.error("Failed to assign account manager");
     } finally {
       setAssigningManager(false);
     }
@@ -170,12 +174,13 @@ const CompanyDetailPage = ({
       const token = await getToken();
       const activated = await activateCompany(token, company.id);
       if (activated) {
+        toast.success("Company activated");
         setCompany(activated);
       } else {
         setCompany({ ...company, status: "active" });
       }
     } catch {
-      // Activation failed — keep current state
+      toast.error("Failed to activate company");
     } finally {
       setActivating(false);
       setActivateOpen(false);

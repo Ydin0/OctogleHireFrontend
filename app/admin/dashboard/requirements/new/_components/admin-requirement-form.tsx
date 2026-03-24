@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 import type { UseFormSetValue } from "react-hook-form";
 import {
@@ -232,8 +233,13 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
         priority: data.priority,
       });
       if (result?.requirement) {
+        toast.success("Requirement created");
         router.push(`/admin/dashboard/requirements/${result.requirement.id}`);
+      } else {
+        toast.error("Failed to create requirement");
       }
+    } catch {
+      toast.error("Failed to create requirement");
     } finally {
       setSubmitting(false);
     }

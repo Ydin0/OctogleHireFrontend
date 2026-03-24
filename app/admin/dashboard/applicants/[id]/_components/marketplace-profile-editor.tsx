@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Save, Plus, X } from "lucide-react";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -139,9 +140,11 @@ const MarketplaceProfileEditor = ({
       }
 
       setSaved(true);
+      toast.success("Marketplace profile saved");
       router.refresh();
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
+      toast.error("Failed to save marketplace profile");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);

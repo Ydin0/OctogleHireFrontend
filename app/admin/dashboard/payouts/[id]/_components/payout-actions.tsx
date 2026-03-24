@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 
+import { toast } from "sonner";
 import type { Payout } from "@/lib/api/payouts";
 import { updatePayoutStatus } from "@/lib/api/payouts";
 import {
@@ -40,15 +41,20 @@ function PayoutActions({ payout, token, onStatusChange }: PayoutActionsProps) {
 
   const handleStatusChange = async (newStatus: string) => {
     setUpdating(true);
-    const updated = await updatePayoutStatus(
-      token,
-      payout.id,
-      newStatus as PayoutStatus,
-    );
-    if (updated) {
-      onStatusChange(updated);
-    } else {
-      onStatusChange({ ...payout, status: newStatus as PayoutStatus });
+    try {
+      const updated = await updatePayoutStatus(
+        token,
+        payout.id,
+        newStatus as PayoutStatus,
+      );
+      if (updated) {
+        onStatusChange(updated);
+      } else {
+        onStatusChange({ ...payout, status: newStatus as PayoutStatus });
+      }
+      toast.success("Payout status updated");
+    } catch {
+      toast.error("Failed to update payout status");
     }
     setUpdating(false);
   };

@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Save } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 import type { Agency } from "@/lib/api/agencies";
 import { updateAgencyProfile } from "@/lib/api/agencies";
@@ -67,9 +68,11 @@ const AgencySettingsForm = ({
     try {
       const token = await getToken();
       await updateAgencyProfile(token, data);
+      toast.success("Settings saved successfully");
       setFeedback({ type: "success", message: "Settings saved successfully." });
       router.refresh();
     } catch {
+      toast.error("Failed to save settings");
       setFeedback({
         type: "error",
         message: "Failed to save. Please try again.",

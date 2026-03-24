@@ -3,6 +3,7 @@
 import { useMemo, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { toast } from "sonner";
 import type { Payout, PayoutSummary } from "@/lib/api/payouts";
 import { updatePayoutStatus } from "@/lib/api/payouts";
 import type { Pagination } from "@/lib/api/admin";
@@ -115,10 +116,15 @@ function PayoutsClient({ payouts, summary, token }: PayoutsClientProps) {
   };
 
   const handleMarkPaid = async (payout: Payout) => {
-    await updatePayoutStatus(token, payout.id, "paid");
-    startTransition(() => {
-      router.refresh();
-    });
+    try {
+      await updatePayoutStatus(token, payout.id, "paid");
+      toast.success("Payout marked as paid");
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch {
+      toast.error("Failed to update payout status");
+    }
   };
 
   const { formatDisplay } = useAdminCurrency();

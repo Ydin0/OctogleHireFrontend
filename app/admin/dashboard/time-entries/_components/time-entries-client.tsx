@@ -3,6 +3,7 @@
 import { useMemo, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { toast } from "sonner";
 import type { AdminTimeEntry } from "@/lib/api/time-entries";
 import { approveTimeEntry, rejectTimeEntry } from "@/lib/api/time-entries";
 import type { Pagination } from "@/lib/api/admin";
@@ -126,17 +127,27 @@ function TimeEntriesClient({ timeEntries, token }: TimeEntriesClientProps) {
   };
 
   const handleApprove = async (entry: AdminTimeEntry) => {
-    await approveTimeEntry(token, entry.id);
-    startTransition(() => {
-      router.refresh();
-    });
+    try {
+      await approveTimeEntry(token, entry.id);
+      toast.success("Time entry approved");
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch {
+      toast.error("Failed to approve time entry");
+    }
   };
 
   const handleReject = async (entry: AdminTimeEntry) => {
-    await rejectTimeEntry(token, entry.id);
-    startTransition(() => {
-      router.refresh();
-    });
+    try {
+      await rejectTimeEntry(token, entry.id);
+      toast.success("Time entry rejected");
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch {
+      toast.error("Failed to reject time entry");
+    }
   };
 
   // Summary stats

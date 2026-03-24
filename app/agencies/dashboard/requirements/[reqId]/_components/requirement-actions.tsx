@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import type { AgencyRequirementDetail } from "@/lib/api/agencies";
 import { submitAgencyPitches } from "@/lib/api/agencies";
@@ -37,6 +38,7 @@ const RequirementActions = ({
       const token = await getToken();
       const result = await submitAgencyPitches(token, requirement.id, pitches);
       if (result) {
+        toast.success("Pitches submitted successfully");
         setPitchDialogOpen(false);
         setSelectedDevs([]);
         router.refresh();

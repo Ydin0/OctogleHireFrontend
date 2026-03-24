@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 import type { DeveloperProfile } from "@/lib/api/developer";
 import { updateDeveloperProfile } from "@/lib/api/developer";
@@ -216,9 +217,11 @@ const ProfileEditor = ({ profile }: { profile: DeveloperProfile | null }) => {
         education: formData.education,
         marketplaceAchievements: formData.marketplaceAchievements,
       });
+      toast.success("Profile saved successfully");
       setFeedback({ type: "success", message: "Profile saved successfully." });
       router.refresh();
     } catch {
+      toast.error("Failed to save profile");
       setFeedback({ type: "error", message: "Failed to save. Please try again." });
     } finally {
       setSaving(false);

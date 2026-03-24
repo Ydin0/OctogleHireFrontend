@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 
+import { toast } from "sonner";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 import { Button } from "@/components/ui/button";
 import {
@@ -73,10 +74,12 @@ function BulkActionsBar({ selectedIds, token, onComplete }: BulkActionsBarProps)
       setStatus("");
       setNote("");
       setError(null);
+      toast.success(`Status updated for ${selectedIds.length} applicant${selectedIds.length > 1 ? "s" : ""}`);
       startTransition(() => {
         onComplete();
       });
     } catch (err) {
+      toast.error("Failed to update status");
       setError(err instanceof Error ? err.message : "Something went wrong");
     }
   };

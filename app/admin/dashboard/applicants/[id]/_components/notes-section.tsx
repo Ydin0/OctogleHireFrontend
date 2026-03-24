@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
@@ -113,12 +114,15 @@ function NotesSection({
 
       if (response.ok) {
         setContent("");
+        toast.success("Note added");
         startTransition(() => {
           router.refresh();
         });
+      } else {
+        toast.error("Failed to add note");
       }
     } catch {
-      // Error handling kept simple
+      toast.error("Failed to add note");
     }
   };
 
@@ -141,12 +145,15 @@ function NotesSection({
       if (response.ok) {
         setEditingNoteId(null);
         setEditContent("");
+        toast.success("Note updated");
         startTransition(() => {
           router.refresh();
         });
+      } else {
+        toast.error("Failed to update note");
       }
     } catch {
-      // Error handling kept simple
+      toast.error("Failed to update note");
     }
   };
 
@@ -164,12 +171,15 @@ function NotesSection({
 
       if (response.ok) {
         setDeleteNoteId(null);
+        toast.success("Note deleted");
         startTransition(() => {
           router.refresh();
         });
+      } else {
+        toast.error("Failed to delete note");
       }
     } catch {
-      // Error handling kept simple
+      toast.error("Failed to delete note");
     }
   };
 

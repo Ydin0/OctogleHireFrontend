@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 import { Pencil, Save, X } from "lucide-react";
 
 import { updateAgencyCandidate } from "@/lib/api/agencies";
@@ -99,9 +100,12 @@ function CandidateEditForm({ candidateId, initialData }: CandidateEditFormProps)
         monthlyRate: form.monthlyRate || undefined,
       });
       setEditing(false);
+      toast.success("Candidate updated successfully");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save");
+      const message = err instanceof Error ? err.message : "Failed to save";
+      toast.error(message);
+      setError(message);
     } finally {
       setSaving(false);
     }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 import {
   fetchAgencyTeam,
@@ -84,13 +85,16 @@ export default function AgencyTeamPage() {
         name: inviteName.trim(),
         role: inviteRole,
       });
+      toast.success("Invite sent successfully");
       setDialogOpen(false);
       setInviteName("");
       setInviteEmail("");
       setInviteRole("member");
       await loadTeam();
     } catch (err) {
-      setInviteError(err instanceof Error ? err.message : "Failed to invite member");
+      const message = err instanceof Error ? err.message : "Failed to invite member";
+      toast.error(message);
+      setInviteError(message);
     } finally {
       setInviting(false);
     }
@@ -101,7 +105,10 @@ export default function AgencyTeamPage() {
     try {
       const token = await getToken();
       await removeAgencyTeamMember(token, memberId);
+      toast.success("Team member removed");
       await loadTeam();
+    } catch {
+      toast.error("Failed to remove team member");
     } finally {
       setRemovingId(null);
     }

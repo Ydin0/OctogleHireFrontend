@@ -9,6 +9,7 @@ import {
   Send,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 
 import {
   fetchConversations,
@@ -210,23 +211,28 @@ export function ChatWidget({
     if (!text) return;
     setSending(true);
     setDraft("");
-    const token = await getToken();
+    try {
+      const token = await getToken();
 
-    if (activeConversation) {
-      const msg = await sendMessage(token, activeConversation.id, text);
-      if (msg) {
-        setMessages((prev) => [...prev, msg]);
+      if (activeConversation) {
+        const msg = await sendMessage(token, activeConversation.id, text);
+        if (msg) {
+          setMessages((prev) => [...prev, msg]);
+        }
+      } else if (view === "compose-am" && accountManagerId) {
+        const result = await startConversation(token, accountManagerId, text);
+        if (result) {
+          setConversations((prev) => [result.conversation, ...prev]);
+          setActiveConversation(result.conversation);
+          setMessages([result.message]);
+          setView("conversation");
+        }
       }
-    } else if (view === "compose-am" && accountManagerId) {
-      const result = await startConversation(token, accountManagerId, text);
-      if (result) {
-        setConversations((prev) => [result.conversation, ...prev]);
-        setActiveConversation(result.conversation);
-        setMessages([result.message]);
-        setView("conversation");
-      }
+    } catch {
+      toast.error("Failed to send message");
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

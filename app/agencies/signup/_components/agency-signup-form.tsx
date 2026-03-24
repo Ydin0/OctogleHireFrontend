@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, CheckCircle } from "lucide-react";
 
+import { toast } from "sonner";
 import { trackMetaEvent } from "@/lib/analytics/meta-events";
 import {
   agencyLeadSchema,
@@ -56,9 +57,9 @@ const AgencySignupForm = () => {
         const body = (await res.json().catch(() => ({}))) as {
           message?: string;
         };
-        setApiError(
-          body.message ?? "Something went wrong. Please try again.",
-        );
+        const errorMsg = body.message ?? "Something went wrong. Please try again.";
+        toast.error(errorMsg);
+        setApiError(errorMsg);
         return;
       }
 
@@ -67,9 +68,11 @@ const AgencySignupForm = () => {
         content_category: "agency",
       });
 
+      toast.success("Registration submitted successfully");
       setContactName(data.contactName);
       setView("success");
     } catch {
+      toast.error("Unable to connect. Please check your connection and try again.");
       setApiError(
         "Unable to connect. Please check your connection and try again.",
       );

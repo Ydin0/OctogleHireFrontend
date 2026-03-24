@@ -10,6 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 import {
   fetchCompanyTeam,
@@ -111,8 +112,10 @@ function EditMemberDialog({
     setSaving(true);
     try {
       await onSave(member.id, { name, email, phone, title, role });
+      toast.success("Team member updated");
       setOpen(false);
     } catch (err) {
+      toast.error("Failed to update team member");
       setError(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSaving(false);
@@ -125,8 +128,9 @@ function EditMemberDialog({
     setUploading(true);
     try {
       await onAvatarUpload(member.id, file);
+      toast.success("Avatar updated");
     } catch {
-      // ignore
+      toast.error("Failed to upload avatar");
     } finally {
       setUploading(false);
     }
@@ -287,7 +291,9 @@ const TeamPage = () => {
       setInviteTitle("");
       setInviteRole("Member");
       await loadTeam();
+      toast.success("Invitation sent");
     } catch (err) {
+      toast.error("Failed to invite member");
       setInviteError(err instanceof Error ? err.message : "Failed to invite member");
     } finally {
       setInviting(false);
@@ -300,6 +306,9 @@ const TeamPage = () => {
       const token = await getToken();
       await removeCompanyTeamMember(token, memberId);
       await loadTeam();
+      toast.success("Team member removed");
+    } catch {
+      toast.error("Failed to remove team member");
     } finally {
       setRemovingId(null);
     }

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import {
   addAgencyCandidate,
@@ -208,9 +209,12 @@ const AddDeveloperDialog = () => {
         education: values.education ?? [],
       });
 
+      toast.success("LinkedIn profile imported");
       setStep("form");
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : "Import failed. Please try again.");
+      const message = err instanceof Error ? err.message : "Import failed. Please try again.";
+      toast.error(message);
+      setImportError(message);
     } finally {
       setImporting(false);
     }
@@ -266,11 +270,14 @@ const AddDeveloperDialog = () => {
     try {
       const token = await getToken();
       await claimAgencyCandidate(token, emailCheck.candidateId);
+      toast.success("Candidate linked to your agency");
       setOpen(false);
       reset();
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Claim failed.");
+      const message = err instanceof Error ? err.message : "Claim failed.";
+      toast.error(message);
+      setSubmitError(message);
     } finally {
       setClaiming(false);
     }
@@ -313,11 +320,14 @@ const AddDeveloperDialog = () => {
         education: form.education.length > 0 ? form.education : undefined,
       });
 
+      toast.success("Developer added successfully");
       setOpen(false);
       reset();
       router.refresh();
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to add candidate.");
+      const message = err instanceof Error ? err.message : "Failed to add candidate.";
+      toast.error(message);
+      setSubmitError(message);
     } finally {
       setSubmitting(false);
     }

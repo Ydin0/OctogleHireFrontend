@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,10 +63,12 @@ function AddAdminForm({ token }: AddAdminFormProps) {
       };
 
       if (data.method === "invited") {
+        toast.success(`Invitation sent to ${trimmedEmail}`);
         setSuccess(
           `Invitation sent to ${trimmedEmail}. They'll receive an email to set up their account.`
         );
       } else {
+        toast.success(`${trimmedEmail} added as admin`);
         setSuccess(`${trimmedEmail} has been upgraded to admin.`);
       }
 
@@ -74,6 +77,7 @@ function AddAdminForm({ token }: AddAdminFormProps) {
       setEmail("");
       router.refresh();
     } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to invite admin");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);

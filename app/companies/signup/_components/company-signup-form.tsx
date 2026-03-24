@@ -6,6 +6,7 @@ import Script from "next/script";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Calendar, Check } from "lucide-react";
+import { toast } from "sonner";
 
 import { trackMetaEvent } from "@/lib/analytics/meta-events";
 import { useCalendlyLead } from "@/lib/analytics/use-calendly-lead";
@@ -54,7 +55,9 @@ const CompanySignupForm = () => {
 
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { message?: string };
-        setApiError(body.message ?? "Something went wrong. Please try again.");
+        const msg = body.message ?? "Something went wrong. Please try again.";
+        setApiError(msg);
+        toast.error(msg);
         return;
       }
 
@@ -65,7 +68,9 @@ const CompanySignupForm = () => {
 
       setContactName(data.contactName);
       setView("success");
+      toast.success("Account created successfully");
     } catch {
+      toast.error("Failed to create account");
       setApiError("Unable to connect. Please check your connection and try again.");
     }
   };

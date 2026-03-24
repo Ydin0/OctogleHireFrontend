@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -126,8 +127,10 @@ function EditProfileDialog({
       }
 
       setOpen(false);
+      toast.success("Profile updated");
       router.refresh();
     } catch (err) {
+      toast.error("Failed to update profile");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);

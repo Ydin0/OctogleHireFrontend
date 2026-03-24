@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -148,8 +149,10 @@ function StatusChanger({
 
       setDialogOpen(false);
       resetForm();
+      toast.success(isOfferFlow ? "Offer extended" : "Status updated");
       router.refresh();
     } catch (err) {
+      toast.error(isOfferFlow ? "Failed to extend offer" : "Failed to update status");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);

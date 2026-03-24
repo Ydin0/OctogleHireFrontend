@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 import type { DeveloperEngagement } from "@/lib/api/developer";
 import { submitTimeEntry } from "@/lib/api/developer";
@@ -66,15 +67,16 @@ function SubmitHoursDialog({
         description: description.trim() || undefined,
       });
 
+      toast.success("Hours submitted successfully");
       setHours("");
       setDescription("");
       setPeriod(defaultPeriod);
       onOpenChange(false);
       onSubmitted();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to submit time entry.",
-      );
+      const message = err instanceof Error ? err.message : "Failed to submit time entry.";
+      toast.error(message);
+      setError(message);
     } finally {
       setSubmitting(false);
     }

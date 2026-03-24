@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { toast } from "sonner";
 import type { EngagementChangeRequestAdmin } from "@/lib/api/engagement-change-requests";
 import { reviewChangeRequest } from "@/lib/api/engagement-change-requests";
 import {
@@ -44,12 +45,14 @@ function ReviewDialog({ open, onOpenChange, request, token }: ReviewDialogProps)
     setError(null);
     try {
       await reviewChangeRequest(token, request.id, action, adminNotes.trim() || undefined);
+      toast.success(`Request ${action}`);
       onOpenChange(false);
       setAdminNotes("");
       startTransition(() => {
         router.refresh();
       });
     } catch (err) {
+      toast.error("Failed to review request");
       setError(err instanceof Error ? err.message : "Failed to review request.");
     }
   };

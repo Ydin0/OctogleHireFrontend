@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { RefreshCw } from "lucide-react";
 
+import { toast } from "sonner";
 import { reofferApplication } from "@/lib/api/admin";
 import { formatCurrency } from "../../../_components/dashboard-data";
 import { Button } from "@/components/ui/button";
@@ -93,8 +94,10 @@ export function ReofferDialog({
 
       setOpen(false);
       resetForm();
+      toast.success("Re-offer sent");
       router.refresh();
     } catch (err) {
+      toast.error("Failed to send re-offer");
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);

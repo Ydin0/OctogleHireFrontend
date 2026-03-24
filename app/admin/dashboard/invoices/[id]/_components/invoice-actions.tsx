@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 
+import { toast } from "sonner";
 import type { Invoice } from "@/lib/api/invoices";
 import { updateInvoiceStatus } from "@/lib/api/invoices";
 import {
@@ -40,15 +41,20 @@ function InvoiceActions({ invoice, token, onStatusChange }: InvoiceActionsProps)
 
   const handleStatusChange = async (newStatus: string) => {
     setUpdating(true);
-    const updated = await updateInvoiceStatus(
-      token,
-      invoice.id,
-      newStatus as InvoiceStatus,
-    );
-    if (updated) {
-      onStatusChange(updated);
-    } else {
-      onStatusChange({ ...invoice, status: newStatus as InvoiceStatus });
+    try {
+      const updated = await updateInvoiceStatus(
+        token,
+        invoice.id,
+        newStatus as InvoiceStatus,
+      );
+      if (updated) {
+        onStatusChange(updated);
+      } else {
+        onStatusChange({ ...invoice, status: newStatus as InvoiceStatus });
+      }
+      toast.success("Invoice status updated");
+    } catch {
+      toast.error("Failed to update invoice status");
     }
     setUpdating(false);
   };

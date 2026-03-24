@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MessageSquarePlus, Pencil } from "lucide-react";
+import { toast } from "sonner";
 
 import { useReviews } from "@/lib/reviews/use-reviews";
 import type { DeveloperReview } from "@/lib/reviews/types";
@@ -36,6 +37,7 @@ export function DeveloperReviewSection({
 
   const handleDelete = (reviewId: string) => {
     deleteReview(reviewId);
+    toast.success("Review deleted");
   };
 
   return (
@@ -90,8 +92,10 @@ export function DeveloperReviewSection({
         onSubmit={(data) => {
           if (editingReview) {
             updateReview(editingReview.id, data);
+            toast.success("Review updated");
           } else {
             addReview({ ...data, companyId, companyName, companyLogoUrl });
+            toast.success("Review submitted");
           }
           setEditingReview(null);
         }}

@@ -3,6 +3,7 @@
 import { useMemo, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { toast } from "sonner";
 import type { Invoice, InvoiceSummary } from "@/lib/api/invoices";
 import { updateInvoiceStatus } from "@/lib/api/invoices";
 import type { Pagination } from "@/lib/api/admin";
@@ -128,10 +129,15 @@ function InvoicesClient({ invoices, summary, token }: InvoicesClientProps) {
   };
 
   const handleMarkPaid = async (invoice: Invoice) => {
-    await updateInvoiceStatus(token, invoice.id, "paid");
-    startTransition(() => {
-      router.refresh();
-    });
+    try {
+      await updateInvoiceStatus(token, invoice.id, "paid");
+      toast.success("Invoice marked as paid");
+      startTransition(() => {
+        router.refresh();
+      });
+    } catch {
+      toast.error("Failed to update invoice status");
+    }
   };
 
   const { formatDisplay } = useAdminCurrency();

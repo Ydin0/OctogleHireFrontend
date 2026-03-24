@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { toast } from "sonner";
 import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,13 +52,16 @@ function QuickNoteDialog({ application, token, onClose }: QuickNoteDialogProps) 
 
       if (response.ok) {
         setContent("");
+        toast.success("Note added");
         onClose();
         startTransition(() => {
           router.refresh();
         });
+      } else {
+        toast.error("Failed to add note");
       }
     } catch {
-      // Error handling kept simple
+      toast.error("Failed to add note");
     }
   };
 
