@@ -1,12 +1,21 @@
 "use client";
 
-import { useMemo, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { toast } from "sonner";
 import type { Payout, PayoutSummary } from "@/lib/api/payouts";
-import { updatePayoutStatus } from "@/lib/api/payouts";
+import { updatePayoutStatus, deletePayout } from "@/lib/api/payouts";
 import type { Pagination } from "@/lib/api/admin";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DataTable } from "../../_components/data-table";
 import { getColumns } from "./columns";
 import { PayoutFiltersBar } from "./filters-bar";
@@ -17,9 +26,10 @@ interface PayoutsClientProps {
   payouts: Payout[];
   summary: PayoutSummary;
   token: string;
+  isSuperAdmin?: boolean;
 }
 
-function PayoutsClient({ payouts, summary, token }: PayoutsClientProps) {
+function PayoutsClient({ payouts, summary, token, isSuperAdmin }: PayoutsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -127,8 +137,29 @@ function PayoutsClient({ payouts, summary, token }: PayoutsClientProps) {
     }
   };
 
+  const [deleteTarget, setDeleteTarget] = useState<Payout | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const ok = await deletePayout(token, deleteTarget.id);
+    if (ok) {
+      toast.success("Payout deleted");
+      setDeleteTarget(null);
+      startTransition(() => { router.refresh(); });
+    } else {
+      toast.error("Failed to delete payout");
+    }
+    setDeleting(false);
+  };
+
   const { formatDisplay } = useAdminCurrency();
-  const columns = getColumns({ onMarkPaid: handleMarkPaid, formatDisplay });
+  const columns = getColumns({
+    onMarkPaid: handleMarkPaid,
+    onDelete: isSuperAdmin ? (p) => setDeleteTarget(p) : undefined,
+    formatDisplay,
+  });
 
   return (
     <>
@@ -169,6 +200,28 @@ function PayoutsClient({ payouts, summary, token }: PayoutsClientProps) {
           router.push(`/admin/dashboard/payouts/${payout.id}`)
         }
       />
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Payout</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete payout{" "}
+              <strong>{deleteTarget?.payoutNumber}</strong> for{" "}
+              <strong>{deleteTarget?.developerName}</strong>? This will also remove
+              all associated line items. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

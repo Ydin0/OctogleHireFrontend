@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { CheckCircle2, Download, Eye, MoreHorizontal } from "lucide-react";
+import { CheckCircle2, Download, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 
 import type { Payout } from "@/lib/api/payouts";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ import {
 
 interface GetColumnsOptions {
   onMarkPaid?: (payout: Payout) => void;
+  onDelete?: (payout: Payout) => void;
   formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
@@ -188,6 +189,18 @@ export function getColumns(
                   >
                     <CheckCircle2 className="mr-2 size-3.5" />
                     Mark as Paid
+                  </DropdownMenuItem>
+                </>
+              )}
+              {options.onDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => options.onDelete?.(payout)}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="mr-2 size-3.5" />
+                    Delete
                   </DropdownMenuItem>
                 </>
               )}

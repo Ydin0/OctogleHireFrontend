@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { Download, Eye, MoreHorizontal } from "lucide-react";
+import { Download, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 
 import type { Invoice } from "@/lib/api/invoices";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,7 @@ import {
 
 interface GetColumnsOptions {
   onMarkPaid?: (invoice: Invoice) => void;
+  onDelete?: (invoice: Invoice) => void;
   formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
@@ -171,6 +172,18 @@ export function getColumns(
                     </DropdownMenuItem>
                   </>
                 )}
+              {options.onDelete && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => options.onDelete?.(invoice)}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="mr-2 size-3.5" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Download, Loader2, Trash2 } from "lucide-react";
 
 import { toast } from "sonner";
 import type { Invoice } from "@/lib/api/invoices";
-import { updateInvoiceStatus } from "@/lib/api/invoices";
+import { updateInvoiceStatus, deleteInvoice } from "@/lib/api/invoices";
 import {
   type InvoiceStatus,
   invoiceStatusLabel,
@@ -33,11 +34,14 @@ const allInvoiceStatuses: InvoiceStatus[] = [
 interface InvoiceActionsProps {
   invoice: Invoice;
   token: string;
+  isSuperAdmin?: boolean;
   onStatusChange: (updated: Invoice) => void;
 }
 
-function InvoiceActions({ invoice, token, onStatusChange }: InvoiceActionsProps) {
+function InvoiceActions({ invoice, token, isSuperAdmin, onStatusChange }: InvoiceActionsProps) {
+  const router = useRouter();
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleStatusChange = async (newStatus: string) => {
     setUpdating(true);
@@ -131,6 +135,32 @@ function InvoiceActions({ invoice, token, onStatusChange }: InvoiceActionsProps)
               </p>
               <p className="text-sm text-muted-foreground">{invoice.notes}</p>
             </div>
+          </>
+        )}
+
+        {isSuperAdmin && (
+          <>
+            <Separator />
+            <Button
+              variant="destructive"
+              className="w-full gap-2"
+              disabled={deleting}
+              onClick={async () => {
+                if (!confirm(`Delete invoice ${invoice.invoiceNumber}? This cannot be undone.`)) return;
+                setDeleting(true);
+                const ok = await deleteInvoice(token, invoice.id);
+                if (ok) {
+                  toast.success("Invoice deleted");
+                  router.push("/admin/dashboard/invoices");
+                } else {
+                  toast.error("Failed to delete invoice");
+                }
+                setDeleting(false);
+              }}
+            >
+              {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              Delete Invoice
+            </Button>
           </>
         )}
       </CardContent>

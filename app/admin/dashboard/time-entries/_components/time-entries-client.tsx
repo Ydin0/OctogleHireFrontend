@@ -1,12 +1,21 @@
 "use client";
 
-import { useMemo, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { toast } from "sonner";
 import type { AdminTimeEntry } from "@/lib/api/time-entries";
-import { approveTimeEntry, rejectTimeEntry } from "@/lib/api/time-entries";
+import { approveTimeEntry, rejectTimeEntry, deleteTimeEntry } from "@/lib/api/time-entries";
 import type { Pagination } from "@/lib/api/admin";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DataTable } from "../../_components/data-table";
 import { getColumns } from "./columns";
 import { useAdminCurrency } from "../../_components/admin-currency-context";
@@ -16,9 +25,10 @@ import { Card, CardContent } from "@/components/ui/card";
 interface TimeEntriesClientProps {
   timeEntries: AdminTimeEntry[];
   token: string;
+  isSuperAdmin?: boolean;
 }
 
-function TimeEntriesClient({ timeEntries, token }: TimeEntriesClientProps) {
+function TimeEntriesClient({ timeEntries, token, isSuperAdmin }: TimeEntriesClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -166,10 +176,28 @@ function TimeEntriesClient({ timeEntries, token }: TimeEntriesClientProps) {
     0,
   );
 
+  const [deleteTarget, setDeleteTarget] = useState<AdminTimeEntry | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const ok = await deleteTimeEntry(token, deleteTarget.id);
+    if (ok) {
+      toast.success("Time entry deleted");
+      setDeleteTarget(null);
+      startTransition(() => { router.refresh(); });
+    } else {
+      toast.error("Failed to delete time entry");
+    }
+    setDeleting(false);
+  };
+
   const { formatDisplay } = useAdminCurrency();
   const columns = getColumns({
     onApprove: handleApprove,
     onReject: handleReject,
+    onDelete: isSuperAdmin ? (e) => setDeleteTarget(e) : undefined,
     formatDisplay,
   });
 
@@ -240,6 +268,27 @@ function TimeEntriesClient({ timeEntries, token }: TimeEntriesClientProps) {
             : undefined
         }
       />
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Time Entry</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this time entry for{" "}
+              <strong>{deleteTarget?.developerName}</strong> ({deleteTarget?.period},{" "}
+              {deleteTarget?.hours} hours)? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

@@ -29,8 +29,10 @@ import { InvoiceActions } from "./invoice-actions";
 
 const InvoiceDetailClient = ({
   params,
+  isSuperAdmin,
 }: {
   params: Promise<{ id: string }>;
+  isSuperAdmin?: boolean;
 }) => {
   const { id } = use(params);
   const { getToken } = useAuth();
@@ -278,6 +280,7 @@ const InvoiceDetailClient = ({
           <InvoiceActions
             invoice={invoice}
             token={token}
+            isSuperAdmin={isSuperAdmin}
             onStatusChange={(updated) => setInvoice(updated)}
           />
         </div>

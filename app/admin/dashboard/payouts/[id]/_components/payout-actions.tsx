@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Download, Loader2, Trash2 } from "lucide-react";
 
 import { toast } from "sonner";
 import type { Payout } from "@/lib/api/payouts";
-import { updatePayoutStatus } from "@/lib/api/payouts";
+import { updatePayoutStatus, deletePayout } from "@/lib/api/payouts";
 import {
   type PayoutStatus,
   payoutStatusLabel,
@@ -33,11 +34,14 @@ const allPayoutStatuses: PayoutStatus[] = [
 interface PayoutActionsProps {
   payout: Payout;
   token: string;
+  isSuperAdmin?: boolean;
   onStatusChange: (updated: Payout) => void;
 }
 
-function PayoutActions({ payout, token, onStatusChange }: PayoutActionsProps) {
+function PayoutActions({ payout, token, isSuperAdmin, onStatusChange }: PayoutActionsProps) {
+  const router = useRouter();
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const handleStatusChange = async (newStatus: string) => {
     setUpdating(true);
@@ -133,6 +137,32 @@ function PayoutActions({ payout, token, onStatusChange }: PayoutActionsProps) {
               </p>
               <p className="text-sm text-muted-foreground">{payout.notes}</p>
             </div>
+          </>
+        )}
+
+        {isSuperAdmin && (
+          <>
+            <Separator />
+            <Button
+              variant="destructive"
+              className="w-full gap-2"
+              disabled={deleting}
+              onClick={async () => {
+                if (!confirm(`Delete payout ${payout.payoutNumber}? This cannot be undone.`)) return;
+                setDeleting(true);
+                const ok = await deletePayout(token, payout.id);
+                if (ok) {
+                  toast.success("Payout deleted");
+                  router.push("/admin/dashboard/payouts");
+                } else {
+                  toast.error("Failed to delete payout");
+                }
+                setDeleting(false);
+              }}
+            >
+              {deleting ? <Loader2 className="size-4 animate-spin" /> : <Trash2 className="size-4" />}
+              Delete Payout
+            </Button>
           </>
         )}
       </CardContent>

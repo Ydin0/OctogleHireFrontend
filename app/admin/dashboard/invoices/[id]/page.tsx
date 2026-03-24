@@ -1,9 +1,16 @@
+import { auth } from "@clerk/nextjs/server";
+
+import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 import { InvoiceDetailClient } from "./_components/invoice-detail-client";
 
-export default function InvoiceDetailPage({
+export default async function InvoiceDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  return <InvoiceDetailClient params={params} />;
+  const { getToken } = await auth();
+  const token = await getToken();
+  const { isSuperAdmin } = await fetchUserRole(token);
+
+  return <InvoiceDetailClient params={params} isSuperAdmin={isSuperAdmin} />;
 }

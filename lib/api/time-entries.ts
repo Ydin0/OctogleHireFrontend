@@ -117,3 +117,25 @@ export async function rejectTimeEntry(
     return null;
   }
 }
+
+export async function deleteTimeEntry(
+  token: string | null,
+  entryId: string,
+): Promise<boolean> {
+  if (!token) return false;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/time-entries/${entryId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    return response.ok;
+  } catch {
+    return false;
+  }
+}

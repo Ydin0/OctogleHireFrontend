@@ -185,3 +185,25 @@ export async function updatePayoutStatus(
     return null;
   }
 }
+
+export async function deletePayout(
+  token: string | null,
+  payoutId: string,
+): Promise<boolean> {
+  if (!token) return false;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/payouts/${payoutId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    return response.ok;
+  } catch {
+    return false;
+  }
+}

@@ -35,8 +35,10 @@ function getMarginColorClass(marginPercent: number): string {
 
 const PayoutDetailClient = ({
   params,
+  isSuperAdmin,
 }: {
   params: Promise<{ id: string }>;
+  isSuperAdmin?: boolean;
 }) => {
   const { id } = use(params);
   const { getToken } = useAuth();
@@ -342,6 +344,7 @@ const PayoutDetailClient = ({
           <PayoutActions
             payout={payout}
             token={token}
+            isSuperAdmin={isSuperAdmin}
             onStatusChange={(updated) => setPayout(updated)}
           />
         </div>

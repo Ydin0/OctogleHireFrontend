@@ -183,3 +183,25 @@ export async function updateInvoiceStatus(
     return null;
   }
 }
+
+export async function deleteInvoice(
+  token: string | null,
+  invoiceId: string,
+): Promise<boolean> {
+  if (!token) return false;
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/invoices/${invoiceId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    return response.ok;
+  } catch {
+    return false;
+  }
+}

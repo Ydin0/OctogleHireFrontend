@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Check, MoreHorizontal, X } from "lucide-react";
+import { Check, MoreHorizontal, Trash2, X } from "lucide-react";
 
 import type { AdminTimeEntry } from "@/lib/api/time-entries";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -22,6 +23,7 @@ import {
 interface GetColumnsOptions {
   onApprove?: (entry: AdminTimeEntry) => void;
   onReject?: (entry: AdminTimeEntry) => void;
+  onDelete?: (entry: AdminTimeEntry) => void;
   formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
@@ -123,7 +125,8 @@ export function getColumns(
       size: 50,
       cell: ({ row }) => {
         const entry = row.original;
-        if (entry.status !== "submitted") return null;
+        const hasActions = entry.status === "submitted" || options.onDelete;
+        if (!hasActions) return null;
 
         return (
           <DropdownMenu>
@@ -134,19 +137,35 @@ export function getColumns(
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => options.onApprove?.(entry)}
-              >
-                <Check className="mr-2 size-3.5" />
-                Approve
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => options.onReject?.(entry)}
-                className="text-red-600 focus:text-red-600"
-              >
-                <X className="mr-2 size-3.5" />
-                Reject
-              </DropdownMenuItem>
+              {entry.status === "submitted" && (
+                <>
+                  <DropdownMenuItem
+                    onClick={() => options.onApprove?.(entry)}
+                  >
+                    <Check className="mr-2 size-3.5" />
+                    Approve
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => options.onReject?.(entry)}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <X className="mr-2 size-3.5" />
+                    Reject
+                  </DropdownMenuItem>
+                </>
+              )}
+              {options.onDelete && (
+                <>
+                  {entry.status === "submitted" && <DropdownMenuSeparator />}
+                  <DropdownMenuItem
+                    onClick={() => options.onDelete?.(entry)}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    <Trash2 className="mr-2 size-3.5" />
+                    Delete
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );
