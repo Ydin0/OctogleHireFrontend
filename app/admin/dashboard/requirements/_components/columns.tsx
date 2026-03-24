@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, MoreHorizontal, Pencil, Star, Trash2 } from "lucide-react";
+import { Building2, MoreHorizontal, Pencil, Star, Trash2, User } from "lucide-react";
 
 import type { AdminRequirement } from "@/lib/api/admin";
 import { Badge } from "@/components/ui/badge";
@@ -86,6 +86,39 @@ export function getColumns(
                 {companyName ?? "Unknown"}
               </p>
             </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "accountManagerName",
+      header: "Assigned To",
+      size: 140,
+      cell: ({ row }) => {
+        const name = row.original.accountManagerName;
+        const imageUrl = row.original.accountManagerImageUrl;
+        if (!name || name.trim() === "") {
+          return (
+            <span className="text-xs text-muted-foreground">Unassigned</span>
+          );
+        }
+        return (
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
+              {imageUrl ? (
+                <Image
+                  src={imageUrl}
+                  alt={name}
+                  width={24}
+                  height={24}
+                  className="size-6 rounded-full object-cover"
+                  unoptimized
+                />
+              ) : (
+                <User className="size-3 text-muted-foreground" />
+              )}
+            </div>
+            <span className="truncate text-sm">{name}</span>
           </div>
         );
       },

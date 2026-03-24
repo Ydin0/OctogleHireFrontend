@@ -710,6 +710,8 @@ export interface AdminRequirement {
   isFeatured: boolean;
   companyName: string | null;
   companyLogoUrl: string | null;
+  accountManagerName: string | null;
+  accountManagerImageUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
