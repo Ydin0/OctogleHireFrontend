@@ -840,25 +840,41 @@ export async function toggleRequirementFeatured(
   }
 }
 
+export interface DeleteRequirementResult {
+  success: boolean;
+  hasReferences?: boolean;
+  references?: { engagements: number; interviews: number; matches: number };
+}
+
 export async function deleteAdminRequirement(
   token: string | null,
-  id: string
-): Promise<boolean> {
-  if (!token) return false;
+  id: string,
+  force = false,
+): Promise<DeleteRequirementResult> {
+  if (!token) return { success: false };
 
   try {
-    const response = await fetch(
-      `${apiBaseUrl}/api/admin/requirements/${id}`,
-      {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
-      }
-    );
+    const url = `${apiBaseUrl}/api/admin/requirements/${id}${force ? "?force=true" : ""}`;
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
 
-    return response.ok;
+    if (response.ok) return { success: true };
+
+    if (response.status === 409) {
+      const data = await response.json();
+      return {
+        success: false,
+        hasReferences: true,
+        references: data.references,
+      };
+    }
+
+    return { success: false };
   } catch {
-    return false;
+    return { success: false };
   }
 }
 

@@ -3,11 +3,12 @@
 import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import type { AdminRequirement, Pagination } from "@/lib/api/admin";
+import type { AdminRequirement, DeleteRequirementResult, Pagination } from "@/lib/api/admin";
 import {
   toggleRequirementFeatured,
   deleteAdminRequirement,
 } from "@/lib/api/admin";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,6 +42,7 @@ function RequirementsClient({
   );
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteRefs, setDeleteRefs] = useState<{ engagements: number; interviews: number; matches: number } | null>(null);
 
   const currentSortBy = searchParams.get("sortBy") ?? "";
   const currentSortOrder = searchParams.get("sortOrder") ?? "";
@@ -78,20 +80,23 @@ function RequirementsClient({
     });
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (force = false) => {
     if (!deleteTarget) return;
     setDeleting(true);
     setDeleteError(null);
 
-    const ok = await deleteAdminRequirement(token, deleteTarget.id);
+    const result = await deleteAdminRequirement(token, deleteTarget.id, force);
 
-    if (ok) {
+    if (result.success) {
       setDeleteTarget(null);
+      setDeleteRefs(null);
       startTransition(() => {
         router.refresh();
       });
+    } else if (result.hasReferences && result.references) {
+      setDeleteRefs(result.references);
     } else {
-      setDeleteError("Failed to delete requirement. It may have active engagements.");
+      setDeleteError("Failed to delete requirement.");
     }
     setDeleting(false);
   };
@@ -100,6 +105,7 @@ function RequirementsClient({
     onToggleFeatured: handleToggleFeatured,
     onDelete: (req) => {
       setDeleteError(null);
+      setDeleteRefs(null);
       setDeleteTarget(req);
     },
   });
@@ -147,7 +153,11 @@ function RequirementsClient({
       <Dialog
         open={!!deleteTarget}
         onOpenChange={(open) => {
-          if (!open) setDeleteTarget(null);
+          if (!open) {
+            setDeleteTarget(null);
+            setDeleteRefs(null);
+            setDeleteError(null);
+          }
         }}
       >
         <DialogContent>
@@ -160,23 +170,60 @@ function RequirementsClient({
               all associated matches. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
+
+          {deleteRefs && (
+            <div className="rounded-md border border-orange-500/30 bg-orange-500/5 p-3 space-y-2">
+              <p className="text-sm font-medium text-orange-600 dark:text-orange-400">
+                This requirement has linked records:
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {deleteRefs.engagements > 0 && (
+                  <Badge variant="outline" className="border-orange-500/30 text-orange-600 dark:text-orange-400">
+                    {deleteRefs.engagements} engagement{deleteRefs.engagements !== 1 ? "s" : ""}
+                  </Badge>
+                )}
+                {deleteRefs.interviews > 0 && (
+                  <Badge variant="outline" className="border-orange-500/30 text-orange-600 dark:text-orange-400">
+                    {deleteRefs.interviews} interview{deleteRefs.interviews !== 1 ? "s" : ""}
+                  </Badge>
+                )}
+                {deleteRefs.matches > 0 && (
+                  <Badge variant="outline" className="border-orange-500/30 text-orange-600 dark:text-orange-400">
+                    {deleteRefs.matches} match{deleteRefs.matches !== 1 ? "es" : ""}
+                  </Badge>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Deleting will remove these linked records. Proceed with caution.
+              </p>
+            </div>
+          )}
+
           {deleteError && (
             <p className="text-sm text-destructive">{deleteError}</p>
           )}
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setDeleteTarget(null)}
+              onClick={() => {
+                setDeleteTarget(null);
+                setDeleteRefs(null);
+                setDeleteError(null);
+              }}
               disabled={deleting}
             >
               Cancel
             </Button>
             <Button
               variant="destructive"
-              onClick={handleDelete}
+              onClick={() => handleDelete(!!deleteRefs)}
               disabled={deleting}
             >
-              {deleting ? "Deleting..." : "Delete"}
+              {deleting
+                ? "Deleting..."
+                : deleteRefs
+                  ? "Delete Anyway"
+                  : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
