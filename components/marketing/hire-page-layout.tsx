@@ -32,6 +32,8 @@ import { PhoneInput } from "@/components/phone-input";
 import { techToSlug, roleToSlug, countryToSlug } from "@/lib/seo-data";
 import { hireFaqs } from "@/lib/data/hire-faqs";
 import { HireComparison } from "@/components/marketing/hire-comparison";
+import { trackMetaEvent } from "@/lib/analytics/meta-events";
+import { useCalendlyLead } from "@/lib/analytics/use-calendly-lead";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -598,6 +600,8 @@ function HeroForm() {
   const [contactName, setContactName] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
 
+  useCalendlyLead(view === "calendly");
+
   const {
     register,
     handleSubmit,
@@ -625,6 +629,11 @@ function HeroForm() {
         setApiError(body.message ?? "Something went wrong. Please try again.");
         return;
       }
+
+      trackMetaEvent("Lead", {
+        content_name: "Hire Page",
+        content_category: "hire",
+      });
 
       setContactName(data.contactName);
       setView("calendly");

@@ -19,6 +19,7 @@ import {
   companyLeadSchema,
   type CompanyLead,
 } from "@/lib/schemas/company-enquiry";
+import { trackMetaEvent } from "@/lib/analytics/meta-events";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -82,6 +83,11 @@ function LeadCaptureDialog({
         setApiError(body.message ?? "Something went wrong. Please try again.");
         return;
       }
+
+      trackMetaEvent("Lead", {
+        content_name: "Lead Capture",
+        content_category: "marketplace",
+      });
 
       setSubmittedName(data.contactName.split(" ")[0]);
       setSubmitted(true);

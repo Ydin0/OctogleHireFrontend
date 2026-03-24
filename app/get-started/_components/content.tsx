@@ -71,6 +71,8 @@ import {
 import { PhoneInput } from "@/components/phone-input";
 import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
 import { HiringCalculator } from "@/components/marketing/hiring-calculator";
+import { trackMetaEvent } from "@/lib/analytics/meta-events";
+import { useCalendlyLead } from "@/lib/analytics/use-calendly-lead";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -279,6 +281,8 @@ export function GetStartedContent() {
   const [contactFirstName, setContactFirstName] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
 
+  useCalendlyLead(modalView === "calendly");
+
   const {
     register,
     handleSubmit,
@@ -315,6 +319,11 @@ export function GetStartedContent() {
         setApiError(body.message ?? "Something went wrong. Please try again.");
         return;
       }
+
+      trackMetaEvent("Lead", {
+        content_name: "Get Started",
+        content_category: "demo",
+      });
 
       setContactFirstName(data.contactName.split(" ")[0]);
       setModalView("calendly");

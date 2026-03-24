@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Calendar, Check } from "lucide-react";
 
 import { trackMetaEvent } from "@/lib/analytics/meta-events";
+import { useCalendlyLead } from "@/lib/analytics/use-calendly-lead";
 import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,8 @@ const CompanySignupForm = () => {
   const [contactName, setContactName] = useState("");
   const [showCalendly, setShowCalendly] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+
+  useCalendlyLead(showCalendly);
 
   const {
     register,
