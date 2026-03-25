@@ -767,9 +767,13 @@ export async function createAdminRequirement(
       },
     );
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new Error(body.message || `Failed to create requirement (${response.status})`);
+    }
     return (await response.json()) as { requirement: AdminRequirement };
-  } catch {
+  } catch (error) {
+    if (error instanceof Error) throw error;
     return null;
   }
 }

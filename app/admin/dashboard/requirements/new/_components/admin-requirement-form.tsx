@@ -240,8 +240,8 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
       } else {
         toast.error("Failed to create requirement");
       }
-    } catch {
-      toast.error("Failed to create requirement");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to create requirement");
     } finally {
       setSubmitting(false);
     }
