@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 
-import { fetchUnifiedCandidates } from "@/lib/api/agencies";
+import { fetchUnifiedCandidates, fetchAgencyTeam } from "@/lib/api/agencies";
 import { CandidatesClient } from "./_components/candidates-client";
 
 interface CandidatesPageProps {
@@ -10,6 +10,7 @@ interface CandidatesPageProps {
     search?: string;
     status?: string;
     source?: string;
+    sourcedBy?: string;
     sortBy?: string;
     sortOrder?: string;
     stack?: string;
@@ -26,19 +27,23 @@ export default async function AgencyCandidatesPage({
   const token = await getToken();
   const params = await searchParams;
 
-  const result = await fetchUnifiedCandidates(token, {
-    page: params.page ? parseInt(params.page) : 1,
-    limit: params.limit ? parseInt(params.limit) : 20,
-    search: params.search,
-    status: params.status,
-    source: params.source,
-    sortBy: params.sortBy,
-    sortOrder: params.sortOrder,
-    stack: params.stack,
-    location: params.location,
-    expMin: params.expMin,
-    expMax: params.expMax,
-  });
+  const [result, teamMembers] = await Promise.all([
+    fetchUnifiedCandidates(token, {
+      page: params.page ? parseInt(params.page) : 1,
+      limit: params.limit ? parseInt(params.limit) : 20,
+      search: params.search,
+      status: params.status,
+      source: params.source,
+      sourcedBy: params.sourcedBy,
+      sortBy: params.sortBy,
+      sortOrder: params.sortOrder,
+      stack: params.stack,
+      location: params.location,
+      expMin: params.expMin,
+      expMax: params.expMax,
+    }),
+    fetchAgencyTeam(token),
+  ]);
 
   const candidates = result?.candidates ?? [];
   const pagination = result?.pagination ?? {
@@ -48,5 +53,16 @@ export default async function AgencyCandidatesPage({
     totalPages: 0,
   };
 
-  return <CandidatesClient candidates={candidates} pagination={pagination} />;
+  const sourcers = (teamMembers ?? []).map((m) => ({
+    userId: m.userId,
+    name: m.name,
+  }));
+
+  return (
+    <CandidatesClient
+      candidates={candidates}
+      pagination={pagination}
+      sourcers={sourcers}
+    />
+  );
 }

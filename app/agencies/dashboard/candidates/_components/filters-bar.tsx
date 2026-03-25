@@ -60,11 +60,17 @@ const SOURCE_OPTIONS = [
   { value: "agency_manual", label: "Manual" },
 ] as const;
 
-interface FiltersBarProps {
-  availableStacks?: string[];
+interface SourcerOption {
+  userId: string;
+  name: string;
 }
 
-function FiltersBar({ availableStacks = [] }: FiltersBarProps) {
+interface FiltersBarProps {
+  availableStacks?: string[];
+  sourcers?: SourcerOption[];
+}
+
+function FiltersBar({ availableStacks = [], sourcers = [] }: FiltersBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -72,6 +78,7 @@ function FiltersBar({ availableStacks = [] }: FiltersBarProps) {
   const currentSearch = searchParams.get("search") ?? "";
   const currentStatus = searchParams.get("status") ?? "all";
   const currentSource = searchParams.get("source") ?? "all";
+  const currentSourcedBy = searchParams.get("sourcedBy") ?? "all";
   const currentStack = searchParams.get("stack") ?? "";
   const currentLocation = searchParams.get("location") ?? "";
   const currentExpMin = searchParams.get("expMin") ?? "";
@@ -177,6 +184,24 @@ function FiltersBar({ availableStacks = [] }: FiltersBarProps) {
             ))}
           </SelectContent>
         </Select>
+        {sourcers.length > 0 && (
+          <Select
+            value={currentSourcedBy}
+            onValueChange={(v) => pushParams({ sourcedBy: v })}
+          >
+            <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectValue placeholder="Filter by sourcer" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Sourcers</SelectItem>
+              {sourcers.map((s) => (
+                <SelectItem key={s.userId} value={s.userId}>
+                  {s.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {/* Row 2: More Filters collapsible */}

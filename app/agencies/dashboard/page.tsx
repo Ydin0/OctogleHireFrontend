@@ -1,9 +1,17 @@
 import { auth } from "@clerk/nextjs/server";
+import { Users } from "lucide-react";
 
 import {
   fetchAgencyStats,
   fetchAgencyCommissionSummary,
+  fetchUnifiedCandidates,
+  fetchAgencyTeam,
 } from "@/lib/api/agencies";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -18,14 +26,54 @@ const formatCurrency = (cents: number) => {
   }).format(cents / 100);
 };
 
+const getInitials = (name: string) =>
+  name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
 export default async function AgencyDashboardPage() {
   const { getToken } = await auth();
   const token = await getToken();
 
-  const [stats, commissionSummary] = await Promise.all([
-    fetchAgencyStats(token),
-    fetchAgencyCommissionSummary(token),
-  ]);
+  const [stats, commissionSummary, candidatesResult, teamMembers] =
+    await Promise.all([
+      fetchAgencyStats(token),
+      fetchAgencyCommissionSummary(token),
+      fetchUnifiedCandidates(token, { limit: 1000 }),
+      fetchAgencyTeam(token),
+    ]);
+
+  // Compute candidates per sourcer
+  const candidates = candidatesResult?.candidates ?? [];
+  const sourcerCounts = new Map<string, { name: string; count: number }>();
+
+  for (const c of candidates) {
+    const userId = c.sourcedByUserId;
+    const name = c.sourcedByName;
+    if (userId && name) {
+      const existing = sourcerCounts.get(userId);
+      if (existing) {
+        existing.count++;
+      } else {
+        sourcerCounts.set(userId, { name, count: 1 });
+      }
+    }
+  }
+
+  // Build sorted leaderboard
+  const sourcerLeaderboard = [...sourcerCounts.entries()]
+    .map(([userId, { name, count }]) => {
+      const member = (teamMembers ?? []).find((m) => m.userId === userId);
+      return { userId, name, count, avatar: member?.avatar ?? null };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  const unattributedCount = candidates.filter(
+    (c) => !c.sourcedByUserId
+  ).length;
 
   return (
     <>
@@ -130,6 +178,55 @@ export default async function AgencyDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Candidates by Sourcer */}
+      {(sourcerLeaderboard.length > 0 || unattributedCount > 0) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="size-4" />
+              Candidates by Sourcer
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {sourcerLeaderboard.length > 0 ? (
+              <div className="divide-y divide-border">
+                {sourcerLeaderboard.map((s) => (
+                  <div
+                    key={s.userId}
+                    className="flex items-center justify-between py-2.5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar className="size-7">
+                        {s.avatar && (
+                          <AvatarImage src={s.avatar} alt={s.name} />
+                        )}
+                        <AvatarFallback className="text-[10px]">
+                          {getInitials(s.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">{s.name}</span>
+                    </div>
+                    <span className="font-mono text-sm">{s.count}</span>
+                  </div>
+                ))}
+                {unattributedCount > 0 && (
+                  <div className="flex items-center justify-between py-2.5 text-muted-foreground">
+                    <span className="text-sm">Unattributed</span>
+                    <span className="font-mono text-sm">
+                      {unattributedCount}
+                    </span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {unattributedCount} candidate{unattributedCount !== 1 ? "s" : ""} with no sourcer assigned yet.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </>
   );
 }

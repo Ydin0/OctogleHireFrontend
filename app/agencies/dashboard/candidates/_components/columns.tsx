@@ -45,6 +45,15 @@ const sourceBadgeClass = (source: string) => {
   }
 };
 
+const formatPrice = (candidate: UnifiedCandidate): string | null => {
+  if (!candidate.pricingType || candidate.pricingAmount == null) return null;
+  if (candidate.pricingType === "flat") {
+    const currency = candidate.pricingCurrency ?? "USD";
+    return `${currency} ${candidate.pricingAmount.toLocaleString()}`;
+  }
+  return `${candidate.pricingAmount}%`;
+};
+
 export function getColumns(): ColumnDef<UnifiedCandidate>[] {
   return [
     {
@@ -140,6 +149,38 @@ export function getColumns(): ColumnDef<UnifiedCandidate>[] {
               </Badge>
             ))}
           </div>
+        );
+      },
+    },
+    {
+      id: "price",
+      header: "Price",
+      size: 100,
+      cell: ({ row }) => {
+        const price = formatPrice(row.original);
+        if (!price) {
+          return <span className="text-sm text-muted-foreground">—</span>;
+        }
+        return (
+          <span className="font-mono text-sm">
+            {price}
+          </span>
+        );
+      },
+    },
+    {
+      id: "sourcedBy",
+      header: "Sourced By",
+      size: 120,
+      cell: ({ row }) => {
+        const name = row.original.sourcedByName;
+        if (!name) {
+          return <span className="text-sm text-muted-foreground">—</span>;
+        }
+        return (
+          <span className="block truncate text-sm">
+            {name}
+          </span>
         );
       },
     },

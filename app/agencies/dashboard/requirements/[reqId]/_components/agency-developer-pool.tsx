@@ -601,6 +601,7 @@ const AgencyDeveloperPool = ({
                         <th className="px-3 py-2.5 text-left">Location</th>
                         <th className="px-3 py-2.5 text-right">Exp</th>
                         <th className="px-3 py-2.5 text-right">Rate</th>
+                        <th className="px-3 py-2.5 text-right">Price</th>
                         <th className="w-20 px-3 py-2.5 text-right">Match</th>
                       </tr>
                     </thead>
@@ -694,6 +695,13 @@ const AgencyDeveloperPool = ({
                               {dev.hourlyRate
                                 ? `$${dev.hourlyRate}/hr`
                                 : "—"}
+                            </td>
+                            <td className="px-3 py-2.5 text-right font-mono text-xs whitespace-nowrap">
+                              {dev.pricingType === "flat" && dev.pricingAmount != null
+                                ? `${dev.pricingCurrency ?? "USD"} ${dev.pricingAmount.toLocaleString()}`
+                                : dev.pricingType === "percentage" && dev.pricingAmount != null
+                                  ? `${dev.pricingAmount}%`
+                                  : <span className="text-muted-foreground">—</span>}
                             </td>
                             <td className="px-3 py-2.5 text-right">
                               <Badge

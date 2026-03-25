@@ -28,6 +28,7 @@ import {
 } from "@/lib/api/companies";
 import {
   createAdminRequirement,
+  notifyNewRequirement,
   adminFetchLinkedInJobs,
   adminParseLinkedInJob,
   adminParseJobDocument,
@@ -241,6 +242,8 @@ function AdminRequirementForm({ token: initialToken, companies }: AdminRequireme
         priority: data.priority,
       });
       toast.success("Requirement created");
+      // Fire email notification to superadmin + account manager (non-blocking)
+      notifyNewRequirement(freshToken, result.requirement.id);
       router.push(`/admin/dashboard/requirements/${result.requirement.id}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

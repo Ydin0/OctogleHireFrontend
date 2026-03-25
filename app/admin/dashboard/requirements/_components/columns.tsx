@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, MoreHorizontal, Pencil, Star, Trash2, User, Users } from "lucide-react";
+import { Building2, Clock, MoreHorizontal, Pencil, Star, Trash2, User, Users } from "lucide-react";
 
 import type { AdminRequirement } from "@/lib/api/admin";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +53,56 @@ const experienceLevelBadgeClass = (level: string) => {
       return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
   }
 };
+
+// ── Live Timer Component ────────────────────────────────────────────────────
+
+function formatElapsed(ms: number): string {
+  const totalMinutes = Math.floor(ms / 60_000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours >= 24) {
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return `${days}d ${remainingHours}h`;
+  }
+  return `${hours}h ${minutes}m`;
+}
+
+function LiveTimer({ createdAt }: { createdAt: string }) {
+  const [elapsed, setElapsed] = useState(() =>
+    Date.now() - new Date(createdAt).getTime()
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsed(Date.now() - new Date(createdAt).getTime());
+    }, 60_000); // update every minute
+    return () => clearInterval(interval);
+  }, [createdAt]);
+
+  return (
+    <span className="flex items-center gap-1 font-mono text-sm text-amber-600">
+      <Clock className="size-3 animate-pulse" />
+      {formatElapsed(elapsed)}
+    </span>
+  );
+}
+
+function ResolvedTimer({
+  createdAt,
+  resolvedAt,
+}: {
+  createdAt: string;
+  resolvedAt: string;
+}) {
+  const ms = new Date(resolvedAt).getTime() - new Date(createdAt).getTime();
+  return (
+    <span className="flex items-center gap-1 font-mono text-sm text-emerald-600">
+      <Clock className="size-3" />
+      {formatElapsed(ms)}
+    </span>
+  );
+}
 
 export function getColumns(
   options: GetColumnsOptions = {}
@@ -208,6 +259,26 @@ export function getColumns(
             </span>
           </div>
         );
+      },
+    },
+    {
+      id: "timeToFirstMatch",
+      header: "Time to Match",
+      size: 120,
+      cell: ({ row }) => {
+        const { createdAt, firstMatchAt, proposedMatchCount } = row.original;
+        // Already matched — show resolved time
+        if (firstMatchAt) {
+          return <ResolvedTimer createdAt={createdAt} resolvedAt={firstMatchAt} />;
+        }
+        // Has matches but no firstMatchAt timestamp (legacy data)
+        if (proposedMatchCount > 0) {
+          return (
+            <span className="text-sm text-muted-foreground">—</span>
+          );
+        }
+        // No matches yet — live timer
+        return <LiveTimer createdAt={createdAt} />;
       },
     },
     {

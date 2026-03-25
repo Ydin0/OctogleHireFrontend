@@ -9,7 +9,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -71,7 +71,8 @@ function extractLinkedInUrls(text: string): string[] {
 // ── Component ────────────────────────────────────────────────────────────────
 
 const BulkImportDialog = () => {
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -182,6 +183,8 @@ const BulkImportDialog = () => {
             values.education && values.education.length > 0
               ? values.education
               : undefined,
+          sourcedByUserId: userId ?? undefined,
+          sourcedByName: user?.fullName ?? user?.firstName ?? undefined,
         });
 
         setRows((prev) =>

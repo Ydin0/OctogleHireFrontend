@@ -1,3 +1,5 @@
+import type { PricingType } from "@/lib/api/agencies";
+
 export interface PoolCandidate {
   id: string;
   fullName: string | null;
@@ -18,6 +20,9 @@ export interface PoolCandidate {
   profilePhotoPath: string | null;
   bio: string | null;
   location: string;
+  pricingType?: PricingType | null;
+  pricingAmount?: number | null;
+  pricingCurrency?: string | null;
 }
 
 export interface PitchPayload {

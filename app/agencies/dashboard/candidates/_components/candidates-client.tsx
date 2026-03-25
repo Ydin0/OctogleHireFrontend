@@ -10,12 +10,18 @@ import { FiltersBar } from "./filters-bar";
 import { AddDeveloperDialog } from "./add-developer-dialog";
 import { BulkImportDialog } from "./bulk-import-dialog";
 
+interface SourcerOption {
+  userId: string;
+  name: string;
+}
+
 interface CandidatesClientProps {
   candidates: UnifiedCandidate[];
   pagination: Pagination;
+  sourcers?: SourcerOption[];
 }
 
-function CandidatesClient({ candidates, pagination }: CandidatesClientProps) {
+function CandidatesClient({ candidates, pagination, sourcers = [] }: CandidatesClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -74,7 +80,7 @@ function CandidatesClient({ candidates, pagination }: CandidatesClientProps) {
         </div>
       </div>
 
-      <FiltersBar availableStacks={availableStacks} />
+      <FiltersBar availableStacks={availableStacks} sourcers={sourcers} />
 
       <DataTable
         columns={columns}

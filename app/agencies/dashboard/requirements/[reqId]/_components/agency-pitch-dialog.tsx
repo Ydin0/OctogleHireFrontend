@@ -231,6 +231,16 @@ const AgencyPitchDialog = ({
                             <p className="text-xs text-muted-foreground truncate">
                               {dev.professionalTitle}
                             </p>
+                            {dev.pricingType === "flat" && dev.pricingAmount != null && (
+                              <p className="font-mono text-[10px] text-muted-foreground">
+                                Price: {dev.pricingCurrency ?? "USD"} {dev.pricingAmount.toLocaleString()}
+                              </p>
+                            )}
+                            {dev.pricingType === "percentage" && dev.pricingAmount != null && (
+                              <p className="font-mono text-[10px] text-muted-foreground">
+                                Price: {dev.pricingAmount}% of salary
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>

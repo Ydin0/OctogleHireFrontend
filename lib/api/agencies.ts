@@ -180,6 +180,8 @@ export interface SavedCandidate {
 
 // ── Unified Candidate Types ─────────────────────────────────────────────────
 
+export type PricingType = "flat" | "percentage";
+
 export interface UnifiedCandidate {
   id: string;
   sourceTable: "application" | "saved";
@@ -195,6 +197,11 @@ export interface UnifiedCandidate {
   linkedinUrl: string | null;
   submittedAt: string | null;
   createdAt: string;
+  sourcedByUserId?: string | null;
+  sourcedByName?: string | null;
+  pricingType?: PricingType | null;
+  pricingAmount?: number | null;
+  pricingCurrency?: string | null;
 }
 
 export interface UnifiedCandidateDetail extends UnifiedCandidate {
@@ -215,8 +222,22 @@ export interface UnifiedCandidateDetail extends UnifiedCandidate {
   hourlyRateCents?: number | null;
   monthlyRateCents?: number | null;
   salaryCurrency?: string | null;
+  salaryAmount?: number | null;
   secondarySkills?: string | null;
   updatedAt?: string;
+  pitches?: CandidatePitchHistory[] | null;
+}
+
+export interface CandidatePitchHistory {
+  id: string;
+  requirementId: string;
+  requirementTitle: string;
+  companyName: string | null;
+  pitchedHourlyRate: number;
+  pitchedMonthlyRate: number;
+  currency: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
 }
 
 export interface UnifiedCandidatesParams {
@@ -225,6 +246,7 @@ export interface UnifiedCandidatesParams {
   search?: string;
   status?: string;
   source?: string;
+  sourcedBy?: string;
   sortBy?: string;
   sortOrder?: string;
   stack?: string;
@@ -350,6 +372,7 @@ export async function fetchUnifiedCandidates(
     if (params.search) searchParams.set("search", params.search);
     if (params.status) searchParams.set("status", params.status);
     if (params.source) searchParams.set("source", params.source);
+    if (params.sourcedBy) searchParams.set("sourcedBy", params.sourcedBy);
     if (params.sortBy) searchParams.set("sortBy", params.sortBy);
     if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
     if (params.stack) searchParams.set("stack", params.stack);
@@ -664,6 +687,9 @@ export interface AgencyPoolCandidate {
   profilePhotoPath: string | null;
   bio: string | null;
   location: string;
+  pricingType?: PricingType | null;
+  pricingAmount?: number | null;
+  pricingCurrency?: string | null;
 }
 
 export interface AdminAgencyPitch extends AgencyPitch {
@@ -852,6 +878,8 @@ export async function addAgencyCandidate(
     secondarySkills?: string;
     profilePhotoUrl?: string;
     englishProficiency?: string;
+    sourcedByUserId?: string;
+    sourcedByName?: string;
   }
 ): Promise<Record<string, unknown>> {
   if (!token) throw new Error("Not authenticated");
@@ -902,6 +930,62 @@ export async function updateAgencyCandidate(
   }
 
   return (await response.json()) as Record<string, unknown>;
+}
+
+export async function updateCandidatePricing(
+  token: string | null,
+  candidateId: string,
+  payload: {
+    pricingType: PricingType | null;
+    pricingAmount: number | null;
+    pricingCurrency: string | null;
+    sourceTable: string;
+  }
+): Promise<Record<string, unknown>> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/agencies/candidates/${candidateId}`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(
+      (body as { message?: string }).message ?? "Failed to update pricing"
+    );
+  }
+
+  return (await response.json()) as Record<string, unknown>;
+}
+
+export async function fetchCandidatePitchHistory(
+  token: string | null,
+  candidateId: string
+): Promise<CandidatePitchHistory[] | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/candidates/${candidateId}/pitches`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as CandidatePitchHistory[];
+  } catch {
+    return null;
+  }
 }
 
 // ── Admin Agency Pitch API Functions ────────────────────────────────────────

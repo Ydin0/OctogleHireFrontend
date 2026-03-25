@@ -11,7 +11,7 @@ import {
   Plus,
   Link2,
 } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -125,7 +125,8 @@ const EMAIL_STATUS_CONFIG: Record<
 // ── Component ────────────────────────────────────────────────────────────────
 
 const AddDeveloperDialog = () => {
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
@@ -318,6 +319,8 @@ const AddDeveloperDialog = () => {
         profilePhotoUrl: form.profilePhotoUrl.trim() || undefined,
         workExperience: form.workExperience.length > 0 ? form.workExperience : undefined,
         education: form.education.length > 0 ? form.education : undefined,
+        sourcedByUserId: userId ?? undefined,
+        sourcedByName: user?.fullName ?? user?.firstName ?? undefined,
       });
 
       toast.success("Developer added successfully");

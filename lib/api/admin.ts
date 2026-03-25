@@ -712,7 +712,9 @@ export interface AdminRequirement {
   companyLogoUrl: string | null;
   accountManagerName: string | null;
   accountManagerImageUrl: string | null;
+  accountManagerEmail: string | null;
   proposedMatchCount: number;
+  firstMatchAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -778,6 +780,30 @@ export async function createAdminRequirement(
     throw new Error("Unexpected API response — missing requirement in body");
   }
   return data as { requirement: AdminRequirement };
+}
+
+export async function notifyNewRequirement(
+  token: string | null,
+  requirementId: string,
+): Promise<void> {
+  if (!token) return;
+
+  // Fire-and-forget — don't block the UI if notification fails
+  try {
+    await fetch(
+      `${apiBaseUrl}/api/admin/requirements/${requirementId}/notify`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      },
+    );
+  } catch {
+    // Silently fail — notification is non-critical
+  }
 }
 
 export async function fetchAdminRequirements(

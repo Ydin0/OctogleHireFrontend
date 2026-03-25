@@ -34,6 +34,8 @@ import {
 } from "@/app/admin/dashboard/_components/dashboard-data";
 import { AgencyStatusChanger } from "./_components/agency-status-changer";
 import { CandidateEditForm } from "./_components/candidate-edit-form";
+import { CandidatePricing } from "./_components/candidate-pricing";
+import { CandidatePitchHistoryCard } from "./_components/candidate-pitch-history";
 
 const getInitials = (name: string | null) => {
   if (!name) return "??";
@@ -467,6 +469,7 @@ export default async function AgencyCandidateDetailPage({
               </CardContent>
             </Card>
           )}
+          <CandidatePitchHistoryCard candidateId={candidate.id} />
         </div>
 
         {/* Right column — 1/3 width */}
@@ -546,6 +549,25 @@ export default async function AgencyCandidateDetailPage({
               </div>
             </CardContent>
           </Card>
+
+          <CandidatePricing
+            candidateId={candidate.id}
+            sourceTable={candidate.sourceTable}
+            initialPricingType={candidate.pricingType}
+            initialPricingAmount={candidate.pricingAmount}
+            initialPricingCurrency={candidate.pricingCurrency}
+          />
+
+          {candidate.sourcedByName && (
+            <Card>
+              <CardContent className="py-4">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Sourced By
+                </p>
+                <p className="text-sm font-medium">{candidate.sourcedByName}</p>
+              </CardContent>
+            </Card>
+          )}
 
           {candidate.linkedinUrl && (
             <Card>
