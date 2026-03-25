@@ -20,15 +20,14 @@ interface HeroProps {
 }
 
 const EXCLUDED = new Set([
-  "GB", "US", "CA", "DE", "FR", "NL", "IT", "AU", // expensive markets
-  "ET", "KE", "NG", "GH", "TZ", "UG",              // smaller markets
+  "GB", "US", "CA", "DE", "FR", "NL", "IT", "AU",
+  "ET", "KE", "NG", "GH", "TZ", "UG",
 ]);
 
 const hireFromCountries = (() => {
   const filtered = REGIONAL_COUNTRIES.filter(
     (c) => !EXCLUDED.has(c.isoCode),
   );
-  // India at the center
   const india = filtered.find((c) => c.isoCode === "IN");
   const rest = filtered.filter((c) => c.isoCode !== "IN");
   if (!india) return rest;
@@ -36,11 +35,17 @@ const hireFromCountries = (() => {
   return [...rest.slice(0, mid), india, ...rest.slice(mid)];
 })();
 
+const badges = [
+  { src: "/security/ISO copy.png", alt: "ISO 27001 Certified", href: "https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C" },
+  { src: "/security/GDPR copy.png", alt: "GDPR Compliant", href: undefined },
+  { src: "/security/CCPA copy.png", alt: "CCPA Compliant", href: undefined },
+];
+
 const Hero = ({ className }: HeroProps) => {
   const allCountries = [...hireFromCountries, ...hireFromCountries];
 
   return (
-    <section className={cn("pt-20 pb-0", className)}>
+    <section className={cn("pt-24 pb-0 lg:pt-32", className)}>
       <div className="container mx-auto px-6">
         {/* Badge */}
         <div className="flex justify-center">
@@ -53,7 +58,7 @@ const Hero = ({ className }: HeroProps) => {
         </div>
 
         {/* Headline */}
-        <h1 className="mt-8 text-center text-5xl font-medium tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
+        <h1 className="mt-10 text-center text-5xl font-medium tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
           World-Class Developers,
           <br />
           Fraction of the
@@ -68,51 +73,55 @@ const Hero = ({ className }: HeroProps) => {
           hours — no recruitment fees, no long-term lock-in.
         </p>
 
-        {/* CTAs */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Button asChild size="lg" className="rounded-full px-6">
-            <a href="/companies/signup">
-              Start Hiring
-              <ArrowRight className="ml-2 size-4 -rotate-45" />
-            </a>
-          </Button>
-        </div>
+        {/* CTAs + Badges row */}
+        <div className="mt-10 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
+          {/* Buttons */}
+          <div className="flex items-center gap-3">
+            <Button asChild size="lg" className="rounded-full px-6">
+              <a href="/companies/signup">
+                Start Hiring
+                <ArrowRight className="ml-2 size-4 -rotate-45" />
+              </a>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="rounded-full px-6">
+              <a href="/get-started?demo=true">
+                Book a Demo
+              </a>
+            </Button>
+          </div>
 
-        <div className="mt-6 flex items-center justify-center gap-5 flex-wrap">
-          {[
-            { src: "/security/ISO copy.png", alt: "ISO 27001 Certified", href: "https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C" },
-            { src: "/security/GDPR copy.png", alt: "GDPR Compliant", href: undefined },
-            { src: "/security/CCPA copy.png", alt: "CCPA Compliant", href: undefined },
-          ].map((badge) =>
-            badge.href ? (
-              <a key={badge.alt} href={badge.href} target="_blank" rel="noopener noreferrer">
+          {/* Divider (desktop only) */}
+          <div className="hidden lg:block h-10 w-px bg-border" />
+
+          {/* Certification badges */}
+          <div className="flex items-center gap-4">
+            {badges.map((badge) =>
+              badge.href ? (
+                <a key={badge.alt} href={badge.href} target="_blank" rel="noopener noreferrer">
+                  <Image
+                    src={badge.src}
+                    alt={badge.alt}
+                    width={80}
+                    height={80}
+                    className="h-10 w-auto invert dark:invert-0 opacity-60 hover:opacity-100 transition-opacity"
+                  />
+                </a>
+              ) : (
                 <Image
+                  key={badge.alt}
                   src={badge.src}
                   alt={badge.alt}
                   width={80}
                   height={80}
-                  className="h-14 w-auto invert dark:invert-0 opacity-70 hover:opacity-100 transition-opacity"
+                  className="h-10 w-auto invert dark:invert-0 opacity-60 hover:opacity-100 transition-opacity"
                 />
-              </a>
-            ) : (
-              <Image
-                key={badge.alt}
-                src={badge.src}
-                alt={badge.alt}
-                width={80}
-                height={80}
-                className="h-14 w-auto invert dark:invert-0 opacity-70 hover:opacity-100 transition-opacity"
-              />
-            )
-          )}
+              )
+            )}
+          </div>
         </div>
 
-        <p className="mt-6 text-center text-[10px] text-muted-foreground">
-          Based on 2024–2025 hiring data across 300+ placements
-        </p>
-
         {/* Hire from 30+ countries */}
-        <p className="mt-10 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="mt-16 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Hire from 30+ countries
         </p>
       </div>
