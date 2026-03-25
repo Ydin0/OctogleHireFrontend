@@ -11,6 +11,7 @@ import {
   toggleRequirementFeatured,
   deleteAdminRequirement,
 } from "@/lib/api/admin";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -147,24 +148,28 @@ function RequirementsClient({
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        {statusTabs.map((tab) => {
-          const isActive = currentStatus === tab.value;
-          return (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => pushParams({ status: tab.value, page: "" })}
-              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                isActive
-                  ? "border-pulse/40 bg-pulse/10 text-pulse"
-                  : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
-              }`}
-            >
-              {tab.label}{tab.count !== undefined ? ` (${tab.count})` : ""}
-            </button>
-          );
-        })}
+      <div className="flex gap-0 border-b border-border">
+        {statusTabs.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => pushParams({ status: tab.value, page: "" })}
+            className={cn(
+              "relative px-4 py-2.5 text-sm font-medium transition-colors",
+              currentStatus === tab.value
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tab.label}
+            <span
+              className={cn(
+                "absolute bottom-0 left-0 h-0.5 w-full bg-foreground transition-all duration-300",
+                currentStatus === tab.value ? "opacity-100" : "opacity-0",
+              )}
+            />
+          </button>
+        ))}
       </div>
 
       <FiltersBar />
