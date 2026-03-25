@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, MoreHorizontal, Pencil, Star, Trash2, User } from "lucide-react";
+import { Building2, MoreHorizontal, Pencil, Star, Trash2, User, Users } from "lucide-react";
 
 import type { AdminRequirement } from "@/lib/api/admin";
 import { Badge } from "@/components/ui/badge";
@@ -191,6 +191,22 @@ export function getColumns(
           >
             {requirementStatusLabel[status] ?? status}
           </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "proposedMatchCount",
+      header: "Candidates",
+      size: 100,
+      cell: ({ getValue }) => {
+        const count = (getValue() as number) ?? 0;
+        return (
+          <div className="flex items-center gap-1.5">
+            <Users className="size-3.5 text-muted-foreground" />
+            <span className={`text-sm font-medium ${count > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+              {count}
+            </span>
+          </div>
         );
       },
     },

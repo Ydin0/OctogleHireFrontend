@@ -712,6 +712,7 @@ export interface AdminRequirement {
   companyLogoUrl: string | null;
   accountManagerName: string | null;
   accountManagerImageUrl: string | null;
+  proposedMatchCount: number;
   createdAt: string;
   updatedAt: string;
 }
