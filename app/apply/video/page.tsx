@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { toast } from "sonner";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
@@ -88,7 +89,7 @@ export default function VideoUploadPage() {
     setError(null);
 
     try {
-      const res = await fetch(`${apiBaseUrl}/api/public/video-upload/send-otp`, {
+      const res = await fetchWithRetry(`${apiBaseUrl}/api/public/video-upload/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
@@ -102,7 +103,11 @@ export default function VideoUploadPage() {
       toast.success("Verification code sent");
       setPhase("otp");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Something went wrong.";
+      const message = err instanceof Error
+        ? (err.message === "Failed to fetch" || err.message === "Request failed after retries"
+          ? "Network error — please check your connection and try again."
+          : err.message)
+        : "Something went wrong.";
       toast.error(message);
       setError(message);
     } finally {
@@ -122,7 +127,7 @@ export default function VideoUploadPage() {
     setError(null);
 
     try {
-      const res = await fetch(
+      const res = await fetchWithRetry(
         `${apiBaseUrl}/api/public/video-upload/verify-otp`,
         {
           method: "POST",
@@ -253,7 +258,7 @@ export default function VideoUploadPage() {
       formData.append("uploadToken", uploadToken);
       formData.append("introVideo", file);
 
-      const res = await fetch(`${apiBaseUrl}/api/public/video-upload/upload`, {
+      const res = await fetchWithRetry(`${apiBaseUrl}/api/public/video-upload/upload`, {
         method: "POST",
         body: formData,
       });
@@ -266,7 +271,11 @@ export default function VideoUploadPage() {
       toast.success("Video uploaded successfully");
       setPhase("done");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Upload failed.";
+      const message = err instanceof Error
+        ? (err.message === "Failed to fetch" || err.message === "Request failed after retries"
+          ? "Network error — please check your connection and try again."
+          : err.message)
+        : "Upload failed.";
       toast.error(message);
       setError(message);
       setPhase("record");

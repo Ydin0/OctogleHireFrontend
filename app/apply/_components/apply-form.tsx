@@ -8,6 +8,7 @@ import { ArrowLeft, ArrowRight, Send } from "lucide-react";
 
 import { toast } from "sonner";
 import { trackMetaEvent } from "@/lib/analytics/meta-events";
+import { fetchWithRetry } from "@/lib/api/fetch-with-retry";
 import { applicationSchema, type Application } from "@/lib/schemas/application";
 import type { LinkedInFormValues, ApifyProfile } from "@/lib/linkedin";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,7 @@ const buildApplicationFormData = (
     applicationId: string | null;
     step?: number;
     includeFiles: boolean;
+    includeVideo?: boolean;
   }
 ) => {
   const formData = new FormData();
@@ -166,7 +168,7 @@ const buildApplicationFormData = (
     formData.append("resumeFile", values.resumeFile);
   }
 
-  if (params.includeFiles && values.introVideo) {
+  if ((params.includeVideo ?? params.includeFiles) && values.introVideo) {
     formData.append("introVideo", values.introVideo);
   }
 
@@ -180,6 +182,18 @@ const buildApplicationFormData = (
   }
 
   return formData;
+};
+
+const humanizeNetworkError = (error: unknown): string => {
+  if (!(error instanceof Error)) return String(error);
+  const msg = error.message;
+  if (msg === "Failed to fetch" || msg === "NetworkError when attempting to fetch resource." || msg === "Load failed") {
+    return "Network error — please check your internet connection and try again.";
+  }
+  if (msg === "Request failed after retries") {
+    return "Our servers are temporarily unavailable. Please wait a moment and try again.";
+  }
+  return msg;
 };
 
 const readErrorMessage = async (response: Response): Promise<string> => {
@@ -324,13 +338,15 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
   const persistDraft = async (step: number): Promise<string | null> => {
     const values = methods.getValues();
     const includeFiles = step >= 4; // steps 4 (links+resume), 5, 6 (video), 7 (review)
+    const includeVideo = step === 6 || step === LAST_STEP; // only upload video on its own step or final submit
     const formData = buildApplicationFormData(values, {
       applicationId: applicationIdRef.current,
       step,
       includeFiles,
+      includeVideo,
     });
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/public/developer-applications/draft`,
       {
         method: "POST",
@@ -375,10 +391,7 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
       toast.success("Progress saved");
       setCurrentStep((prev) => prev + 1);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Unable to save this step right now. Please try again.";
+      const message = humanizeNetworkError(error);
       toast.error(message);
       setSubmitError(message);
     } finally {
@@ -410,9 +423,10 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
         applicationId: resolvedId,
         step: LAST_STEP,
         includeFiles: true,
+        includeVideo: true,
       });
 
-      const response = await fetch(`${apiBaseUrl}/api/public/developer-applications`, {
+      const response = await fetchWithRetry(`${apiBaseUrl}/api/public/developer-applications`, {
         method: "POST",
         body: formData,
       });
@@ -433,10 +447,7 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
 
       router.push(`/apply/status?applicationId=${resolvedId}`);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Unable to submit your application right now. Please try again.";
+      const message = humanizeNetworkError(error);
       toast.error(message);
       setSubmitError(message);
     } finally {
