@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface RequestHourChangeDialogProps {
   open: boolean;
@@ -127,12 +128,9 @@ function RequestHourChangeDialog({
 
           <div className="space-y-2">
             <Label htmlFor="hour-effective">Effective From</Label>
-            <Input
-              id="hour-effective"
-              type="date"
-              value={effectiveDate}
-              onChange={(e) => setEffectiveDate(e.target.value)}
-              min={defaultEffective}
+            <DatePicker
+              value={effectiveDate ? new Date(effectiveDate + "T00:00:00") : undefined}
+              onChange={(d) => setEffectiveDate(d ? d.toISOString().split("T")[0] : "")}
             />
           </div>
 

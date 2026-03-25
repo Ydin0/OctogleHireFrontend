@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
+import { TimePicker } from "@/components/ui/time-picker";
 import {
   Dialog,
   DialogContent,
@@ -18,8 +20,9 @@ import {
 interface AvailabilitySlotDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  defaultDate?: string; // "YYYY-MM-DD"
+  defaultDate?: Date;
   defaultStartTime?: string; // "HH:MM"
+  timezone: string;
   onSave: (slot: {
     startTime: string;
     endTime: string;
@@ -32,25 +35,39 @@ export function AvailabilitySlotDialog({
   onOpenChange,
   defaultDate,
   defaultStartTime,
+  timezone,
   onSave,
 }: AvailabilitySlotDialogProps) {
-  const today = defaultDate ?? new Date().toISOString().split("T")[0];
-  const [date, setDate] = useState(today);
+  const [date, setDate] = useState<Date | undefined>(defaultDate ?? new Date());
   const [startTime, setStartTime] = useState(defaultStartTime ?? "09:00");
   const [endTime, setEndTime] = useState(
     defaultStartTime
-      ? `${String(Number(defaultStartTime.split(":")[0]) + 1).padStart(2, "0")}:00`
+      ? `${String(Math.min(Number(defaultStartTime.split(":")[0]) + 1, 23)).padStart(2, "0")}:00`
       : "10:00",
   );
   const [saving, setSaving] = useState(false);
 
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  // Reset state when dialog opens with new defaults
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen) {
+      setDate(defaultDate ?? new Date());
+      setStartTime(defaultStartTime ?? "09:00");
+      setEndTime(
+        defaultStartTime
+          ? `${String(Math.min(Number(defaultStartTime.split(":")[0]) + 1, 23)).padStart(2, "0")}:00`
+          : "10:00",
+      );
+    }
+    onOpenChange(isOpen);
+  };
 
   const handleSave = async () => {
+    if (!date) return;
     setSaving(true);
+    const dateStr = format(date, "yyyy-MM-dd");
     await onSave({
-      startTime: `${date}T${startTime}:00`,
-      endTime: `${date}T${endTime}:00`,
+      startTime: `${dateStr}T${startTime}:00`,
+      endTime: `${dateStr}T${endTime}:00`,
       timezone,
     });
     setSaving(false);
@@ -58,7 +75,7 @@ export function AvailabilitySlotDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>Add Availability Slot</DialogTitle>
@@ -70,28 +87,20 @@ export function AvailabilitySlotDialog({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Date</Label>
-            <Input
-              type="date"
+            <DatePicker
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(d) => setDate(d)}
+              placeholder="Select date"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Start Time</Label>
-              <Input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
+              <TimePicker value={startTime} onChange={setStartTime} />
             </div>
             <div className="space-y-2">
               <Label>End Time</Label>
-              <Input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
+              <TimePicker value={endTime} onChange={setEndTime} />
             </div>
           </div>
           <p className="text-xs text-muted-foreground">

@@ -18,6 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
+import { MonthPicker } from "@/components/ui/month-picker";
 import {
   Select,
   SelectContent,
@@ -463,18 +465,16 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Date</Label>
-                <Input
-                  type="date"
-                  value={editForm.startDate}
-                  onChange={(e) => setEditForm((f) => ({ ...f, startDate: e.target.value }))}
+                <DatePicker
+                  value={editForm.startDate ? new Date(editForm.startDate + "T00:00:00") : undefined}
+                  onChange={(d) => setEditForm((f) => ({ ...f, startDate: d ? d.toISOString().split("T")[0] : "" }))}
                 />
               </div>
               <div className="space-y-2">
                 <Label>End Date</Label>
-                <Input
-                  type="date"
-                  value={editForm.endDate}
-                  onChange={(e) => setEditForm((f) => ({ ...f, endDate: e.target.value }))}
+                <DatePicker
+                  value={editForm.endDate ? new Date(editForm.endDate + "T00:00:00") : undefined}
+                  onChange={(d) => setEditForm((f) => ({ ...f, endDate: d ? d.toISOString().split("T")[0] : "" }))}
                 />
               </div>
             </div>
@@ -566,12 +566,7 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="ts-period">Period</Label>
-                  <Input
-                    id="ts-period"
-                    type="month"
-                    value={tsPeriod}
-                    onChange={(e) => setTsPeriod(e.target.value)}
-                  />
+                  <MonthPicker value={tsPeriod} onChange={setTsPeriod} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="ts-hours">Hours</Label>

@@ -11,12 +11,36 @@ import type {
 } from "@/lib/api/companies";
 import { deleteCompanySlot } from "@/lib/api/companies";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { AvailabilitySlotDialog } from "./availability-slot-dialog";
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+// ── Constants ───────────────────────────────────────────────────────────────
 
 const HOURS = Array.from({ length: 13 }, (_, i) => i + 8); // 8am–8pm
-const HOUR_HEIGHT = 60; // px per hour
+const HOUR_HEIGHT = 60;
+
+const TIMEZONES = [
+  { value: "America/New_York", label: "Eastern (ET)" },
+  { value: "America/Chicago", label: "Central (CT)" },
+  { value: "America/Denver", label: "Mountain (MT)" },
+  { value: "America/Los_Angeles", label: "Pacific (PT)" },
+  { value: "Europe/London", label: "London (GMT/BST)" },
+  { value: "Europe/Paris", label: "Central Europe (CET)" },
+  { value: "Europe/Istanbul", label: "Turkey (TRT)" },
+  { value: "Asia/Dubai", label: "Dubai (GST)" },
+  { value: "Asia/Kolkata", label: "India (IST)" },
+  { value: "Asia/Singapore", label: "Singapore (SGT)" },
+  { value: "Asia/Tokyo", label: "Tokyo (JST)" },
+  { value: "Australia/Sydney", label: "Sydney (AEST)" },
+];
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
 
 function getWeekDates(weekOffset: number): Date[] {
   const now = new Date();
@@ -56,27 +80,28 @@ function isToday(date: Date): boolean {
   );
 }
 
+/** Get pixel position of a time block within a day column (using LOCAL time) */
 function getBlockPosition(
   startStr: string,
   endStr: string,
-  dayStart: Date,
+  dayDate: Date,
 ): { top: number; height: number } | null {
   const start = new Date(startStr);
   const end = new Date(endStr);
-  const dayEnd = new Date(dayStart);
+
+  // Check if the block falls on this day (using local date comparison)
+  const dayStart = new Date(dayDate);
+  dayStart.setHours(8, 0, 0, 0);
+  const dayEnd = new Date(dayDate);
   dayEnd.setHours(20, 0, 0, 0);
-  const dayStartHour = new Date(dayStart);
-  dayStartHour.setHours(8, 0, 0, 0);
 
-  if (end <= dayStartHour || start >= dayEnd) return null;
+  if (end <= dayStart || start >= dayEnd) return null;
 
-  const clampedStart = start < dayStartHour ? dayStartHour : start;
+  const clampedStart = start < dayStart ? dayStart : start;
   const clampedEnd = end > dayEnd ? dayEnd : end;
 
-  const startMinutes =
-    (clampedStart.getHours() - 8) * 60 + clampedStart.getMinutes();
-  const endMinutes =
-    (clampedEnd.getHours() - 8) * 60 + clampedEnd.getMinutes();
+  const startMinutes = (clampedStart.getHours() - 8) * 60 + clampedStart.getMinutes();
+  const endMinutes = (clampedEnd.getHours() - 8) * 60 + clampedEnd.getMinutes();
 
   return {
     top: (startMinutes / 60) * HOUR_HEIGHT,
@@ -99,6 +124,8 @@ interface CalendarWeekViewProps {
   interviews: CalendarInterview[];
   slots: CompanyAvailabilitySlot[];
   token: string;
+  timezone: string;
+  onTimezoneChange: (tz: string) => void;
   onSlotCreated: () => void;
   onCreateSlot: (slot: {
     startTime: string;
@@ -113,13 +140,15 @@ export function CalendarWeekView({
   interviews,
   slots,
   token,
+  timezone,
+  onTimezoneChange,
   onSlotCreated,
   onCreateSlot,
   onWeekChange,
 }: CalendarWeekViewProps) {
   const [weekOffset, setWeekOffset] = useState(0);
   const [slotDialogOpen, setSlotDialogOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string | undefined>();
 
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
@@ -134,9 +163,7 @@ export function CalendarWeekView({
   };
 
   const handleCellClick = (dayIndex: number, hour: number) => {
-    const date = weekDates[dayIndex];
-    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-    setSelectedDate(dateStr);
+    setSelectedDate(weekDates[dayIndex]);
     setSelectedTime(`${String(hour).padStart(2, "0")}:00`);
     setSlotDialogOpen(true);
   };
@@ -154,9 +181,21 @@ export function CalendarWeekView({
   return (
     <>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <h2 className="text-sm font-semibold">{formatMonthYear(weekDates)}</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={timezone} onValueChange={onTimezoneChange}>
+            <SelectTrigger className="w-[180px] h-8 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TIMEZONES.map((tz) => (
+                <SelectItem key={tz.value} value={tz.value}>
+                  {tz.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
             variant="outline"
             size="sm"
@@ -201,9 +240,7 @@ export function CalendarWeekView({
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                 {formatDay(date)}
               </p>
-              <p
-                className={`text-lg font-semibold ${isToday(date) ? "text-pulse" : ""}`}
-              >
+              <p className={`text-lg font-semibold ${isToday(date) ? "text-pulse" : ""}`}>
                 {formatDayNum(date)}
               </p>
             </div>
@@ -220,11 +257,7 @@ export function CalendarWeekView({
                 className="flex h-[60px] items-start justify-end border-b pr-2 pt-0.5"
               >
                 <span className="text-[10px] font-mono text-muted-foreground">
-                  {hour === 12
-                    ? "12 PM"
-                    : hour > 12
-                      ? `${hour - 12} PM`
-                      : `${hour} AM`}
+                  {hour === 12 ? "12 PM" : hour > 12 ? `${hour - 12} PM` : `${hour} AM`}
                 </span>
               </div>
             ))}
@@ -233,7 +266,6 @@ export function CalendarWeekView({
           {/* Day columns */}
           {weekDates.map((date, dayIdx) => (
             <div key={dayIdx} className="relative border-r last:border-r-0">
-              {/* Hour grid lines */}
               {HOURS.map((hour) => (
                 <div
                   key={hour}
@@ -252,9 +284,7 @@ export function CalendarWeekView({
                     className="absolute left-0.5 right-0.5 rounded bg-zinc-500/15 border border-zinc-500/10 pointer-events-none"
                     style={{ top: pos.top, height: pos.height }}
                   >
-                    <p className="truncate px-1.5 pt-0.5 text-[10px] text-muted-foreground">
-                      Busy
-                    </p>
+                    <p className="truncate px-1.5 pt-0.5 text-[10px] text-muted-foreground">Busy</p>
                   </div>
                 );
               })}
@@ -273,9 +303,7 @@ export function CalendarWeekView({
                     >
                       <div className="flex items-center gap-1 px-1.5 pt-0.5">
                         <Video className="size-2.5 shrink-0 text-pulse" />
-                        <p className="truncate text-[10px] font-medium text-pulse">
-                          {iv.title}
-                        </p>
+                        <p className="truncate text-[10px] font-medium text-pulse">{iv.title}</p>
                       </div>
                     </div>
                   );
@@ -283,9 +311,7 @@ export function CalendarWeekView({
 
               {/* Availability slots (green) */}
               {slots
-                .filter(
-                  (s) => !s.recurring && isSameDay(new Date(s.startTime), date),
-                )
+                .filter((s) => !s.recurring && isSameDay(new Date(s.startTime), date))
                 .map((s) => {
                   const pos = getBlockPosition(s.startTime, s.endTime, date);
                   if (!pos) return null;
@@ -300,9 +326,7 @@ export function CalendarWeekView({
                       }}
                     >
                       <div className="flex items-center justify-between px-1.5 pt-0.5">
-                        <p className="truncate text-[10px] font-medium text-emerald-600">
-                          Available
-                        </p>
+                        <p className="truncate text-[10px] font-medium text-emerald-600">Available</p>
                         <Trash2 className="size-2.5 text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
@@ -318,6 +342,7 @@ export function CalendarWeekView({
         onOpenChange={setSlotDialogOpen}
         defaultDate={selectedDate}
         defaultStartTime={selectedTime}
+        timezone={timezone}
         onSave={async (slot) => {
           await onCreateSlot(slot);
           onSlotCreated();

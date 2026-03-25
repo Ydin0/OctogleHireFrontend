@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MonthPicker } from "@/components/ui/month-picker";
 import { Textarea } from "@/components/ui/textarea";
 
 interface SubmitHoursDialogProps {
@@ -95,12 +96,7 @@ function SubmitHoursDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="period">Period</Label>
-            <Input
-              id="period"
-              type="month"
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-            />
+            <MonthPicker value={period} onChange={setPeriod} />
           </div>
 
           <div className="space-y-2">

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface RequestExtensionDialogProps {
   open: boolean;
@@ -102,12 +103,9 @@ function RequestExtensionDialog({
 
           <div className="space-y-2">
             <Label htmlFor="new-end-date">New End Date</Label>
-            <Input
-              id="new-end-date"
-              type="date"
-              value={newEndDate}
-              onChange={(e) => setNewEndDate(e.target.value)}
-              min={minDate}
+            <DatePicker
+              value={newEndDate ? new Date(newEndDate + "T00:00:00") : undefined}
+              onChange={(d) => setNewEndDate(d ? d.toISOString().split("T")[0] : "")}
             />
           </div>
 

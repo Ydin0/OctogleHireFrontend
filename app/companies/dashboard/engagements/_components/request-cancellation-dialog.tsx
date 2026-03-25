@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface RequestCancellationDialogProps {
   open: boolean;
@@ -94,12 +95,9 @@ function RequestCancellationDialog({
 
           <div className="space-y-2">
             <Label htmlFor="cancellation-date">Effective Date</Label>
-            <Input
-              id="cancellation-date"
-              type="date"
-              value={effectiveDate}
-              onChange={(e) => setEffectiveDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
+            <DatePicker
+              value={effectiveDate ? new Date(effectiveDate + "T00:00:00") : undefined}
+              onChange={(d) => setEffectiveDate(d ? d.toISOString().split("T")[0] : "")}
             />
           </div>
 

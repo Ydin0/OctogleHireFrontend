@@ -47,6 +47,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -664,7 +665,10 @@ function AdminRequirementForm({ token: initialToken, companies }: AdminRequireme
 
             <div className="space-y-2">
               <Label htmlFor="startDate">Start Date</Label>
-              <Input id="startDate" type="date" {...register("startDate")} />
+              <DatePicker
+                value={watch("startDate") ? new Date(watch("startDate") + "T00:00:00") : undefined}
+                onChange={(d) => setValue("startDate", d ? d.toISOString().split("T")[0] : "", { shouldValidate: true })}
+              />
               {errors.startDate && (
                 <p className="text-xs text-destructive">
                   {errors.startDate.message}

@@ -40,8 +40,10 @@ export default function CalendarPage() {
   const [interviews, setInterviews] = useState<CalendarInterview[]>([]);
   const [slots, setSlots] = useState<CompanyAvailabilitySlot[]>([]);
   const [weekRange, setWeekRange] = useState(getWeekRange());
+  const [timezone, setTimezone] = useState(
+    Intl.DateTimeFormat().resolvedOptions().timeZone,
+  );
 
-  // Show toast on successful connection redirect
   useEffect(() => {
     if (searchParams.get("connected") === "true") {
       toast.success("Calendar connected successfully");
@@ -70,7 +72,6 @@ export default function CalendarPage() {
       setSlots(slotsData);
       setInterviews(interviewsData);
 
-      // Fetch busy blocks only if connected
       if (conn.connected) {
         const busy = await fetchCalendarAvailability(t, effectiveStart, effectiveEnd);
         setBusyBlocks(busy);
@@ -132,6 +133,8 @@ export default function CalendarPage() {
         interviews={interviews}
         slots={slots}
         token={token!}
+        timezone={timezone}
+        onTimezoneChange={setTimezone}
         onSlotCreated={() => loadData()}
         onCreateSlot={handleCreateSlot}
         onWeekChange={handleWeekChange}

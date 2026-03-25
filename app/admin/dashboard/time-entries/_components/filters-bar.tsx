@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
+import { MonthPicker } from "@/components/ui/month-picker";
 import {
   Select,
   SelectContent,
@@ -81,13 +82,9 @@ function TimeEntryFiltersBar() {
           ))}
         </SelectContent>
       </Select>
-      <Input
-        type="month"
-        value={currentPeriod}
-        onChange={(e) => pushParams({ period: e.target.value })}
-        className="w-full sm:w-[180px]"
-        placeholder="Period"
-      />
+      <div className="w-full sm:w-[180px]">
+        <MonthPicker value={currentPeriod} onChange={(v) => pushParams({ period: v })} />
+      </div>
     </div>
   );
 }

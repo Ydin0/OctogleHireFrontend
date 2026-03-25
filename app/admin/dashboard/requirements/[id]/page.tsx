@@ -47,6 +47,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -621,13 +622,12 @@ const RequirementDetailPage = ({
                 </div>
                 <div className="space-y-1.5">
                   <Label>Start Date</Label>
-                  <Input
-                    type="date"
-                    value={editForm.startDate}
-                    onChange={(e) =>
+                  <DatePicker
+                    value={editForm.startDate ? new Date(editForm.startDate + "T00:00:00") : undefined}
+                    onChange={(d) =>
                       setEditForm((f) => ({
                         ...f,
-                        startDate: e.target.value,
+                        startDate: d ? d.toISOString().split("T")[0] : "",
                       }))
                     }
                   />

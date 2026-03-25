@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Select,
   SelectContent,
@@ -210,11 +211,9 @@ export function ReofferDialog({
 
           <div className="space-y-1.5">
             <Label htmlFor="reoffer-start">Start Date</Label>
-            <Input
-              id="reoffer-start"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+            <DatePicker
+              value={startDate ? new Date(startDate + "T00:00:00") : undefined}
+              onChange={(d) => setStartDate(d ? d.toISOString().split("T")[0] : "")}
             />
           </div>
 
