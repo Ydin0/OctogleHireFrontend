@@ -1274,3 +1274,46 @@ export async function createAdminTimeEntry(
     return { success: false, error: "Network error" };
   }
 }
+
+export async function updateAdminEngagement(
+  token: string | null,
+  id: string,
+  payload: {
+    companyBillingRate?: number;
+    developerPayoutRate?: number;
+    currency?: string;
+    payoutCurrency?: string;
+    engagementType?: string;
+    status?: string;
+    monthlyHoursExpected?: number | null;
+    monthlyHoursCap?: number | null;
+    startDate?: string | null;
+    endDate?: string | null;
+  },
+): Promise<{ success: boolean; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/engagements/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { success: false, error: body.message || "Failed to update engagement" };
+    }
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}

@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
-import { Building2, Clock, MoreHorizontal } from "lucide-react";
+import { Building2, Clock, MoreHorizontal, Pencil } from "lucide-react";
 
 import type { AdminEngagement } from "@/lib/api/admin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -58,6 +58,7 @@ const getInitials = (name: string) =>
 
 interface GetColumnsOptions {
   onAddTimesheet?: (engagement: AdminEngagement) => void;
+  onEdit?: (engagement: AdminEngagement) => void;
   formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
@@ -256,6 +257,15 @@ export function getColumns(
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  options.onEdit?.(eng);
+                }}
+              >
+                <Pencil className="mr-2 size-3.5" />
+                Edit Engagement
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();

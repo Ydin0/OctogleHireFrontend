@@ -12,12 +12,19 @@ import {
 } from "lucide-react";
 
 import type { AdminEngagement } from "@/lib/api/admin";
-import { createAdminTimeEntry } from "@/lib/api/admin";
+import { createAdminTimeEntry, updateAdminEngagement } from "@/lib/api/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
@@ -79,6 +86,38 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
   const [tsPeriod, setTsPeriod] = useState(currentPeriod());
   const [tsSubmitting, setTsSubmitting] = useState(false);
 
+  // Edit dialog
+  const [editTarget, setEditTarget] = useState<AdminEngagement | null>(null);
+  const [editForm, setEditForm] = useState({
+    companyBillingRate: "",
+    developerPayoutRate: "",
+    currency: "USD",
+    payoutCurrency: "USD",
+    engagementType: "full-time",
+    status: "active",
+    monthlyHoursExpected: "",
+    monthlyHoursCap: "",
+    startDate: "",
+    endDate: "",
+  });
+  const [editSubmitting, setEditSubmitting] = useState(false);
+
+  const openEditDialog = (eng: AdminEngagement) => {
+    setEditTarget(eng);
+    setEditForm({
+      companyBillingRate: String(eng.companyBillingRate),
+      developerPayoutRate: String(eng.developerPayoutRate),
+      currency: eng.currency,
+      payoutCurrency: eng.payoutCurrency,
+      engagementType: eng.engagementType,
+      status: eng.status,
+      monthlyHoursExpected: eng.monthlyHoursExpected != null ? String(eng.monthlyHoursExpected) : "",
+      monthlyHoursCap: eng.monthlyHoursCap != null ? String(eng.monthlyHoursCap) : "",
+      startDate: eng.startDate ? eng.startDate.split("T")[0] : "",
+      endDate: eng.endDate ? eng.endDate.split("T")[0] : "",
+    });
+  };
+
   // Currency display
   let formatDisplay: ((amount: number, from: string) => string) | undefined;
   try {
@@ -134,7 +173,7 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
   const paginatedData = filtered.slice((safePage - 1) * limit, safePage * limit);
 
   const columns = useMemo(
-    () => getColumns({ onAddTimesheet: setTimesheetTarget, formatDisplay }),
+    () => getColumns({ onAddTimesheet: setTimesheetTarget, onEdit: openEditDialog, formatDisplay }),
     [formatDisplay],
   );
 
@@ -164,6 +203,36 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
     }
 
     setTsSubmitting(false);
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editTarget) return;
+    setEditSubmitting(true);
+
+    const result = await updateAdminEngagement(token, editTarget.id, {
+      companyBillingRate: Number(editForm.companyBillingRate),
+      developerPayoutRate: Number(editForm.developerPayoutRate),
+      currency: editForm.currency,
+      payoutCurrency: editForm.payoutCurrency,
+      engagementType: editForm.engagementType,
+      status: editForm.status,
+      monthlyHoursExpected: editForm.monthlyHoursExpected ? Number(editForm.monthlyHoursExpected) : null,
+      monthlyHoursCap: editForm.monthlyHoursCap ? Number(editForm.monthlyHoursCap) : null,
+      startDate: editForm.startDate || null,
+      endDate: editForm.endDate || null,
+    });
+
+    if (result.success) {
+      toast.success("Engagement updated");
+      setEditTarget(null);
+      startTransition(() => {
+        router.refresh();
+      });
+    } else {
+      toast.error(result.error ?? "Failed to update engagement");
+    }
+
+    setEditSubmitting(false);
   };
 
   return (
@@ -255,6 +324,198 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
           }}
         />
       )}
+
+      {/* Edit Engagement Dialog */}
+      <Dialog
+        open={!!editTarget}
+        onOpenChange={(open) => {
+          if (!open) setEditTarget(null);
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Engagement</DialogTitle>
+            <DialogDescription>
+              {editTarget?.developerName} at {editTarget?.companyName}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={editForm.status}
+                  onValueChange={(v) => setEditForm((f) => ({ ...f, status: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="ended">Ended</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Engagement Type</Label>
+                <Select
+                  value={editForm.engagementType}
+                  onValueChange={(v) => setEditForm((f) => ({ ...f, engagementType: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full-time">Full Time</SelectItem>
+                    <SelectItem value="part-time">Part Time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Billing Rate ($/hr)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={editForm.companyBillingRate}
+                  onChange={(e) => setEditForm((f) => ({ ...f, companyBillingRate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Billing Currency</Label>
+                <Select
+                  value={editForm.currency}
+                  onValueChange={(v) => setEditForm((f) => ({ ...f, currency: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="GBP">GBP</SelectItem>
+                    <SelectItem value="AED">AED</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Payout Rate ($/hr)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={editForm.developerPayoutRate}
+                  onChange={(e) => setEditForm((f) => ({ ...f, developerPayoutRate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Payout Currency</Label>
+                <Select
+                  value={editForm.payoutCurrency}
+                  onValueChange={(v) => setEditForm((f) => ({ ...f, payoutCurrency: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD</SelectItem>
+                    <SelectItem value="GBP">GBP</SelectItem>
+                    <SelectItem value="AED">AED</SelectItem>
+                    <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Expected Hours/mo</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 160"
+                  value={editForm.monthlyHoursExpected}
+                  onChange={(e) => setEditForm((f) => ({ ...f, monthlyHoursExpected: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Hours Cap/mo</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="e.g. 176"
+                  value={editForm.monthlyHoursCap}
+                  onChange={(e) => setEditForm((f) => ({ ...f, monthlyHoursCap: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Start Date</Label>
+                <Input
+                  type="date"
+                  value={editForm.startDate}
+                  onChange={(e) => setEditForm((f) => ({ ...f, startDate: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Input
+                  type="date"
+                  value={editForm.endDate}
+                  onChange={(e) => setEditForm((f) => ({ ...f, endDate: e.target.value }))}
+                />
+              </div>
+            </div>
+
+            {editForm.companyBillingRate && editForm.monthlyHoursCap && (
+              <div className="rounded-md border border-pulse/20 bg-pulse/5 p-3">
+                <p className="text-xs text-muted-foreground">Predicted monthly bill</p>
+                <p className="font-mono text-lg font-semibold">
+                  {formatCurrency(
+                    Number(editForm.companyBillingRate) * Number(editForm.monthlyHoursCap),
+                    editForm.currency,
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setEditTarget(null)}
+              disabled={editSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditSubmit}
+              disabled={editSubmitting || !editForm.companyBillingRate}
+            >
+              {editSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Add Timesheet Dialog */}
       <Dialog
