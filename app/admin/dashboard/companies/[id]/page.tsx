@@ -10,10 +10,12 @@ import {
   Briefcase,
   Building2,
   Calendar,
+  Camera,
   ExternalLink,
   FileText,
   Loader2,
   Mail,
+  Pencil,
   Phone,
   Shield,
   TrendingUp,
@@ -67,6 +69,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 const allCompanyStatuses: CompanyStatus[] = [
@@ -98,6 +102,19 @@ const CompanyDetailPage = ({
     phone: string | null;
   }>>([]);
   const [assigningManager, setAssigningManager] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editLogo, setEditLogo] = useState<File | null>(null);
+  const [editLogoPreview, setEditLogoPreview] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({
+    companyName: "",
+    contactName: "",
+    email: "",
+    phone: "",
+    website: "",
+    linkedinCompanyUrl: "",
+    location: "",
+  });
 
   const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -184,6 +201,64 @@ const CompanyDetailPage = ({
     } finally {
       setActivating(false);
       setActivateOpen(false);
+    }
+  };
+
+  const openEditDialog = () => {
+    if (!company) return;
+    setEditForm({
+      companyName: company.companyName ?? "",
+      contactName: company.contactName ?? "",
+      email: company.email ?? "",
+      phone: company.phone ?? "",
+      website: company.website ?? "",
+      linkedinCompanyUrl: ((company as unknown as Record<string, unknown>).linkedinCompanyUrl as string) ?? "",
+      location: company.location ?? "",
+    });
+    setEditLogo(null);
+    setEditLogoPreview(null);
+    setEditOpen(true);
+  };
+
+  const handleEditLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setEditLogo(file);
+    const url = URL.createObjectURL(file);
+    setEditLogoPreview(url);
+  };
+
+  const handleEditSave = async () => {
+    if (!company) return;
+    setEditSaving(true);
+    try {
+      const token = await getToken();
+      const fd = new FormData();
+      fd.append("companyName", editForm.companyName);
+      fd.append("contactName", editForm.contactName);
+      fd.append("email", editForm.email);
+      fd.append("phone", editForm.phone);
+      fd.append("website", editForm.website);
+      fd.append("linkedinCompanyUrl", editForm.linkedinCompanyUrl);
+      fd.append("location", editForm.location);
+      if (editLogo) {
+        fd.append("logo", editLogo);
+      }
+      const res = await fetch(`${apiBase}/api/admin/companies/${company.id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      if (!res.ok) {
+        throw new Error("Failed to update company");
+      }
+      toast.success("Company updated");
+      setEditOpen(false);
+      await load();
+    } catch {
+      toast.error("Failed to update company");
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -316,9 +391,19 @@ const CompanyDetailPage = ({
                 </div>
               )}
               <div className="space-y-1">
-                <h1 className="text-2xl font-semibold">
-                  {company.companyName}
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-2xl font-semibold">
+                    {company.companyName}
+                  </h1>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7"
+                    onClick={openEditDialog}
+                  >
+                    <Pencil className="size-3.5" />
+                  </Button>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   {company.contactName}
                 </p>
@@ -778,6 +863,126 @@ const CompanyDetailPage = ({
           </Card>
         </div>
       </div>
+
+      {/* ── Edit Company Dialog ──────────────────────────────────────── */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Company</DialogTitle>
+            <DialogDescription>
+              Update company information. Changes will be saved immediately.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Logo Upload */}
+            <div className="flex flex-col items-center gap-2">
+              <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Company Logo
+              </Label>
+              <label className="group relative cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleEditLogoChange}
+                />
+                {editLogoPreview || company.logoUrl ? (
+                  <Image
+                    src={editLogoPreview ?? company.logoUrl!}
+                    alt="Logo"
+                    width={80}
+                    height={80}
+                    unoptimized
+                    className="size-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex size-20 items-center justify-center rounded-full bg-muted">
+                    <Building2 className="size-8 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                  <Camera className="size-5 text-white" />
+                </div>
+              </label>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-companyName">Company Name</Label>
+              <Input
+                id="edit-companyName"
+                value={editForm.companyName}
+                onChange={(e) => setEditForm({ ...editForm, companyName: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-contactName">Contact Name</Label>
+              <Input
+                id="edit-contactName"
+                value={editForm.contactName}
+                onChange={(e) => setEditForm({ ...editForm, contactName: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-phone">Phone</Label>
+              <Input
+                id="edit-phone"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-website">Website</Label>
+              <Input
+                id="edit-website"
+                value={editForm.website}
+                onChange={(e) => setEditForm({ ...editForm, website: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-linkedin">LinkedIn URL</Label>
+              <Input
+                id="edit-linkedin"
+                value={editForm.linkedinCompanyUrl}
+                onChange={(e) => setEditForm({ ...editForm, linkedinCompanyUrl: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-location">Location</Label>
+              <Input
+                id="edit-location"
+                value={editForm.location}
+                onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>
+              Cancel
+            </Button>
+            <Button disabled={editSaving} onClick={handleEditSave} className="gap-2">
+              {editSaving && <Loader2 className="size-4 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
