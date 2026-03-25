@@ -9,15 +9,24 @@ import {
   ClipboardList,
   Clock,
   FileText,
+  Headset,
   Layers,
+  LogOut,
   Settings,
   UserSearch,
   UsersRound,
   Video,
 } from "lucide-react";
+import { useClerk } from "@clerk/nextjs";
 
 import type { CompanyProfileSummary } from "@/lib/api/companies";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import { Logo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { RoleSwitcher } from "@/components/shared/role-switcher";
 
 const navGroups = [
@@ -68,8 +77,9 @@ interface CompanySidebarProps {
   activeRole?: string;
 }
 
-function CompanySidebarContent({ companyProfile, roles, activeRole }: CompanySidebarProps) {
+function CompanySidebarContent({ user, companyProfile, roles, activeRole }: CompanySidebarProps) {
   const pathname = usePathname();
+  const { signOut } = useClerk();
 
   const companyName = companyProfile?.companyName ?? "Company";
 
@@ -135,6 +145,75 @@ function CompanySidebarContent({ companyProfile, roles, activeRole }: CompanySid
           </div>
         ))}
       </nav>
+
+      {/* Account Manager */}
+      {companyProfile?.accountManager && (
+        <div className="border-t border-border/70 px-4 py-3">
+          <p className="mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+            Your Account Manager
+          </p>
+          <div className="flex items-center gap-2.5">
+            <div className="relative shrink-0">
+              <Avatar className="size-7">
+                {companyProfile.accountManager.profilePhotoUrl && (
+                  <AvatarImage
+                    src={companyProfile.accountManager.profilePhotoUrl}
+                    alt={companyProfile.accountManager.name}
+                  />
+                )}
+                <AvatarFallback className="text-[10px]">
+                  {companyProfile.accountManager.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full border border-background bg-emerald-500" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{companyProfile.accountManager.name}</p>
+              <a
+                href={`mailto:${companyProfile.accountManager.email}`}
+                className="block truncate text-xs text-muted-foreground hover:text-foreground"
+              >
+                {companyProfile.accountManager.email}
+              </a>
+            </div>
+            <Headset className="size-4 shrink-0 text-muted-foreground" />
+          </div>
+        </div>
+      )}
+
+      {/* User footer */}
+      <div className="border-t border-border/70 px-4 py-4 space-y-3">
+        <div className="flex items-center gap-3">
+          <Avatar className="size-8">
+            {user.imageUrl && (
+              <AvatarImage src={user.imageUrl} alt={user.fullName ?? ""} />
+            )}
+            <AvatarFallback className="text-xs">
+              {user.fullName
+                ? user.fullName.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase()
+                : "U"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium">
+              {user.fullName ?? "User"}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user.email}
+            </p>
+          </div>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <button
+              onClick={() => signOut({ redirectUrl: "/" })}
+              className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <LogOut className="size-4" />
+              <span className="sr-only">Sign out</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

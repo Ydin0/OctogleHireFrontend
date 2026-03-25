@@ -203,23 +203,8 @@ function CompanyHeader({ user, companyProfile, roles, activeRole }: CompanySideb
         </Sheet>
       </header>
 
-      {/* Desktop header */}
-      <header className="sticky top-0 z-20 hidden border-b border-border/70 bg-background/90 backdrop-blur lg:block lg:ml-64">
-        <div className="flex items-center justify-between px-6 py-3">
-          <div />
-
-          <div className="flex items-center gap-3">
-            {companyProfile?.accountManager && (
-              <AccountManagerPopover
-                accountManager={companyProfile.accountManager}
-              />
-            )}
-            <NotificationsDropdown />
-            <ThemeToggle />
-            <UserMenu user={user} />
-          </div>
-        </div>
-      </header>
+      {/* No desktop header — user info, theme toggle, and account manager
+          are in the sidebar footer, matching the admin dashboard pattern */}
     </>
   );
 }
