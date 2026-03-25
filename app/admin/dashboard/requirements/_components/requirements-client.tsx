@@ -29,12 +29,14 @@ interface RequirementsClientProps {
   requirements: AdminRequirement[];
   pagination: Pagination;
   token: string;
+  statusCounts?: { all: number; open: number; filled: number; closed: number };
 }
 
 function RequirementsClient({
   requirements,
   pagination,
   token,
+  statusCounts,
 }: RequirementsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,16 +48,15 @@ function RequirementsClient({
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteRefs, setDeleteRefs] = useState<{ engagements: number; interviews: number; matches: number } | null>(null);
 
-  const currentStatus = searchParams.get("status") ?? "all";
+  const currentStatus = searchParams.get("status") ?? "open";
   const currentSortBy = searchParams.get("sortBy") ?? "";
   const currentSortOrder = searchParams.get("sortOrder") ?? "";
 
   const statusTabs = [
-    { label: "All", value: "all" },
-    { label: "Open", value: "open" },
-    { label: "Matching", value: "matching" },
-    { label: "Filled", value: "filled" },
-    { label: "Closed", value: "closed" },
+    { label: "Open", value: "open", count: statusCounts?.open },
+    { label: "Filled", value: "filled", count: statusCounts?.filled },
+    { label: "Closed", value: "closed", count: statusCounts?.closed },
+    { label: "All", value: "all", count: statusCounts?.all },
   ];
 
   const pushParams = (updates: Record<string, string>) => {
@@ -147,20 +148,23 @@ function RequirementsClient({
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        {statusTabs.map((tab) => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => pushParams({ status: tab.value === "all" ? "" : tab.value, page: "" })}
-            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-              currentStatus === tab.value || (tab.value === "all" && !searchParams.get("status"))
-                ? "border-pulse/40 bg-pulse/10 text-pulse"
-                : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        {statusTabs.map((tab) => {
+          const isActive = currentStatus === tab.value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => pushParams({ status: tab.value, page: "" })}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                isActive
+                  ? "border-pulse/40 bg-pulse/10 text-pulse"
+                  : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
+              }`}
+            >
+              {tab.label}{tab.count !== undefined ? ` (${tab.count})` : ""}
+            </button>
+          );
+        })}
       </div>
 
       <FiltersBar />

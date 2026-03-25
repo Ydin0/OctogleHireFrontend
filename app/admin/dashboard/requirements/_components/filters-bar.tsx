@@ -14,14 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ALL_STATUSES = [
-  { value: "open", label: "Open" },
-  { value: "matching", label: "Matching" },
-  { value: "partially_filled", label: "Partially Filled" },
-  { value: "filled", label: "Filled" },
-  { value: "closed", label: "Closed" },
-] as const;
-
 const FEATURED_OPTIONS = [
   { value: "all", label: "All" },
   { value: "true", label: "Featured" },
@@ -34,7 +26,6 @@ function FiltersBar() {
   const [, startTransition] = useTransition();
 
   const currentSearch = searchParams.get("search") ?? "";
-  const currentStatus = searchParams.get("status") ?? "all";
   const currentFeatured = searchParams.get("isFeatured") ?? "all";
 
   const [searchValue, setSearchValue] = useState(currentSearch);
@@ -66,13 +57,14 @@ function FiltersBar() {
     return () => clearTimeout(timer);
   }, [searchValue, currentSearch, pushParams]);
 
-  const hasFilters =
-    currentSearch || currentStatus !== "all" || currentFeatured !== "all";
+  const hasFilters = currentSearch || currentFeatured !== "all";
 
   const clearAll = () => {
     const params = new URLSearchParams();
     const limit = searchParams.get("limit");
+    const status = searchParams.get("status");
     if (limit) params.set("limit", limit);
+    if (status) params.set("status", status);
     startTransition(() => {
       router.push(`?${params.toString()}`);
     });
@@ -90,22 +82,6 @@ function FiltersBar() {
           className="pl-9"
         />
       </div>
-      <Select
-        value={currentStatus}
-        onValueChange={(v) => pushParams({ status: v })}
-      >
-        <SelectTrigger className="w-full sm:w-[160px]">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Statuses</SelectItem>
-          {ALL_STATUSES.map((s) => (
-            <SelectItem key={s.value} value={s.value}>
-              {s.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
       <Select
         value={currentFeatured}
         onValueChange={(v) => pushParams({ isFeatured: v })}
