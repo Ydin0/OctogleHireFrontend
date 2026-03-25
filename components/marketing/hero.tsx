@@ -76,9 +76,6 @@ const Hero = ({ className }: HeroProps) => {
               <ArrowRight className="ml-2 size-4 -rotate-45" />
             </a>
           </Button>
-          <Button asChild variant="outline" size="lg" className="rounded-full px-6">
-            <a href="/marketplace">Browse Developers</a>
-          </Button>
         </div>
 
         <div className="mt-6 flex items-center justify-center gap-5 flex-wrap">
