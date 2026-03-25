@@ -1055,3 +1055,92 @@ export async function fetchAdminTeam(
     return [];
   }
 }
+
+// ── Admin document/LinkedIn parsing ─────────────────────────────────────────
+
+export async function adminFetchLinkedInJobs(
+  token: string | null,
+  linkedinCompanyUrl: string,
+): Promise<Record<string, unknown>[]> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/admin/linkedin-jobs`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ linkedinCompanyUrl }),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to fetch LinkedIn jobs");
+  }
+
+  return response.json();
+}
+
+export async function adminParseLinkedInJob(
+  token: string | null,
+  data: {
+    title: string;
+    description: string;
+    descriptionHtml?: string;
+    location?: string;
+    employmentType?: string;
+  },
+): Promise<Record<string, unknown>> {
+  if (!token) throw new Error("Not authenticated");
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/admin/linkedin-jobs/parse`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to parse job");
+  }
+
+  return response.json();
+}
+
+export async function adminParseJobDocument(
+  token: string | null,
+  file: File,
+): Promise<Record<string, unknown>> {
+  if (!token) throw new Error("Not authenticated");
+
+  const formData = new FormData();
+  formData.append("document", file);
+
+  const response = await fetch(
+    `${apiBaseUrl}/api/admin/requirements/parse-document`,
+    {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || "Failed to parse document");
+  }
+
+  return response.json();
+}

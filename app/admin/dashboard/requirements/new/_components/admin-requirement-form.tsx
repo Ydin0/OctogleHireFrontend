@@ -22,13 +22,15 @@ import {
 import { TIMEZONE_OPTIONS } from "@/lib/constants/timezones";
 import { MARKETPLACE_TECH_STACK_OPTIONS } from "@/lib/data/developers";
 import {
-  fetchLinkedInJobs,
-  parseLinkedInJob,
-  parseJobDocument,
   type LinkedInJob,
   type ParsedJobData,
 } from "@/lib/api/companies";
-import { createAdminRequirement } from "@/lib/api/admin";
+import {
+  createAdminRequirement,
+  adminFetchLinkedInJobs,
+  adminParseLinkedInJob,
+  adminParseJobDocument,
+} from "@/lib/api/admin";
 import { yearsToLevel } from "@/lib/utils/experience";
 import { TechStackSelector } from "@/app/apply/_components/tech-stack-selector";
 import { CountrySelector } from "@/components/country-selector";
@@ -157,7 +159,7 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
     if (!linkedinUrl.includes("linkedin.com/company/")) return;
     setFetchingJobs(true);
     try {
-      const jobs = await fetchLinkedInJobs(token, linkedinUrl);
+      const jobs = await adminFetchLinkedInJobs(token, linkedinUrl) as unknown as LinkedInJob[];
       setLinkedinJobs(jobs);
     } catch {
       // handled by state reset
@@ -169,13 +171,13 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
   const handleSelectJob = async (job: LinkedInJob) => {
     setParsingJob(job.externalId as string);
     try {
-      const parsed = await parseLinkedInJob(token, {
-        title: job.title,
-        description: job.description,
-        descriptionHtml: job.descriptionHtml,
-        location: job.location,
-        employmentType: job.employmentType,
-      });
+      const parsed = await adminParseLinkedInJob(token, {
+        title: job.title as string,
+        description: job.description as string,
+        descriptionHtml: job.descriptionHtml as string,
+        location: job.location as string,
+        employmentType: job.employmentType as string,
+      }) as unknown as ParsedJobData;
       prefillForm(parsed, setValue);
       setLinkedinJobs([]);
     } catch {
@@ -191,7 +193,7 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
     if (!file) return;
     setParsingDoc(true);
     try {
-      const parsed = await parseJobDocument(token, file);
+      const parsed = await adminParseJobDocument(token, file) as unknown as ParsedJobData;
       prefillForm(parsed, setValue);
     } catch {
       // handled by state reset
