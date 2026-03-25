@@ -750,32 +750,34 @@ export interface CreateAdminRequirementPayload {
 export async function createAdminRequirement(
   token: string | null,
   payload: CreateAdminRequirementPayload,
-): Promise<{ requirement: AdminRequirement } | null> {
-  if (!token) return null;
+): Promise<{ requirement: AdminRequirement }> {
+  if (!token) throw new Error("Authentication token missing — please refresh the page");
 
-  try {
-    const response = await fetch(
-      `${apiBaseUrl}/api/admin/requirements`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-        cache: "no-store",
+  const response = await fetch(
+    `${apiBaseUrl}/api/admin/requirements`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
 
-    if (!response.ok) {
-      const body = await response.json().catch(() => ({}));
-      throw new Error(body.message || `Failed to create requirement (${response.status})`);
-    }
-    return (await response.json()) as { requirement: AdminRequirement };
-  } catch (error) {
-    if (error instanceof Error) throw error;
-    return null;
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(
+      body.message || body.error || `Failed to create requirement (${response.status})`,
+    );
   }
+
+  const data = await response.json();
+  if (!data.requirement) {
+    throw new Error("Unexpected API response — missing requirement in body");
+  }
+  return data as { requirement: AdminRequirement };
 }
 
 export async function fetchAdminRequirements(

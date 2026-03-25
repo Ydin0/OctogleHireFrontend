@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@clerk/nextjs";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -98,8 +99,9 @@ interface AdminRequirementFormProps {
   companies: CompanyOption[];
 }
 
-function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
+function AdminRequirementForm({ token: initialToken, companies }: AdminRequirementFormProps) {
   const router = useRouter();
+  const { getToken } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [companyId, setCompanyId] = useState("");
   const [companyError, setCompanyError] = useState<string | null>(null);
@@ -159,7 +161,8 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
     if (!linkedinUrl.includes("linkedin.com/company/")) return;
     setFetchingJobs(true);
     try {
-      const jobs = await adminFetchLinkedInJobs(token, linkedinUrl) as unknown as LinkedInJob[];
+      const freshToken = await getToken();
+      const jobs = await adminFetchLinkedInJobs(freshToken, linkedinUrl) as unknown as LinkedInJob[];
       setLinkedinJobs(jobs);
     } catch {
       // handled by state reset
@@ -171,7 +174,8 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
   const handleSelectJob = async (job: LinkedInJob) => {
     setParsingJob(job.externalId as string);
     try {
-      const parsed = await adminParseLinkedInJob(token, {
+      const freshToken = await getToken();
+      const parsed = await adminParseLinkedInJob(freshToken, {
         title: job.title as string,
         description: job.description as string,
         descriptionHtml: job.descriptionHtml as string,
@@ -193,7 +197,8 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
     if (!file) return;
     setParsingDoc(true);
     try {
-      const parsed = await adminParseJobDocument(token, file) as unknown as ParsedJobData;
+      const freshToken = await getToken();
+      const parsed = await adminParseJobDocument(freshToken, file) as unknown as ParsedJobData;
       prefillForm(parsed, setValue);
     } catch {
       // handled by state reset
@@ -216,7 +221,8 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
         data.experienceYearsMin,
         data.experienceYearsMax,
       );
-      const result = await createAdminRequirement(token, {
+      const freshToken = await getToken();
+      const result = await createAdminRequirement(freshToken, {
         companyId,
         title: data.title,
         techStack: data.techStack,
@@ -234,14 +240,11 @@ function AdminRequirementForm({ token, companies }: AdminRequirementFormProps) {
         startDate: data.startDate,
         priority: data.priority,
       });
-      if (result?.requirement) {
-        toast.success("Requirement created");
-        router.push(`/admin/dashboard/requirements/${result.requirement.id}`);
-      } else {
-        toast.error("Failed to create requirement");
-      }
+      toast.success("Requirement created");
+      router.push(`/admin/dashboard/requirements/${result.requirement.id}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to create requirement");
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
