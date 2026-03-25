@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Briefcase,
   Building2,
+  CalendarDays,
   ClipboardList,
   Clock,
   FileText,
@@ -42,6 +43,7 @@ const navGroups = [
       { href: "/companies/dashboard/requirements", label: "Requirements", icon: ClipboardList },
       { href: "/companies/dashboard/candidates", label: "Candidates", icon: UserSearch },
       { href: "/companies/dashboard/interviews", label: "Interviews", icon: Video },
+      { href: "/companies/dashboard/calendar", label: "Calendar", icon: CalendarDays },
     ],
   },
   {

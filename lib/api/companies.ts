@@ -1763,3 +1763,174 @@ export async function completeInterview(
     return null;
   }
 }
+
+// ── Calendar Integration ────────────────────────────────────────────────────
+
+export interface CalendarConnection {
+  connected: boolean;
+  id?: string;
+  provider?: "google" | "microsoft";
+  email?: string;
+  status?: string;
+}
+
+export interface CalendarBusyBlock {
+  startTime: string;
+  endTime: string;
+}
+
+export interface CompanyAvailabilitySlot {
+  id: string;
+  companyId: string;
+  startTime: string;
+  endTime: string;
+  timezone: string;
+  recurring: boolean;
+  dayOfWeek?: number | null;
+  recurringStartTime?: string | null;
+  recurringEndTime?: string | null;
+}
+
+export interface CalendarInterview {
+  id: string;
+  title: string;
+  requirementTitle: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  meetingLink?: string | null;
+}
+
+export async function fetchCalendarStatus(
+  token: string | null,
+): Promise<CalendarConnection> {
+  if (!token) return { connected: false };
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/status`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return { connected: false };
+    return (await res.json()) as CalendarConnection;
+  } catch {
+    return { connected: false };
+  }
+}
+
+export async function startCalendarConnect(
+  token: string | null,
+): Promise<{ authUrl: string } | null> {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/connect`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as { authUrl: string };
+  } catch {
+    return null;
+  }
+}
+
+export async function disconnectCalendar(
+  token: string | null,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/connection`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function fetchCalendarAvailability(
+  token: string | null,
+  start: string,
+  end: string,
+): Promise<CalendarBusyBlock[]> {
+  if (!token) return [];
+  try {
+    const res = await fetch(
+      `${apiBaseUrl}/api/companies/calendar/availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    const data = (await res.json()) as { busyBlocks: CalendarBusyBlock[] };
+    return data.busyBlocks;
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchCompanySlots(
+  token: string | null,
+): Promise<CompanyAvailabilitySlot[]> {
+  if (!token) return [];
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/slots`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return (await res.json()) as CompanyAvailabilitySlot[];
+  } catch {
+    return [];
+  }
+}
+
+export async function createCompanySlot(
+  token: string | null,
+  slot: { startTime: string; endTime: string; timezone: string; recurring?: boolean; dayOfWeek?: number },
+): Promise<CompanyAvailabilitySlot | null> {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/slots`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(slot),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as CompanyAvailabilitySlot;
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteCompanySlot(
+  token: string | null,
+  slotId: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/slots/${slotId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function fetchCalendarInterviews(
+  token: string | null,
+  start: string,
+  end: string,
+): Promise<CalendarInterview[]> {
+  if (!token) return [];
+  try {
+    const res = await fetch(
+      `${apiBaseUrl}/api/companies/calendar/interviews?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as CalendarInterview[];
+  } catch {
+    return [];
+  }
+}
