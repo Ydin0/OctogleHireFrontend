@@ -20,16 +20,16 @@ export function CalendarConnectionCard({
   token,
   onConnectionChange,
 }: CalendarConnectionCardProps) {
-  const [connecting, setConnecting] = useState(false);
+  const [connecting, setConnecting] = useState<"google" | "microsoft" | null>(null);
   const [disconnecting, setDisconnecting] = useState(false);
 
-  const handleConnect = async () => {
-    setConnecting(true);
-    const result = await startCalendarConnect(token);
+  const handleConnect = async (provider: "google" | "microsoft") => {
+    setConnecting(provider);
+    const result = await startCalendarConnect(token, provider);
     if (result?.authUrl) {
       window.location.href = result.authUrl;
     }
-    setConnecting(false);
+    setConnecting(null);
   };
 
   const handleDisconnect = async () => {
@@ -94,18 +94,18 @@ export function CalendarConnectionCard({
         <div className="mt-4 flex items-center justify-center gap-3">
           <Button
             variant="outline"
-            onClick={handleConnect}
-            disabled={connecting}
+            onClick={() => handleConnect("google")}
+            disabled={!!connecting}
           >
-            {connecting && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
+            {connecting === "google" && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
             Connect Google Calendar
           </Button>
           <Button
             variant="outline"
-            onClick={handleConnect}
-            disabled={connecting}
+            onClick={() => handleConnect("microsoft")}
+            disabled={!!connecting}
           >
-            {connecting && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
+            {connecting === "microsoft" && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
             Connect Microsoft Outlook
           </Button>
         </div>

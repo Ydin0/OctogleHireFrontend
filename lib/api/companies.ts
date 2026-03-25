@@ -1819,10 +1819,11 @@ export async function fetchCalendarStatus(
 
 export async function startCalendarConnect(
   token: string | null,
+  provider: "google" | "microsoft" = "google",
 ): Promise<{ authUrl: string } | null> {
   if (!token) return null;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/connect`, {
+    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/connect?provider=${provider}`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
