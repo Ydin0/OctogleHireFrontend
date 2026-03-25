@@ -40,17 +40,17 @@ const experienceLevelLabel: Record<string, string> = {
 const experienceLevelBadgeClass = (level: string) => {
   switch (level) {
     case "junior":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "mid":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
     case "senior":
-      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
     case "lead":
-      return "bg-orange-500/10 text-orange-600 border-orange-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "principal":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-500 border-zinc-500/15";
   }
 };
 

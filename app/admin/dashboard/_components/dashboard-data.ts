@@ -78,30 +78,30 @@ export const applicationStatusLabel: Record<ApplicationStatus, string> = {
 export const applicationStatusBadgeClass = (status: ApplicationStatus) => {
   switch (status) {
     case "draft":
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
     case "hr_communication_round":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "ai_technical_examination":
-      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
     case "tech_lead_human_interview":
-      return "bg-sky-500/10 text-sky-600 border-sky-600/20";
+      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
     case "background_previous_company_checks":
-      return "bg-orange-500/10 text-orange-600 border-orange-600/20";
+      return "bg-orange-500/8 text-orange-500 border-orange-500/15";
     case "offer_extended":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
     case "approved":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "rejected":
     case "offer_declined":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     case "prospected":
-      return "bg-teal-500/10 text-teal-600 border-teal-600/20";
+      return "bg-teal-500/8 text-teal-500 border-teal-500/15";
     case "contacted":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
     case "interviewing":
-      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -116,15 +116,15 @@ export const companyStatusLabel: Record<CompanyStatus, string> = {
 export const companyStatusBadgeClass = (status: CompanyStatus) => {
   switch (status) {
     case "enquired":
-      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
     case "active":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "inactive":
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
     case "contacted":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
     default:
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
   }
 };
 
@@ -141,17 +141,17 @@ export const requirementStatusLabel: Record<RequirementStatus, string> = {
 export const requirementStatusBadgeClass = (status: RequirementStatus) => {
   switch (status) {
     case "open":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
     case "matching":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "partially_filled":
-      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
     case "filled":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "closed":
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -169,23 +169,23 @@ export const matchStatusLabel: Record<MatchStatus, string> = {
 export const matchStatusBadgeClass = (status: MatchStatus) => {
   switch (status) {
     case "proposed":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "accepted":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
     case "interview_requested":
-      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
     case "interview_scheduled":
-      return "bg-sky-500/10 text-sky-600 border-sky-600/20";
+      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
     case "declined":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     case "active":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "rejected":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     case "ended":
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -200,17 +200,17 @@ export const interviewStatusLabel: Record<InterviewStatus, string> = {
 export const interviewStatusBadgeClass = (status: InterviewStatus) => {
   switch (status) {
     case "requested":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "confirmed":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
     case "completed":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "declined":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     case "rescheduled":
-      return "bg-violet-500/10 text-violet-600 border-violet-600/20";
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -224,13 +224,13 @@ export const priorityLabel: Record<string, string> = {
 export const priorityBadgeClass = (priority: string) => {
   switch (priority) {
     case "urgent":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     case "high":
-      return "bg-orange-500/10 text-orange-600 border-orange-600/20";
+      return "bg-orange-500/8 text-orange-500 border-orange-500/15";
     case "medium":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -247,13 +247,13 @@ export const timeEntryStatusLabel: Record<TimeEntryStatus, string> = {
 export const timeEntryStatusBadgeClass = (status: TimeEntryStatus) => {
   switch (status) {
     case "submitted":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "approved":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "rejected":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -272,17 +272,17 @@ export const invoiceStatusLabel: Record<InvoiceStatus, string> = {
 export const invoiceStatusBadgeClass = (status: InvoiceStatus) => {
   switch (status) {
     case "paid":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "sent":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
     case "overdue":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     case "draft":
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
     case "cancelled":
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -301,17 +301,17 @@ export const payoutStatusLabel: Record<PayoutStatus, string> = {
 export const payoutStatusBadgeClass = (status: PayoutStatus) => {
   switch (status) {
     case "paid":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "approved":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
     case "processing":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "pending":
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
     case "cancelled":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -329,13 +329,13 @@ export const changeRequestTypeLabel: Record<ChangeRequestType, string> = {
 export const changeRequestTypeBadgeClass = (type: ChangeRequestType) => {
   switch (type) {
     case "cancellation":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     case "hour_reduction":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "extension":
-      return "bg-blue-500/10 text-blue-600 border-blue-600/20";
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
@@ -348,13 +348,13 @@ export const changeRequestStatusLabel: Record<ChangeRequestStatus, string> = {
 export const changeRequestStatusBadgeClass = (status: ChangeRequestStatus) => {
   switch (status) {
     case "pending":
-      return "bg-amber-500/10 text-amber-700 border-amber-600/20";
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
     case "approved":
-      return "bg-emerald-500/10 text-emerald-600 border-emerald-600/20";
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
     case "rejected":
-      return "bg-red-500/10 text-red-600 border-red-600/20";
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
     default:
-      return "bg-zinc-500/10 text-zinc-600 border-zinc-600/20";
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
   }
 };
 
