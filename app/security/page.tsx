@@ -112,7 +112,7 @@ export default function SecurityPage() {
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Issue Date
                   </p>
-                  <p className="mt-1 text-sm font-medium">17 March 2026</p>
+                  <p className="mt-1 text-sm font-medium">23 March 2026</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -134,6 +134,19 @@ export default function SecurityPage() {
                   client data management, matching and engagement workflows, and
                   supporting infrastructure.
                 </p>
+              </div>
+
+              <div className="mt-6 flex items-center justify-between">
+                <a
+                  href="https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
+                >
+                  <CheckCircle className="size-4 text-pulse" />
+                  IAF CertSearch Verified
+                  <ArrowRight className="size-3.5" />
+                </a>
               </div>
             </div>
           </FadeUp>
@@ -178,7 +191,8 @@ export default function SecurityPage() {
               </h2>
               <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
                 Contact us for more details about our ISMS, data processing
-                agreements, or to request our full ISO 27001 certificate.
+                agreements, or to request our full ISO 27001 certificate. Our
+                certification can be independently verified via IAF CertSearch.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <Button asChild size="lg" className="rounded-full gap-2">

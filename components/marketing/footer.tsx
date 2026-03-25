@@ -126,19 +126,31 @@ const Footer = ({ className }: FooterProps) => {
               </p>
               <div className="mt-6 flex items-center gap-4">
                 {[
-                  { src: "/security/ISO copy.png", alt: "ISO 27001 Certified" },
-                  { src: "/security/GDPR copy.png", alt: "GDPR Compliant" },
-                  { src: "/security/CCPA copy.png", alt: "CCPA Compliant" },
-                ].map((badge) => (
-                  <Image
-                    key={badge.alt}
-                    src={badge.src}
-                    alt={badge.alt}
-                    width={80}
-                    height={80}
-                    className="h-12 w-auto invert dark:invert-0 opacity-60 hover:opacity-100 transition-opacity"
-                  />
-                ))}
+                  { src: "/security/ISO copy.png", alt: "ISO 27001 Certified", href: "https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C" },
+                  { src: "/security/GDPR copy.png", alt: "GDPR Compliant", href: undefined },
+                  { src: "/security/CCPA copy.png", alt: "CCPA Compliant", href: undefined },
+                ].map((badge) =>
+                  badge.href ? (
+                    <a key={badge.alt} href={badge.href} target="_blank" rel="noopener noreferrer">
+                      <Image
+                        src={badge.src}
+                        alt={badge.alt}
+                        width={80}
+                        height={80}
+                        className="h-12 w-auto invert dark:invert-0 opacity-60 hover:opacity-100 transition-opacity"
+                      />
+                    </a>
+                  ) : (
+                    <Image
+                      key={badge.alt}
+                      src={badge.src}
+                      alt={badge.alt}
+                      width={80}
+                      height={80}
+                      className="h-12 w-auto invert dark:invert-0 opacity-60 hover:opacity-100 transition-opacity"
+                    />
+                  )
+                )}
               </div>
             </div>
             <div className="flex flex-wrap gap-12">

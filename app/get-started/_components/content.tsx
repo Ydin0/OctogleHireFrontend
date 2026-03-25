@@ -613,19 +613,31 @@ export function GetStartedContent() {
               {/* Certification badges */}
               <div className="mt-8 flex items-center gap-6 flex-wrap justify-center lg:justify-start">
                 {[
-                  { src: "/security/ISO copy.png", alt: "ISO 27001 Certified" },
-                  { src: "/security/GDPR copy.png", alt: "GDPR Compliant" },
-                  { src: "/security/CCPA copy.png", alt: "CCPA Compliant" },
-                ].map((badge) => (
-                  <Image
-                    key={badge.alt}
-                    src={badge.src}
-                    alt={badge.alt}
-                    width={120}
-                    height={120}
-                    className="h-20 w-auto opacity-80 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
-                  />
-                ))}
+                  { src: "/security/ISO copy.png", alt: "ISO 27001 Certified", href: "https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C" },
+                  { src: "/security/GDPR copy.png", alt: "GDPR Compliant", href: undefined },
+                  { src: "/security/CCPA copy.png", alt: "CCPA Compliant", href: undefined },
+                ].map((badge) =>
+                  badge.href ? (
+                    <a key={badge.alt} href={badge.href} target="_blank" rel="noopener noreferrer">
+                      <Image
+                        src={badge.src}
+                        alt={badge.alt}
+                        width={120}
+                        height={120}
+                        className="h-20 w-auto opacity-80 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
+                      />
+                    </a>
+                  ) : (
+                    <Image
+                      key={badge.alt}
+                      src={badge.src}
+                      alt={badge.alt}
+                      width={120}
+                      height={120}
+                      className="h-20 w-auto opacity-80 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
+                    />
+                  )
+                )}
               </div>
             </div>
 
@@ -1092,10 +1104,14 @@ export function GetStartedContent() {
                     Start Hiring Globally
                   </Button>
                   <Button variant="outline" asChild className="rounded-full">
-                    <Link href="/security">
-                      ISO 27001 Certified
+                    <a
+                      href="https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      ISO 27001 — IAF Verified
                       <ShieldCheck className="ml-1 size-4" />
-                    </Link>
+                    </a>
                   </Button>
                 </div>
               </div>
