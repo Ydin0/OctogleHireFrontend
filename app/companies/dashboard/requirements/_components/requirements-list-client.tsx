@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import {
   Bell,
   CheckCircle2,
@@ -48,6 +49,7 @@ type StatusFilter = "all" | "open" | "closed" | "filled";
 
 const RequirementsListClient = () => {
   const { getToken } = useAuth();
+  const router = useRouter();
   const [requirements, setRequirements] = useState<JobRequirement[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -88,7 +90,6 @@ const RequirementsListClient = () => {
     );
   }
 
-  // Sort: requirements with reviews first, then by date
   const sorted = [...requirements].sort((a, b) => {
     const aReview = countToReview(a);
     const bReview = countToReview(b);
@@ -187,124 +188,138 @@ const RequirementsListClient = () => {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Requirement</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead className="text-center">Candidates</TableHead>
-                  <TableHead>Budget</TableHead>
-                  <TableHead>Countries</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Posted</TableHead>
-                  <TableHead className="w-8" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRequirements.map((req) => {
-                  const matches = req.proposedMatches ?? [];
-                  const reviewCount = countToReview(req);
-                  const activeCount = matches.filter((m) => m.status === "active").length;
+        <div className="rounded-md border">
+          <Table className="table-fixed">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 280 }}>
+                  Requirement
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
+                  Status
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
+                  Priority
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground text-center" style={{ width: 100 }}>
+                  Candidates
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 140 }}>
+                  Budget
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
+                  Countries
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
+                  Type
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
+                  Posted
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredRequirements.map((req) => {
+                const matches = req.proposedMatches ?? [];
+                const reviewCount = countToReview(req);
+                const activeMatchCount = matches.filter((m) => m.status === "active").length;
 
-                  return (
-                    <TableRow key={req.id} className="group">
-                      <TableCell>
-                        <Link
-                          href={`/companies/dashboard/requirements/${req.id}`}
-                          className="block space-y-1"
-                        >
-                          <p className="text-sm font-medium group-hover:underline">
-                            {req.title}
-                          </p>
-                          <div className="flex flex-wrap gap-1">
-                            {req.techStack.slice(0, 3).map((tech) => (
-                              <Badge key={tech} variant="secondary" className="text-[10px] font-normal px-1.5 py-0">
-                                {tech}
-                              </Badge>
-                            ))}
-                            {req.techStack.length > 3 && (
-                              <span className="text-[10px] text-muted-foreground">
-                                +{req.techStack.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={requirementStatusBadgeClass(req.status)}
-                        >
-                          {requirementStatusLabel[req.status]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={priorityBadgeClass(req.priority)}
-                        >
-                          {priorityLabel[req.priority]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex flex-col items-center gap-0.5">
-                          <span className="text-sm font-medium">
-                            <Users className="mr-1 inline size-3 text-muted-foreground" />
-                            {activeCount}/{req.developersNeeded}
-                          </span>
-                          {reviewCount > 0 && (
-                            <span className="text-[10px] font-medium text-amber-600">
-                              {reviewCount} to review
-                            </span>
+                return (
+                  <TableRow
+                    key={req.id}
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/companies/dashboard/requirements/${req.id}`)}
+                  >
+                    <TableCell className="overflow-hidden" style={{ width: 280 }}>
+                      <div className="space-y-1">
+                        <p className="truncate text-sm font-medium">
+                          {req.title}
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {req.techStack.slice(0, 3).map((tech) => (
+                            <Badge key={tech} variant="secondary" className="text-[10px] font-normal px-1.5 py-0">
+                              {tech}
+                            </Badge>
+                          ))}
+                          {req.techStack.length > 3 && (
+                            <Badge variant="outline" className="text-[10px]">
+                              +{req.techStack.length - 3}
+                            </Badge>
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        {req.budgetMin || req.budgetMax ? (
-                          <span className="font-mono text-sm text-muted-foreground">
-                            {req.budgetMin && req.budgetMax
-                              ? `$${req.budgetMin}–$${req.budgetMax}`
-                              : req.budgetMin
-                                ? `$${req.budgetMin}+`
-                                : `Up to $${req.budgetMax}`}
-                            <span className="text-[10px]">/{req.budgetType === "monthly" ? "mo" : req.budgetType === "annual" ? "yr" : "hr"}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 100 }}>
+                      <Badge
+                        variant="outline"
+                        className={requirementStatusBadgeClass(req.status)}
+                      >
+                        {requirementStatusLabel[req.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 100 }}>
+                      <Badge
+                        variant="outline"
+                        className={priorityBadgeClass(req.priority)}
+                      >
+                        {priorityLabel[req.priority]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="overflow-hidden text-center" style={{ width: 100 }}>
+                      <div className="flex flex-col items-center gap-0.5">
+                        <span className="flex items-center gap-1 text-sm font-medium">
+                          <Users className="size-3 text-muted-foreground" />
+                          {activeMatchCount}/{req.developersNeeded}
+                        </span>
+                        {reviewCount > 0 && (
+                          <span className="text-[10px] font-medium text-amber-600">
+                            {reviewCount} to review
                           </span>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
                         )}
-                      </TableCell>
-                      <TableCell>
-                        {req.hiringCountries?.length > 0 ? (
-                          <CountryFlags codes={req.hiringCountries} max={3} />
-                        ) : (
-                          <span className="text-sm text-muted-foreground">-</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm capitalize text-muted-foreground">
-                          {req.engagementType?.replace("-", " ") ?? "-"}
+                      </div>
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 140 }}>
+                      {req.budgetMin || req.budgetMax ? (
+                        <span className="font-mono text-sm text-muted-foreground">
+                          {req.budgetMin && req.budgetMax
+                            ? `$${req.budgetMin}–$${req.budgetMax}`
+                            : req.budgetMin
+                              ? `$${req.budgetMin}+`
+                              : `Up to $${req.budgetMax}`}
+                          <span className="text-[10px]">/{req.budgetType === "monthly" ? "mo" : req.budgetType === "annual" ? "yr" : "hr"}</span>
                         </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {formatDate(req.createdAt)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Link href={`/companies/dashboard/requirements/${req.id}`}>
-                          <ChevronRight className="size-4 text-muted-foreground" />
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                      ) : (
+                        <span className="text-sm text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 100 }}>
+                      {req.hiringCountries?.length > 0 ? (
+                        <CountryFlags codes={req.hiringCountries} max={3} />
+                      ) : (
+                        <span className="text-sm text-muted-foreground">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 100 }}>
+                      <span className="text-sm capitalize text-muted-foreground">
+                        {req.engagementType?.replace("-", " ") ?? "-"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 100 }}>
+                      <span className="text-sm text-muted-foreground">
+                        {formatDate(req.createdAt)}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-between border-t px-4 py-3">
+            <span className="text-xs text-muted-foreground">
+              {filteredRequirements.length} requirement{filteredRequirements.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
       )}
     </>
   );

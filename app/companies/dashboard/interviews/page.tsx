@@ -8,7 +8,6 @@ import {
   Clock,
   Video,
   Loader2,
-  ChevronRight,
 } from "lucide-react";
 
 import type { CompanyInterview } from "@/lib/api/companies";
@@ -17,12 +16,18 @@ import {
   type InterviewStatus,
   interviewStatusLabel,
   interviewStatusBadgeClass,
-  formatDate,
 } from "@/app/admin/dashboard/_components/dashboard-data";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function getInitials(name: string) {
   return name
@@ -35,16 +40,17 @@ function getInitials(name: string) {
 
 function formatDateTime(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }) +
-    " at " +
+  return (
+    d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    }) +
+    ", " +
     d.toLocaleTimeString("en-US", {
       hour: "numeric",
       minute: "2-digit",
-    });
+    })
+  );
 }
 
 const interviewTypeBadge = (type: string) => {
@@ -82,103 +88,14 @@ function isUpcoming(interview: CompanyInterview) {
   );
 }
 
-function isPast(interview: CompanyInterview) {
-  if (interview.status === "completed" || interview.status === "declined")
-    return true;
-  if (interview.scheduledAt && new Date(interview.scheduledAt) < new Date())
-    return true;
-  return false;
-}
-
-function InterviewCard({ interview }: { interview: CompanyInterview }) {
-  const router = useRouter();
-
-  return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() =>
-        router.push(
-          `/companies/dashboard/interviews/${interview.id}`,
-        )
-      }
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ")
-          router.push(
-            `/companies/dashboard/interviews/${interview.id}`,
-          );
-      }}
-      className="flex cursor-pointer items-center gap-4 rounded-lg border border-border bg-card p-4 transition-colors hover:bg-accent/50"
-    >
-      <Avatar className="size-10 shrink-0">
-        <AvatarImage src={interview.developerAvatar} alt={interview.developerName} />
-        <AvatarFallback className="text-xs">
-          {getInitials(interview.developerName)}
-        </AvatarFallback>
-      </Avatar>
-
-      <div className="min-w-0 flex-1 space-y-1">
-        <div className="flex items-center gap-2">
-          <span className="truncate text-sm font-semibold">
-            {interview.developerName}
-          </span>
-          <span className="truncate text-xs text-muted-foreground">
-            {interview.developerRole}
-          </span>
-        </div>
-
-        <p className="truncate text-xs text-muted-foreground">
-          {interview.requirementTitle}
-        </p>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge
-            variant="outline"
-            className={`text-[10px] ${interviewTypeBadge(interview.type)}`}
-          >
-            {interview.type}
-          </Badge>
-          <Badge
-            variant="outline"
-            className={`text-[10px] ${interviewStatusBadgeClass(interview.status as InterviewStatus)}`}
-          >
-            {interviewStatusLabel[interview.status as InterviewStatus] ??
-              interview.status}
-          </Badge>
-          {interview.outcome && (
-            <Badge
-              variant="outline"
-              className={`text-[10px] ${outcomeBadge(interview.outcome)}`}
-            >
-              {interview.outcome}
-            </Badge>
-          )}
-        </div>
-      </div>
-
-      <div className="hidden shrink-0 items-center gap-4 sm:flex">
-        <div className="text-right">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-            Scheduled
-          </p>
-          {interview.scheduledAt ? (
-            <p className="font-mono text-xs">
-              {formatDateTime(interview.scheduledAt)}
-            </p>
-          ) : (
-            <p className="text-xs text-muted-foreground">Pending</p>
-          )}
-        </div>
-        <ChevronRight className="size-4 text-muted-foreground" />
-      </div>
-    </div>
-  );
-}
+type TabFilter = "all" | "upcoming" | "past";
 
 export default function InterviewsPage() {
   const { getToken } = useAuth();
+  const router = useRouter();
   const [interviews, setInterviews] = useState<CompanyInterview[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<TabFilter>("all");
 
   useEffect(() => {
     async function load() {
@@ -199,31 +116,34 @@ export default function InterviewsPage() {
   }
 
   const upcoming = interviews.filter(isUpcoming);
-  const past = interviews.filter(isPast);
+  const past = interviews.filter(
+    (i) =>
+      i.status === "completed" ||
+      i.status === "declined" ||
+      (i.scheduledAt && new Date(i.scheduledAt) < new Date()),
+  );
 
   const kpis = [
-    {
-      label: "Total Interviews",
-      value: String(interviews.length),
-      icon: Video,
-    },
-    {
-      label: "Upcoming",
-      value: String(upcoming.length),
-      icon: CalendarDays,
-    },
+    { label: "Total Interviews", value: String(interviews.length), icon: Video },
+    { label: "Upcoming", value: String(upcoming.length), icon: CalendarDays },
     {
       label: "Completed",
-      value: String(
-        interviews.filter((i) => i.status === "completed").length,
-      ),
+      value: String(interviews.filter((i) => i.status === "completed").length),
       icon: Clock,
     },
   ];
 
+  const tabFilters: { label: string; value: TabFilter; count: number }[] = [
+    { label: "All", value: "all", count: interviews.length },
+    { label: "Upcoming", value: "upcoming", count: upcoming.length },
+    { label: "Past", value: "past", count: past.length },
+  ];
+
+  const filtered =
+    tab === "upcoming" ? upcoming : tab === "past" ? past : interviews;
+
   return (
     <>
-      {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold">Interviews</h1>
@@ -233,7 +153,6 @@ export default function InterviewsPage() {
         </div>
       </div>
 
-      {/* KPI Cards */}
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {kpis.map((kpi) => (
           <Card key={kpi.label}>
@@ -243,7 +162,9 @@ export default function InterviewsPage() {
                   <kpi.icon className="size-4 text-pulse" />
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{kpi.label}</p>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    {kpi.label}
+                  </p>
                   <p className="text-lg font-semibold">{kpi.value}</p>
                 </div>
               </div>
@@ -252,74 +173,146 @@ export default function InterviewsPage() {
         ))}
       </section>
 
-      {/* Interview List */}
-      <Card>
-        <CardContent className="pt-6">
-          <Tabs defaultValue="all">
-            <TabsList>
-              <TabsTrigger value="all">
-                All ({interviews.length})
-              </TabsTrigger>
-              <TabsTrigger value="upcoming">
-                Upcoming ({upcoming.length})
-              </TabsTrigger>
-              <TabsTrigger value="past">
-                Past ({past.length})
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="all" className="mt-4 space-y-3">
-              {interviews.length === 0 ? (
-                <EmptyState />
-              ) : (
-                interviews.map((interview) => (
-                  <InterviewCard key={interview.id} interview={interview} />
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="upcoming" className="mt-4 space-y-3">
-              {upcoming.length === 0 ? (
-                <EmptyState message="No upcoming interviews." />
-              ) : (
-                upcoming.map((interview) => (
-                  <InterviewCard key={interview.id} interview={interview} />
-                ))
-              )}
-            </TabsContent>
-
-            <TabsContent value="past" className="mt-4 space-y-3">
-              {past.length === 0 ? (
-                <EmptyState message="No past interviews." />
-              ) : (
-                past.map((interview) => (
-                  <InterviewCard key={interview.id} interview={interview} />
-                ))
-              )}
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
-    </>
-  );
-}
-
-function EmptyState({
-  message = "No interviews yet.",
-}: {
-  message?: string;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-      <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-        <Video className="size-6 text-muted-foreground" />
+      <div className="flex flex-wrap items-center gap-2">
+        {tabFilters.map((f) => (
+          <button
+            key={f.value}
+            type="button"
+            onClick={() => setTab(f.value)}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+              tab === f.value
+                ? "border-pulse/40 bg-pulse/10 text-pulse"
+                : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
+            }`}
+          >
+            {f.label} ({f.count})
+          </button>
+        ))}
       </div>
-      <h3 className="mt-4 text-sm font-semibold">
-        {message}
-      </h3>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-        Interviews will appear here when scheduled through your requirements.
-      </p>
-    </div>
+
+      {filtered.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+              <Video className="size-6 text-muted-foreground" />
+            </div>
+            <h3 className="mt-4 text-sm font-semibold">No interviews yet</h3>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              Interviews will appear here when scheduled through your requirements.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="rounded-md border">
+          <Table className="table-fixed">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 220 }}>
+                  Candidate
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 200 }}>
+                  Requirement
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
+                  Type
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 120 }}>
+                  Status
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
+                  Outcome
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 150 }}>
+                  Scheduled
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((interview) => (
+                <TableRow
+                  key={interview.id}
+                  className="cursor-pointer"
+                  onClick={() =>
+                    router.push(`/companies/dashboard/interviews/${interview.id}`)
+                  }
+                >
+                  <TableCell className="overflow-hidden" style={{ width: 220 }}>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="size-8 shrink-0">
+                        <AvatarImage
+                          src={interview.developerAvatar}
+                          alt={interview.developerName}
+                        />
+                        <AvatarFallback className="text-[10px]">
+                          {getInitials(interview.developerName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">
+                          {interview.developerName}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {interview.developerRole}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="overflow-hidden" style={{ width: 200 }}>
+                    <span className="block truncate text-sm">
+                      {interview.requirementTitle}
+                    </span>
+                  </TableCell>
+                  <TableCell className="overflow-hidden" style={{ width: 100 }}>
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] capitalize ${interviewTypeBadge(interview.type)}`}
+                    >
+                      {interview.type}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="overflow-hidden" style={{ width: 120 }}>
+                    <Badge
+                      variant="outline"
+                      className={interviewStatusBadgeClass(interview.status as InterviewStatus)}
+                    >
+                      {interviewStatusLabel[interview.status as InterviewStatus] ??
+                        interview.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="overflow-hidden" style={{ width: 100 }}>
+                    {interview.outcome ? (
+                      <Badge
+                        variant="outline"
+                        className={`capitalize ${outcomeBadge(interview.outcome)}`}
+                      >
+                        {interview.outcome}
+                      </Badge>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="overflow-hidden" style={{ width: 150 }}>
+                    {interview.scheduledAt ? (
+                      <span className="font-mono text-sm text-muted-foreground">
+                        {formatDateTime(interview.scheduledAt)}
+                      </span>
+                    ) : (
+                      <span className="text-sm text-muted-foreground">
+                        Pending
+                      </span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-between border-t px-4 py-3">
+            <span className="text-xs text-muted-foreground">
+              {filtered.length} interview{filtered.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

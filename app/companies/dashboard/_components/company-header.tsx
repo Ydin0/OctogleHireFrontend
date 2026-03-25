@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LogOut, Mail, Menu, Phone } from "lucide-react";
+import { Headset, LogOut, Mail, Menu, Phone } from "lucide-react";
 import { useClerk } from "@clerk/nextjs";
 
 import type { CompanyProfileSummary } from "@/lib/api/companies";
@@ -50,24 +50,26 @@ function AccountManagerPopover({
           type="button"
           className="flex items-center gap-2 rounded-full border border-border/70 py-1 pl-1 pr-3 transition-colors hover:bg-accent/50"
         >
+          <Headset className="ml-1.5 size-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">Support:</span>
+          <span className="text-xs font-medium">{accountManager.name}</span>
           <div className="relative">
-            <Avatar size="sm">
+            <Avatar className="size-5">
               {accountManager.profilePhotoUrl && (
                 <AvatarImage
                   src={accountManager.profilePhotoUrl}
                   alt={accountManager.name}
                 />
               )}
-              <AvatarFallback className="text-[10px]">
+              <AvatarFallback className="text-[8px]">
                 {getInitials(accountManager.name)}
               </AvatarFallback>
             </Avatar>
-            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background bg-emerald-500" />
+            <span className="absolute -bottom-0.5 -right-0.5 size-2 rounded-full border border-background bg-emerald-500" />
           </div>
-          <span className="text-sm font-medium">{accountManager.name}</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-72 p-0">
+      <PopoverContent align="start" className="w-72 p-0">
         <div className="flex items-center gap-3 border-b px-4 py-3">
           <div className="relative shrink-0">
             <Avatar>
@@ -86,7 +88,7 @@ function AccountManagerPopover({
           <div>
             <p className="text-sm font-semibold">{accountManager.name}</p>
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Account Manager
+              Your Account Manager
             </p>
           </div>
         </div>
@@ -204,15 +206,14 @@ function CompanyHeader({ user, companyProfile, roles, activeRole }: CompanySideb
       {/* Desktop header */}
       <header className="sticky top-0 z-20 hidden border-b border-border/70 bg-background/90 backdrop-blur lg:block lg:ml-64">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+          <div />
+
           <div className="flex items-center gap-3">
             {companyProfile?.accountManager && (
               <AccountManagerPopover
                 accountManager={companyProfile.accountManager}
               />
             )}
-          </div>
-
-          <div className="flex items-center gap-2">
             <NotificationsDropdown />
             <ThemeToggle />
             <UserMenu user={user} />

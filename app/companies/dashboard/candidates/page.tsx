@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
-import { ChevronRight, Loader2, UserSearch } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Loader2, UserSearch } from "lucide-react";
 
 import {
   type JobRequirement,
@@ -55,6 +56,7 @@ interface FlatCandidate {
 
 export default function CandidatesPage() {
   const { getToken } = useAuth();
+  const router = useRouter();
   const [requirements, setRequirements] = useState<JobRequirement[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<CandidateStatusFilter>("all");
@@ -69,7 +71,6 @@ export default function CandidatesPage() {
     load();
   }, [getToken]);
 
-  // Flatten all proposed matches across requirements
   const candidates: FlatCandidate[] = useMemo(() => {
     const flat: FlatCandidate[] = [];
     for (const req of requirements) {
@@ -81,7 +82,6 @@ export default function CandidatesPage() {
         });
       }
     }
-    // Sort: accepted (to review) first, then by proposedAt desc
     flat.sort((a, b) => {
       if (a.match.status === "accepted" && b.match.status !== "accepted") return -1;
       if (b.match.status === "accepted" && a.match.status !== "accepted") return 1;
@@ -95,7 +95,6 @@ export default function CandidatesPage() {
     return candidates.filter((c) => c.match.status === statusFilter);
   }, [candidates, statusFilter]);
 
-  // Count per status for filter pills
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = { all: candidates.length };
     for (const c of candidates) {
@@ -104,7 +103,6 @@ export default function CandidatesPage() {
     return counts;
   }, [candidates]);
 
-  // Build filter options from statuses that actually exist
   const filterOptions: { label: string; value: CandidateStatusFilter; count: number }[] = useMemo(() => {
     const opts: { label: string; value: CandidateStatusFilter; count: number }[] = [
       { label: "All", value: "all", count: candidates.length },
@@ -142,7 +140,6 @@ export default function CandidatesPage() {
 
   return (
     <>
-      {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold">Candidates</h1>
@@ -152,7 +149,6 @@ export default function CandidatesPage() {
         </div>
       </div>
 
-      {/* Status Filters */}
       <div className="flex flex-wrap items-center gap-2">
         {filterOptions.map((f) => (
           <button
@@ -170,7 +166,6 @@ export default function CandidatesPage() {
         ))}
       </div>
 
-      {/* Candidates Table */}
       {filtered.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
@@ -186,94 +181,104 @@ export default function CandidatesPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Candidate</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Requirement</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Rate</TableHead>
-                  <TableHead>Proposed</TableHead>
-                  <TableHead className="w-8" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((c) => {
-                  const dev = c.match.developer;
-                  return (
-                    <TableRow key={c.match.id} className="group">
-                      <TableCell>
-                        <Link
-                          href={`/companies/dashboard/developers/${c.match.developerId}`}
-                          className="flex items-center gap-3"
-                        >
-                          <Avatar className="size-8 shrink-0">
-                            <AvatarImage src={dev?.avatar} alt={dev?.name ?? ""} />
-                            <AvatarFallback className="text-[10px]">
-                              {dev?.name ? getInitials(dev.name) : "?"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-medium group-hover:underline">
-                              {dev?.name ?? "Unknown"}
-                            </p>
-                            <p className="truncate text-xs text-muted-foreground">
-                              {dev?.role ?? ""}
-                            </p>
-                          </div>
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {dev?.location ?? "-"}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Link
-                          href={`/companies/dashboard/requirements/${c.requirementId}`}
-                          className="text-sm hover:underline"
-                        >
-                          {c.requirementTitle}
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={matchStatusBadgeClass(c.match.status)}
-                        >
-                          {matchStatusLabel[c.match.status]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className="font-mono text-sm">
-                          {formatCurrency(c.match.proposedHourlyRate)}/hr
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm text-muted-foreground">
-                          {formatDate(c.match.proposedAt)}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <Link href={`/companies/dashboard/developers/${c.match.developerId}`}>
-                          <ChevronRight className="size-4 text-muted-foreground" />
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-            <div className="border-t px-4 py-3">
-              <p className="text-xs text-muted-foreground">
-                {filtered.length} of {candidates.length} candidates
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-md border">
+          <Table className="table-fixed">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 240 }}>
+                  Candidate
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 140 }}>
+                  Location
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 200 }}>
+                  Requirement
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 130 }}>
+                  Status
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground text-right" style={{ width: 100 }}>
+                  Rate
+                </TableHead>
+                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
+                  Proposed
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map((c) => {
+                const dev = c.match.developer;
+                return (
+                  <TableRow
+                    key={c.match.id}
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      const target = e.target as HTMLElement;
+                      if (target.closest("a")) return;
+                      router.push(`/companies/dashboard/developers/${c.match.developerId}`);
+                    }}
+                  >
+                    <TableCell className="overflow-hidden" style={{ width: 240 }}>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-8 shrink-0">
+                          <AvatarImage src={dev?.avatar} alt={dev?.name ?? ""} />
+                          <AvatarFallback className="text-[10px]">
+                            {dev?.name ? getInitials(dev.name) : "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">
+                            {dev?.name ?? "Unknown"}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {dev?.role ?? ""}
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 140 }}>
+                      <span className="block truncate text-sm text-muted-foreground">
+                        {dev?.location ?? "-"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 200 }}>
+                      <Link
+                        href={`/companies/dashboard/requirements/${c.requirementId}`}
+                        className="block truncate text-sm hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {c.requirementTitle}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 130 }}>
+                      <Badge
+                        variant="outline"
+                        className={matchStatusBadgeClass(c.match.status)}
+                      >
+                        {matchStatusLabel[c.match.status]}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="overflow-hidden text-right" style={{ width: 100 }}>
+                      <span className="font-mono text-sm">
+                        {formatCurrency(c.match.proposedHourlyRate)}/hr
+                      </span>
+                    </TableCell>
+                    <TableCell className="overflow-hidden" style={{ width: 100 }}>
+                      <span className="text-sm text-muted-foreground">
+                        {formatDate(c.match.proposedAt)}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+          <div className="flex items-center justify-between border-t px-4 py-3">
+            <span className="text-xs text-muted-foreground">
+              {filtered.length} of {candidates.length} candidate{candidates.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
       )}
     </>
   );
