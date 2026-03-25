@@ -46,8 +46,17 @@ function RequirementsClient({
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteRefs, setDeleteRefs] = useState<{ engagements: number; interviews: number; matches: number } | null>(null);
 
+  const currentStatus = searchParams.get("status") ?? "all";
   const currentSortBy = searchParams.get("sortBy") ?? "";
   const currentSortOrder = searchParams.get("sortOrder") ?? "";
+
+  const statusTabs = [
+    { label: "All", value: "all" },
+    { label: "Open", value: "open" },
+    { label: "Matching", value: "matching" },
+    { label: "Filled", value: "filled" },
+    { label: "Closed", value: "closed" },
+  ];
 
   const pushParams = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -135,6 +144,23 @@ function RequirementsClient({
             New Requirement
           </Link>
         </Button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        {statusTabs.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => pushParams({ status: tab.value === "all" ? "" : tab.value, page: "" })}
+            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+              currentStatus === tab.value || (tab.value === "all" && !searchParams.get("status"))
+                ? "border-pulse/40 bg-pulse/10 text-pulse"
+                : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       <FiltersBar />

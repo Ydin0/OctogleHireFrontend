@@ -8,6 +8,7 @@ import {
   Building2,
   Clock,
   GitPullRequestArrow,
+  Handshake,
   Layers,
   LogOut,
   Receipt,
@@ -60,6 +61,7 @@ const navGroups = [
     label: "OPERATIONS",
     superAdminOnly: false,
     items: [
+      { href: "/admin/dashboard/engagements", label: "Engagements", icon: Handshake },
       { href: "/admin/dashboard/time-entries", label: "Timesheets", icon: Clock },
       { href: "/admin/dashboard/change-requests", label: "Requests", icon: GitPullRequestArrow },
       { href: "/admin/dashboard/invoices", label: "Invoices", icon: Receipt },

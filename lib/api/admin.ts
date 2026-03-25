@@ -1177,3 +1177,100 @@ export async function adminParseJobDocument(
 
   return response.json();
 }
+
+// ── Admin Engagements ─────────────────────────────────────────────────────
+
+export interface AdminEngagement {
+  id: string;
+  developerId: string;
+  developerName: string;
+  developerRole: string;
+  developerAvatar: string | null;
+  companyId: string;
+  companyName: string;
+  companyLogoUrl: string | null;
+  requirementId: string;
+  requirementTitle: string;
+  engagementType: string;
+  status: string;
+  startDate: string | null;
+  endDate: string | null;
+  companyBillingRate: number;
+  developerPayoutRate: number;
+  currency: string;
+  payoutCurrency: string;
+  monthlyHoursExpected: number | null;
+  monthlyHoursCap: number | null;
+  currentMonthTimeEntry: { hours: number; status: string } | null;
+  pendingChangeRequests: number;
+  createdAt: string;
+}
+
+export async function fetchAdminEngagements(
+  token: string | null,
+  params?: {
+    status?: string;
+    companyId?: string;
+    developerId?: string;
+  },
+): Promise<AdminEngagement[]> {
+  if (!token) return [];
+
+  try {
+    const searchParams = new URLSearchParams();
+    if (params?.status) searchParams.set("status", params.status);
+    if (params?.companyId) searchParams.set("companyId", params.companyId);
+    if (params?.developerId) searchParams.set("developerId", params.developerId);
+    const qs = searchParams.toString();
+
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/engagements${qs ? `?${qs}` : ""}`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) return [];
+    return (await response.json()) as AdminEngagement[];
+  } catch {
+    return [];
+  }
+}
+
+export async function createAdminTimeEntry(
+  token: string | null,
+  payload: {
+    engagementId: string;
+    period: string;
+    hours: number;
+    description?: string;
+  },
+): Promise<{ success: boolean; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/time-entries`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { success: false, error: body.message || "Failed to create time entry" };
+    }
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
