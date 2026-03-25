@@ -37,22 +37,8 @@ const experienceLevelLabel: Record<string, string> = {
   principal: "Principal",
 };
 
-const experienceLevelBadgeClass = (level: string) => {
-  switch (level) {
-    case "junior":
-      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
-    case "mid":
-      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
-    case "senior":
-      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
-    case "lead":
-      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
-    case "principal":
-      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
-    default:
-      return "bg-zinc-500/8 text-zinc-500 border-zinc-500/15";
-  }
-};
+const experienceLevelBadgeClass = (_level: string) =>
+  "bg-transparent text-muted-foreground border-border";
 
 // ── Live Timer Component ────────────────────────────────────────────────────
 

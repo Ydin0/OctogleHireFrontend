@@ -138,22 +138,8 @@ export const requirementStatusLabel: Record<RequirementStatus, string> = {
   closed: "Closed",
 };
 
-export const requirementStatusBadgeClass = (status: RequirementStatus) => {
-  switch (status) {
-    case "open":
-      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
-    case "matching":
-      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
-    case "partially_filled":
-      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
-    case "filled":
-      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
-    case "closed":
-      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
-    default:
-      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
-  }
-};
+export const requirementStatusBadgeClass = (_status: RequirementStatus) =>
+  "bg-transparent text-muted-foreground border-border";
 
 export const matchStatusLabel: Record<MatchStatus, string> = {
   proposed: "Proposed",
@@ -221,18 +207,8 @@ export const priorityLabel: Record<string, string> = {
   urgent: "Urgent",
 };
 
-export const priorityBadgeClass = (priority: string) => {
-  switch (priority) {
-    case "urgent":
-      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
-    case "high":
-      return "bg-orange-500/8 text-orange-500 border-orange-500/15";
-    case "medium":
-      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
-    default:
-      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
-  }
-};
+export const priorityBadgeClass = (_priority: string) =>
+  "bg-transparent text-muted-foreground border-border";
 
 // ── Time entry status helpers ────────────────────────────────────────────────
 
