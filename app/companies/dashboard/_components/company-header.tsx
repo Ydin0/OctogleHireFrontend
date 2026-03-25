@@ -131,13 +131,13 @@ function UserMenu({ user }: { user: CompanySidebarProps["user"] }) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="rounded-full transition-opacity hover:opacity-80"
+          className="rounded-full ring-2 ring-border ring-offset-2 ring-offset-background transition-all hover:ring-pulse/50"
         >
-          <Avatar size="sm">
+          <Avatar className="size-9">
             {user.imageUrl && (
               <AvatarImage src={user.imageUrl} alt={user.fullName ?? ""} />
             )}
-            <AvatarFallback>{initials}</AvatarFallback>
+            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
           </Avatar>
         </button>
       </PopoverTrigger>
@@ -205,7 +205,7 @@ function CompanyHeader({ user, companyProfile, roles, activeRole }: CompanySideb
 
       {/* Desktop header */}
       <header className="sticky top-0 z-20 hidden border-b border-border/70 bg-background/90 backdrop-blur lg:block lg:ml-64">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+        <div className="flex items-center justify-between px-6 py-3">
           <div />
 
           <div className="flex items-center gap-3">
