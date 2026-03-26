@@ -44,9 +44,10 @@ export default async function ApplicantsPage({
   const params = await searchParams;
 
   // Resolve effective status filter from tab + manual status selection
+  // When searching, don't restrict by status so agency candidates (draft) appear
   const tab = params.tab ?? "in_progress";
   let effectiveStatus = params.status;
-  if (!effectiveStatus) {
+  if (!effectiveStatus && !params.search) {
     if (tab === "in_progress") effectiveStatus = IN_PROGRESS_STATUSES;
     else if (tab === "draft") effectiveStatus = "draft";
     // tab === "all" → no status filter

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import Image from "next/image";
 import Link from "next/link";
 import { Building2, ExternalLink, MoreHorizontal, StickyNote } from "lucide-react";
 
@@ -264,20 +265,39 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
       header: "Source",
       size: 140,
       cell: ({ row }) => {
-        const { source, agencyName } = row.original;
-        if (source === "agency_referral" || source === "agency_manual") {
-          return (
+        const { source, agencyName, agencyId, agencyLogo } = row.original;
+        if (source === "agency" || source === "agency_referral" || source === "agency_manual") {
+          const href = agencyId ? `/admin/dashboard/agencies/${agencyId}` : undefined;
+          const badge = (
             <Badge
               variant="outline"
-              className="gap-1 border-blue-200 bg-blue-50 text-blue-700 text-[10px] dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300"
+              className="gap-1.5 border-blue-500/15 bg-blue-500/8 text-blue-500 text-[10px]"
             >
-              <Building2 className="size-3" />
-              {agencyName ?? "Agency"}
+              {agencyLogo ? (
+                <Image
+                  src={agencyLogo as string}
+                  alt={(agencyName as string) ?? ""}
+                  width={14}
+                  height={14}
+                  className="size-3.5 rounded-full object-contain"
+                  unoptimized
+                />
+              ) : (
+                <Building2 className="size-3" />
+              )}
+              {(agencyName as string) ?? "Agency"}
             </Badge>
           );
+          return href ? (
+            <Link href={href} onClick={(e) => e.stopPropagation()}>
+              {badge}
+            </Link>
+          ) : badge;
         }
         return (
-          <span className="text-xs text-muted-foreground">Direct</span>
+          <span className="text-xs text-muted-foreground capitalize">
+            {(source as string)?.replace(/_/g, " ") ?? "Direct"}
+          </span>
         );
       },
     },

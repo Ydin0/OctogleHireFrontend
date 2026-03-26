@@ -26,6 +26,7 @@ export interface AdminApplication {
   source: string;
   agencyId: string | null;
   agencyName: string | null;
+  agencyLogo: string | null;
 }
 
 export interface AdminApplicationFull {
