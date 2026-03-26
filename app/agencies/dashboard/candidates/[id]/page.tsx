@@ -223,16 +223,15 @@ export default async function AgencyCandidateDetailPage({
                 <CardTitle className="text-base">Contact Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {candidate.email && (
+                {candidate.email && !candidate.email.includes("import.placeholder") && !candidate.email.includes("linkedin-import") ? (
                   <div className="flex items-center gap-3 text-sm">
                     <Mail className="size-4 text-muted-foreground" />
                     <span>{candidate.email}</span>
                   </div>
-                )}
-                {!candidate.email && isSaved && (
+                ) : (
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     <Mail className="size-4" />
-                    <span>Not available (LinkedIn prospect)</span>
+                    <span>Not provided</span>
                   </div>
                 )}
                 {location && (
