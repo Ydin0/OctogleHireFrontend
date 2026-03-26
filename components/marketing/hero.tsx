@@ -84,7 +84,7 @@ const Hero = ({ className }: HeroProps) => {
               </a>
             </Button>
             <Button asChild variant="outline" size="lg" className="rounded-full px-6">
-              <a href="/get-started?demo=true">
+              <a href="/companies/signup">
                 Book a Demo
               </a>
             </Button>
@@ -94,16 +94,16 @@ const Hero = ({ className }: HeroProps) => {
           <div className="hidden lg:block h-10 w-px bg-border" />
 
           {/* Certification badges */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             {badges.map((badge) =>
               badge.href ? (
                 <a key={badge.alt} href={badge.href} target="_blank" rel="noopener noreferrer">
                   <Image
                     src={badge.src}
                     alt={badge.alt}
-                    width={80}
-                    height={80}
-                    className="h-10 w-auto invert dark:invert-0 opacity-60 hover:opacity-100 transition-opacity"
+                    width={120}
+                    height={120}
+                    className="h-16 w-auto brightness-0 dark:brightness-200 opacity-80 hover:opacity-100 transition-opacity"
                   />
                 </a>
               ) : (
@@ -111,9 +111,9 @@ const Hero = ({ className }: HeroProps) => {
                   key={badge.alt}
                   src={badge.src}
                   alt={badge.alt}
-                  width={80}
-                  height={80}
-                  className="h-10 w-auto invert dark:invert-0 opacity-60 hover:opacity-100 transition-opacity"
+                  width={120}
+                  height={120}
+                  className="h-16 w-auto brightness-0 dark:brightness-200 opacity-80 hover:opacity-100 transition-opacity"
                 />
               )
             )}

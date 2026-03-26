@@ -114,7 +114,7 @@ export default async function AdminOverviewPage() {
     },
   ];
 
-  const pipelineBreakdown = PIPELINE_STAGES.map((stage) => ({
+  const pipelineBreakdown = [...PIPELINE_STAGES, "rejected" as const].map((stage) => ({
     stage,
     count: byStatus[stage] ?? 0,
   }));
