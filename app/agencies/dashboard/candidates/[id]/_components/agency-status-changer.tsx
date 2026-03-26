@@ -20,12 +20,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  type ApplicationStatus,
-  applicationStatusLabel,
-} from "@/app/admin/dashboard/_components/dashboard-data";
+const SAVED_STATUSES = [
+  "draft",
+  "prospected",
+  "contacted",
+  "pre_screening",
+  "submitted",
+  "interviewing",
+  "interview_scheduled",
+  "offered",
+  "placed",
+  "rejected",
+] as const;
 
-const SAVED_STATUSES = ["prospected", "contacted", "interviewing", "rejected"] as const;
+const agencyStatusLabel: Record<string, string> = {
+  draft: "Draft",
+  prospected: "Prospected",
+  contacted: "Contacted",
+  pre_screening: "Pre-screening",
+  submitted: "Submitted",
+  interviewing: "Interviewing",
+  interview_scheduled: "Interview Scheduled",
+  offered: "Offered",
+  placed: "Placed",
+  rejected: "Rejected",
+  // Fallbacks for admin pipeline statuses that may appear on referral candidates
+  hr_communication_round: "HR Communication",
+  ai_technical_examination: "AI Technical Exam",
+  tech_lead_human_interview: "Tech Lead Interview",
+  background_previous_company_checks: "Background Checks",
+  offer_extended: "Offer Extended",
+  approved: "Approved",
+};
 
 interface AgencyStatusChangerProps {
   candidateId: string;
@@ -112,7 +138,7 @@ function AgencyStatusChanger({
         <SelectContent>
           {statuses.map((status) => (
             <SelectItem key={status} value={status}>
-              {applicationStatusLabel[status as ApplicationStatus] ?? status}
+              {agencyStatusLabel[status] ?? status}
             </SelectItem>
           ))}
         </SelectContent>
@@ -125,11 +151,11 @@ function AgencyStatusChanger({
             <DialogDescription>
               Moving from{" "}
               <span className="font-medium text-foreground">
-                {applicationStatusLabel[currentStatus as ApplicationStatus] ?? currentStatus}
+                {agencyStatusLabel[currentStatus] ?? currentStatus}
               </span>{" "}
               to{" "}
               <span className="font-medium text-foreground">
-                {applicationStatusLabel[selectedStatus as ApplicationStatus] ?? selectedStatus}
+                {agencyStatusLabel[selectedStatus] ?? selectedStatus}
               </span>
             </DialogDescription>
           </DialogHeader>

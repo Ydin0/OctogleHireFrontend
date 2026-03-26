@@ -25,6 +25,42 @@ import {
   applicationStatusLabel,
 } from "@/app/admin/dashboard/_components/dashboard-data";
 
+const agencyStatusLabel: Record<string, string> = {
+  draft: "Draft",
+  prospected: "Prospected",
+  contacted: "Contacted",
+  pre_screening: "Pre-screening",
+  submitted: "Submitted",
+  interviewing: "Interviewing",
+  interview_scheduled: "Interview Scheduled",
+  offered: "Offered",
+  placed: "Placed",
+  rejected: "Rejected",
+};
+
+const agencyStatusBadgeClass = (status: string) => {
+  switch (status) {
+    case "draft":
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
+    case "prospected":
+      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
+    case "contacted":
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
+    case "pre_screening":
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
+    case "submitted":
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
+    case "interview_scheduled":
+      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
+    case "offered":
+      return "bg-orange-500/8 text-orange-500 border-orange-500/15";
+    case "placed":
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
+    default:
+      return applicationStatusBadgeClass(status as ApplicationStatus);
+  }
+};
+
 const getInitials = (name: string | null) => {
   if (!name) return "??";
   return name
@@ -214,9 +250,9 @@ export function getColumns(): ColumnDef<UnifiedCandidate>[] {
         return (
           <Badge
             variant="outline"
-            className={applicationStatusBadgeClass(status as ApplicationStatus)}
+            className={agencyStatusBadgeClass(status)}
           >
-            {applicationStatusLabel[status as ApplicationStatus] ?? status.replace(/_/g, " ")}
+            {agencyStatusLabel[status] ?? applicationStatusLabel[status as ApplicationStatus] ?? status.replace(/_/g, " ")}
           </Badge>
         );
       },

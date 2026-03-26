@@ -42,14 +42,15 @@ import {
 
 const AGENCY_STATUSES = [
   { value: "all", label: "All Statuses" },
+  { value: "draft", label: "Draft" },
   { value: "prospected", label: "Prospected" },
   { value: "contacted", label: "Contacted" },
+  { value: "pre_screening", label: "Pre-screening" },
+  { value: "submitted", label: "Submitted" },
   { value: "interviewing", label: "Interviewing" },
-  { value: "draft", label: "Draft" },
-  { value: "hr_communication_round", label: "HR Communication" },
-  { value: "ai_technical_examination", label: "AI Technical Exam" },
-  { value: "tech_lead_human_interview", label: "Tech Lead Interview" },
-  { value: "approved", label: "Approved" },
+  { value: "interview_scheduled", label: "Interview Scheduled" },
+  { value: "offered", label: "Offered" },
+  { value: "placed", label: "Placed" },
   { value: "rejected", label: "Rejected" },
 ] as const;
 
