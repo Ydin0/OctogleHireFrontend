@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Users } from "lucide-react";
 
 import {
+  fetchAgencyMe,
   fetchAgencyStats,
   fetchAgencyCommissionSummary,
   fetchUnifiedCandidates,
@@ -38,32 +39,37 @@ export default async function AgencyDashboardPage() {
   const { getToken } = await auth();
   const token = await getToken();
 
+  const me = await fetchAgencyMe(token);
+  const isAdmin = me?.role === "admin";
+  const scope = isAdmin ? undefined : ("mine" as const);
+
   const [stats, commissionSummary, candidatesResult, teamMembers] =
     await Promise.all([
-      fetchAgencyStats(token),
+      fetchAgencyStats(token, scope),
       fetchAgencyCommissionSummary(token),
       fetchUnifiedCandidates(token, { limit: 1000 }),
-      fetchAgencyTeam(token),
+      isAdmin ? fetchAgencyTeam(token) : Promise.resolve(null),
     ]);
 
-  // Compute candidates per sourcer
+  // Compute candidates per sourcer (admin only)
   const candidates = candidatesResult?.candidates ?? [];
   const sourcerCounts = new Map<string, { name: string; count: number }>();
 
-  for (const c of candidates) {
-    const userId = c.sourcedByUserId;
-    const name = c.sourcedByName;
-    if (userId && name) {
-      const existing = sourcerCounts.get(userId);
-      if (existing) {
-        existing.count++;
-      } else {
-        sourcerCounts.set(userId, { name, count: 1 });
+  if (isAdmin) {
+    for (const c of candidates) {
+      const userId = c.sourcedByUserId;
+      const name = c.sourcedByName;
+      if (userId && name) {
+        const existing = sourcerCounts.get(userId);
+        if (existing) {
+          existing.count++;
+        } else {
+          sourcerCounts.set(userId, { name, count: 1 });
+        }
       }
     }
   }
 
-  // Build sorted leaderboard
   const sourcerLeaderboard = [...sourcerCounts.entries()]
     .map(([userId, { name, count }]) => {
       const member = (teamMembers ?? []).find((m) => m.userId === userId);
@@ -80,7 +86,9 @@ export default async function AgencyDashboardPage() {
       <div>
         <h1 className="text-lg font-semibold">Overview</h1>
         <p className="text-sm text-muted-foreground">
-          Your agency performance at a glance.
+          {isAdmin
+            ? "Your agency performance at a glance."
+            : "Your personal performance at a glance."}
         </p>
       </div>
 
@@ -179,8 +187,8 @@ export default async function AgencyDashboardPage() {
         </Card>
       </div>
 
-      {/* Candidates by Sourcer */}
-      {(sourcerLeaderboard.length > 0 || unattributedCount > 0) && (
+      {/* Candidates by Sourcer — admin only */}
+      {isAdmin && (sourcerLeaderboard.length > 0 || unattributedCount > 0) && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">

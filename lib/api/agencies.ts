@@ -518,12 +518,36 @@ export async function fetchAgencyCommissionSummary(
   }
 }
 
+export interface AgencyMe {
+  role: "admin" | "member";
+  userId: string | null;
+  agencyId: string;
+}
+
+export async function fetchAgencyMe(
+  token: string | null,
+): Promise<AgencyMe | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/agencies/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as AgencyMe;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchAgencyStats(
-  token: string | null
+  token: string | null,
+  scope?: "mine",
 ): Promise<AgencyStats | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/stats`, {
+    const qs = scope ? `?scope=${scope}` : "";
+    const response = await fetch(`${apiBaseUrl}/api/agencies/stats${qs}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
