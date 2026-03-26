@@ -115,6 +115,10 @@ export interface AgencyStats {
 export interface AgencyReferralLink {
   referralCode: string;
   referralUrl: string;
+  agencyReferralCode: string;
+  agencyReferralUrl: string;
+  memberReferralCode: string | null;
+  memberReferralUrl: string | null;
 }
 
 export interface AgencyTeamMember {

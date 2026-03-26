@@ -72,12 +72,14 @@ export const techStackSchema = z.object({
 
 export const linksSchema = z.object({
   linkedinUrl: z
-    .string()
-    .url("Please enter a valid URL")
-    .refine(
-      (url) => url.includes("linkedin.com"),
-      "Must be a LinkedIn URL",
-    ),
+    .union([
+      z.string().url("Please enter a valid URL").refine(
+        (url) => url.includes("linkedin.com"),
+        "Must be a LinkedIn URL",
+      ),
+      z.literal(""),
+    ])
+    .optional(),
   githubUrl: z
     .union([
       z.string().url("Please enter a valid URL").refine(
@@ -96,7 +98,8 @@ export const linksSchema = z.object({
     .refine(
       (file) => file.type === "application/pdf",
       "Resume must be a PDF file",
-    ),
+    )
+    .optional(),
   profilePhoto: z
     .instanceof(File)
     .refine(
@@ -108,7 +111,10 @@ export const linksSchema = z.object({
         ["image/jpeg", "image/png", "image/webp"].includes(file.type),
       "Photo must be JPEG, PNG, or WebP",
     ),
-});
+}).refine(
+  (data) => (data.linkedinUrl && data.linkedinUrl.length > 0) || data.resumeFile,
+  { message: "Please provide either a LinkedIn URL or upload your CV", path: ["resumeFile"] },
+);
 
 export const introVideoSchema = z.object({
   introVideo: z

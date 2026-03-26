@@ -146,7 +146,7 @@ const buildApplicationFormData = (
   formData.append("primaryStack", JSON.stringify(values.primaryStack));
   formData.append("secondarySkills", values.secondarySkills ?? "");
   formData.append("certifications", values.certifications ?? "");
-  formData.append("linkedinUrl", values.linkedinUrl);
+  formData.append("linkedinUrl", values.linkedinUrl ?? "");
   formData.append("githubUrl", values.githubUrl ?? "");
   formData.append("portfolioUrl", values.portfolioUrl ?? "");
   formData.append("engagementType", JSON.stringify(values.engagementType));
@@ -410,8 +410,12 @@ const ApplyForm = ({ referralCode }: ApplyFormProps = {}) => {
     setSubmitError(null);
 
     try {
-      if (!values.resumeFile || !values.profilePhoto) {
-        throw new Error("Please upload your resume and profile photo.");
+      if (!values.profilePhoto) {
+        throw new Error("Please upload your profile photo.");
+      }
+      const hasLinkedIn = values.linkedinUrl && values.linkedinUrl.includes("linkedin.com");
+      if (!values.resumeFile && !hasLinkedIn) {
+        throw new Error("Please upload your CV or provide your LinkedIn URL.");
       }
       if (!values.introVideo) {
         throw new Error("Please record your video introduction.");
