@@ -17,6 +17,23 @@ const formatTime = (seconds: number) => {
   return `${m}:${s.toString().padStart(2, "0")}`;
 };
 
+/** Pick the best supported MIME type for MediaRecorder */
+function getSupportedMimeType(): string {
+  const candidates = [
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8,opus",
+    "video/webm",
+    "video/mp4",
+  ];
+  for (const mime of candidates) {
+    if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(mime)) {
+      return mime;
+    }
+  }
+  // Fallback — let the browser decide
+  return "";
+}
+
 const StepVideoIntro = () => {
   const { setValue, watch } = useFormContext<Application>();
   const existingVideo = watch("introVideo");
@@ -56,21 +73,39 @@ const StepVideoIntro = () => {
     };
   }, [stopStream, clearTimer, recordedUrl]);
 
+  // Attach stream to video element whenever the ref or stream changes
+  // This fixes the black screen — the video element must be in the DOM first
+  useEffect(() => {
+    if (
+      (state === "previewing" || state === "recording") &&
+      videoRef.current &&
+      streamRef.current
+    ) {
+      videoRef.current.srcObject = streamRef.current;
+      // Force play — some browsers need this
+      videoRef.current.play().catch(() => {});
+    }
+  }, [state]);
+
   const startCamera = async () => {
     setCameraError(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+        video: {
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
         audio: true,
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
+      // Set state first so the <video> element renders,
+      // then the useEffect above will attach the stream
       setState("previewing");
-    } catch {
+    } catch (err) {
+      console.error("[video] Camera access error:", err);
       setCameraError(
-        "Unable to access camera or microphone. Please check your browser permissions.",
+        "Unable to access camera or microphone. Please check your browser permissions and ensure no other app is using the camera.",
       );
     }
   };
@@ -81,52 +116,68 @@ const StepVideoIntro = () => {
     chunksRef.current = [];
     setElapsed(0);
 
-    const mimeType = MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
-      ? "video/webm;codecs=vp9,opus"
-      : MediaRecorder.isTypeSupported("video/webm")
-        ? "video/webm"
-        : "video/mp4";
+    const mimeType = getSupportedMimeType();
+    const recorderOptions: MediaRecorderOptions = {};
+    if (mimeType) recorderOptions.mimeType = mimeType;
 
-    const recorder = new MediaRecorder(streamRef.current, { mimeType });
-    recorderRef.current = recorder;
+    try {
+      const recorder = new MediaRecorder(streamRef.current, recorderOptions);
+      recorderRef.current = recorder;
 
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
-    };
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
 
-    recorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: mimeType.split(";")[0] });
-      const ext = mimeType.includes("mp4") ? ".mp4" : ".webm";
-      const file = new File([blob], `intro-video${ext}`, {
-        type: blob.type,
-      });
-      setValue("introVideo", file, { shouldValidate: true });
+      recorder.onstop = () => {
+        const actualMime = recorder.mimeType || mimeType || "video/webm";
+        const blob = new Blob(chunksRef.current, { type: actualMime.split(";")[0] });
+        const ext = actualMime.includes("mp4") ? ".mp4" : ".webm";
+        const file = new File([blob], `intro-video${ext}`, {
+          type: blob.type,
+        });
+        setValue("introVideo", file, { shouldValidate: true });
 
-      const url = URL.createObjectURL(blob);
-      if (recordedUrl) URL.revokeObjectURL(recordedUrl);
-      setRecordedUrl(url);
+        const url = URL.createObjectURL(blob);
+        if (recordedUrl) URL.revokeObjectURL(recordedUrl);
+        setRecordedUrl(url);
 
-      stopStream();
-      setState("recorded");
-    };
+        stopStream();
+        setState("recorded");
+      };
 
-    recorder.start(1000);
-    setState("recording");
+      recorder.onerror = (e) => {
+        console.error("[video] MediaRecorder error:", e);
+        setCameraError("Recording failed. Please try again or use a different browser.");
+        stopStream();
+        clearTimer();
+        setState("idle");
+      };
 
-    timerRef.current = setInterval(() => {
-      setElapsed((prev) => {
-        const next = prev + 1;
-        if (next >= MAX_DURATION) {
-          stopRecording();
-        }
-        return next;
-      });
-    }, 1000);
+      recorder.start(1000);
+      setState("recording");
+
+      timerRef.current = setInterval(() => {
+        setElapsed((prev) => {
+          const next = prev + 1;
+          if (next >= MAX_DURATION) {
+            stopRecording();
+          }
+          return next;
+        });
+      }, 1000);
+    } catch (err) {
+      console.error("[video] Failed to create MediaRecorder:", err);
+      setCameraError(
+        "Your browser doesn't support video recording. Please try Chrome or Firefox.",
+      );
+    }
   };
 
   const stopRecording = () => {
     clearTimer();
-    recorderRef.current?.stop();
+    if (recorderRef.current && recorderRef.current.state !== "inactive") {
+      recorderRef.current.stop();
+    }
   };
 
   const reRecord = async () => {
