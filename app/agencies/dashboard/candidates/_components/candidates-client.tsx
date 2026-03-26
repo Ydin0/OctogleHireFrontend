@@ -1,9 +1,21 @@
 "use client";
 
-import { useMemo, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import type { RowSelectionState } from "@tanstack/react-table";
+import { Loader2, Users } from "lucide-react";
+import { toast } from "sonner";
 
 import type { UnifiedCandidate, Pagination } from "@/lib/api/agencies";
+import { bulkReassignSourcedBy } from "@/lib/api/agencies";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DataTable } from "@/app/admin/dashboard/_components/data-table";
 import { getColumns } from "./columns";
 import { FiltersBar } from "./filters-bar";
@@ -19,12 +31,16 @@ interface CandidatesClientProps {
   candidates: UnifiedCandidate[];
   pagination: Pagination;
   sourcers?: SourcerOption[];
+  token: string;
 }
 
-function CandidatesClient({ candidates, pagination, sourcers = [] }: CandidatesClientProps) {
+function CandidatesClient({ candidates, pagination, sourcers = [], token }: CandidatesClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [bulkAssignee, setBulkAssignee] = useState("");
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
 
   const currentSortBy = searchParams.get("sortBy") ?? "";
   const currentSortOrder = searchParams.get("sortOrder") ?? "";
@@ -65,6 +81,34 @@ function CandidatesClient({ candidates, pagination, sourcers = [] }: CandidatesC
     return [...set].sort();
   }, [candidates]);
 
+  // Get selected candidate IDs (only application-type, not saved)
+  const selectedIds = Object.keys(rowSelection)
+    .filter((idx) => rowSelection[idx])
+    .map((idx) => candidates[Number(idx)])
+    .filter((c) => c?.sourceTable === "application")
+    .map((c) => c.id);
+
+  const handleBulkReassign = async () => {
+    if (!bulkAssignee || selectedIds.length === 0) return;
+    setBulkSubmitting(true);
+    const member = sourcers.find((s) => s.userId === bulkAssignee);
+    const result = await bulkReassignSourcedBy(
+      token,
+      selectedIds,
+      bulkAssignee,
+      member?.name ?? "",
+    );
+    if (result) {
+      toast.success(`Reassigned ${result.updated} candidate${result.updated !== 1 ? "s" : ""}`);
+      setRowSelection({});
+      setBulkAssignee("");
+      startTransition(() => router.refresh());
+    } else {
+      toast.error("Failed to reassign candidates");
+    }
+    setBulkSubmitting(false);
+  };
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -81,6 +125,45 @@ function CandidatesClient({ candidates, pagination, sourcers = [] }: CandidatesC
       </div>
 
       <FiltersBar availableStacks={availableStacks} sourcers={sourcers} />
+
+      {/* Bulk action bar */}
+      {selectedIds.length > 0 && sourcers.length > 0 && (
+        <div className="flex items-center gap-3 rounded-md border border-pulse/30 bg-pulse/5 px-4 py-2.5">
+          <Users className="size-4 text-pulse" />
+          <span className="text-sm font-medium">
+            {selectedIds.length} selected
+          </span>
+          <Select value={bulkAssignee} onValueChange={setBulkAssignee}>
+            <SelectTrigger className="w-[200px] h-8 text-xs">
+              <SelectValue placeholder="Reassign to..." />
+            </SelectTrigger>
+            <SelectContent>
+              {sourcers.map((s) => (
+                <SelectItem key={s.userId} value={s.userId}>
+                  {s.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            disabled={!bulkAssignee || bulkSubmitting}
+            onClick={handleBulkReassign}
+          >
+            {bulkSubmitting ? (
+              <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+            ) : null}
+            Reassign
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setRowSelection({})}
+          >
+            Clear
+          </Button>
+        </div>
+      )}
 
       <DataTable
         columns={columns}
@@ -101,6 +184,8 @@ function CandidatesClient({ candidates, pagination, sourcers = [] }: CandidatesC
             ? { column: currentSortBy, order: currentSortOrder as "asc" | "desc" }
             : undefined
         }
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
         onRowClick={(candidate) => {
           const href =
             candidate.sourceTable === "saved"

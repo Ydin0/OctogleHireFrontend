@@ -12,7 +12,7 @@ import {
   Phone,
 } from "lucide-react";
 
-import { fetchUnifiedCandidateDetail } from "@/lib/api/agencies";
+import { fetchUnifiedCandidateDetail, fetchAgencyTeam } from "@/lib/api/agencies";
 import {
   Avatar,
   AvatarFallback,
@@ -95,11 +95,10 @@ export default async function AgencyCandidateDetailPage({
   const { id } = await params;
   const { source } = await searchParams;
 
-  const candidate = await fetchUnifiedCandidateDetail(
-    token,
-    id,
-    source === "saved" ? "saved" : undefined
-  );
+  const [candidate, teamMembers] = await Promise.all([
+    fetchUnifiedCandidateDetail(token, id, source === "saved" ? "saved" : undefined),
+    fetchAgencyTeam(token),
+  ]);
 
   if (!candidate) {
     notFound();
@@ -286,7 +285,10 @@ export default async function AgencyCandidateDetailPage({
                 hourlyRateCents: candidate.hourlyRateCents ?? null,
                 monthlyRateCents: candidate.monthlyRateCents ?? null,
                 primaryStack: candidate.primaryStack,
+                sourcedByUserId: candidate.sourcedByUserId ?? null,
+                sourcedByName: candidate.sourcedByName ?? null,
               }}
+              teamMembers={(teamMembers ?? []).map((m) => ({ userId: m.userId, name: m.name ?? m.email }))}
             />
           )}
 
@@ -558,16 +560,7 @@ export default async function AgencyCandidateDetailPage({
             initialPricingCurrency={candidate.pricingCurrency}
           />
 
-          {candidate.sourcedByName && (
-            <Card>
-              <CardContent className="py-4">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Sourced By
-                </p>
-                <p className="text-sm font-medium">{candidate.sourcedByName}</p>
-              </CardContent>
-            </Card>
-          )}
+          {/* Sourced By is now shown in the edit form */}
 
           {candidate.linkedinUrl && (
             <Card>

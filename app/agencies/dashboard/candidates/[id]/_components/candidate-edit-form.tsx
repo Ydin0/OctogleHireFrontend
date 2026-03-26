@@ -26,6 +26,11 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+interface TeamMember {
+  userId: string;
+  name: string;
+}
+
 interface CandidateEditFormProps {
   candidateId: string;
   initialData: {
@@ -43,10 +48,13 @@ interface CandidateEditFormProps {
     hourlyRateCents: number | null;
     monthlyRateCents: number | null;
     primaryStack: string[] | null;
+    sourcedByUserId: string | null;
+    sourcedByName: string | null;
   };
+  teamMembers?: TeamMember[];
 }
 
-function CandidateEditForm({ candidateId, initialData }: CandidateEditFormProps) {
+function CandidateEditForm({ candidateId, initialData, teamMembers = [] }: CandidateEditFormProps) {
   const router = useRouter();
   const { getToken } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -77,7 +85,11 @@ function CandidateEditForm({ candidateId, initialData }: CandidateEditFormProps)
     salaryCurrency: initialData.salaryCurrency ?? "USD",
     hourlyRate: initialData.hourlyRateCents ? initialData.hourlyRateCents / 100 : 0,
     monthlyRate: initialData.monthlyRateCents ? initialData.monthlyRateCents / 100 : 0,
+    primaryStack: initialData.primaryStack ?? [],
+    sourcedByUserId: initialData.sourcedByUserId ?? "",
+    sourcedByName: initialData.sourcedByName ?? "",
   });
+  const [newSkill, setNewSkill] = useState("");
 
   const handleSave = async () => {
     setSaving(true);
@@ -98,6 +110,9 @@ function CandidateEditForm({ candidateId, initialData }: CandidateEditFormProps)
         salaryCurrency: form.salaryCurrency || undefined,
         hourlyRate: form.hourlyRate || undefined,
         monthlyRate: form.monthlyRate || undefined,
+        primaryStack: form.primaryStack,
+        sourcedByUserId: form.sourcedByUserId || undefined,
+        sourcedByName: form.sourcedByName || undefined,
       });
       setEditing(false);
       toast.success("Candidate updated successfully");
@@ -171,6 +186,26 @@ function CandidateEditForm({ candidateId, initialData }: CandidateEditFormProps)
               </p>
             </div>
           </div>
+
+          {/* Tech Stack (read-only) */}
+          {initialData.primaryStack && initialData.primaryStack.length > 0 && (
+            <div className="mt-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">Tech Stack</p>
+              <div className="flex flex-wrap gap-1">
+                {initialData.primaryStack.map((skill) => (
+                  <Badge key={skill} variant="secondary" className="text-[10px]">{skill}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Sourced By (read-only) */}
+          {initialData.sourcedByName && (
+            <div className="mt-4">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Sourced By</p>
+              <p className="text-sm font-medium">{initialData.sourcedByName}</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
@@ -282,6 +317,82 @@ function CandidateEditForm({ candidateId, initialData }: CandidateEditFormProps)
           <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Bio / Summary</Label>
           <Textarea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} />
         </div>
+
+        {/* Tech Stack */}
+        <div className="space-y-1.5">
+          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Tech Stack</Label>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {form.primaryStack.map((skill) => (
+              <Badge key={skill} variant="secondary" className="gap-1 text-xs">
+                {skill}
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, primaryStack: form.primaryStack.filter((s) => s !== skill) })}
+                  className="ml-0.5 hover:text-destructive"
+                >
+                  <X className="size-2.5" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={newSkill}
+              onChange={(e) => setNewSkill(e.target.value)}
+              placeholder="Add a skill..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const skill = newSkill.trim();
+                  if (skill && !form.primaryStack.includes(skill)) {
+                    setForm({ ...form, primaryStack: [...form.primaryStack, skill] });
+                    setNewSkill("");
+                  }
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const skill = newSkill.trim();
+                if (skill && !form.primaryStack.includes(skill)) {
+                  setForm({ ...form, primaryStack: [...form.primaryStack, skill] });
+                  setNewSkill("");
+                }
+              }}
+            >
+              Add
+            </Button>
+          </div>
+        </div>
+
+        {/* Sourced By */}
+        {teamMembers.length > 0 && (
+          <div className="space-y-1.5">
+            <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Sourced By</Label>
+            <Select
+              value={form.sourcedByUserId || "unassigned"}
+              onValueChange={(v) => {
+                if (v === "unassigned") {
+                  setForm({ ...form, sourcedByUserId: "", sourcedByName: "" });
+                } else {
+                  const member = teamMembers.find((m) => m.userId === v);
+                  setForm({ ...form, sourcedByUserId: v, sourcedByName: member?.name ?? "" });
+                }
+              }}
+            >
+              <SelectTrigger><SelectValue placeholder="Select team member..." /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                {teamMembers.map((m) => (
+                  <SelectItem key={m.userId} value={m.userId}>{m.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

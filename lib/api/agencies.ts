@@ -1383,3 +1383,32 @@ export async function markCommissionPaid(
     return null;
   }
 }
+
+// ── Bulk Reassign Sourced By ────────────────────────────────────────────────
+
+export async function bulkReassignSourcedBy(
+  token: string | null,
+  candidateIds: string[],
+  sourcedByUserId: string,
+  sourcedByName: string,
+): Promise<{ updated: number } | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/candidates/bulk/sourced-by`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ candidateIds, sourcedByUserId, sourcedByName }),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as { updated: number };
+  } catch {
+    return null;
+  }
+}

@@ -63,6 +63,7 @@ export default async function AgencyCandidatesPage({
       candidates={candidates}
       pagination={pagination}
       sourcers={sourcers}
+      token={token!}
     />
   );
 }
