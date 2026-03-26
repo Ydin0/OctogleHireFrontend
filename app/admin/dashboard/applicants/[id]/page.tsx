@@ -414,7 +414,11 @@ export default async function ApplicantDetailPage({
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-3 text-sm">
                   <Mail className="size-4 text-muted-foreground" />
-                  <span>{applicant.email}</span>
+                  <span className={!applicant.email || applicant.email.includes("import.placeholder") || applicant.email.includes("linkedin-import") ? "text-muted-foreground" : ""}>
+                    {!applicant.email || applicant.email.includes("import.placeholder") || applicant.email.includes("linkedin-import")
+                      ? "Not provided"
+                      : applicant.email}
+                  </span>
                 </div>
                 {applicant.phone && (
                   <div className="flex items-center gap-3 text-sm">

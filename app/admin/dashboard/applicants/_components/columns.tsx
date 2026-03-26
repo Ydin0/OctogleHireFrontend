@@ -91,7 +91,11 @@ export function getColumns(options: GetColumnsOptions = {}): ColumnDef<AdminAppl
               <p className="truncate text-sm font-medium">
                 {fullName ?? "Unknown"}
               </p>
-              <p className="truncate text-xs text-muted-foreground">{email}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {email && !email.includes("import.placeholder") && !email.includes("linkedin-import")
+                  ? email
+                  : ""}
+              </p>
             </div>
           </div>
         );
