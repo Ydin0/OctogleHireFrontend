@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import {
@@ -270,8 +271,19 @@ const AgencyDetailPage = ({
         <CardContent className="p-6 lg:p-8">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-4">
-              <div className="flex size-16 items-center justify-center rounded-full bg-pulse/10">
-                <Briefcase className="size-8 text-pulse" />
+              <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-muted overflow-hidden">
+                {agency.logo ? (
+                  <Image
+                    src={agency.logo}
+                    alt={agency.name}
+                    width={64}
+                    height={64}
+                    className="size-16 object-contain"
+                    unoptimized
+                  />
+                ) : (
+                  <Briefcase className="size-8 text-pulse" />
+                )}
               </div>
               <div className="space-y-1">
                 <h1 className="text-2xl font-semibold">{agency.name}</h1>
@@ -483,12 +495,19 @@ const AgencyDetailPage = ({
             </CardContent>
           </Card>
 
-          {/* Sourced Candidates */}
+          {/* Sourced Candidates — show 5 most recent */}
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">
                 Sourced Candidates ({candidates?.length ?? 0})
               </CardTitle>
+              {candidates && candidates.length > 0 && (
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={`/admin/dashboard/applicants?agency=${agency.id}&tab=all`}>
+                    View All
+                  </Link>
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               {!candidates || candidates.length === 0 ? (
@@ -497,7 +516,7 @@ const AgencyDetailPage = ({
                 </p>
               ) : (
                 <div className="divide-y divide-border">
-                  {candidates.map((c) => (
+                  {candidates.slice(0, 5).map((c) => (
                     <Link
                       key={c.id}
                       href={`/admin/dashboard/applicants/${c.id}`}
@@ -524,7 +543,9 @@ const AgencyDetailPage = ({
                           {c.fullName ?? "Unknown"}
                         </p>
                         <p className="truncate text-xs text-muted-foreground">
-                          {c.professionalTitle ?? c.email}
+                          {c.professionalTitle && !c.professionalTitle.includes("import.placeholder")
+                            ? c.professionalTitle
+                            : "No title set"}
                         </p>
                         {c.primaryStack && c.primaryStack.length > 0 && (
                           <div className="mt-0.5 flex flex-wrap gap-1">
