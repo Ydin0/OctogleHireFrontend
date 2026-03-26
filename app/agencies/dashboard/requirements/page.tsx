@@ -35,21 +35,25 @@ export default async function AgencyMarketplacePage({
     }
   }
 
+  if (!params.limit) params.limit = "20";
+
   const data = await fetchMarketplaceRequirements(token, params);
 
   return (
     <>
-      <div>
-        <h1 className="text-lg font-semibold">Marketplace</h1>
-        <p className="text-sm text-muted-foreground">
-          Browse open positions and pitch your candidates.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Requirements</h1>
+          <p className="text-sm text-muted-foreground">
+            Browse open positions and pitch your candidates.
+          </p>
+        </div>
       </div>
 
       <MarketplaceClient
         requirements={data?.requirements ?? []}
         pagination={
-          data?.pagination ?? { page: 1, limit: 24, total: 0, totalPages: 0 }
+          data?.pagination ?? { page: 1, limit: 20, total: 0, totalPages: 0 }
         }
         filterOptions={
           data?.filterOptions ?? {
