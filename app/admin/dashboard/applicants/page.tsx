@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { fetchApplications, fetchFilterOptions } from "@/lib/api/admin";
 import { ApplicantsClient } from "./_components/applicants-client";
 
-// All non-draft statuses for the "In Progress" tab
+// Non-draft, non-terminal statuses for the "In Progress" tab
 const IN_PROGRESS_STATUSES = [
   "hr_communication_round",
   "ai_technical_examination",
@@ -11,8 +11,6 @@ const IN_PROGRESS_STATUSES = [
   "background_previous_company_checks",
   "offer_extended",
   "offer_declined",
-  "approved",
-  "rejected",
 ].join(",");
 
 interface ApplicantsPageProps {
@@ -50,6 +48,8 @@ export default async function ApplicantsPage({
   if (!effectiveStatus && !params.search) {
     if (tab === "in_progress") effectiveStatus = IN_PROGRESS_STATUSES;
     else if (tab === "draft") effectiveStatus = "draft";
+    else if (tab === "approved") effectiveStatus = "approved";
+    else if (tab === "rejected") effectiveStatus = "rejected";
     // tab === "all" → no status filter
   }
 

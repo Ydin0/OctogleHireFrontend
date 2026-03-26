@@ -14,6 +14,8 @@ import { QuickNoteDialog } from "./quick-note-dialog";
 const TABS = [
   { value: "in_progress", label: "In Progress" },
   { value: "draft", label: "Draft" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
   { value: "all", label: "All" },
 ] as const;
 
@@ -96,11 +98,19 @@ function ApplicantsClient({
 
   return (
     <>
-      <div>
-        <h1 className="text-lg font-semibold">Applicants</h1>
-        <p className="text-sm text-muted-foreground">
-          Review and manage developer applications through the pipeline.
-        </p>
+      <div className="flex items-baseline justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Applicants</h1>
+          <p className="text-sm text-muted-foreground">
+            Review and manage developer applications through the pipeline.
+          </p>
+        </div>
+        <span className="font-mono text-sm tabular-nums text-muted-foreground">
+          {pagination.total.toLocaleString()}{" "}
+          <span className="text-xs">
+            {pagination.total === 1 ? "candidate" : "candidates"}
+          </span>
+        </span>
       </div>
 
       <div className="flex gap-0 border-b border-border">

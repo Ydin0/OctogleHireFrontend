@@ -41,14 +41,16 @@ const volksans = localFont({
     },
   ],
   variable: "--font-volksans",
-  preload: false,
+  preload: true,
+  display: "swap",
 });
 
 const dmMono = DM_Mono({
   variable: "--font-dm-mono",
   subsets: ["latin"],
   weight: ["300", "400", "500"],
-  preload: false,
+  preload: true,
+  display: "swap",
 });
 
 export const metadata: Metadata = {

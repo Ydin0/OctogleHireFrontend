@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useMemo,
   type ReactNode,
 } from "react";
 import { useExchangeRates } from "@/lib/hooks/use-exchange-rates";
@@ -57,17 +58,20 @@ export function AdminCurrencyProvider({
     [convert, displayCurrency],
   );
 
+  const contextValue = useMemo(
+    () => ({
+      displayCurrency,
+      setDisplayCurrency,
+      convert,
+      formatDisplay,
+      rates,
+      loading,
+    }),
+    [displayCurrency, setDisplayCurrency, convert, formatDisplay, rates, loading],
+  );
+
   return (
-    <AdminCurrencyContext.Provider
-      value={{
-        displayCurrency,
-        setDisplayCurrency,
-        convert,
-        formatDisplay,
-        rates,
-        loading,
-      }}
-    >
+    <AdminCurrencyContext.Provider value={contextValue}>
       {children}
     </AdminCurrencyContext.Provider>
   );
