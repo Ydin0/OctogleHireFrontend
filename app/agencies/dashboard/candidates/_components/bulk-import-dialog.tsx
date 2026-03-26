@@ -127,8 +127,6 @@ const BulkImportDialog = () => {
     setDone(false);
     abortRef.current = false;
 
-    const token = await getToken();
-
     for (let i = 0; i < rows.length; i++) {
       if (abortRef.current) break;
       if (rows[i].status === "success") continue;
@@ -139,6 +137,10 @@ const BulkImportDialog = () => {
       );
 
       try {
+        // Get fresh token for each candidate to prevent expiry
+        const token = await getToken();
+        if (!token) throw new Error("Session expired — please refresh the page and try again.");
+
         // 1. Scrape LinkedIn profile
         const profile: ApifyProfile = await fetchLinkedInProfile(rows[i].url);
         const values = mapProfileToFormValues(profile, rows[i].url);
