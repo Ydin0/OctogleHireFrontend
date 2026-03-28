@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { RequestCancellationDialog } from "./request-cancellation-dialog";
 import { RequestHourChangeDialog } from "./request-hour-change-dialog";
 import { RequestExtensionDialog } from "./request-extension-dialog";
+import { DeveloperOnboardingChecklist } from "./developer-onboarding-checklist";
 import { useReviews } from "@/lib/reviews/use-reviews";
 import { ReviewDialog } from "@/app/companies/dashboard/_components/review-dialog";
 import { DeveloperReviewsDisplay } from "@/app/companies/dashboard/_components/developer-reviews-display";
@@ -188,6 +189,13 @@ function EngagementDetails({ engagement, token, companyId, companyName, companyL
           </div>
         )}
       </div>
+
+      {/* Developer Onboarding Checklist */}
+      <DeveloperOnboardingChecklist
+        engagementId={engagement.id}
+        engagementStatus={engagement.status}
+        token={token}
+      />
 
       {/* Time Entry History */}
       {timeEntries && timeEntries.length > 0 && (

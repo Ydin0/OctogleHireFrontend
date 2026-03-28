@@ -7,10 +7,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
-  FileUp,
+  FileText,
   Linkedin,
   Loader2,
   Sparkles,
+  ArrowRight,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -102,6 +104,9 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
   const { getToken } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const isEdit = mode === "edit";
+
+  // Import mode toggle
+  const [importMode, setImportMode] = useState<"linkedin" | "document" | null>(null);
 
   // LinkedIn import state
   const [linkedinUrl, setLinkedinUrl] = useState("");
@@ -262,111 +267,188 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
       </div>
 
       {/* ── Import Methods ─────────────────────────────────────────────── */}
-      {!isEdit && <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Sparkles className="size-4" />
-            Import Job Description
-          </CardTitle>
-          <CardDescription>
-            Import from LinkedIn or upload a document to auto-fill the form.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* LinkedIn import */}
-          <div className="space-y-3">
-            <Label className="flex items-center gap-1.5">
-              <Linkedin className="size-3.5" />
-              LinkedIn Company Jobs
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="https://www.linkedin.com/company/acme/"
-                value={linkedinUrl}
-                onChange={(e) => setLinkedinUrl(e.target.value)}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                disabled={
-                  fetchingJobs || !linkedinUrl.includes("linkedin.com/company/")
+      {!isEdit && (
+        <div className="space-y-3">
+          <div>
+            <h2 className="flex items-center gap-2 text-base font-semibold">
+              <Sparkles className="size-4" />
+              Quick Import
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Save time by importing an existing job description. AI will parse and pre-fill the form for you.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {/* LinkedIn Option */}
+            <button
+              type="button"
+              onClick={() => setImportMode(importMode === "linkedin" ? null : "linkedin")}
+              className={`group relative flex flex-col items-start gap-3 rounded-xl border-2 p-5 text-left transition-all ${
+                importMode === "linkedin"
+                  ? "border-[#0A66C2] bg-[#0A66C2]/[0.03]"
+                  : "border-border hover:border-[#0A66C2]/40 hover:bg-muted/30"
+              }`}
+            >
+              <div className={`flex size-11 items-center justify-center rounded-lg ${
+                importMode === "linkedin" ? "bg-[#0A66C2]/10" : "bg-muted"
+              }`}>
+                <Linkedin className={`size-5 ${importMode === "linkedin" ? "text-[#0A66C2]" : "text-muted-foreground"}`} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">Import from LinkedIn</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Paste your company LinkedIn URL and select from your active job listings. AI extracts all the details instantly.
+                </p>
+              </div>
+              <ArrowRight className={`absolute right-4 top-5 size-4 transition-transform ${
+                importMode === "linkedin" ? "rotate-90 text-[#0A66C2]" : "text-muted-foreground/50 group-hover:translate-x-0.5"
+              }`} />
+            </button>
+
+            {/* PDF / Document Option */}
+            <button
+              type="button"
+              onClick={() => {
+                if (importMode === "document") {
+                  setImportMode(null);
+                } else {
+                  setImportMode("document");
                 }
-                onClick={handleFetchJobs}
-                className="gap-1.5"
-              >
-                {fetchingJobs && <Loader2 className="size-3.5 animate-spin" />}
-                Fetch Jobs
-              </Button>
-            </div>
+              }}
+              className={`group relative flex flex-col items-start gap-3 rounded-xl border-2 p-5 text-left transition-all ${
+                importMode === "document"
+                  ? "border-foreground/20 bg-foreground/[0.02]"
+                  : "border-border hover:border-foreground/20 hover:bg-muted/30"
+              }`}
+            >
+              <div className={`flex size-11 items-center justify-center rounded-lg ${
+                importMode === "document" ? "bg-foreground/5" : "bg-muted"
+              }`}>
+                <FileText className={`size-5 ${importMode === "document" ? "text-foreground" : "text-muted-foreground"}`} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold">Upload a Job Description</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  Upload a PDF, DOCX, or TXT file and let AI parse the role, tech stack, experience level, and more in seconds.
+                </p>
+              </div>
+              <ArrowRight className={`absolute right-4 top-5 size-4 transition-transform ${
+                importMode === "document" ? "rotate-90 text-foreground" : "text-muted-foreground/50 group-hover:translate-x-0.5"
+              }`} />
+            </button>
+          </div>
 
-            {fetchingJobs && (
-              <p className="text-xs text-muted-foreground">
-                Fetching jobs from LinkedIn... This may take 30-60 seconds.
-              </p>
-            )}
-
-            {linkedinJobs.length > 0 && (
-              <div className="max-h-64 space-y-2 overflow-y-auto rounded-md border p-2">
-                {linkedinJobs.map((job) => (
-                  <button
-                    key={job.externalId || job.title}
+          {/* LinkedIn Expanded Panel */}
+          {importMode === "linkedin" && (
+            <Card className="border-[#0A66C2]/20">
+              <CardContent className="space-y-4 pt-5">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="https://www.linkedin.com/company/acme/"
+                    value={linkedinUrl}
+                    onChange={(e) => setLinkedinUrl(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button
                     type="button"
-                    className="flex w-full items-center justify-between rounded-md border border-border/50 px-3 py-2 text-left text-sm transition-colors hover:bg-accent"
-                    disabled={parsingJob === job.externalId}
-                    onClick={() => handleSelectJob(job)}
+                    variant="outline"
+                    disabled={fetchingJobs || !linkedinUrl.includes("linkedin.com/company/")}
+                    onClick={handleFetchJobs}
+                    className="gap-1.5"
                   >
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">{job.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {[job.location, job.employmentType]
-                          .filter(Boolean)
-                          .join(" \u00b7 ")}
-                      </p>
-                    </div>
-                    {parsingJob === job.externalId && (
-                      <Loader2 className="ml-2 size-4 shrink-0 animate-spin" />
+                    {fetchingJobs ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Linkedin className="size-3.5" />
                     )}
+                    Fetch Jobs
+                  </Button>
+                </div>
+
+                {fetchingJobs && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="size-3.5 animate-spin" />
+                    Fetching jobs from LinkedIn... This may take 30-60 seconds.
+                  </div>
+                )}
+
+                {linkedinJobs.length > 0 && (
+                  <div className="max-h-64 space-y-2 overflow-y-auto rounded-md border p-2">
+                    {linkedinJobs.map((job) => (
+                      <button
+                        key={job.externalId || job.title}
+                        type="button"
+                        className="flex w-full items-center justify-between rounded-md border border-border/50 px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent"
+                        disabled={parsingJob === job.externalId}
+                        onClick={() => handleSelectJob(job)}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium">{job.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {[job.location, job.employmentType].filter(Boolean).join(" \u00b7 ")}
+                          </p>
+                        </div>
+                        {parsingJob === job.externalId ? (
+                          <Loader2 className="ml-2 size-4 shrink-0 animate-spin" />
+                        ) : (
+                          <ArrowRight className="ml-2 size-3.5 shrink-0 text-muted-foreground" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {!fetchingJobs && linkedinJobs.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Paste your company&apos;s LinkedIn URL above and click &ldquo;Fetch Jobs&rdquo; to see active listings.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Document Upload Expanded Panel */}
+          {importMode === "document" && (
+            <Card>
+              <CardContent className="pt-5">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.txt"
+                  onChange={handleDocUpload}
+                  disabled={parsingDoc}
+                  className="hidden"
+                />
+
+                {parsingDoc ? (
+                  <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-10">
+                    <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                    <div className="text-center">
+                      <p className="text-sm font-medium">Parsing your document...</p>
+                      <p className="text-xs text-muted-foreground">AI is extracting role details, tech stack, and requirements.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex w-full flex-col items-center gap-3 rounded-lg border-2 border-dashed py-10 transition-colors hover:border-foreground/20 hover:bg-muted/30"
+                  >
+                    <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+                      <Upload className="size-5 text-muted-foreground" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium">Click to upload your job description</p>
+                      <p className="text-xs text-muted-foreground">Supports PDF, DOCX, and TXT files</p>
+                    </div>
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">or</span>
-            </div>
-          </div>
-
-          {/* Document upload */}
-          <div className="space-y-3">
-            <Label className="flex items-center gap-1.5">
-              <FileUp className="size-3.5" />
-              Upload Document
-            </Label>
-            <div className="flex gap-2">
-              <Input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.txt"
-                onChange={handleDocUpload}
-                disabled={parsingDoc}
-                className="flex-1"
-              />
-            </div>
-            {parsingDoc && (
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Loader2 className="size-3.5 animate-spin" />
-                Parsing document with AI...
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>}
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* ── Manual Form ────────────────────────────────────────────────── */}
       <Card>

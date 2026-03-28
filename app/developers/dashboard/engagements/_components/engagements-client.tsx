@@ -19,6 +19,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SubmitHoursDialog } from "./submit-hours-dialog";
+import { DeveloperOnboardingView } from "./developer-onboarding-view";
 
 interface EngagementsClientProps {
   engagements: DeveloperEngagement[];
@@ -141,53 +142,56 @@ function EngagementsClient({
             activeEngagements.map((eng) => (
               <div
                 key={eng.id}
-                className="flex items-center justify-between rounded-md border p-3"
+                className="rounded-md border p-3"
               >
-                <div className="flex min-w-0 flex-1 items-start gap-3">
-                  {eng.companyLogoUrl ? (
-                    <Image
-                      src={eng.companyLogoUrl}
-                      alt={eng.companyName}
-                      width={32}
-                      height={32}
-                      unoptimized
-                      className="size-8 shrink-0 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                      <Building2 className="size-4 text-muted-foreground" />
+                <div className="flex items-center justify-between">
+                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                    {eng.companyLogoUrl ? (
+                      <Image
+                        src={eng.companyLogoUrl}
+                        alt={eng.companyName}
+                        width={32}
+                        height={32}
+                        unoptimized
+                        className="size-8 shrink-0 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                        <Building2 className="size-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{eng.companyName}</p>
+                        <Badge
+                          variant="outline"
+                          className={statusBadgeClass(eng.status)}
+                        >
+                          {statusLabel[eng.status] ?? eng.status}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {eng.requirementTitle}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        <span className="font-mono">
+                          {formatCurrency(eng.developerPayoutRate, eng.currency)}
+                        </span>
+                        /hr &middot; {eng.engagementType}
+                      </p>
                     </div>
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{eng.companyName}</p>
-                      <Badge
-                        variant="outline"
-                        className={statusBadgeClass(eng.status)}
-                      >
-                        {statusLabel[eng.status] ?? eng.status}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {eng.requirementTitle}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      <span className="font-mono">
-                        {formatCurrency(eng.developerPayoutRate, eng.currency)}
-                      </span>
-                      /hr &middot; {eng.engagementType}
-                    </p>
                   </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => setSubmitEngagement(eng)}
+                  >
+                    <Clock className="mr-1.5 size-3.5" />
+                    Submit Hours
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="shrink-0"
-                  onClick={() => setSubmitEngagement(eng)}
-                >
-                  <Clock className="mr-1.5 size-3.5" />
-                  Submit Hours
-                </Button>
+                <DeveloperOnboardingView engagementId={eng.id} />
               </div>
             ))
           )}

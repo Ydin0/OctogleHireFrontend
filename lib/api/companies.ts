@@ -1935,3 +1935,154 @@ export async function fetchCalendarInterviews(
     return [];
   }
 }
+
+// ── Onboarding Checklist ──────────────────────────────────────────────────
+
+export interface OnboardingTemplateItem {
+  key: string;
+  label: string;
+  description: string;
+  category: string;
+  sortOrder: number;
+}
+
+export interface OnboardingChecklistItem {
+  id: string;
+  engagementId: string;
+  itemKey: string;
+  label: string;
+  description: string | null;
+  category: string | null;
+  sortOrder: number;
+  isCompleted: boolean;
+  completedAt: string | null;
+  completedBy: string | null;
+  notes: string | null;
+}
+
+export async function fetchOnboardingTemplate(
+  token: string | null,
+): Promise<{ items: OnboardingTemplateItem[] } | null> {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/onboarding-template`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as { items: OnboardingTemplateItem[] };
+  } catch {
+    return null;
+  }
+}
+
+export async function updateOnboardingTemplate(
+  token: string,
+  items: OnboardingTemplateItem[],
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/onboarding-template`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ items }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function fetchEngagementOnboarding(
+  token: string | null,
+  engagementId: string,
+): Promise<OnboardingChecklistItem[]> {
+  if (!token) return [];
+  try {
+    const res = await fetch(
+      `${apiBaseUrl}/api/companies/engagements/${engagementId}/onboarding`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as OnboardingChecklistItem[];
+  } catch {
+    return [];
+  }
+}
+
+export async function toggleOnboardingItem(
+  token: string,
+  engagementId: string,
+  itemId: string,
+  isCompleted: boolean,
+  notes?: string,
+): Promise<OnboardingChecklistItem | null> {
+  try {
+    const body: Record<string, unknown> = { isCompleted };
+    if (notes !== undefined) body.notes = notes;
+
+    const res = await fetch(
+      `${apiBaseUrl}/api/companies/engagements/${engagementId}/onboarding/${itemId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      },
+    );
+    if (!res.ok) return null;
+    return (await res.json()) as OnboardingChecklistItem;
+  } catch {
+    return null;
+  }
+}
+
+export async function addOnboardingItem(
+  token: string,
+  engagementId: string,
+  item: { label: string; description?: string; category?: string },
+): Promise<OnboardingChecklistItem | null> {
+  try {
+    const res = await fetch(
+      `${apiBaseUrl}/api/companies/engagements/${engagementId}/onboarding/items`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(item),
+      },
+    );
+    if (!res.ok) return null;
+    return (await res.json()) as OnboardingChecklistItem;
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteOnboardingItem(
+  token: string,
+  engagementId: string,
+  itemId: string,
+): Promise<boolean> {
+  try {
+    const res = await fetch(
+      `${apiBaseUrl}/api/companies/engagements/${engagementId}/onboarding/${itemId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

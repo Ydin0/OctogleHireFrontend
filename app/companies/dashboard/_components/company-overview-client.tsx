@@ -49,6 +49,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { OnboardingChecklist } from "./onboarding-checklist";
+import { OnboardingProgressWidget } from "./onboarding-progress-widget";
 
 function countToReview(req: JobRequirement): number {
   return (req.proposedMatches ?? []).filter((m) => m.status === "accepted").length;
@@ -191,6 +192,9 @@ export function CompanyOverviewClient({
         requirements={requirements}
         engagements={engagements}
       />
+
+      {/* Developer Onboarding Progress */}
+      <OnboardingProgressWidget engagements={engagements} />
 
       {/* Onboarding: Discover Jobs Banner */}
       {showBanner && (

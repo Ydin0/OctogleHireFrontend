@@ -557,3 +557,39 @@ export async function respondToInterview(
     throw error;
   }
 }
+
+// ── Onboarding Checklist (read-only) ──────────────────────────────────────
+
+export interface DeveloperOnboardingChecklistItem {
+  id: string;
+  engagementId: string;
+  itemKey: string;
+  label: string;
+  description: string | null;
+  category: string | null;
+  sortOrder: number;
+  isCompleted: boolean;
+  completedAt: string | null;
+  completedBy: string | null;
+  notes: string | null;
+}
+
+export async function fetchDeveloperEngagementOnboarding(
+  token: string | null,
+  engagementId: string,
+): Promise<DeveloperOnboardingChecklistItem[]> {
+  if (!token) return [];
+  try {
+    const res = await fetch(
+      `${apiBaseUrl}/api/developers/engagements/${engagementId}/onboarding`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as DeveloperOnboardingChecklistItem[];
+  } catch {
+    return [];
+  }
+}
