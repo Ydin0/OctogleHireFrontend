@@ -657,9 +657,7 @@ const RequirementDetailPage = ({
               <CardTitle className="text-sm">Description</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                <MarkdownDisplay content={requirement.description} />
-              </div>
+              <MarkdownDisplay content={requirement.description} />
             </CardContent>
           </Card>
 
