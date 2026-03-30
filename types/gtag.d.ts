@@ -9,5 +9,6 @@ interface Window {
     command: "track" | "trackCustom" | "init",
     eventOrPixelId: string,
     params?: Record<string, unknown>,
+    options?: { eventID?: string },
   ) => void;
 }

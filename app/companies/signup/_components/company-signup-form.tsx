@@ -47,10 +47,13 @@ const CompanySignupForm = () => {
   const onSubmit = async (data: CompanyLead) => {
     setApiError(null);
     try {
+      // Generate a shared event_id for browser ↔ CAPI deduplication
+      const eventId = crypto.randomUUID();
+
       const res = await fetch(`${API_BASE_URL}/api/public/company-signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, eventId }),
       });
 
       if (!res.ok) {
@@ -64,7 +67,7 @@ const CompanySignupForm = () => {
       trackMetaEvent("Lead", {
         content_name: "Company Signup",
         content_category: "company",
-      });
+      }, eventId);
 
       setContactName(data.contactName);
       setView("success");

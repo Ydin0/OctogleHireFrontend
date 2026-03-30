@@ -44,12 +44,15 @@ const AgencySignupForm = () => {
   const onSubmit = async (data: AgencyLead) => {
     setApiError(null);
     try {
+      // Generate a shared event_id for browser ↔ CAPI deduplication
+      const eventId = crypto.randomUUID();
+
       const res = await fetch(
         `${API_BASE_URL}/api/public/agency-enquiries`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
+          body: JSON.stringify({ ...data, eventId }),
         },
       );
 
@@ -66,7 +69,7 @@ const AgencySignupForm = () => {
       trackMetaEvent("Lead", {
         content_name: "Agency Signup",
         content_category: "agency",
-      });
+      }, eventId);
 
       toast.success("Registration submitted successfully");
       setContactName(data.contactName);
