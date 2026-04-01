@@ -36,6 +36,7 @@ import { AgencyStatusChanger } from "./_components/agency-status-changer";
 import { CandidateEditForm } from "./_components/candidate-edit-form";
 import { CandidatePricing } from "./_components/candidate-pricing";
 import { CandidatePitchHistoryCard } from "./_components/candidate-pitch-history";
+import { ActivateCandidateButton } from "./_components/activate-candidate-button";
 
 const getInitials = (name: string | null) => {
   if (!name) return "??";
@@ -190,6 +191,14 @@ export default async function AgencyCandidateDetailPage({
             </div>
 
             <div className="flex items-end gap-3">
+              {candidate.sourceTable === "application" && (
+                <ActivateCandidateButton
+                  candidateId={candidate.id}
+                  token={token!}
+                  hasAccount={!!candidate.hasAccount}
+                  hasValidEmail={!!candidate.email && !candidate.email.includes("placeholder")}
+                />
+              )}
               <AgencyStatusChanger
                 candidateId={candidate.id}
                 currentStatus={candidate.status}

@@ -230,6 +230,7 @@ export interface UnifiedCandidateDetail extends UnifiedCandidate {
   secondarySkills?: string | null;
   updatedAt?: string;
   pitches?: CandidatePitchHistory[] | null;
+  hasAccount?: boolean;
 }
 
 export interface CandidatePitchHistory {
