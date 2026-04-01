@@ -70,6 +70,12 @@ const isItemActive = (pathname: string, href: string) => {
   return pathname === href || pathname.startsWith(`${href}/`);
 };
 
+export interface SidebarCounts {
+  requirements?: number;
+  candidates?: number;
+  agreements?: number;
+}
+
 interface CompanySidebarProps {
   user: {
     fullName: string | null;
@@ -79,9 +85,16 @@ interface CompanySidebarProps {
   companyProfile: CompanyProfileSummary | null;
   roles?: string[];
   activeRole?: string;
+  counts?: SidebarCounts;
 }
 
-function CompanySidebarContent({ user, companyProfile, roles, activeRole }: CompanySidebarProps) {
+const countMap: Record<string, keyof SidebarCounts> = {
+  "/companies/dashboard/requirements": "requirements",
+  "/companies/dashboard/candidates": "candidates",
+  "/companies/dashboard/agreements": "agreements",
+};
+
+function CompanySidebarContent({ user, companyProfile, roles, activeRole, counts = {} }: CompanySidebarProps) {
   const pathname = usePathname();
   const { signOut } = useClerk();
 
@@ -130,6 +143,8 @@ function CompanySidebarContent({ user, companyProfile, roles, activeRole }: Comp
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const active = isItemActive(pathname, item.href);
+                const countKey = countMap[item.href];
+                const badge = countKey ? (counts[countKey] ?? 0) : 0;
                 return (
                   <Link
                     key={item.href}
@@ -141,7 +156,12 @@ function CompanySidebarContent({ user, companyProfile, roles, activeRole }: Comp
                     }`}
                   >
                     <item.icon className="size-4 text-pulse" />
-                    {item.label}
+                    <span className="flex-1">{item.label}</span>
+                    {badge > 0 && (
+                      <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground/10 px-1.5 text-[10px] font-medium tabular-nums">
+                        {badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -222,10 +242,10 @@ function CompanySidebarContent({ user, companyProfile, roles, activeRole }: Comp
   );
 }
 
-function CompanySidebar({ user, companyProfile, roles, activeRole }: CompanySidebarProps) {
+function CompanySidebar({ user, companyProfile, roles, activeRole, counts }: CompanySidebarProps) {
   return (
     <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-border/70 lg:bg-background">
-      <CompanySidebarContent user={user} companyProfile={companyProfile} roles={roles} activeRole={activeRole} />
+      <CompanySidebarContent user={user} companyProfile={companyProfile} roles={roles} activeRole={activeRole} counts={counts} />
     </aside>
   );
 }

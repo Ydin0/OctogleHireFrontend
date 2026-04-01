@@ -7,7 +7,7 @@ import { CompanyHeader } from "./_components/company-header";
 import { ChatWidget } from "./_components/chat-widget";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
-import { fetchCompanyProfile, fetchCompanyTeam } from "@/lib/api/companies";
+import { fetchCompanyProfile, fetchCompanyTeam, fetchCompanyRequirements, fetchCompanyAgreements } from "@/lib/api/companies";
 
 export const metadata: Metadata = {
   title: "Company Dashboard | OctogleHire",
@@ -37,10 +37,21 @@ export default async function CompanyDashboardLayout({
   }
 
   const clerkUser = await currentUser();
-  const [companyProfile, teamMembers] = await Promise.all([
+  const [companyProfile, teamMembers, requirements, agreements] = await Promise.all([
     fetchCompanyProfile(token),
     fetchCompanyTeam(token),
+    fetchCompanyRequirements(token),
+    fetchCompanyAgreements(token),
   ]);
+
+  const sidebarCounts = {
+    requirements: (requirements ?? []).filter((r) => r.status === "open" || r.status === "matching" || r.status === "partially_filled").length,
+    candidates: (requirements ?? []).reduce((sum, r) => {
+      const matches = (r as any).proposedMatches ?? [];
+      return sum + matches.filter((m: any) => m.status === "accepted" || m.status === "interview_scheduled").length;
+    }, 0),
+    agreements: agreements.filter((a) => a.status === "pending").length,
+  };
 
   const userEmail = clerkUser?.emailAddresses?.[0]?.emailAddress ?? null;
   // Prefer team member avatar (uploaded via team page) over Clerk default
@@ -61,8 +72,8 @@ export default async function CompanyDashboardLayout({
 
   return (
     <div className="min-h-screen bg-background">
-      <CompanySidebar user={user} companyProfile={companyProfile} roles={roles} activeRole={accountType ?? "company"} />
-      <CompanyHeader user={user} companyProfile={companyProfile} roles={roles} activeRole={accountType ?? "company"} />
+      <CompanySidebar user={user} companyProfile={companyProfile} roles={roles} activeRole={accountType ?? "company"} counts={sidebarCounts} />
+      <CompanyHeader user={user} companyProfile={companyProfile} roles={roles} activeRole={accountType ?? "company"} counts={sidebarCounts} />
       <main className="lg:ml-64">
         <div className="space-y-6 px-6 py-6 lg:py-8">
           {children}
