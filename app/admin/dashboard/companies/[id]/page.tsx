@@ -12,6 +12,7 @@ import {
   Calendar,
   Camera,
   ExternalLink,
+  FileSignature,
   FileText,
   Loader2,
   Mail,
@@ -26,10 +27,13 @@ import { use } from "react";
 
 import {
   type CompanyProfile,
+  type Agreement,
   activateCompany,
   fetchCompany,
   updateCompanyStatus,
   updateCompanyCurrency,
+  fetchAdminCompanyAgreements,
+  sendCompanyMsa,
 } from "@/lib/api/companies";
 import { CompanyInvoices } from "./_components/company-invoices";
 import {
@@ -116,18 +120,23 @@ const CompanyDetailPage = ({
     location: "",
   });
 
+  const [agreements, setAgreements] = useState<Agreement[]>([]);
+  const [sendingMsa, setSendingMsa] = useState(false);
+
   const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
   const load = useCallback(async () => {
     const token = await getToken();
-    const [data, teamRes] = await Promise.all([
+    const [data, teamRes, agreementsRes] = await Promise.all([
       fetchCompany(token, id),
       fetch(`${apiBase}/api/admin/team`, {
         headers: { Authorization: `Bearer ${token}` },
       }).then((r) => r.json()).then((d: { admins: typeof adminUsers }) => d.admins).catch(() => []),
+      fetchAdminCompanyAgreements(token, id),
     ]);
     setCompany(data);
     setAdminUsers(teamRes);
+    setAgreements(agreementsRes);
     setLoading(false);
   }, [getToken, id, apiBase]);
 
@@ -159,6 +168,22 @@ const CompanyDetailPage = ({
     const token = await getToken();
     await updateCompanyCurrency(token, company.id, newCurrency);
     toast.success("Invoice currency updated");
+  };
+
+  const handleSendMsa = async () => {
+    if (!company) return;
+    setSendingMsa(true);
+    const token = await getToken();
+    const result = await sendCompanyMsa(token, company.id);
+    if (result.success) {
+      toast.success("MSA sent to company");
+      // Refresh agreements
+      const updated = await fetchAdminCompanyAgreements(token, company.id);
+      setAgreements(updated);
+    } else {
+      toast.error(result.error ?? "Failed to send MSA");
+    }
+    setSendingMsa(false);
   };
 
   const handleAssignManager = async (accountManagerId: string) => {
@@ -680,6 +705,96 @@ const CompanyDetailPage = ({
                   })}
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Agreements */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <FileSignature className="size-4" />
+                Agreements
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {(() => {
+                const msa = agreements.find((a) => a.type === "msa");
+                const reas = agreements.filter((a) => a.type === "rea");
+
+                return (
+                  <>
+                    {/* MSA status */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">Master Services Agreement</p>
+                        {msa ? (
+                          <p className="text-xs text-muted-foreground">
+                            {msa.status === "signed"
+                              ? `Signed ${formatDate(msa.signedAt!)} by ${msa.signedByName}`
+                              : `Sent ${formatDate(msa.createdAt)} — awaiting signature`}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Not yet sent</p>
+                        )}
+                      </div>
+                      {!msa ? (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="rounded-full"
+                          disabled={sendingMsa}
+                          onClick={handleSendMsa}
+                        >
+                          {sendingMsa ? (
+                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Mail className="mr-1.5 h-3.5 w-3.5" />
+                          )}
+                          Send MSA
+                        </Button>
+                      ) : (
+                        <Badge
+                          variant="outline"
+                          className={
+                            msa.status === "signed"
+                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
+                              : "border-amber-500/30 bg-amber-500/10 text-amber-700"
+                          }
+                        >
+                          {msa.status === "signed" ? "Signed" : "Pending"}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* REA list */}
+                    {reas.length > 0 && (
+                      <>
+                        <Separator />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          Resource Engagement Addendums
+                        </p>
+                        {reas.map((rea) => (
+                          <div key={rea.id} className="flex items-center justify-between text-sm">
+                            <p className="text-muted-foreground truncate">
+                              {rea.engagementId ? `Engagement ${rea.engagementId.slice(0, 8)}` : "REA"}
+                            </p>
+                            <Badge
+                              variant="outline"
+                              className={
+                                rea.status === "signed"
+                                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
+                                  : "border-amber-500/30 bg-amber-500/10 text-amber-700"
+                              }
+                            >
+                              {rea.status === "signed" ? "Signed" : "Pending"}
+                            </Badge>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </>
+                );
+              })()}
             </CardContent>
           </Card>
 

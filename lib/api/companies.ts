@@ -2086,3 +2086,122 @@ export async function deleteOnboardingItem(
     return false;
   }
 }
+
+// ── Agreements ──────────────────────────────────────────────────────────────
+
+export interface Agreement {
+  id: string;
+  companyId: string;
+  engagementId: string | null;
+  type: "msa" | "rea";
+  status: "pending" | "signed";
+  signedByName: string | null;
+  signedByTitle: string | null;
+  signedAt: string | null;
+  createdAt: string;
+  developerName?: string | null;
+  role?: string | null;
+}
+
+export interface AgreementDetail extends Agreement {
+  contentSnapshot: string;
+  signedByEmail: string | null;
+}
+
+export async function fetchCompanyAgreements(
+  token: string | null,
+): Promise<Agreement[]> {
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/agreements`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    return (await res.json()) as Agreement[];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchCompanyAgreement(
+  token: string | null,
+  id: string,
+): Promise<AgreementDetail | null> {
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/agreements/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as AgreementDetail;
+  } catch {
+    return null;
+  }
+}
+
+export async function signAgreement(
+  token: string | null,
+  id: string,
+  payload: { name: string; title: string },
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(`${apiBaseUrl}/api/companies/agreements/${id}/sign`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      return { success: false, error: data?.message ?? "Failed to sign agreement" };
+    }
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+// ── Admin Agreement Functions ───────────────────────────────────────────────
+
+export async function sendCompanyMsa(
+  token: string | null,
+  companyId: string,
+): Promise<{ success: boolean; agreement?: Agreement; error?: string }> {
+  try {
+    const res = await fetch(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/agreements/msa`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      return { success: false, error: data?.message ?? "Failed to send MSA" };
+    }
+    return { success: true, agreement: (await res.json()) as Agreement };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function fetchAdminCompanyAgreements(
+  token: string | null,
+  companyId: string,
+): Promise<Agreement[]> {
+  try {
+    const res = await fetch(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/agreements`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!res.ok) return [];
+    return (await res.json()) as Agreement[];
+  } catch {
+    return [];
+  }
+}

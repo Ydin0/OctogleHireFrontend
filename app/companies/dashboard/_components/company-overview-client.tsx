@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Bell,
+  FileSignature,
   Briefcase,
   ClipboardList,
   DollarSign,
@@ -92,11 +93,13 @@ export function CompanyOverviewClient({
   team,
   engagements,
   profile,
+  pendingAgreements = 0,
 }: {
   requirements: JobRequirement[];
   team: TeamMember[];
   engagements: CompanyEngagement[];
   profile: CompanyProfileSummary | null;
+  pendingAgreements?: number;
 }) {
   const [bannerDismissed, setBannerDismissed] = useState(true);
   const [comingSoonOpen, setComingSoonOpen] = useState(false);
@@ -227,6 +230,31 @@ export function CompanyOverviewClient({
                 </Link>
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Unsigned agreements banner */}
+      {pendingAgreements > 0 && (
+        <Card className="border-amber-500/30 bg-amber-500/5">
+          <CardContent className="flex items-center gap-4 py-4">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15">
+              <FileSignature className="h-4 w-4 text-amber-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium">
+                You have {pendingAgreements} unsigned agreement{pendingAgreements > 1 ? "s" : ""}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Please review and sign your outstanding agreements to continue hiring.
+              </p>
+            </div>
+            <Button variant="outline" size="sm" className="rounded-full" asChild>
+              <Link href="/companies/dashboard/agreements">
+                Review Agreements
+                <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       )}

@@ -7,6 +7,7 @@ import {
   fetchCompanyTeam,
   fetchCompanyEngagements,
   fetchCompanyProfile,
+  fetchCompanyAgreements,
 } from "@/lib/api/companies";
 
 export default async function CompanyOverviewPage() {
@@ -15,11 +16,12 @@ export default async function CompanyOverviewPage() {
 
   const token = await getToken();
 
-  const [requirements, team, engagements, profile] = await Promise.all([
+  const [requirements, team, engagements, profile, agreements] = await Promise.all([
     fetchCompanyRequirements(token),
     fetchCompanyTeam(token),
     fetchCompanyEngagements(token),
     fetchCompanyProfile(token),
+    fetchCompanyAgreements(token),
   ]);
 
   return (
@@ -28,6 +30,7 @@ export default async function CompanyOverviewPage() {
       team={team ?? []}
       engagements={engagements ?? []}
       profile={profile}
+      pendingAgreements={agreements.filter((a) => a.status === "pending").length}
     />
   );
 }

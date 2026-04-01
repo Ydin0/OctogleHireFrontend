@@ -9,6 +9,7 @@ import {
   CalendarDays,
   ClipboardList,
   Clock,
+  FileSignature,
   FileText,
   Headset,
   Layers,
@@ -57,6 +58,7 @@ const navGroups = [
   {
     label: "BILLING",
     items: [
+      { href: "/companies/dashboard/agreements", label: "Agreements", icon: FileSignature },
       { href: "/companies/dashboard/invoices", label: "Invoices", icon: FileText },
       { href: "/companies/dashboard/settings", label: "Settings", icon: Settings },
     ],
