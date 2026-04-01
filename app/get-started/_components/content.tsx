@@ -333,7 +333,7 @@ export function GetStartedContent() {
   };
 
   return (
-    <>
+    <div className="overflow-x-hidden">
       {/* ─── Lead Capture Modal ────────────────────────────────────────── */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden gap-0">
@@ -517,7 +517,7 @@ export function GetStartedContent() {
         {/* ═══════════════════════════════════════════════════════════════════
             SECTION 1 — HERO
            ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-20 lg:py-32">
+        <section className="py-12 lg:py-32">
           <div className="container mx-auto px-6 grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
             {/* Left — Copy */}
             <div className="mx-auto flex flex-col items-center text-center lg:ml-0 lg:max-w-3xl lg:items-start lg:text-left">
@@ -529,7 +529,7 @@ export function GetStartedContent() {
                 </span>
               </Badge>
 
-              <h1 className="my-6 mt-0 text-4xl font-bold text-pretty lg:text-6xl xl:text-7xl">
+              <h1 className="my-6 mt-0 text-3xl font-bold text-pretty sm:text-4xl lg:text-6xl xl:text-7xl">
                 Pre-Vetted Engineers,{" "}
                 <span className="text-pulse">40-60% Lower Cost</span>
               </h1>
@@ -624,7 +624,7 @@ export function GetStartedContent() {
                         alt={badge.alt}
                         width={120}
                         height={120}
-                        className="h-20 w-auto opacity-80 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
+                        className="h-14 w-auto opacity-80 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75 sm:h-20"
                       />
                     </a>
                   ) : (
@@ -634,7 +634,7 @@ export function GetStartedContent() {
                       alt={badge.alt}
                       width={120}
                       height={120}
-                      className="h-20 w-auto opacity-80 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
+                      className="h-14 w-auto opacity-80 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75 sm:h-20"
                     />
                   )
                 )}
@@ -840,11 +840,12 @@ export function GetStartedContent() {
               Trusted by engineering teams building with
             </p>
           </div>
-          <div className="pt-10">
-            <div className="relative mx-auto flex items-center justify-center">
+          <div className="pt-6 lg:pt-10 overflow-hidden max-w-full">
+            <div className="relative mx-auto overflow-hidden">
               <Carousel
                 opts={{ loop: true, align: "start" }}
                 plugins={[AutoScroll({ playOnInit: true, speed: 0.6, stopOnInteraction: false })]}
+                className="w-full"
               >
                 <CarouselContent className="ml-0">
                   {[...companyLogos, ...companyLogos].map((logo, i) => (
@@ -852,19 +853,19 @@ export function GetStartedContent() {
                       key={`${logo.id}-${i}`}
                       className="flex basis-1/3 items-center justify-center pl-0 sm:basis-1/4 md:basis-1/5 lg:basis-[12.5%]"
                     >
-                      <div className="flex h-10 w-32 shrink-0 items-center justify-center">
+                      <div className="flex h-10 items-center justify-center px-2">
                         <img
                           src={logo.image}
                           alt={logo.name}
-                          className="max-h-7 max-w-[120px] w-auto object-contain invert dark:invert-0 opacity-50 hover:opacity-100 transition-opacity"
+                          className="max-h-6 w-auto object-contain invert dark:invert-0 opacity-50 hover:opacity-100 transition-opacity sm:max-h-7"
                         />
                       </div>
                     </CarouselItem>
                   ))}
                 </CarouselContent>
               </Carousel>
-              <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-linear-to-r from-background to-transparent" />
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-linear-to-l from-background to-transparent" />
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-linear-to-r from-background to-transparent sm:w-20" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-linear-to-l from-background to-transparent sm:w-20" />
             </div>
           </div>
         </section>
@@ -873,7 +874,7 @@ export function GetStartedContent() {
             SECTION 3 — FEATURE CARDS (shadcnblocks/feature3 pattern)
             6 cards with images showing why OctogleHire
            ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-32">
+        <section className="py-16 lg:py-32">
           <div className="container mx-auto px-6">
             <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 text-center">
               <Badge variant="outline">Why OctogleHire</Badge>
@@ -910,7 +911,7 @@ export function GetStartedContent() {
             SECTION 4 — PROCESS (shadcnblocks/process1 pattern)
             Sticky sidebar left, numbered steps right
            ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-32 bg-muted/30">
+        <section className="py-16 lg:py-32 bg-muted/30">
           <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-6 lg:gap-20">
               {/* Sticky sidebar */}
@@ -967,7 +968,7 @@ export function GetStartedContent() {
         {/* ═══════════════════════════════════════════════════════════════════
             SECTION 6 — VETTING PROOF (feature1 pattern — image + text split)
            ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-32 bg-muted/30">
+        <section className="py-16 lg:py-32 bg-muted/30">
           <div className="container mx-auto px-6">
             <div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-16">
               {/* Left — Funnel visualization */}
@@ -1038,7 +1039,7 @@ export function GetStartedContent() {
         {/* ═══════════════════════════════════════════════════════════════════
             SECTION 7 — COMPLIANCE (feature2 pattern — image left, text right)
            ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-32">
+        <section className="py-16 lg:py-32">
           <div className="container mx-auto px-6">
             <div className="grid items-center gap-8 md:gap-16 lg:grid-cols-2">
               {/* Left — Country flags + compliance cards */}
@@ -1122,9 +1123,9 @@ export function GetStartedContent() {
         {/* ═══════════════════════════════════════════════════════════════════
             SECTION 8 — PRICING (two cards, inverted primary)
            ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-32 bg-muted/30">
+        <section className="py-16 lg:py-32 bg-muted/30">
           <div className="container mx-auto px-6">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
+            <div className="mx-auto mb-10 lg:mb-16 max-w-2xl text-center">
               <Badge variant="outline" className="mb-4">
                 Pricing
               </Badge>
@@ -1229,7 +1230,7 @@ export function GetStartedContent() {
         {/* ═══════════════════════════════════════════════════════════════════
             SECTION 9 — FAQ (shadcnblocks/faq1 pattern — accordion)
            ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-32">
+        <section className="py-16 lg:py-32">
           <div className="container mx-auto px-6 max-w-3xl">
             <h2 className="mb-4 text-3xl font-semibold md:mb-11 md:text-4xl">
               Frequently asked questions
@@ -1252,7 +1253,7 @@ export function GetStartedContent() {
         {/* ═══════════════════════════════════════════════════════════════════
             SECTION 10 — CTA (shadcnblocks/cta4 pattern — split with checklist)
            ═══════════════════════════════════════════════════════════════════ */}
-        <section className="py-32">
+        <section className="py-16 lg:py-32">
           <div className="container mx-auto px-6">
             <div className="flex justify-center">
               <div className="max-w-5xl w-full">
@@ -1332,6 +1333,6 @@ export function GetStartedContent() {
           </div>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
