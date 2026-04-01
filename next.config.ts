@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   compress: true,
+  crossOrigin: "anonymous",
   productionBrowserSourceMaps: false,
   experimental: {
     optimizePackageImports: [
