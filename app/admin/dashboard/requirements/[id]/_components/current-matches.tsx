@@ -93,10 +93,10 @@ const CurrentMatches = ({
                 {/* Rate */}
                 <p className="text-sm">
                   <span className="font-mono font-semibold">
-                    ${match.proposedHourlyRate}/hr
+                    {new Intl.NumberFormat("en-US", { style: "currency", currency: match.currency || "USD", minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(match.proposedHourlyRate)}/hr
                   </span>
                   <span className="ml-2 font-mono text-xs text-muted-foreground">
-                    ${match.proposedMonthlyRate.toLocaleString()}/mo
+                    {new Intl.NumberFormat("en-US", { style: "currency", currency: match.currency || "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(match.proposedMonthlyRate)}/mo
                   </span>
                 </p>
 
