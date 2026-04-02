@@ -71,11 +71,18 @@ function MatchCard({
   onUpdate?: () => void;
 }) {
   const { getToken } = useAuth();
+  // Derive hours/days from rate data when DB columns are null
+  const derivedDays = match.workingDaysPerMonth ?? 22;
+  const derivedHours = match.hoursPerDay ??
+    (match.proposedHourlyRate > 0
+      ? Math.round(match.proposedMonthlyRate / match.proposedHourlyRate / derivedDays)
+      : 8);
+
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [hourlyRate, setHourlyRate] = useState(String(match.proposedHourlyRate));
-  const [hoursPerDay, setHoursPerDay] = useState(String(match.hoursPerDay ?? 8));
-  const [daysPerMonth, setDaysPerMonth] = useState(String(match.workingDaysPerMonth ?? 22));
+  const [hoursPerDay, setHoursPerDay] = useState(String(derivedHours));
+  const [daysPerMonth, setDaysPerMonth] = useState(String(derivedDays));
 
   const hours = Number(hoursPerDay) || 8;
   const days = Number(daysPerMonth) || 22;
@@ -101,8 +108,8 @@ function MatchCard({
     setSaving(false);
   };
 
-  const displayHours = match.hoursPerDay ?? 8;
-  const displayDays = match.workingDaysPerMonth ?? 22;
+  const displayHours = derivedHours;
+  const displayDays = derivedDays;
 
   return (
     <div className="rounded-lg border border-border/70 p-4">
@@ -258,8 +265,8 @@ function MatchCard({
                     onClick={() => {
                       setEditing(false);
                       setHourlyRate(String(match.proposedHourlyRate));
-                      setHoursPerDay(String(match.hoursPerDay ?? 8));
-                      setDaysPerMonth(String(match.workingDaysPerMonth ?? 22));
+                      setHoursPerDay(String(derivedHours));
+                      setDaysPerMonth(String(derivedDays));
                     }}
                   >
                     <X className="mr-1 size-3" />
