@@ -21,10 +21,12 @@ import {
   Search,
   Shield,
   Smartphone,
+  Star,
   TestTube,
 } from "lucide-react";
 
 import { Logo } from "@/components/logo";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,7 +42,12 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 const CALENDLY_URL = "https://calendly.com/yaseen-octogle/30min";
 
-/* ── Step 1 data ─────────────────────────────────────────────────────────── */
+const avatars = [
+  { src: "/review-1.jpg", alt: "Client" },
+  { src: "/review-2.jpg", alt: "Client" },
+  { src: "/review-3.jpg", alt: "Client" },
+  { src: "/review-4.jpg", alt: "Client" },
+];
 
 const roles = [
   { id: "frontend", label: "Frontend", icon: Laptop },
@@ -53,8 +60,6 @@ const roles = [
   { id: "other", label: "Other", icon: Search },
 ];
 
-/* ── Step 2 data ─────────────────────────────────────────────────────────── */
-
 const timelines = [
   { id: "immediate", label: "Immediately", sub: "ASAP" },
   { id: "2-4-weeks", label: "2-4 Weeks", sub: "Soon" },
@@ -62,7 +67,61 @@ const timelines = [
   { id: "exploring", label: "Just Exploring", sub: "No rush" },
 ];
 
-/* ── Component ───────────────────────────────────────────────────────────── */
+/* ── Trust bar — shown on every step ─────────────────────────────────────── */
+
+function TrustBar() {
+  return (
+    <div className="flex flex-col items-center gap-3 pt-6">
+      {/* Clutch + stars + avatars */}
+      <div className="flex items-center gap-3">
+        <Image
+          src="/company-logos/Clutch.co Logo Dark.svg"
+          alt="Clutch"
+          width={60}
+          height={17}
+          unoptimized
+          className="block dark:hidden"
+        />
+        <Image
+          src="/company-logos/Clutch.co Logo.svg"
+          alt="Clutch"
+          width={60}
+          height={17}
+          unoptimized
+          className="hidden dark:block"
+        />
+        <div className="flex items-center gap-0.5">
+          {[...Array(5)].map((_, i) => (
+            <Star
+              key={i}
+              className="size-3 fill-[#E62415] text-[#E62415]"
+            />
+          ))}
+        </div>
+        <span className="text-xs font-bold">5.0</span>
+      </div>
+
+      {/* Avatars + trusted by */}
+      <div className="flex items-center gap-2.5">
+        <span className="inline-flex items-center -space-x-2">
+          {avatars.map((avatar, i) => (
+            <Avatar
+              key={i}
+              className="size-7 border-2 border-background ring-1 ring-border/30"
+            >
+              <AvatarImage src={avatar.src} alt={avatar.alt} />
+            </Avatar>
+          ))}
+        </span>
+        <p className="text-xs text-muted-foreground">
+          Trusted by <span className="font-semibold text-foreground">300+</span> businesses
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Main form ───────────────────────────────────────────────────────────── */
 
 export function StartForm() {
   const [step, setStep] = useState(1);
@@ -136,26 +195,26 @@ export function StartForm() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background">
-      {/* Header — logo only, no nav */}
-      <header className="flex items-center justify-between px-6 py-5">
-        <Link href="/">
-          <Logo width={110} height={26} />
-        </Link>
+    <div className="flex min-h-[100dvh] flex-col bg-background overflow-x-hidden">
+      {/* Header — centered logo + back button */}
+      <header className="relative flex items-center justify-center px-6 py-5">
         {step > 1 && step < 4 && (
           <button
             onClick={goBack}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="absolute left-6 flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="size-3.5" />
             Back
           </button>
         )}
+        <Link href="/">
+          <Logo width={120} height={28} />
+        </Link>
       </header>
 
       {/* Progress dots */}
       {step < 4 && (
-        <div className="flex justify-center gap-2 pb-4">
+        <div className="flex justify-center gap-2 pb-2">
           {[1, 2, 3].map((s) => (
             <div
               key={s}
@@ -172,16 +231,16 @@ export function StartForm() {
       )}
 
       {/* Main content — centered */}
-      <main className="flex flex-1 items-center justify-center px-6 pb-12">
+      <main className="flex flex-1 flex-col items-center justify-center px-5 pb-8 sm:px-6">
         <div className="w-full max-w-lg">
           {/* ── STEP 1: Role selection ────────────────────────────────── */}
           {step === 1 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-8 text-center">
+              <div className="mb-6 text-center sm:mb-8">
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                   Step 1 of 3
                 </p>
-                <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
                   What role are you hiring?
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -189,16 +248,16 @@ export function StartForm() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                 {roles.map((r) => {
                   const Icon = r.icon;
                   return (
                     <button
                       key={r.id}
                       onClick={() => selectRole(r.id)}
-                      className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background px-4 py-4 text-left transition-all hover:border-foreground/30 hover:bg-muted/50 active:scale-[0.98]"
+                      className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background px-3.5 py-3.5 text-left transition-all hover:border-foreground/30 hover:bg-muted/50 active:scale-[0.98] sm:px-4 sm:py-4"
                     >
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 transition-colors group-hover:bg-foreground/10">
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/60 transition-colors group-hover:bg-foreground/10 sm:size-9">
                         <Icon className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" />
                       </div>
                       <span className="text-sm font-medium">{r.label}</span>
@@ -206,17 +265,19 @@ export function StartForm() {
                   );
                 })}
               </div>
+
+              <TrustBar />
             </div>
           )}
 
           {/* ── STEP 2: Timeline selection ────────────────────────────── */}
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-8 text-center">
+              <div className="mb-6 text-center sm:mb-8">
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                   Step 2 of 3
                 </p>
-                <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
                   How soon do you need them?
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -224,12 +285,12 @@ export function StartForm() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
                 {timelines.map((t) => (
                   <button
                     key={t.id}
                     onClick={() => selectTimeline(t.id)}
-                    className="group flex flex-col items-center gap-1 rounded-xl border border-border/60 bg-background px-4 py-5 text-center transition-all hover:border-foreground/30 hover:bg-muted/50 active:scale-[0.98]"
+                    className="group flex flex-col items-center gap-1 rounded-xl border border-border/60 bg-background px-4 py-4 text-center transition-all hover:border-foreground/30 hover:bg-muted/50 active:scale-[0.98] sm:py-5"
                   >
                     <span className="text-sm font-medium">{t.label}</span>
                     <span className="text-[11px] text-muted-foreground">
@@ -238,17 +299,19 @@ export function StartForm() {
                   </button>
                 ))}
               </div>
+
+              <TrustBar />
             </div>
           )}
 
           {/* ── STEP 3: Contact form ─────────────────────────────────── */}
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-8 text-center">
+              <div className="mb-6 text-center sm:mb-8">
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                   Step 3 of 3
                 </p>
-                <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
                   Where should we send your shortlist?
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -257,7 +320,7 @@ export function StartForm() {
               </div>
 
               <form
-                className="space-y-4"
+                className="space-y-3.5"
                 onSubmit={handleSubmit(onSubmit)}
                 noValidate
               >
@@ -270,7 +333,7 @@ export function StartForm() {
                   {...register("website")}
                 />
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-3.5 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="contactName"
@@ -379,7 +442,7 @@ export function StartForm() {
                   )}
                 </Button>
 
-                <div className="flex items-center justify-center gap-4 pt-2 text-[10px] text-muted-foreground">
+                <div className="flex items-center justify-center gap-3 pt-1 text-[10px] text-muted-foreground sm:gap-4">
                   <span className="flex items-center gap-1">
                     <Clock className="size-3" />
                     48-hour delivery
@@ -395,34 +458,7 @@ export function StartForm() {
                 </div>
               </form>
 
-              {/* Trust bar */}
-              <div className="mt-8 flex items-center justify-center gap-4 border-t border-border/40 pt-6">
-                <p className="text-[10px] text-muted-foreground">
-                  Trusted by 50+ companies
-                </p>
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <svg
-                      key={i}
-                      className="size-3 fill-amber-400"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                  <span className="ml-1 text-[10px] font-semibold text-muted-foreground">
-                    5.0
-                  </span>
-                </div>
-                <Image
-                  src="/company-logos/Clutch.co Logo.svg"
-                  alt="Clutch"
-                  width={50}
-                  height={14}
-                  unoptimized
-                  className="opacity-50 invert dark:invert-0"
-                />
-              </div>
+              <TrustBar />
             </div>
           )}
 
@@ -433,7 +469,7 @@ export function StartForm() {
                 <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-500/10">
                   <CheckCircle className="size-6 text-emerald-500" />
                 </div>
-                <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
                   Thanks{contactFirstName ? `, ${contactFirstName}` : ""}!
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground">
