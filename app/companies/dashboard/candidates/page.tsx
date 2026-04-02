@@ -260,7 +260,7 @@ export default function CandidatesPage() {
                     </TableCell>
                     <TableCell className="overflow-hidden text-right" style={{ width: 100 }}>
                       <span className="font-mono text-sm">
-                        {formatCurrency(c.match.proposedHourlyRate)}/hr
+                        {formatCurrency(c.match.proposedHourlyRate, c.match.currency)}/hr
                       </span>
                     </TableCell>
                     <TableCell className="overflow-hidden" style={{ width: 100 }}>

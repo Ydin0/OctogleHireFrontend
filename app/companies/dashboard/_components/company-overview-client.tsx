@@ -138,7 +138,7 @@ export function CompanyOverviewClient({
     },
     {
       label: "Predicted Monthly Bill",
-      value: formatCurrency(predictedBill),
+      value: formatCurrency(predictedBill, activeEngagements[0]?.currency || "USD"),
       hint: "Based on engagement hours",
       icon: DollarSign,
       highlight: false,
@@ -320,7 +320,7 @@ export function CompanyOverviewClient({
                 </Link>
                 <div className="shrink-0 text-right">
                   <p className="font-mono text-sm">
-                    {formatCurrency(eng.companyBillingRate)}/hr
+                    {formatCurrency(eng.companyBillingRate, eng.currency)}/hr
                   </p>
                   <p className="text-xs text-muted-foreground">{eng.engagementType}</p>
                 </div>

@@ -668,9 +668,9 @@ function CandidateCard({
 
         {/* Rate */}
         <div className="font-mono text-sm">
-          ${match.proposedHourlyRate}/hr
+          {new Intl.NumberFormat("en-US", { style: "currency", currency: match.currency || "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(match.proposedHourlyRate)}/hr
           <span className="text-muted-foreground"> | </span>
-          ${match.proposedMonthlyRate.toLocaleString()}/mo
+          {new Intl.NumberFormat("en-US", { style: "currency", currency: match.currency || "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(match.proposedMonthlyRate)}/mo
         </div>
 
         <Separator />

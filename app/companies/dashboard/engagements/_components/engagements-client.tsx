@@ -55,7 +55,7 @@ function EngagementsClient({ engagements, token, companyId, companyName, company
         {([
           { label: "Active Engagements", value: String(activeEngagements.length), icon: Briefcase, highlight: false, mono: false },
           { label: "Active Developers", value: String(uniqueDevIds.size), icon: Users, highlight: false, mono: false },
-          { label: "Predicted Monthly Bill", value: formatCurrency(predictedBill), icon: DollarSign, highlight: false, mono: true },
+          { label: "Predicted Monthly Bill", value: formatCurrency(predictedBill, activeEngagements[0]?.currency || "USD"), icon: DollarSign, highlight: false, mono: true },
           { label: "Pending Requests", value: String(pendingRequestCount), icon: AlertCircle, highlight: pendingRequestCount > 0, mono: false },
         ] as const).map((kpi) => (
           <Card key={kpi.label} className={kpi.highlight ? "border-amber-500/40 bg-amber-500/5" : ""}>

@@ -203,7 +203,7 @@ function ProfileSidebar({
                     </Badge>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="font-mono">${match.proposedHourlyRate}/hr</span>
+                    <span className="font-mono">{new Intl.NumberFormat("en-US", { style: "currency", currency: match.currency || "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(match.proposedHourlyRate)}/hr</span>
                     <span className="text-border">|</span>
                     <span className="capitalize">{match.engagementType?.replace("-", " ")}</span>
                   </div>
@@ -271,10 +271,10 @@ function ProfileSidebar({
               </p>
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="font-mono text-xs">
-                  ${developer.hourlyRate || developer.matches[0]?.proposedHourlyRate || 0}/hr
+                  {new Intl.NumberFormat("en-US", { style: "currency", currency: developer.matches[0]?.currency || "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(developer.hourlyRate || developer.matches[0]?.proposedHourlyRate || 0)}/hr
                 </Badge>
                 <Badge variant="secondary" className="font-mono text-xs">
-                  ${(developer.monthlyRate || developer.matches[0]?.proposedMonthlyRate || 0).toLocaleString()}/mo
+                  {new Intl.NumberFormat("en-US", { style: "currency", currency: developer.matches[0]?.currency || "USD", minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(developer.monthlyRate || developer.matches[0]?.proposedMonthlyRate || 0)}/mo
                 </Badge>
               </div>
             </div>
