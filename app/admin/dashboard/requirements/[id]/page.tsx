@@ -224,6 +224,8 @@ const RequirementDetailPage = ({
     hourlyRate: number;
     monthlyRate: number;
     currency: string;
+    hoursPerDay: number;
+    workingDaysPerMonth: number;
   }) => {
     const token = await getToken();
     try {
@@ -422,7 +424,7 @@ const RequirementDetailPage = ({
         </CardHeader>
         {matches.length > 0 && (
           <CardContent>
-            <CurrentMatches matches={matches} onRemove={handleRemoveMatch} />
+            <CurrentMatches matches={matches} onRemove={handleRemoveMatch} onUpdate={loadRequirement} />
           </CardContent>
         )}
       </Card>

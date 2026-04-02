@@ -138,6 +138,8 @@ export interface ProposedMatch {
   proposedHourlyRate: number;
   proposedMonthlyRate: number;
   currency: string;
+  hoursPerDay?: number | null;
+  workingDaysPerMonth?: number | null;
   status: MatchStatus;
   rejectionReason?: string;
   proposedAt: string;
@@ -374,6 +376,8 @@ export interface ProposeMatchPayload {
   hourlyRate: number;
   monthlyRate: number;
   currency: string;
+  hoursPerDay?: number;
+  workingDaysPerMonth?: number;
 }
 
 // ── Company-side API functions ───────────────────────────────────────────────
@@ -1325,6 +1329,32 @@ export async function removeMatch(
     return response.ok;
   } catch {
     return false;
+  }
+}
+
+export async function updateMatch(
+  token: string | null,
+  matchId: string,
+  payload: Partial<ProposeMatchPayload>,
+): Promise<ProposedMatch | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/matches/${matchId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as ProposedMatch;
+  } catch {
+    return null;
   }
 }
 

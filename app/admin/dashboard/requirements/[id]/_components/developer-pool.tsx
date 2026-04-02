@@ -70,6 +70,8 @@ interface DeveloperPoolProps {
     hourlyRate: number;
     monthlyRate: number;
     currency: string;
+    hoursPerDay: number;
+    workingDaysPerMonth: number;
   }) => Promise<void>;
 }
 
@@ -711,6 +713,8 @@ const DeveloperPool = ({
         hourlyRate,
         monthlyRate,
         currency,
+        hoursPerDay: hours,
+        workingDaysPerMonth: days,
       });
     }
 
