@@ -11,6 +11,7 @@ export function trackMetaEvent(
   eventId?: string,
 ) {
   if (typeof window === "undefined" || typeof window.fbq !== "function") return;
+  if (!event || typeof event !== "string" || event.trim() === "") return;
   if (eventId) {
     window.fbq("track", event, params, { eventID: eventId });
   } else {
