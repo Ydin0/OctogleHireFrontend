@@ -3,11 +3,11 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { RowSelectionState } from "@tanstack/react-table";
-import { Loader2, Users } from "lucide-react";
+import { Loader2, Sparkles, Users } from "lucide-react";
 import { toast } from "sonner";
 
 import type { UnifiedCandidate, Pagination } from "@/lib/api/agencies";
-import { bulkReassignSourcedBy } from "@/lib/api/agencies";
+import { bulkReassignSourcedBy, enrichAgencyCandidates } from "@/lib/api/agencies";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -88,6 +88,24 @@ function CandidatesClient({ candidates, pagination, sourcers = [], token }: Cand
     .filter((c) => c?.sourceTable === "application")
     .map((c) => c.id);
 
+  const [enriching, setEnriching] = useState(false);
+
+  const handleBulkEnrich = async () => {
+    if (selectedIds.length === 0) return;
+    setEnriching(true);
+    try {
+      const result = await enrichAgencyCandidates(token, selectedIds);
+      if (result) {
+        toast.success(
+          `Enrichment submitted for ${result.submitted} candidate${result.submitted !== 1 ? "s" : ""}${result.skipped > 0 ? ` (${result.skipped} skipped — no name)` : ""}`
+        );
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Enrichment failed");
+    }
+    setEnriching(false);
+  };
+
   const handleBulkReassign = async () => {
     if (!bulkAssignee || selectedIds.length === 0) return;
     setBulkSubmitting(true);
@@ -154,6 +172,19 @@ function CandidatesClient({ candidates, pagination, sourcers = [], token }: Cand
               <Loader2 className="mr-1.5 size-3.5 animate-spin" />
             ) : null}
             Reassign
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={enriching}
+            onClick={handleBulkEnrich}
+          >
+            {enriching ? (
+              <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="mr-1.5 size-3.5" />
+            )}
+            Enrich Contacts
           </Button>
           <Button
             variant="ghost"

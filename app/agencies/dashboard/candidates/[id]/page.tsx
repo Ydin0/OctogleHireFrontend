@@ -37,6 +37,7 @@ import { CandidateEditForm } from "./_components/candidate-edit-form";
 import { CandidatePricing } from "./_components/candidate-pricing";
 import { CandidatePitchHistoryCard } from "./_components/candidate-pitch-history";
 import { ActivateCandidateButton } from "./_components/activate-candidate-button";
+import { EnrichCandidateButton } from "./_components/enrich-candidate-button";
 
 const getInitials = (name: string | null) => {
   if (!name) return "??";
@@ -191,6 +192,14 @@ export default async function AgencyCandidateDetailPage({
             </div>
 
             <div className="flex items-end gap-3">
+              {candidate.sourceTable === "application" && (
+                <EnrichCandidateButton
+                  candidateId={candidate.id}
+                  token={token!}
+                  email={candidate.email ?? null}
+                  phone={candidate.phone ?? null}
+                />
+              )}
               {candidate.sourceTable === "application" && (
                 <ActivateCandidateButton
                   candidateId={candidate.id}

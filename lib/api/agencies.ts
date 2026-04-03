@@ -1417,3 +1417,48 @@ export async function bulkReassignSourcedBy(
     return null;
   }
 }
+
+// ── BetterContact Enrichment ────────────────────────────────────────────────
+
+export async function enrichAgencyCandidates(
+  token: string | null,
+  candidateIds: string[],
+): Promise<{ submitted: number; skipped: number } | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/agencies/candidates/enrich`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ candidateIds }),
+    });
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      throw new Error(data?.message ?? "Enrichment failed");
+    }
+    return (await response.json()) as { submitted: number; skipped: number };
+  } catch (err) {
+    throw err;
+  }
+}
+
+export async function enrichAgencyCandidate(
+  token: string | null,
+  candidateId: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/agencies/candidates/${candidateId}/enrich`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
