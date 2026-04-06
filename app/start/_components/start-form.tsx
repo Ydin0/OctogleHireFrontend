@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
@@ -67,11 +67,60 @@ const timelines = [
   { id: "exploring", label: "Just Exploring", sub: "No rush" },
 ];
 
+/* ── Rotating social proof quotes ────────────────────────────────────────── */
+
+const quotes = [
+  { text: "We're saving over £200k a year.", name: "Ricardo M.", company: "Beekey", avatar: "/Ricardo-Recruitment.jpg", stat: "60% saved" },
+  { text: "Cutting our costs by more than half.", name: "Antonio C.", company: "Artistatours", avatar: "/review-4.jpg", stat: "59% saved" },
+  { text: "Three engineers placed in under a week.", name: "Connor B.", company: "Hireflow", avatar: "/review-3.jpg", stat: "3 hired" },
+  { text: "Equally skilled engineer for half the price.", name: "Eduardo M.", company: "1VA", avatar: "https://media.licdn.com/dms/image/v2/D4D03AQF1HZ_soFlz_A/profile-displayphoto-crop_800_800/B4DZqnZwyBGsAI-/0/1763745140907?e=1775692800&v=beta&t=ymhZJ57Gb1efoAix0Q_0WLZnfA4hw9_CbTjKP7JMXJE", stat: "50% saved" },
+];
+
+function RotatingQuote() {
+  const [idx, setIdx] = useState(0);
+  const [fade, setFade] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setIdx((i) => (i + 1) % quotes.length);
+        setFade(true);
+      }, 200);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const q = quotes[idx];
+
+  return (
+    <div
+      className={`flex items-center justify-center gap-3 py-4 transition-opacity duration-200 ${fade ? "opacity-100" : "opacity-0"}`}
+    >
+      <Avatar className="size-8 ring-1 ring-border/30 shrink-0">
+        <AvatarImage src={q.avatar} alt={q.name} />
+      </Avatar>
+      <p className="text-center text-sm text-muted-foreground">
+        &ldquo;{q.text}&rdquo;
+        <span className="ml-1.5 font-medium text-foreground">
+          {q.name}
+        </span>
+        <span className="text-muted-foreground/60">, {q.company}</span>
+      </p>
+      <span className="shrink-0 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-500">
+        {q.stat}
+      </span>
+    </div>
+  );
+}
+
 /* ── Trust bar — shown on every step ─────────────────────────────────────── */
 
 function TrustBar() {
   return (
-    <div className="flex flex-col items-center gap-3 pt-6">
+    <div className="flex flex-col items-center gap-3 pt-4">
+      {/* Rotating quote */}
+      <RotatingQuote />
       {/* Clutch + stars + avatars */}
       <div className="flex items-center gap-3">
         <Image
