@@ -121,13 +121,13 @@ const Hero = ({ className }: HeroProps) => {
         </div>
 
         {/* Hire from 30+ countries */}
-        <p className="mt-10 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="mt-8 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Hire from 30+ countries
         </p>
       </div>
 
-      {/* Country flag carousel — full width */}
-      <div className="relative mt-4 pb-6">
+      {/* Country flag carousel — full width, inside viewport */}
+      <div className="relative mt-3 shrink-0 pb-4">
         <Carousel
           plugins={[AutoScroll({ playOnInit: true, speed: 0.4, stopOnInteraction: false })]}
           opts={{ loop: true, align: "start" }}
