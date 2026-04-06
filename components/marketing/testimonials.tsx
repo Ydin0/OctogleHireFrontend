@@ -14,13 +14,13 @@ interface TestimonialsProps {
 
 const testimonials = [
   {
-    name: "Sarah Chen",
-    role: "CTO",
-    company: "Nextera Technologies",
-    avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop&crop=face",
+    name: "Ricardo Machado",
+    role: "CEO",
+    company: "Beekey",
+    avatar: "/Ricardo-Recruitment.jpg",
     quote:
-      "OctogleHire transformed how we build engineering teams. We went from months of searching to having three senior engineers fully onboarded in under two weeks. The quality of candidates is exceptional.",
-    tags: ["SaaS", "Series B", "Product", "Growth"],
+      "OctogleHire transformed how we build engineering teams. We went from months of searching to having senior engineers fully onboarded in under two weeks. The quality of candidates is exceptional and the process is seamless.",
+    tags: ["PropTech", "Engineering", "Remote", "Growth"],
     stat: { value: "3x", label: "faster time to hire" },
   },
   {

@@ -69,13 +69,6 @@ const team = [
     linkedin: null,
     bio: "Manages client relationships end-to-end — from onboarding to ongoing success — ensuring every company gets the right talent and a seamless experience.",
   },
-  {
-    name: "Ricardo Machado",
-    role: "Recruitment Partner",
-    image: "/Ricardo-Recruitment.jpg",
-    linkedin: null,
-    bio: "Leads our global talent sourcing and candidate pipeline. Ricardo identifies, screens, and shortlists engineering talent across 30+ countries to keep our network stocked with top-tier professionals.",
-  },
 ];
 
 const values = [
