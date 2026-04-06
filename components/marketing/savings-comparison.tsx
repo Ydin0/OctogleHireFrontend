@@ -16,7 +16,7 @@ const stories = [
     name: "Ricardo Machado",
     role: "CEO",
     company: "Beekey",
-    logo: "/company-logos/Beekey.svg",
+    logo: "/company-logos/Solidus.svg",
     avatar: "/Ricardo-Recruitment.jpg",
     quote:
       "We were about to commit to three senior frontend engineers at London rates. OctogleHire matched us with equally talented engineers in under a week — and we're saving over $200k a year.",
