@@ -69,14 +69,14 @@ const stories = [
     logo: "/company-logos/Hireflow.svg",
     avatar: "/review-3.jpg",
     quote:
-      "Hiring full-stack engineers in Berlin was eating our runway. OctogleHire cut our engineering spend by 60% without any drop in quality. The vetting process is genuinely world-class.",
+      "Hiring three engineers locally in the UK was going to cost us \u00A315,000 a month. OctogleHire placed all three at \u00A32,000 each \u2014 saving us over \u00A3108k a year without compromising on quality.",
     hiredRole: "Full-Stack Engineer",
-    hiredCount: 4,
-    localRate: 8000,
-    octogleRate: 3200,
-    market: "DE",
-    flag: "de",
-    currency: "€",
+    hiredCount: 3,
+    localRate: 5000,
+    octogleRate: 2000,
+    market: "UK",
+    flag: "gb",
+    currency: "£",
   },
 ];
 
