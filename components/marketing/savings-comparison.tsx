@@ -17,6 +17,7 @@ const stories = [
     role: "CEO",
     company: "Beekey",
     logo: "/company-logos/Solidus.svg",
+    logoSize: "h-10",
     avatar: "/Ricardo-Recruitment.jpg",
     quote:
       "We were about to commit to three senior frontend engineers at London rates. OctogleHire matched us with equally talented engineers in under a week — and we're saving over $200k a year.",
@@ -156,7 +157,7 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
               <img
                 src={s.logo}
                 alt={s.company}
-                className="h-10 w-auto opacity-40 invert dark:invert-0 hidden sm:block"
+                className={`${s.logoSize ?? "h-6"} w-auto opacity-40 invert dark:invert-0 hidden sm:block`}
               />
             </div>
 
