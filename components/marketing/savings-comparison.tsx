@@ -62,12 +62,11 @@ const stories = [
     currency: "£",
   },
   {
-    name: "James Okafor",
-    role: "CTO",
-    company: "DataPulse Analytics",
-    logo: "/company-logos/DNO Investments.svg",
-    avatar:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face",
+    name: "Connor Berwick",
+    role: "Co-Founder",
+    company: "Hireflow",
+    logo: "/company-logos/Hireflow.svg",
+    avatar: "/review-3.jpg",
     quote:
       "Hiring full-stack engineers in Berlin was eating our runway. OctogleHire cut our engineering spend by 60% without any drop in quality. The vetting process is genuinely world-class.",
     hiredRole: "Full-Stack Engineer",
