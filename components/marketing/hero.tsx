@@ -45,8 +45,8 @@ const Hero = ({ className }: HeroProps) => {
   const allCountries = [...hireFromCountries, ...hireFromCountries];
 
   return (
-    <section className={cn("pt-24 pb-0 lg:pt-32", className)}>
-      <div className="container mx-auto px-6">
+    <section className={cn("flex min-h-[100dvh] flex-col pt-20 pb-0 lg:pt-24", className)}>
+      <div className="container mx-auto flex flex-1 flex-col justify-center px-6">
         {/* Badge */}
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5">
@@ -58,7 +58,7 @@ const Hero = ({ className }: HeroProps) => {
         </div>
 
         {/* Headline */}
-        <h1 className="mt-10 text-center text-5xl font-medium tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
+        <h1 className="mt-6 text-center text-5xl font-medium tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
           World-Class Developers,
           <br />
           Fraction of the
@@ -67,14 +67,14 @@ const Hero = ({ className }: HeroProps) => {
         </h1>
 
         {/* Description */}
-        <p className="mx-auto mt-8 max-w-xl text-center text-base text-muted-foreground sm:text-lg">
+        <p className="mx-auto mt-6 max-w-xl text-center text-base text-muted-foreground sm:text-lg">
           OctogleHire delivers pre-vetted engineers from 30+ countries
           at 40–60% below US/UK rates. Receive 3–5 curated profiles within 48
           hours — no recruitment fees, no long-term lock-in.
         </p>
 
         {/* CTAs + Badges row */}
-        <div className="mt-10 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
+        <div className="mt-8 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
           {/* Buttons */}
           <div className="flex items-center gap-3">
             <Button asChild size="lg" className="rounded-full px-6">
@@ -121,13 +121,13 @@ const Hero = ({ className }: HeroProps) => {
         </div>
 
         {/* Hire from 30+ countries */}
-        <p className="mt-16 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="mt-10 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Hire from 30+ countries
         </p>
       </div>
 
       {/* Country flag carousel — full width */}
-      <div className="relative mt-6 pb-20">
+      <div className="relative mt-4 pb-6">
         <Carousel
           plugins={[AutoScroll({ playOnInit: true, speed: 0.4, stopOnInteraction: false })]}
           opts={{ loop: true, align: "start" }}
