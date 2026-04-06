@@ -71,6 +71,7 @@ import {
 import { PhoneInput } from "@/components/phone-input";
 import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
 import { HiringCalculator } from "@/components/marketing/hiring-calculator";
+import { SavingsComparison } from "@/components/marketing/savings-comparison";
 import { trackMetaEvent } from "@/lib/analytics/meta-events";
 import { useCalendlyLead } from "@/lib/analytics/use-calendly-lead";
 
@@ -869,6 +870,11 @@ export function GetStartedContent() {
             </div>
           </div>
         </section>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            SECTION 2.5 — SAVINGS TESTIMONIALS
+           ═══════════════════════════════════════════════════════════════════ */}
+        <SavingsComparison />
 
         {/* ═══════════════════════════════════════════════════════════════════
             SECTION 3 — FEATURE CARDS (shadcnblocks/feature3 pattern)
