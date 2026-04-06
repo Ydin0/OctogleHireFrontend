@@ -103,6 +103,16 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
 
   return (
     <section className={cn("py-24 container mx-auto px-6", className)}>
+      {/* Preload all images */}
+      <div className="hidden">
+        {stories.map((story) => (
+          <span key={story.name}>
+            <img src={story.avatar} alt="" />
+            <img src={story.logo} alt="" />
+          </span>
+        ))}
+      </div>
+
       {/* Header */}
       <div className="mb-12 flex flex-col gap-2">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
