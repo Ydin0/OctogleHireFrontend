@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, SITE_URL, webPageSchema, breadcrumbSchema } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 import {
   ComparePageLayout,
   type ComparePageData,
@@ -160,6 +161,33 @@ export default function CompareDirectHiringPage() {
         <ComparePageLayout data={data} />
       </main>
       <Footer />
+      <JsonLd
+        data={[
+          webPageSchema({
+            path: "/compare/direct-hiring",
+            name: "OctogleHire vs Direct Hiring — Comparison",
+            description:
+              "Compare OctogleHire with building an in-house recruiting pipeline. Skip 6-12 weeks of sourcing — hire pre-vetted engineers in 48 hours.",
+          }),
+          breadcrumbSchema("/compare/direct-hiring", [
+            { name: "Home", url: SITE_URL },
+            { name: "Compare", url: absoluteUrl("/compare") },
+            { name: "vs Direct Hiring" },
+          ]),
+          {
+            "@type": "FAQPage",
+            "@id": `${SITE_URL}/compare/direct-hiring/#faq`,
+            mainEntity: data.faqs.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
+          },
+        ]}
+      />
     </>
   );
 }

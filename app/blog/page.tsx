@@ -10,7 +10,14 @@ import { PostCard } from "@/components/blog/post-card";
 import { TagFilter } from "@/components/blog/tag-filter";
 import { getPublishedPosts, getAllTags } from "@/lib/blog";
 import { topics } from "@/lib/data/topics";
-import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
+import {
+  absoluteUrl,
+  SITE_URL,
+  webPageSchema,
+  breadcrumbSchema,
+} from "@/lib/seo";
+import { getPostAuthor } from "@/lib/blog";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -40,16 +47,20 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const featuredPost = !tag ? posts[0] : null;
   const gridPosts = featuredPost ? posts.slice(1) : posts;
 
-  const jsonLd = buildJsonLd({
-    "@type": "CollectionPage",
-    name: "OctogleHire Blog",
-    description:
-      "Insights on remote hiring, engineering teams, and the future of global talent.",
-    url: absoluteUrl("/blog"),
-    publisher: {
-      "@type": "Organization",
-      name: SITE_NAME,
-    },
+  const blogPostings = allPosts.map((post) => {
+    const author = getPostAuthor(post);
+    return {
+      "@type": "BlogPosting" as const,
+      headline: post.title,
+      description: post.description,
+      url: absoluteUrl(`/blog/${post.slug}`),
+      datePublished: post.date,
+      image: post.image ? absoluteUrl(post.image) : undefined,
+      author: {
+        "@type": "Person" as const,
+        name: author.name,
+      },
+    };
   });
 
   return (
@@ -172,7 +183,34 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         </section>
       </main>
       <Footer />
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
+      <JsonLd
+        data={[
+          {
+            ...webPageSchema({
+              path: "/blog",
+              name: "OctogleHire Blog",
+              description:
+                "Insights on remote hiring, engineering teams, and the future of global talent.",
+              type: "CollectionPage",
+            }),
+            mainEntity: {
+              "@type": "ItemList",
+              "@id": absoluteUrl("/blog/#item-list"),
+              numberOfItems: allPosts.length,
+              itemListElement: allPosts.map((post, i) => ({
+                "@type": "ListItem",
+                position: i + 1,
+                url: absoluteUrl(`/blog/${post.slug}`),
+              })),
+            },
+          },
+          breadcrumbSchema("/blog", [
+            { name: "Home", url: SITE_URL },
+            { name: "Blog" },
+          ]),
+          ...blogPostings,
+        ]}
+      />
     </>
   );
 }

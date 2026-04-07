@@ -6,7 +6,14 @@ import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { Button } from "@/components/ui/button";
-import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
+import {
+  absoluteUrl,
+  SITE_URL,
+  SITE_NAME,
+  webPageSchema,
+  breadcrumbSchema,
+} from "@/lib/seo";
 import {
   FadeUp,
   Stagger,
@@ -103,31 +110,6 @@ const values = [
 ];
 
 export default function AboutPage() {
-  const jsonLd = buildJsonLd({
-    "@type": "AboutPage",
-    name: `About ${SITE_NAME}`,
-    description:
-      "Learn about OctogleHire's mission to connect companies with the world's best engineering talent.",
-    url: absoluteUrl("/about"),
-    mainEntity: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: absoluteUrl("/"),
-      logo: absoluteUrl("/Octogle Darkmode.svg"),
-      foundingDate: "2024",
-      description:
-        "The global talent platform for pre-vetted developers. Build world-class engineering teams in days, not months.",
-      numberOfEmployees: {
-        "@type": "QuantitativeValue",
-        minValue: 10,
-      },
-      sameAs: [
-        "https://twitter.com/octoglehire",
-        "https://linkedin.com/company/octoglehire",
-      ],
-    },
-  });
-
   return (
     <>
       <Navbar />
@@ -382,7 +364,92 @@ export default function AboutPage() {
         </section>
       </main>
       <Footer />
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
+      <JsonLd
+        data={[
+          breadcrumbSchema("/about", [
+            { name: "Home", url: SITE_URL },
+            { name: "About" },
+          ]),
+          {
+            ...webPageSchema({
+              path: "/about",
+              name: `About ${SITE_NAME}`,
+              description:
+                "Learn about OctogleHire's mission to connect companies with the world's best engineering talent.",
+              type: "AboutPage",
+            }),
+            mainEntity: {
+              "@type": "Organization",
+              "@id": `${SITE_URL}/#organization`,
+              name: SITE_NAME,
+              url: absoluteUrl("/"),
+              logo: absoluteUrl("/Octogle Darkmode.svg"),
+              foundingDate: "2024",
+              description:
+                "The global talent platform for pre-vetted developers. Build world-class engineering teams in days, not months.",
+              numberOfEmployees: {
+                "@type": "QuantitativeValue",
+                minValue: 10,
+              },
+              sameAs: [
+                "https://twitter.com/octoglehire",
+                "https://linkedin.com/company/octoglehire",
+              ],
+            },
+          },
+          {
+            "@type": "Person",
+            "@id": absoluteUrl("/about/#yaseen-deen"),
+            name: "Yaseen Deen",
+            jobTitle: "CEO",
+            description:
+              "Leads company strategy, product, and growth. Built OctogleHire to fix how companies access global engineering talent.",
+            image: absoluteUrl("/Yaseen Founder.jpg"),
+            sameAs: ["https://www.linkedin.com/in/yaseen-deen-52249219b/"],
+            worksFor: { "@id": `${SITE_URL}/#organization` },
+          },
+          {
+            "@type": "Person",
+            "@id": absoluteUrl("/about/#stergios-pappos"),
+            name: "Stergios Pappos",
+            jobTitle: "Head of Technology",
+            description:
+              "Oversees platform architecture, engineering, and infrastructure. Stergios ensures OctogleHire's technology scales reliably as our network and client base grow.",
+            image: absoluteUrl("/Stergios-Technology.jpg"),
+            worksFor: { "@id": `${SITE_URL}/#organization` },
+          },
+          {
+            "@type": "Person",
+            "@id": absoluteUrl("/about/#dimitris-pappos"),
+            name: "Dimitris Pappos",
+            jobTitle: "Head of Marketing",
+            description:
+              "Drives brand strategy, demand generation, and market positioning. Dimitris builds the channels that connect companies with OctogleHire's vetted talent network.",
+            image: absoluteUrl("/Dimitris-Marketing.jpg"),
+            worksFor: { "@id": `${SITE_URL}/#organization` },
+          },
+          {
+            "@type": "Person",
+            "@id": absoluteUrl("/about/#anil-wadghule"),
+            name: "Anil Wadghule",
+            jobTitle: "Tech Lead",
+            description:
+              "18 years of engineering experience across full-stack, architecture, and Elixir. A recognised speaker at Elixir conferences, Anil leads our technical vetting and assessment design — ensuring only truly exceptional engineers make it through.",
+            image: absoluteUrl("/Anil-TechLead.jpg"),
+            worksFor: { "@id": `${SITE_URL}/#organization` },
+          },
+          {
+            "@type": "Person",
+            "@id": absoluteUrl("/about/#milo-clarke"),
+            name: "Milo Clarke",
+            jobTitle: "Client Success Manager",
+            description:
+              "Manages client relationships end-to-end — from onboarding to ongoing success — ensuring every company gets the right talent and a seamless experience.",
+            image: absoluteUrl("/MiloSales.jpg"),
+            worksFor: { "@id": `${SITE_URL}/#organization` },
+          },
+        ]}
+      />
     </>
   );
 }

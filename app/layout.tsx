@@ -9,7 +9,8 @@ import { MetaPixel } from "@/components/analytics/meta-pixel";
 import { MicrosoftClarity } from "@/components/analytics/microsoft-clarity";
 import { Toaster } from "sonner";
 import { AIReferralTracker } from "@/components/analytics/ai-referral-tracker";
-import { SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION } from "@/lib/seo";
+import { SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION, ORGANIZATION_SCHEMA, WEBSITE_SCHEMA } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 import "./globals.css";
 
 const volksans = localFont({
@@ -101,6 +102,7 @@ export default function RootLayout({
       <body
         className={`${volksans.variable} ${dmMono.variable} antialiased`}
       >
+        <JsonLd data={[ORGANIZATION_SCHEMA, WEBSITE_SCHEMA]} />
         <GoogleAnalytics />
         <MetaPixel />
         <MicrosoftClarity />

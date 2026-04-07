@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
-import { absoluteUrl, SITE_NAME } from "@/lib/seo";
+import { absoluteUrl, SITE_NAME, webPageSchema } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -168,6 +169,16 @@ export default function TermsPage() {
         </article>
       </main>
       <Footer />
+      <JsonLd
+        data={[
+          webPageSchema({
+            path: "/terms",
+            name: "Terms of Service — OctogleHire",
+            description:
+              "OctogleHire terms of service. Read the terms and conditions governing use of the OctogleHire platform.",
+          }),
+        ]}
+      />
     </>
   );
 }

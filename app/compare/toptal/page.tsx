@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, SITE_URL, webPageSchema, breadcrumbSchema } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 import {
   ComparePageLayout,
   type ComparePageData,
@@ -160,6 +161,33 @@ export default function CompareToptalPage() {
         <ComparePageLayout data={data} />
       </main>
       <Footer />
+      <JsonLd
+        data={[
+          webPageSchema({
+            path: "/compare/toptal",
+            name: "OctogleHire vs Toptal — Comparison",
+            description:
+              "Compare OctogleHire and Toptal side-by-side. Same quality vetting, faster matching (48h vs 1-3 weeks), and 40-60% lower rates with no placement fees.",
+          }),
+          breadcrumbSchema("/compare/toptal", [
+            { name: "Home", url: SITE_URL },
+            { name: "Compare", url: absoluteUrl("/compare") },
+            { name: "vs Toptal" },
+          ]),
+          {
+            "@type": "FAQPage",
+            "@id": `${SITE_URL}/compare/toptal/#faq`,
+            mainEntity: data.faqs.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
+          },
+        ]}
+      />
     </>
   );
 }

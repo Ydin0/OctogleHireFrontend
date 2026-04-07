@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, SITE_URL, webPageSchema, breadcrumbSchema } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 import {
   ComparePageLayout,
   type ComparePageData,
@@ -161,6 +162,33 @@ export default function CompareTuringPage() {
         <ComparePageLayout data={data} />
       </main>
       <Footer />
+      <JsonLd
+        data={[
+          webPageSchema({
+            path: "/compare/turing",
+            name: "OctogleHire vs Turing — Comparison",
+            description:
+              "Compare OctogleHire and Turing. Faster matching, transparent pricing, and human-led vetting vs AI-first screening.",
+          }),
+          breadcrumbSchema("/compare/turing", [
+            { name: "Home", url: SITE_URL },
+            { name: "Compare", url: absoluteUrl("/compare") },
+            { name: "vs Turing" },
+          ]),
+          {
+            "@type": "FAQPage",
+            "@id": `${SITE_URL}/compare/turing/#faq`,
+            mainEntity: data.faqs.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
+          },
+        ]}
+      />
     </>
   );
 }

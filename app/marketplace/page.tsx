@@ -5,7 +5,13 @@ import { auth } from "@clerk/nextjs/server";
 import { Footer } from "@/components/marketing/footer";
 import { Navbar } from "@/components/marketing/navbar";
 import { DevelopersPage } from "@/app/developers/_components/developers-page";
-import { absoluteUrl, SITE_NAME, buildJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
+import {
+  absoluteUrl,
+  SITE_URL,
+  webPageSchema,
+  breadcrumbSchema,
+} from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -27,25 +33,38 @@ export default async function MarketplaceRoute() {
   const { userId } = await auth();
   const isAuthenticated = !!userId;
 
-  const jsonLd = buildJsonLd({
-    "@type": "ItemList",
-    name: "Developer Marketplace",
-    description:
-      "Browse and hire pre-vetted software developers from 30+ countries.",
-    url: absoluteUrl("/marketplace"),
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Pre-vetted Software Developers",
-        url: absoluteUrl("/marketplace"),
-      },
-    ],
-    provider: {
-      "@type": "Organization",
-      name: SITE_NAME,
+  const jsonLdData = [
+    webPageSchema({
+      path: "/marketplace",
+      name: "Developer Marketplace",
+      description:
+        "Search and hire pre-vetted developers from 30+ countries. Filter by tech stack, skills, and experience to find your perfect engineering match.",
+      type: "CollectionPage",
+    }),
+    breadcrumbSchema("/marketplace", [
+      { name: "Home", url: SITE_URL },
+      { name: "Marketplace" },
+    ]),
+    {
+      "@type": "ItemList",
+      "@id": absoluteUrl("/marketplace/#item-list"),
+      name: "Developer Marketplace",
+      description: "Browse 1,000+ pre-vetted engineers",
+      url: absoluteUrl("/marketplace"),
+      numberOfItems: 1000,
+      itemListOrder: "https://schema.org/ItemListUnordered",
     },
-  });
+    {
+      "@type": "Service",
+      "@id": absoluteUrl("/marketplace/#service"),
+      name: "Developer Marketplace",
+      description:
+        "Search and hire pre-vetted software developers from 30+ countries. Filter by tech stack, skills, and experience.",
+      provider: { "@id": `${SITE_URL}/#organization` },
+      serviceType: "Developer Marketplace",
+      areaServed: "Worldwide",
+    },
+  ];
 
   return (
     <div className="marketplace-route bg-gradient-to-b from-background via-background to-pulse/5">
@@ -96,7 +115,7 @@ export default async function MarketplaceRoute() {
       )}
 
       <Footer />
-      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd} />
+      <JsonLd data={jsonLdData} />
     </div>
   );
 }

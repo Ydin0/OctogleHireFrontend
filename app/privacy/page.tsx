@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
-import { absoluteUrl, SITE_NAME } from "@/lib/seo";
+import { absoluteUrl, SITE_NAME, webPageSchema } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -158,6 +159,16 @@ export default function PrivacyPage() {
         </article>
       </main>
       <Footer />
+      <JsonLd
+        data={[
+          webPageSchema({
+            path: "/privacy",
+            name: "Privacy Policy — OctogleHire",
+            description:
+              "OctogleHire privacy policy. Learn how we collect, use, and protect your personal data.",
+          }),
+        ]}
+      />
     </>
   );
 }

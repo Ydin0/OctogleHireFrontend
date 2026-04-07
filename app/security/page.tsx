@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { Button } from "@/components/ui/button";
-import { absoluteUrl, SITE_NAME } from "@/lib/seo";
+import { absoluteUrl, SITE_NAME, webPageSchema } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 import {
   FadeUp,
   Stagger,
@@ -215,6 +216,16 @@ export default function SecurityPage() {
         </section>
       </main>
       <Footer />
+      <JsonLd
+        data={[
+          webPageSchema({
+            path: "/security",
+            name: "Security — ISO 27001 Certified — OctogleHire",
+            description:
+              "OctogleHire is ISO 27001:2022 certified. Learn about our information security practices, certification details, and how we protect your data.",
+          }),
+        ]}
+      />
     </>
   );
 }

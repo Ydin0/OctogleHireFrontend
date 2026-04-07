@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, SITE_URL, webPageSchema, breadcrumbSchema } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 import {
   ComparePageLayout,
   type ComparePageData,
@@ -162,6 +163,33 @@ export default function CompareUpworkPage() {
         <ComparePageLayout data={data} />
       </main>
       <Footer />
+      <JsonLd
+        data={[
+          webPageSchema({
+            path: "/compare/upwork",
+            name: "OctogleHire vs Upwork — Comparison",
+            description:
+              "Compare OctogleHire and Upwork. Skip weeks of filtering unvetted profiles — get 3-5 pre-vetted engineers matched to your stack in 48 hours.",
+          }),
+          breadcrumbSchema("/compare/upwork", [
+            { name: "Home", url: SITE_URL },
+            { name: "Compare", url: absoluteUrl("/compare") },
+            { name: "vs Upwork" },
+          ]),
+          {
+            "@type": "FAQPage",
+            "@id": `${SITE_URL}/compare/upwork/#faq`,
+            mainEntity: data.faqs.map((faq) => ({
+              "@type": "Question",
+              name: faq.question,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.answer,
+              },
+            })),
+          },
+        ]}
+      />
     </>
   );
 }

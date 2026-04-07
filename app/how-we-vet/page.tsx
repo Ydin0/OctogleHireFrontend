@@ -14,7 +14,8 @@ import {
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
 import { Button } from "@/components/ui/button";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, SITE_URL, SITE_NAME, webPageSchema, breadcrumbSchema } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 import {
   FadeUp,
   Stagger,
@@ -528,6 +529,69 @@ export default function HowWeVetPage() {
         </section>
       </main>
       <Footer />
+      <JsonLd
+        data={[
+          webPageSchema({
+            path: "/how-we-vet",
+            name: "How We Vet — OctogleHire",
+            description:
+              "From over 25,000 applicants, only 1,000 engineers have been accepted. Learn how OctogleHire's 5-stage vetting process ensures you hire verified, exceptional talent.",
+          }),
+          breadcrumbSchema("/how-we-vet", [
+            { name: "Home", url: SITE_URL },
+            { name: "How We Vet" },
+          ]),
+          {
+            "@type": "HowTo",
+            "@id": `${SITE_URL}/how-we-vet/#howto`,
+            name: "OctogleHire's 5-Stage Vetting Process",
+            description:
+              "Our rigorous 5-stage vetting process to accept only the top 1 in 25 applicants into the OctogleHire network.",
+            step: [
+              {
+                "@type": "HowToStep",
+                position: 1,
+                name: "Application Screening",
+                text: "Every developer submits a detailed application covering work history, tech stack proficiency, portfolio projects, and salary expectations. Our recruitment team manually reviews each profile against role-specific criteria.",
+              },
+              {
+                "@type": "HowToStep",
+                position: 2,
+                name: "Technical Assessment",
+                text: "Shortlisted candidates complete a rigorous, stack-specific coding assessment designed by senior engineers — real-world scenarios that test how a developer actually works.",
+              },
+              {
+                "@type": "HowToStep",
+                position: 3,
+                name: "Live Technical Interview",
+                text: "Candidates join a live 60-90 minute interview with our engineering panel covering system design, technical deep-dives, and communication evaluation.",
+              },
+              {
+                "@type": "HowToStep",
+                position: 4,
+                name: "Background & Reference Checks",
+                text: "We verify employment history, contact 3+ professional references, and confirm identity. Only candidates with a proven track record make it through.",
+              },
+              {
+                "@type": "HowToStep",
+                position: 5,
+                name: "Approved & Matched",
+                text: "Approved developers join our verified talent network and are immediately eligible for matching based on skill fit, timezone overlap, rate alignment, and availability.",
+              },
+            ],
+          },
+          {
+            "@type": "Service",
+            "@id": `${SITE_URL}/how-we-vet/#service`,
+            name: "Pre-Vetted Developer Matching",
+            provider: { "@id": `${SITE_URL}/#organization` },
+            description:
+              "OctogleHire matches companies with pre-vetted, world-class engineers from 30+ countries through a rigorous 5-stage vetting process.",
+            serviceType: "Developer Staffing",
+            areaServed: "Worldwide",
+          },
+        ]}
+      />
     </>
   );
 }
