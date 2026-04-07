@@ -45,7 +45,7 @@ const Hero = ({ className }: HeroProps) => {
   const allCountries = [...hireFromCountries, ...hireFromCountries];
 
   return (
-    <section className={cn("flex min-h-[100dvh] flex-col pt-20 pb-0 lg:pt-24", className)}>
+    <section className={cn("flex h-[calc(100dvh-64px)] flex-col", className)}>
       <div className="container mx-auto flex flex-1 flex-col justify-center px-6">
         {/* Badge */}
         <div className="flex justify-center">
