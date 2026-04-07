@@ -29,7 +29,7 @@ export const topics: Topic[] = [
     relatedHireLinks: [
       { label: "Hire React Developers", href: "/hire/react-developers" },
       { label: "Hire Python Developers", href: "/hire/python-developers" },
-      { label: "Hire Node.js Developers", href: "/hire/node-js-developers" },
+      { label: "Hire Node.js Developers", href: "/hire/nodejs-developers" },
       { label: "Developers in India", href: "/hire/developers-in/india" },
       { label: "Developers in Brazil", href: "/hire/developers-in/brazil" },
     ],

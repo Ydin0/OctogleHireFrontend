@@ -24,11 +24,11 @@ const sections = [
     links: [
       { name: "React Developers", href: "/hire/react-developers" },
       { name: "Python Developers", href: "/hire/python-developers" },
-      { name: "Node.js Developers", href: "/hire/node-js-developers" },
+      { name: "Node.js Developers", href: "/hire/nodejs-developers" },
       { name: "TypeScript Developers", href: "/hire/typescript-developers" },
       { name: "Go Developers", href: "/hire/go-developers" },
       { name: "Java Developers", href: "/hire/java-developers" },
-      { name: "Next.js Developers", href: "/hire/next-js-developers" },
+      { name: "Next.js Developers", href: "/hire/nextjs-developers" },
       { name: "Angular Developers", href: "/hire/angular-developers" },
       { name: "AWS Developers", href: "/hire/aws-developers" },
       { name: "Flutter Developers", href: "/hire/flutter-developers" },
