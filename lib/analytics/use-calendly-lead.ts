@@ -21,6 +21,10 @@ export function useCalendlyLead(active: boolean) {
           content_name: "Calendly Booking",
           content_category: "booking",
         });
+        trackMetaEvent("Schedule", {
+          content_name: "Calendly Booking",
+          content_category: "booking",
+        });
       }
     };
 

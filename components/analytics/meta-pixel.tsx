@@ -20,21 +20,6 @@ export function MetaPixel() {
           fbq('set', 'autoConfig', false, '${PIXEL_ID}');
           fbq('init', '${PIXEL_ID}');
           fbq('track', 'PageView');
-
-          // Guard against third-party scripts (e.g. Calendly) firing fbq
-          // with empty or undefined event names, which causes __missing_event
-          (function(){
-            var _fbq = fbq;
-            window.fbq = function(){
-              var cmd = arguments[0];
-              var evt = arguments[1];
-              if ((cmd === 'track' || cmd === 'trackCustom') && (!evt || typeof evt !== 'string' || evt.trim() === '')) {
-                return;
-              }
-              return _fbq.apply(this, arguments);
-            };
-            Object.assign(window.fbq, _fbq);
-          })();
         `}
       </Script>
       <noscript>
