@@ -40,6 +40,7 @@ import {
   markCommissionPaid,
   updateAdminAgency,
 } from "@/lib/api/agencies";
+import { AgencyMembers } from "./_components/agency-members";
 import { formatDate } from "../../_components/dashboard-data";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -494,6 +495,9 @@ const AgencyDetailPage = ({
               )}
             </CardContent>
           </Card>
+
+          {/* Team Members */}
+          <AgencyMembers agencyId={agency.id} />
 
           {/* Sourced Candidates — show 5 most recent */}
           <Card>

@@ -1462,3 +1462,111 @@ export async function enrichAgencyCandidate(
     return false;
   }
 }
+
+// ── Admin Agency Member Management ───────────────────────────────────────────
+
+export interface AdminAgencyMember {
+  id: string;
+  userId: string;
+  role: string;
+  referralCode: string | null;
+  name: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  avatar: string | null;
+  joinedAt: string;
+}
+
+export async function fetchAdminAgencyMembers(
+  token: string | null,
+  agencyId: string,
+): Promise<AdminAgencyMember[]> {
+  if (!token) return [];
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/agencies/${agencyId}/members`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return [];
+    return (await response.json()) as AdminAgencyMember[];
+  } catch {
+    return [];
+  }
+}
+
+export async function inviteAdminAgencyMember(
+  token: string | null,
+  agencyId: string,
+  payload: { email: string; name: string; role: string },
+): Promise<{ success: boolean; member?: AdminAgencyMember; error?: string }> {
+  if (!token) return { success: false, error: "Not authenticated" };
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/agencies/${agencyId}/members`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+    const data = await response.json().catch(() => null);
+    if (!response.ok) {
+      return { success: false, error: data?.message ?? "Failed to invite member" };
+    }
+    return { success: true, member: data as AdminAgencyMember };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function updateAdminAgencyMemberRole(
+  token: string | null,
+  agencyId: string,
+  memberId: string,
+  role: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/agencies/${agencyId}/members/${memberId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ role }),
+      },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function removeAdminAgencyMember(
+  token: string | null,
+  agencyId: string,
+  memberId: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/agencies/${agencyId}/members/${memberId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
