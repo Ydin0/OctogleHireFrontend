@@ -166,6 +166,40 @@ function TrustBar() {
           Trusted by <span className="font-semibold text-foreground">300+</span> businesses
         </p>
       </div>
+
+      {/* Certification badges */}
+      <div className="flex items-center gap-4 pt-1">
+        <a
+          href="https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            src="/security/ISO copy.png"
+            alt="ISO 27001 Certified"
+            width={120}
+            height={120}
+            unoptimized
+            className="h-10 w-auto opacity-70 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
+          />
+        </a>
+        <Image
+          src="/security/GDPR copy.png"
+          alt="GDPR Compliant"
+          width={120}
+          height={120}
+          unoptimized
+          className="h-10 w-auto opacity-70 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
+        />
+        <Image
+          src="/security/CCPA copy.png"
+          alt="CCPA Compliant"
+          width={120}
+          height={120}
+          unoptimized
+          className="h-10 w-auto opacity-70 transition-opacity hover:opacity-100 dark:brightness-[2] dark:contrast-75"
+        />
+      </div>
     </div>
   );
 }
