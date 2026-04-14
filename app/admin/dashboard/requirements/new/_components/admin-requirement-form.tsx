@@ -243,11 +243,14 @@ function AdminRequirementForm({ token: initialToken, companies }: AdminRequireme
         priority: data.priority,
       });
       toast.success("Requirement created");
-      // Fire email notification to superadmin + account manager (non-blocking)
-      notifyNewRequirement(freshToken, result.requirement.id);
+      // Fire email notification — fully non-blocking, swallow any errors
+      notifyNewRequirement(freshToken, result.requirement.id).catch(() => {});
       router.push(`/admin/dashboard/requirements/${result.requirement.id}`);
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
+      const raw = err instanceof Error ? err.message : String(err);
+      const message = raw === "Failed to fetch"
+        ? "Network error — please check your internet connection and try again."
+        : raw;
       toast.error(message);
     } finally {
       setSubmitting(false);
