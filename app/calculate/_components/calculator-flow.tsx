@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Script from "next/script";
 import { useForm } from "react-hook-form";
@@ -8,11 +8,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
   ArrowRight,
+  Bolt,
+  Calculator,
   CheckCircle,
   Clock,
   Code2,
   Container,
   Figma,
+  Flame,
   Laptop,
   Layers,
   Loader2,
@@ -22,6 +25,9 @@ import {
   Sparkles,
   Star,
   TestTube,
+  TrendingUp,
+  Trophy,
+  Zap,
 } from "lucide-react";
 
 import { Logo } from "@/components/logo";
@@ -57,9 +63,9 @@ const roles = [
 ] as const;
 
 const seniorities = [
-  { id: "junior", label: "Junior", sub: "1-2 years" },
-  { id: "mid", label: "Mid-Level", sub: "3-5 years" },
-  { id: "senior", label: "Senior", sub: "6+ years" },
+  { id: "junior", label: "Junior", sub: "1-2 years", emoji: "🌱" },
+  { id: "mid", label: "Mid-Level", sub: "3-5 years", emoji: "⚡" },
+  { id: "senior", label: "Senior", sub: "6+ years", emoji: "🚀" },
 ] as const;
 
 const markets = [
@@ -70,10 +76,10 @@ const markets = [
 ] as const;
 
 const timelines = [
-  { id: "immediate", label: "Immediately", sub: "ASAP" },
-  { id: "2-4-weeks", label: "2-4 Weeks", sub: "Soon" },
-  { id: "1-2-months", label: "1-2 Months", sub: "Planning" },
-  { id: "exploring", label: "Just Exploring", sub: "No rush" },
+  { id: "immediate", label: "Immediately", sub: "ASAP", emoji: "🔥" },
+  { id: "2-4-weeks", label: "2-4 Weeks", sub: "Soon", emoji: "⏱️" },
+  { id: "1-2-months", label: "1-2 Months", sub: "Planning", emoji: "📅" },
+  { id: "exploring", label: "Just Exploring", sub: "No rush", emoji: "👀" },
 ] as const;
 
 type RoleKey = "Frontend Engineer" | "Backend Engineer" | "Full-Stack Engineer" | "DevOps Engineer";
@@ -113,6 +119,15 @@ const avatars = [
   { src: "/review-4.jpg", alt: "Client" },
 ];
 
+/* Step badges — show what was just locked in */
+const stepRewards = [
+  { label: "Role locked in", icon: CheckCircle },
+  { label: "Seniority confirmed", icon: CheckCircle },
+  { label: "Market set", icon: CheckCircle },
+  { label: "Team size locked", icon: CheckCircle },
+  { label: "Timeline added", icon: CheckCircle },
+];
+
 /* ── Component ───────────────────────────────────────────────────────────── */
 
 export function CalculatorFlow() {
@@ -125,6 +140,7 @@ export function CalculatorFlow() {
   const [contactFirstName, setContactFirstName] = useState("");
   const [apiError, setApiError] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
+  const [showReward, setShowReward] = useState(false);
 
   useCalendlyLead(step === 7);
 
@@ -141,26 +157,38 @@ export function CalculatorFlow() {
 
   const phoneValue = watch("phone") ?? "";
 
-  // Calculate annual savings
+  // Calculate annual savings (works after step 1 too — uses defaults)
   const { annualSavings, displayCurrency, monthlySavings, savingsPercent } = useMemo(() => {
-    if (!role || !seniority || !market) {
-      return { annualSavings: 0, displayCurrency: "$", monthlySavings: 0, savingsPercent: 0 };
-    }
+    if (!role) return { annualSavings: 0, displayCurrency: "$", monthlySavings: 0, savingsPercent: 0 };
+
     const rateKey = role.rateKey as RoleKey;
-    const rates = RATE_DATA[rateKey][seniority.id as Seniority][market.id as MarketKey];
+    const sen = (seniority?.id ?? "mid") as Seniority;
+    const mkt = (market?.id ?? "UK") as MarketKey;
+    const cur = market?.currency ?? "£";
+    const rates = RATE_DATA[rateKey][sen][mkt];
     const monthly = (rates.local - rates.octogle) * teamSize;
     const annual = monthly * 12;
     const pct = Math.round(((rates.local - rates.octogle) / rates.local) * 100);
+
     return {
       annualSavings: annual,
-      displayCurrency: market.currency,
+      displayCurrency: cur,
       monthlySavings: monthly,
       savingsPercent: pct,
     };
   }, [role, seniority, market, teamSize]);
 
-  // Show counter from step 2 onward
+  // Show counter from step 2 onwards
   const showCounter = step >= 2 && step !== 7;
+
+  // Trigger reward badge animation when step changes
+  useEffect(() => {
+    if (step >= 2 && step <= 6) {
+      setShowReward(true);
+      const t = setTimeout(() => setShowReward(false), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [step]);
 
   const onSubmit = async (data: CompanyLead) => {
     setApiError(null);
@@ -202,9 +230,18 @@ export function CalculatorFlow() {
   };
 
   return (
-    <div className="flex min-h-[100dvh] flex-col bg-background overflow-x-hidden pb-24 lg:pb-0">
+    <div className="relative flex min-h-[100dvh] flex-col bg-background overflow-x-hidden pb-28 lg:pb-32">
+      {/* ── Decorative animated background ────────────────────── */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        {/* Animated dot grid */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.04)_1px,transparent_0)] [background-size:20px_20px]" />
+        {/* Floating orbs */}
+        <div className="absolute -top-40 left-1/4 size-[500px] rounded-full bg-emerald-500/[0.04] blur-3xl" />
+        <div className="absolute -bottom-40 right-1/4 size-[600px] rounded-full bg-pulse/[0.03] blur-3xl" />
+      </div>
+
       {/* Header */}
-      <header className="relative flex items-center justify-center px-6 py-5">
+      <header className="relative z-10 flex items-center justify-center px-6 py-5">
         {step > 1 && step < 7 && (
           <button
             onClick={goBack}
@@ -219,45 +256,99 @@ export function CalculatorFlow() {
         </Link>
       </header>
 
-      {/* Progress dots */}
-      {step < 7 && (
-        <div className="flex justify-center gap-2 pb-2">
-          {[1, 2, 3, 4, 5, 6].map((s) => (
-            <div
-              key={s}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                s === step ? "w-8 bg-foreground" : s < step ? "w-1.5 bg-foreground/40" : "w-1.5 bg-foreground/15"
-              }`}
-            />
-          ))}
+      {/* Reward popup — shows briefly when step changes */}
+      {showReward && step >= 2 && step <= 6 && (
+        <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex justify-center px-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-emerald-500 shadow-lg backdrop-blur-md">
+            <Sparkles className="size-3.5" />
+            +{step === 2 ? "20" : step === 3 ? "20" : step === 4 ? "30" : step === 5 ? "20" : "10"}% accuracy unlocked
+          </div>
         </div>
       )}
 
       {/* Floating savings counter */}
       {showCounter && (
-        <BlurredCounter value={annualSavings} currency={displayCurrency} revealed={revealed} />
+        <BlurredCounter
+          value={annualSavings}
+          currency={displayCurrency}
+          revealed={revealed}
+          step={step - 1}
+          totalSteps={5}
+        />
       )}
 
       {/* Main content */}
-      <main className="flex flex-1 flex-col items-center justify-center px-5 pb-8 sm:px-6">
+      <main className="relative z-10 flex flex-1 flex-col items-center justify-center px-5 pb-8 sm:px-6">
         <div className="w-full max-w-lg">
-          {/* STEP 1 — Role */}
+          {/* ═══════════════════════════════════════════
+              STEP 1 — Hero + Role selection
+              ═══════════════════════════════════════════ */}
           {step === 1 && (
-            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-6 text-center sm:mb-8">
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                  Step 1 of 6
-                </p>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
-                  What kind of developer are you hiring?
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              {/* Hero */}
+              <div className="mb-8 text-center sm:mb-10">
+                {/* Badge */}
+                <div className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5">
+                  <Flame className="size-3 text-orange-500" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-500">
+                    UK Min Wage just went up — calculate your savings
+                  </span>
+                </div>
+
+                {/* Main title */}
+                <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
+                  How much could{" "}
+                  <span className="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
+                    you save
+                  </span>
+                  ?
                 </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  This helps us calculate accurate market rates.
+                <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
+                  Take this <strong className="text-foreground">60-second quiz</strong> to see exactly how much your dev team could save with OctogleHire.
+                </p>
+
+                {/* Stats row */}
+                <div className="mx-auto mt-6 flex max-w-sm items-center justify-center gap-4 text-[10px] sm:gap-6 sm:text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="size-3 text-emerald-500" />
+                    <span className="text-muted-foreground">
+                      <strong className="font-mono text-foreground">60</strong>s
+                    </span>
+                  </div>
+                  <div className="h-3 w-px bg-border" />
+                  <div className="flex items-center gap-1.5">
+                    <Trophy className="size-3 text-amber-500" />
+                    <span className="text-muted-foreground">
+                      Avg saving{" "}
+                      <strong className="font-mono text-foreground">£127k</strong>
+                    </span>
+                  </div>
+                  <div className="h-3 w-px bg-border" />
+                  <div className="flex items-center gap-1.5">
+                    <Bolt className="size-3 text-pulse" />
+                    <span className="text-muted-foreground">
+                      <strong className="font-mono text-foreground">300+</strong>{" "}
+                      teams
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step badge */}
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex size-7 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-bold text-emerald-500">
+                    1
+                  </div>
+                  <p className="text-sm font-semibold">Pick your role</p>
+                </div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Step 1 / 6
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
-                {roles.map((r) => {
+                {roles.map((r, i) => {
                   const Icon = r.icon;
                   return (
                     <button
@@ -266,35 +357,51 @@ export function CalculatorFlow() {
                         setRole(r);
                         setStep(2);
                       }}
-                      className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background px-3.5 py-3.5 text-left transition-all hover:border-foreground/30 hover:bg-muted/50 active:scale-[0.98] sm:px-4 sm:py-4"
+                      className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/60 bg-background/60 px-3.5 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-[0.98] sm:px-4 sm:py-4"
+                      style={{ animationDelay: `${i * 50}ms` }}
                     >
-                      <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/60 transition-colors group-hover:bg-foreground/10 sm:size-9">
-                        <Icon className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" />
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 transition-all group-hover:bg-emerald-500/15 group-hover:text-emerald-500">
+                        <Icon className="size-4 text-muted-foreground transition-colors group-hover:text-emerald-500" />
                       </div>
                       <span className="text-sm font-medium">{r.label}</span>
+                      <ArrowRight className="ml-auto size-3.5 text-muted-foreground/0 transition-all group-hover:translate-x-0.5 group-hover:text-emerald-500" />
                     </button>
                   );
                 })}
               </div>
+
+              {/* Trust line under tiles */}
+              <div className="mt-6 flex items-center justify-center gap-2">
+                <span className="inline-flex items-center -space-x-2">
+                  {avatars.map((avatar, i) => (
+                    <Avatar
+                      key={i}
+                      className="size-5 border-2 border-background ring-1 ring-border/30"
+                    >
+                      <AvatarImage src={avatar.src} alt={avatar.alt} />
+                    </Avatar>
+                  ))}
+                </span>
+                <p className="text-[10px] text-muted-foreground">
+                  Joined by <strong className="text-foreground">300+</strong> companies this month
+                </p>
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="size-2.5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
-          {/* STEP 2 — Seniority */}
+          {/* ═══════════════════════════════════════════
+              STEP 2 — Seniority
+              ═══════════════════════════════════════════ */}
           {step === 2 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-6 text-center sm:mb-8">
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                  Step 2 of 6
-                </p>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
-                  How experienced should they be?
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Different experience levels = different cost savings.
-                </p>
-              </div>
+              <StepHeader stepNum={2} totalSteps={6} title="How experienced?" sub="Different levels = different savings." />
 
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {seniorities.map((s) => (
                   <button
                     key={s.id}
@@ -302,32 +409,28 @@ export function CalculatorFlow() {
                       setSeniority(s);
                       setStep(3);
                     }}
-                    className="group flex flex-col items-center gap-1 rounded-xl border border-border/60 bg-background px-4 py-5 text-center transition-all hover:border-foreground/30 hover:bg-muted/50 active:scale-[0.98]"
+                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-[0.98]"
                   >
-                    <span className="text-sm font-medium">{s.label}</span>
-                    <span className="text-[11px] text-muted-foreground">{s.sub}</span>
+                    <span className="text-2xl">{s.emoji}</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">{s.label}</p>
+                      <p className="text-xs text-muted-foreground">{s.sub}</p>
+                    </div>
+                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-emerald-500" />
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* STEP 3 — Market */}
+          {/* ═══════════════════════════════════════════
+              STEP 3 — Market
+              ═══════════════════════════════════════════ */}
           {step === 3 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-6 text-center sm:mb-8">
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                  Step 3 of 6
-                </p>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
-                  Where would you normally hire from?
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  We&rsquo;ll compare your local market rates against ours.
-                </p>
-              </div>
+              <StepHeader stepNum={3} totalSteps={6} title="Where do you hire from?" sub="We'll compare your local market vs ours." />
 
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
                 {markets.map((m) => (
                   <button
                     key={m.id}
@@ -335,40 +438,38 @@ export function CalculatorFlow() {
                       setMarket(m);
                       setStep(4);
                     }}
-                    className="group flex items-center gap-3 rounded-xl border border-border/60 bg-background px-4 py-4 text-left transition-all hover:border-foreground/30 hover:bg-muted/50 active:scale-[0.98]"
+                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-[0.98]"
                   >
                     <img
-                      src={`https://flagcdn.com/w40/${m.flag}.png`}
+                      src={`https://flagcdn.com/w80/${m.flag}.png`}
                       alt={m.label}
-                      className="h-6 w-auto rounded-sm shadow-sm"
-                      width={40}
-                      height={27}
+                      className="h-7 w-auto rounded shadow-md"
+                      width={60}
+                      height={40}
                     />
-                    <span className="text-sm font-medium">{m.label}</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">{m.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Currency: <span className="font-mono">{m.currency}</span>
+                      </p>
+                    </div>
+                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-emerald-500" />
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* STEP 4 — Team size */}
+          {/* ═══════════════════════════════════════════
+              STEP 4 — Team size
+              ═══════════════════════════════════════════ */}
           {step === 4 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-8 text-center">
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                  Step 4 of 6
-                </p>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
-                  How many developers do you need?
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  More devs = bigger savings.
-                </p>
-              </div>
+              <StepHeader stepNum={4} totalSteps={6} title="How many developers?" sub="More devs = exponentially bigger savings." />
 
-              <div className="rounded-2xl border border-border/60 bg-muted/20 p-6">
+              <div className="rounded-2xl border border-border/60 bg-background/60 p-6 backdrop-blur-sm">
                 <div className="mb-6 text-center">
-                  <p className="font-mono text-5xl font-bold tracking-tight">
+                  <p className="font-mono text-7xl font-bold tracking-tight tabular-nums bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent">
                     {teamSize}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -391,7 +492,7 @@ export function CalculatorFlow() {
 
               <Button
                 size="lg"
-                className="mt-6 w-full rounded-full"
+                className="mt-6 w-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700"
                 onClick={() => setStep(5)}
               >
                 Continue
@@ -400,22 +501,14 @@ export function CalculatorFlow() {
             </div>
           )}
 
-          {/* STEP 5 — Timeline */}
+          {/* ═══════════════════════════════════════════
+              STEP 5 — Timeline
+              ═══════════════════════════════════════════ */}
           {step === 5 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-6 text-center sm:mb-8">
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                  Step 5 of 6
-                </p>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
-                  How soon do you need them?
-                </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Almost there — last question.
-                </p>
-              </div>
+              <StepHeader stepNum={5} totalSteps={6} title="When do you need them?" sub="Almost there — last question." />
 
-              <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              <div className="grid grid-cols-1 gap-2.5 sm:gap-3">
                 {timelines.map((t) => (
                   <button
                     key={t.id}
@@ -423,29 +516,51 @@ export function CalculatorFlow() {
                       setTimeline(t);
                       setStep(6);
                     }}
-                    className="group flex flex-col items-center gap-1 rounded-xl border border-border/60 bg-background px-4 py-5 text-center transition-all hover:border-foreground/30 hover:bg-muted/50 active:scale-[0.98]"
+                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-emerald-500/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-emerald-500/5 active:scale-[0.98]"
                   >
-                    <span className="text-sm font-medium">{t.label}</span>
-                    <span className="text-[11px] text-muted-foreground">{t.sub}</span>
+                    <span className="text-2xl">{t.emoji}</span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold">{t.label}</p>
+                      <p className="text-xs text-muted-foreground">{t.sub}</p>
+                    </div>
+                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-emerald-500" />
                   </button>
                 ))}
               </div>
             </div>
           )}
 
-          {/* STEP 6 — Reveal form */}
+          {/* ═══════════════════════════════════════════
+              STEP 6 — Reveal form
+              ═══════════════════════════════════════════ */}
           {step === 6 && (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-              <div className="mb-6 text-center sm:mb-8">
-                <div className="mx-auto mb-4 flex w-fit items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-500">
-                  <Sparkles className="size-3" />
-                  Your savings are ready
+              <div className="mb-6 text-center">
+                {/* Trophy icon */}
+                <div className="relative mx-auto mb-4 flex size-16 items-center justify-center">
+                  <div className="absolute inset-0 animate-pulse rounded-full bg-amber-500/20 blur-2xl" />
+                  <div className="relative flex size-16 items-center justify-center rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-400/10 to-amber-600/10">
+                    <Trophy className="size-7 text-amber-500" />
+                  </div>
                 </div>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
-                  Where should we send your savings report?
+
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1">
+                  <Sparkles className="size-3 text-emerald-500" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-emerald-500">
+                    Quiz complete
+                  </span>
+                </div>
+
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                  Your savings are{" "}
+                  <span className="bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent">
+                    locked in
+                  </span>
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Enter your details to reveal your personalised savings figure and book a call.
+                  Enter your details to{" "}
+                  <strong className="text-foreground">unlock the full breakdown</strong>{" "}
+                  + book a 15-min call.
                 </p>
               </div>
 
@@ -507,7 +622,7 @@ export function CalculatorFlow() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full rounded-full text-base"
+                  className="w-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-base text-white hover:from-emerald-600 hover:to-emerald-700"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -517,8 +632,8 @@ export function CalculatorFlow() {
                     </>
                   ) : (
                     <>
+                      <Zap className="mr-2 size-4" fill="currentColor" />
                       Reveal My Savings
-                      <Sparkles className="ml-2 size-4" />
                     </>
                   )}
                 </Button>
@@ -526,7 +641,7 @@ export function CalculatorFlow() {
                 <div className="flex items-center justify-center gap-3 pt-1 text-[10px] text-muted-foreground sm:gap-4">
                   <span className="flex items-center gap-1">
                     <Clock className="size-3" />
-                    60-second result
+                    Instant result
                   </span>
                   <span className="flex items-center gap-1">
                     <Shield className="size-3" />
@@ -539,31 +654,36 @@ export function CalculatorFlow() {
             </div>
           )}
 
-          {/* STEP 7 — Reveal + Calendly */}
+          {/* ═══════════════════════════════════════════
+              STEP 7 — Reveal + Calendly
+              ═══════════════════════════════════════════ */}
           {step === 7 && (
             <div className="animate-in fade-in zoom-in-95 duration-500">
               <div className="mb-6 text-center">
-                <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-emerald-500/10">
-                  <CheckCircle className="size-6 text-emerald-500" />
+                <div className="relative mx-auto mb-4 flex size-14 items-center justify-center">
+                  <div className="absolute inset-0 animate-ping rounded-full bg-emerald-500/30" />
+                  <div className="relative flex size-14 items-center justify-center rounded-full bg-emerald-500/10">
+                    <CheckCircle className="size-7 text-emerald-500" />
+                  </div>
                 </div>
-                <h1 className="text-xl font-semibold tracking-tight sm:text-3xl">
-                  Here&rsquo;s your potential savings, {contactFirstName}
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                  🎉 {contactFirstName}, here&rsquo;s the verdict
                 </h1>
               </div>
 
-              <div className="mb-6 rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-emerald-500/0 p-6">
+              <div className="mb-6 overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-500/[0.08] to-emerald-500/0 p-6">
                 <BlurredCounter
                   value={annualSavings}
                   currency={displayCurrency}
                   revealed={true}
                   variant="inline"
                 />
-                <div className="grid grid-cols-3 gap-3 border-t border-border/60 pt-4">
+                <div className="grid grid-cols-3 gap-3 border-t border-border/40 pt-4">
                   <div className="text-center">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       Per Month
                     </p>
-                    <p className="font-mono text-sm font-semibold">
+                    <p className="font-mono text-base font-bold sm:text-lg">
                       {displayCurrency}
                       {monthlySavings.toLocaleString()}
                     </p>
@@ -572,7 +692,7 @@ export function CalculatorFlow() {
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       Cost Cut
                     </p>
-                    <p className="font-mono text-sm font-semibold text-emerald-500">
+                    <p className="font-mono text-base font-bold text-emerald-500 sm:text-lg">
                       -{savingsPercent}%
                     </p>
                   </div>
@@ -580,7 +700,7 @@ export function CalculatorFlow() {
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       Team Size
                     </p>
-                    <p className="font-mono text-sm font-semibold">
+                    <p className="font-mono text-base font-bold sm:text-lg">
                       {teamSize}
                     </p>
                   </div>
@@ -588,11 +708,11 @@ export function CalculatorFlow() {
               </div>
 
               <div className="mb-3 text-center">
-                <p className="text-sm font-medium">
-                  Book a 15-min call to claim these savings
+                <p className="text-sm font-semibold">
+                  📅 Book a 15-min call to claim these savings
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Receive your shortlist of pre-vetted developers within 48 hours.
+                <p className="mt-1 text-xs text-muted-foreground">
+                  We&rsquo;ll send your shortlist of pre-vetted developers within 48 hours.
                 </p>
               </div>
 
@@ -622,6 +742,37 @@ export function CalculatorFlow() {
   );
 }
 
+/* ── Step header — used on steps 2-5 ─────────────────────────────────────── */
+
+function StepHeader({
+  stepNum,
+  totalSteps,
+  title,
+  sub,
+}: {
+  stepNum: number;
+  totalSteps: number;
+  title: string;
+  sub: string;
+}) {
+  return (
+    <>
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="flex size-7 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-bold text-emerald-500">
+            {stepNum}
+          </div>
+          <p className="text-sm font-semibold">{title}</p>
+        </div>
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+          Step {stepNum} / {totalSteps}
+        </p>
+      </div>
+      <p className="mb-6 text-sm text-muted-foreground">{sub}</p>
+    </>
+  );
+}
+
 /* ── Compact trust bar (only shown at step 6) ────────────────────────────── */
 
 function CompactTrustBar() {
@@ -639,7 +790,7 @@ function CompactTrustBar() {
           ))}
         </span>
         <p className="text-[11px] text-muted-foreground">
-          Trusted by <span className="font-semibold text-foreground">300+</span> businesses
+          Trusted by <strong className="text-foreground">300+</strong> businesses
         </p>
       </div>
       <div className="flex items-center gap-1">
@@ -651,4 +802,3 @@ function CompactTrustBar() {
     </div>
   );
 }
-
