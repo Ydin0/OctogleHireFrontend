@@ -236,7 +236,7 @@ export function CalculatorFlow() {
         {/* Animated dot grid */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.04)_1px,transparent_0)] [background-size:20px_20px]" />
         {/* Floating orbs */}
-        <div className="absolute -top-40 left-1/4 size-[500px] rounded-full bg-pulse-500/[0.04] blur-3xl" />
+        <div className="absolute -top-40 left-1/4 size-[500px] rounded-full bg-pulse/[0.04] blur-3xl" />
         <div className="absolute -bottom-40 right-1/4 size-[600px] rounded-full bg-pulse/[0.03] blur-3xl" />
       </div>
 
@@ -259,7 +259,7 @@ export function CalculatorFlow() {
       {/* Reward popup — shows briefly when step changes */}
       {showReward && step >= 2 && step <= 6 && (
         <div className="pointer-events-none fixed inset-x-0 top-20 z-50 flex justify-center px-4 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-2 rounded-full border border-pulse-500/30 bg-pulse-500/10 px-4 py-2 text-xs font-semibold text-pulse-500 shadow-lg backdrop-blur-md">
+          <div className="flex items-center gap-2 rounded-full border border-pulse/30 bg-pulse/10 px-4 py-2 text-xs font-semibold text-pulse shadow-lg backdrop-blur-md">
             <Sparkles className="size-3.5" />
             +{step === 2 ? "20" : step === 3 ? "20" : step === 4 ? "30" : step === 5 ? "20" : "10"}% accuracy unlocked
           </div>
@@ -289,11 +289,7 @@ export function CalculatorFlow() {
               <div className="mb-8 text-center sm:mb-10">
                 {/* Main title */}
                 <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
-                  How much could{" "}
-                  <span className="bg-gradient-to-r from-pulse-400 to-pulse-600 bg-clip-text text-transparent">
-                    you save
-                  </span>
-                  ?
+                  How much could <span className="text-pulse">you save</span>?
                 </h1>
                 <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground sm:text-base">
                   Take this <strong className="text-foreground">60-second quiz</strong> to see exactly how much your dev team could save with OctogleHire.
@@ -302,7 +298,7 @@ export function CalculatorFlow() {
                 {/* Stats row */}
                 <div className="mx-auto mt-6 flex max-w-sm items-center justify-center gap-4 text-[10px] sm:gap-6 sm:text-xs">
                   <div className="flex items-center gap-1.5">
-                    <Clock className="size-3 text-pulse-500" />
+                    <Clock className="size-3 text-pulse" />
                     <span className="text-muted-foreground">
                       <strong className="font-mono text-foreground">60</strong>s
                     </span>
@@ -329,7 +325,7 @@ export function CalculatorFlow() {
               {/* Step badge */}
               <div className="mb-5 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex size-7 items-center justify-center rounded-full bg-pulse-500/10 text-xs font-bold text-pulse-500">
+                  <div className="flex size-7 items-center justify-center rounded-full bg-pulse/10 text-xs font-bold text-pulse">
                     1
                   </div>
                   <p className="text-sm font-semibold">Pick your role</p>
@@ -349,14 +345,14 @@ export function CalculatorFlow() {
                         setRole(r);
                         setStep(2);
                       }}
-                      className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/60 bg-background/60 px-3.5 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-pulse-500/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-pulse-500/5 active:scale-[0.98] sm:px-4 sm:py-4"
+                      className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border/60 bg-background/60 px-3.5 py-3.5 text-left transition-all hover:-translate-y-0.5 hover:border-pulse/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-pulse/5 active:scale-[0.98] sm:px-4 sm:py-4"
                       style={{ animationDelay: `${i * 50}ms` }}
                     >
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 transition-all group-hover:bg-pulse-500/15 group-hover:text-pulse-500">
-                        <Icon className="size-4 text-muted-foreground transition-colors group-hover:text-pulse-500" />
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted/60 transition-all group-hover:bg-pulse/15 group-hover:text-pulse">
+                        <Icon className="size-4 text-muted-foreground transition-colors group-hover:text-pulse" />
                       </div>
                       <span className="text-sm font-medium">{r.label}</span>
-                      <ArrowRight className="ml-auto size-3.5 text-muted-foreground/0 transition-all group-hover:translate-x-0.5 group-hover:text-pulse-500" />
+                      <ArrowRight className="ml-auto size-3.5 text-muted-foreground/0 transition-all group-hover:translate-x-0.5 group-hover:text-pulse" />
                     </button>
                   );
                 })}
@@ -401,14 +397,14 @@ export function CalculatorFlow() {
                       setSeniority(s);
                       setStep(3);
                     }}
-                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-pulse-500/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-pulse-500/5 active:scale-[0.98]"
+                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-pulse/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-pulse/5 active:scale-[0.98]"
                   >
                     <span className="text-2xl">{s.emoji}</span>
                     <div className="flex-1">
                       <p className="text-sm font-semibold">{s.label}</p>
                       <p className="text-xs text-muted-foreground">{s.sub}</p>
                     </div>
-                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-pulse-500" />
+                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-pulse" />
                   </button>
                 ))}
               </div>
@@ -430,7 +426,7 @@ export function CalculatorFlow() {
                       setMarket(m);
                       setStep(4);
                     }}
-                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-pulse-500/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-pulse-500/5 active:scale-[0.98]"
+                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-pulse/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-pulse/5 active:scale-[0.98]"
                   >
                     <img
                       src={`https://flagcdn.com/w80/${m.flag}.png`}
@@ -445,7 +441,7 @@ export function CalculatorFlow() {
                         Currency: <span className="font-mono">{m.currency}</span>
                       </p>
                     </div>
-                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-pulse-500" />
+                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-pulse" />
                   </button>
                 ))}
               </div>
@@ -484,7 +480,7 @@ export function CalculatorFlow() {
 
               <Button
                 size="lg"
-                className="mt-6 w-full rounded-full bg-gradient-to-r from-pulse-500 to-pulse-600 text-white hover:from-pulse-600 hover:to-pulse-700"
+                className="mt-6 w-full rounded-full bg-pulse text-pulse-foreground hover:bg-pulse/90"
                 onClick={() => setStep(5)}
               >
                 Continue
@@ -508,14 +504,14 @@ export function CalculatorFlow() {
                       setTimeline(t);
                       setStep(6);
                     }}
-                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-pulse-500/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-pulse-500/5 active:scale-[0.98]"
+                    className="group flex items-center gap-4 rounded-xl border border-border/60 bg-background/60 px-5 py-4 text-left transition-all hover:-translate-y-0.5 hover:border-pulse/40 hover:bg-muted/40 hover:shadow-lg hover:shadow-pulse/5 active:scale-[0.98]"
                   >
                     <span className="text-2xl">{t.emoji}</span>
                     <div className="flex-1">
                       <p className="text-sm font-semibold">{t.label}</p>
                       <p className="text-xs text-muted-foreground">{t.sub}</p>
                     </div>
-                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-pulse-500" />
+                    <ArrowRight className="size-4 text-muted-foreground/40 transition-all group-hover:translate-x-0.5 group-hover:text-pulse" />
                   </button>
                 ))}
               </div>
@@ -536,16 +532,16 @@ export function CalculatorFlow() {
                   </div>
                 </div>
 
-                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-pulse-500/30 bg-pulse-500/10 px-3 py-1">
-                  <Sparkles className="size-3 text-pulse-500" />
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-pulse-500">
+                <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-pulse/30 bg-pulse/10 px-3 py-1">
+                  <Sparkles className="size-3 text-pulse" />
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-pulse">
                     Quiz complete
                   </span>
                 </div>
 
                 <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
                   Your savings are{" "}
-                  <span className="bg-gradient-to-r from-pulse-400 to-pulse-600 bg-clip-text text-transparent">
+                  <span className="text-pulse">
                     locked in
                   </span>
                 </h1>
@@ -614,7 +610,7 @@ export function CalculatorFlow() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full rounded-full bg-gradient-to-r from-pulse-500 to-pulse-600 text-base text-white hover:from-pulse-600 hover:to-pulse-700"
+                  className="w-full rounded-full bg-gradient-to-r from-pulse to-pulse text-base text-white hover:from-pulse hover:to-pulse"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -653,9 +649,9 @@ export function CalculatorFlow() {
             <div className="animate-in fade-in zoom-in-95 duration-500">
               <div className="mb-6 text-center">
                 <div className="relative mx-auto mb-4 flex size-14 items-center justify-center">
-                  <div className="absolute inset-0 animate-ping rounded-full bg-pulse-500/30" />
-                  <div className="relative flex size-14 items-center justify-center rounded-full bg-pulse-500/10">
-                    <CheckCircle className="size-7 text-pulse-500" />
+                  <div className="absolute inset-0 animate-ping rounded-full bg-pulse/30" />
+                  <div className="relative flex size-14 items-center justify-center rounded-full bg-pulse/10">
+                    <CheckCircle className="size-7 text-pulse" />
                   </div>
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
@@ -663,7 +659,7 @@ export function CalculatorFlow() {
                 </h1>
               </div>
 
-              <div className="mb-6 overflow-hidden rounded-2xl border border-pulse-500/30 bg-gradient-to-br from-pulse-500/[0.08] to-pulse-500/0 p-6">
+              <div className="mb-6 overflow-hidden rounded-2xl border border-pulse/30 bg-gradient-to-br from-pulse/[0.08] to-pulse/0 p-6">
                 <BlurredCounter
                   value={annualSavings}
                   currency={displayCurrency}
@@ -684,7 +680,7 @@ export function CalculatorFlow() {
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       Cost Cut
                     </p>
-                    <p className="font-mono text-base font-bold text-pulse-500 sm:text-lg">
+                    <p className="font-mono text-base font-bold text-pulse sm:text-lg">
                       -{savingsPercent}%
                     </p>
                   </div>
@@ -751,7 +747,7 @@ function StepHeader({
     <>
       <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="flex size-7 items-center justify-center rounded-full bg-pulse-500/10 text-xs font-bold text-pulse-500">
+          <div className="flex size-7 items-center justify-center rounded-full bg-pulse/10 text-xs font-bold text-pulse">
             {stepNum}
           </div>
           <p className="text-sm font-semibold">{title}</p>
