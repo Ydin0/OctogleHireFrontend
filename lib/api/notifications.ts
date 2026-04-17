@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "./fetch-with-retry";
+
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -23,7 +25,7 @@ export async function fetchNotifications(
 ): Promise<NotificationsResponse | null> {
   if (!token) return null;
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/notifications?limit=${limit}&offset=${offset}`,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -43,7 +45,7 @@ export async function markNotificationRead(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/notifications/${id}/read`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/notifications/${id}/read`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -58,7 +60,7 @@ export async function markAllNotificationsRead(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/notifications/read-all`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/notifications/read-all`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${token}` },
     });

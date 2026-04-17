@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "./fetch-with-retry";
+
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -29,7 +31,7 @@ export async function fetchConversations(
 ): Promise<Conversation[]> {
   if (!token) return [];
   try {
-    const res = await fetch(`${apiBaseUrl}/api/messages/conversations`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/messages/conversations`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -46,7 +48,7 @@ export async function fetchMessages(
 ): Promise<Message[]> {
   if (!token) return [];
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/messages/conversations/${conversationId}/messages`,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -67,7 +69,7 @@ export async function sendMessage(
 ): Promise<Message | null> {
   if (!token) return null;
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/messages/conversations/${conversationId}/messages`,
       {
         method: "POST",
@@ -92,7 +94,7 @@ export async function startConversation(
 ): Promise<{ conversation: Conversation; message: Message } | null> {
   if (!token) return null;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/messages/conversations`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/messages/conversations`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -113,7 +115,7 @@ export async function markConversationRead(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/messages/conversations/${conversationId}/read`,
       {
         method: "PATCH",

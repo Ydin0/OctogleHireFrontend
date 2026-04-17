@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "./fetch-with-retry";
+
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -267,7 +269,7 @@ export async function fetchAgencyProfile(
 ): Promise<Agency | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/profile`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/profile`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 60 },
@@ -285,7 +287,7 @@ export async function updateAgencyProfile(
 ): Promise<Agency | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/profile`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/profile`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -306,7 +308,7 @@ export async function fetchAgencyTeam(
 ): Promise<AgencyTeamMember[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/team`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/team`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 60 },
@@ -329,7 +331,7 @@ export async function fetchAgencyCandidates(
     if (params.limit) searchParams.set("limit", String(params.limit));
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/candidates${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -353,7 +355,7 @@ export async function fetchAgencyCandidate(
 ): Promise<AgencyCandidate | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/candidates/${id}`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/candidates/${id}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -386,7 +388,7 @@ export async function fetchUnifiedCandidates(
     if (params.expMax) searchParams.set("expMax", params.expMax);
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/candidates${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -412,7 +414,7 @@ export async function fetchUnifiedCandidateDetail(
   if (!token) return null;
   try {
     const qs = source === "saved" ? "?source=saved" : "";
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/candidates/${id}${qs}`,
       {
         method: "GET",
@@ -434,7 +436,7 @@ export async function updateCandidateStatus(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/candidates/${id}/status`,
       {
         method: "PATCH",
@@ -464,7 +466,7 @@ export async function fetchMarketplaceRequirements(
     }
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/requirements${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -491,7 +493,7 @@ export async function fetchAgencyCommissions(
 ): Promise<AgencyCommission[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/commissions`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/commissions`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -508,7 +510,7 @@ export async function fetchAgencyCommissionSummary(
 ): Promise<AgencyCommissionSummary | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/commissions/summary`,
       {
         method: "GET",
@@ -534,7 +536,7 @@ export async function fetchAgencyMe(
 ): Promise<AgencyMe | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/me`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/me`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -552,7 +554,7 @@ export async function fetchAgencyStats(
   if (!token) return null;
   try {
     const qs = scope ? `?scope=${scope}` : "";
-    const response = await fetch(`${apiBaseUrl}/api/agencies/stats${qs}`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/stats${qs}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -569,7 +571,7 @@ export async function fetchAgencyReferralLink(
 ): Promise<AgencyReferralLink | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/referral-link`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/referral-link`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -593,7 +595,7 @@ export async function fetchSavedCandidates(
     if (params.search) searchParams.set("search", params.search);
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/extension/candidates${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -617,7 +619,7 @@ export async function inviteAgencyTeamMember(
 ): Promise<AgencyTeamMember> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/agencies/team/invite`,
     {
       method: "POST",
@@ -644,7 +646,7 @@ export async function removeAgencyTeamMember(
 ): Promise<boolean> {
   if (!token) return false;
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/agencies/team/${memberId}`,
     {
       method: "DELETE",
@@ -736,7 +738,7 @@ export async function fetchAgencyRequirementDetail(
 ): Promise<AgencyRequirementDetail | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/requirements/${reqId}`,
       {
         method: "GET",
@@ -756,7 +758,7 @@ export async function fetchAgencyCandidatePool(
 ): Promise<AgencyPoolCandidate[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/candidates/pool`,
       {
         method: "GET",
@@ -787,7 +789,7 @@ export async function submitAgencyPitches(
 ): Promise<{ created: number; skipped: number } | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/requirements/${reqId}/pitches`,
       {
         method: "POST",
@@ -816,7 +818,7 @@ export async function fetchAgencyPitches(
     if (params.status) searchParams.set("status", params.status);
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/pitches${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -837,7 +839,7 @@ export async function checkAgencyCandidateEmail(
 ): Promise<EmailCheckResult> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/agencies/candidates/check-email`,
     {
       method: "POST",
@@ -864,7 +866,7 @@ export async function claimAgencyCandidate(
 ): Promise<Record<string, unknown>> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/agencies/candidates/claim`,
     {
       method: "POST",
@@ -913,7 +915,7 @@ export async function addAgencyCandidate(
 ): Promise<Record<string, unknown>> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(`${apiBaseUrl}/api/agencies/candidates`, {
+  const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/candidates`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -938,7 +940,7 @@ export async function updateAgencyCandidate(
 ): Promise<Record<string, unknown>> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/agencies/candidates/${candidateId}`,
     {
       method: "PATCH",
@@ -973,7 +975,7 @@ export async function updateCandidatePricing(
 ): Promise<Record<string, unknown>> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/agencies/candidates/${candidateId}`,
     {
       method: "PATCH",
@@ -1002,7 +1004,7 @@ export async function fetchCandidatePitchHistory(
 ): Promise<CandidatePitchHistory[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/candidates/${candidateId}/pitches`,
       {
         method: "GET",
@@ -1029,7 +1031,7 @@ export async function fetchAdminAgencyPitches(
     if (params.status) searchParams.set("status", params.status);
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agency-pitches${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -1051,7 +1053,7 @@ export async function reviewAdminAgencyPitch(
 ): Promise<Record<string, unknown> | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agency-pitches/${pitchId}`,
       {
         method: "PATCH",
@@ -1077,7 +1079,7 @@ export async function fetchAdminAgencies(
 ): Promise<Agency[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/agencies`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/agencies`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -1095,7 +1097,7 @@ export async function fetchAdminAgency(
 ): Promise<Agency | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/agencies/${id}`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/agencies/${id}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -1123,7 +1125,7 @@ export async function createAdminAgency(
 ): Promise<Agency | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/agencies`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/agencies`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1146,7 +1148,7 @@ export async function updateAdminAgency(
 ): Promise<Agency | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/agencies/${id}`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/agencies/${id}`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1168,7 +1170,7 @@ export async function fetchAdminAgencyCandidates(
 ): Promise<AgencyCandidate[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${agencyId}/candidates`,
       {
         method: "GET",
@@ -1189,7 +1191,7 @@ export async function fetchAdminAgencyCommissions(
 ): Promise<AgencyCommission[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${agencyId}/commissions`,
       {
         method: "GET",
@@ -1224,7 +1226,7 @@ export async function activateAdminAgency(
   token: string | null,
   id: string
 ): Promise<Agency> {
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/admin/agencies/${id}/activate`,
     {
       method: "POST",
@@ -1247,7 +1249,7 @@ export async function fetchAdminAgencyStats(
 ): Promise<AdminAgencyStats | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${id}/stats`,
       {
         method: "GET",
@@ -1268,7 +1270,7 @@ export async function fetchAdminAgencyPitchesForAgency(
 ): Promise<AdminAgencyPitch[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${agencyId}/pitches`,
       {
         method: "GET",
@@ -1305,7 +1307,7 @@ export async function fetchAdminAgencyEnquiries(
 ): Promise<AgencyEnquiry[] | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agency-enquiries`,
       {
         method: "GET",
@@ -1327,7 +1329,7 @@ export async function updateAdminAgencyEnquiry(
 ): Promise<AgencyEnquiry | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agency-enquiries/${id}`,
       {
         method: "PATCH",
@@ -1352,7 +1354,7 @@ export async function convertAgencyEnquiry(
 ): Promise<Agency | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agency-enquiries/${id}/convert`,
       {
         method: "POST",
@@ -1374,7 +1376,7 @@ export async function markCommissionPaid(
 ): Promise<AgencyCommission | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${agencyId}/commissions/${commissionId}/pay`,
       {
         method: "POST",
@@ -1399,7 +1401,7 @@ export async function bulkReassignSourcedBy(
 ): Promise<{ updated: number } | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/candidates/bulk/sourced-by`,
       {
         method: "PATCH",
@@ -1426,7 +1428,7 @@ export async function enrichAgencyCandidates(
 ): Promise<{ submitted: number; skipped: number } | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/agencies/candidates/enrich`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/agencies/candidates/enrich`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1450,7 +1452,7 @@ export async function enrichAgencyCandidate(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/agencies/candidates/${candidateId}/enrich`,
       {
         method: "POST",
@@ -1484,7 +1486,7 @@ export async function fetchAdminAgencyMembers(
 ): Promise<AdminAgencyMember[]> {
   if (!token) return [];
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${agencyId}/members`,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -1505,7 +1507,7 @@ export async function inviteAdminAgencyMember(
 ): Promise<{ success: boolean; member?: AdminAgencyMember; error?: string }> {
   if (!token) return { success: false, error: "Not authenticated" };
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${agencyId}/members`,
       {
         method: "POST",
@@ -1534,7 +1536,7 @@ export async function updateAdminAgencyMemberRole(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${agencyId}/members/${memberId}`,
       {
         method: "PATCH",
@@ -1558,7 +1560,7 @@ export async function removeAdminAgencyMember(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/agencies/${agencyId}/members/${memberId}`,
       {
         method: "DELETE",

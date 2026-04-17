@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "./fetch-with-retry";
+
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -256,7 +258,7 @@ export async function fetchApplications(
     const qs = searchParams.toString();
     const url = `${apiBaseUrl}/api/admin/applications${qs ? `?${qs}` : ""}`;
 
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -278,7 +280,7 @@ export async function fetchFilterOptions(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/filter-options`,
       {
         method: "GET",
@@ -301,7 +303,7 @@ export async function fetchApplication(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${id}`,
       {
         method: "GET",
@@ -329,7 +331,7 @@ export async function updateApplicationStatus(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${id}/status`,
       {
         method: "PATCH",
@@ -357,7 +359,7 @@ export async function toggleApplicationLive(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${id}/live`,
       {
         method: "PATCH",
@@ -386,7 +388,7 @@ export async function createApplicationNote(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${id}/notes`,
       {
         method: "POST",
@@ -415,7 +417,7 @@ export async function updateApplicationNote(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${applicationId}/notes/${noteId}`,
       {
         method: "PATCH",
@@ -443,7 +445,7 @@ export async function deleteApplicationNote(
   if (!token) return false;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${applicationId}/notes/${noteId}`,
       {
         method: "DELETE",
@@ -467,7 +469,7 @@ export async function bulkUpdateApplicationStatus(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/bulk/status`,
       {
         method: "PATCH",
@@ -510,7 +512,7 @@ export async function exportApplicationsCsv(
     const qs = searchParams.toString();
     const url = `${apiBaseUrl}/api/admin/applications/export${qs ? `?${qs}` : ""}`;
 
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -530,7 +532,7 @@ export async function toggleApplicationFeatured(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${id}/featured`,
       {
         method: "PATCH",
@@ -568,7 +570,7 @@ export async function sendOffer(
       formData.append("contractFile", payload.contractFile);
     }
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${applicationId}/offer`,
       {
         method: "POST",
@@ -613,7 +615,7 @@ export async function updateApplicationProfile(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${id}/profile`,
       {
         method: "PATCH",
@@ -651,7 +653,7 @@ export async function updateMarketplaceProfile(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/applications/${id}/marketplace-profile`,
       {
         method: "PATCH",
@@ -677,7 +679,7 @@ export async function fetchAdminStats(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/stats`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/stats`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -756,7 +758,7 @@ export async function createAdminRequirement(
 ): Promise<{ requirement: AdminRequirement }> {
   if (!token) throw new Error("Authentication token missing — please refresh the page");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/admin/requirements`,
     {
       method: "POST",
@@ -791,7 +793,7 @@ export async function notifyNewRequirement(
 
   // Fire-and-forget — don't block the UI if notification fails
   try {
-    await fetch(
+    await fetchWithRetry(
       `${apiBaseUrl}/api/admin/requirements/${requirementId}/notify`,
       {
         method: "POST",
@@ -826,7 +828,7 @@ export async function fetchAdminRequirements(
     const qs = searchParams.toString();
     const url = `${apiBaseUrl}/api/admin/requirements${qs ? `?${qs}` : ""}`;
 
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -849,7 +851,7 @@ export async function fetchAdminRequirement(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/requirements/${id}`,
       {
         method: "GET",
@@ -873,7 +875,7 @@ export async function updateAdminRequirement(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/requirements/${id}`,
       {
         method: "PATCH",
@@ -901,7 +903,7 @@ export async function toggleRequirementFeatured(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/requirements/${id}/featured`,
       {
         method: "PATCH",
@@ -936,7 +938,7 @@ export async function deleteAdminRequirement(
 
   try {
     const url = `${apiBaseUrl}/api/admin/requirements/${id}${force ? "?force=true" : ""}`;
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -971,7 +973,7 @@ export async function reofferApplication(
     note?: string;
   },
 ): Promise<void> {
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/admin/applications/${applicationId}/reoffer`,
     {
       method: "POST",
@@ -1006,7 +1008,7 @@ export async function fetchInterviews(
     const qs = searchParams.toString();
     const url = `${apiBaseUrl}/api/admin/interviews${qs ? `?${qs}` : ""}`;
 
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -1025,7 +1027,7 @@ export async function fetchPendingApprovalCount(
 ): Promise<number> {
   if (!token) return 0;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/matches/awaiting-approval`,
       {
         method: "GET",
@@ -1047,7 +1049,7 @@ export async function fetchOpenRequirementCount(
   if (!token) return 0;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/requirements/open-count`,
       {
         method: "GET",
@@ -1072,7 +1074,7 @@ export async function toggleSuperAdmin(
   if (!token) return false;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/team/${clerkUserId}/super-admin`,
       {
         method: "PATCH",
@@ -1097,7 +1099,7 @@ export async function fetchAdminTeam(
   if (!token) return [];
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/team`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/team`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -1119,7 +1121,7 @@ export async function adminFetchLinkedInJobs(
 ): Promise<Record<string, unknown>[]> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/admin/linkedin-jobs`,
     {
       method: "POST",
@@ -1152,7 +1154,7 @@ export async function adminParseLinkedInJob(
 ): Promise<Record<string, unknown>> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/admin/linkedin-jobs/parse`,
     {
       method: "POST",
@@ -1182,7 +1184,7 @@ export async function adminParseJobDocument(
   const formData = new FormData();
   formData.append("document", file);
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/admin/requirements/parse-document`,
     {
       method: "POST",
@@ -1245,7 +1247,7 @@ export async function fetchAdminEngagements(
     if (params?.developerId) searchParams.set("developerId", params.developerId);
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/engagements${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -1273,7 +1275,7 @@ export async function createAdminTimeEntry(
   if (!token) return { success: false, error: "No token" };
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/time-entries`,
       {
         method: "POST",
@@ -1346,7 +1348,7 @@ export async function fetchAdminFinanceSummary(
 ): Promise<AdminFinanceSummary | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/finances/summary`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/finances/summary`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -1363,7 +1365,7 @@ export async function fetchAdminRevenueTrend(
 ): Promise<RevenueTrendPoint[]> {
   if (!token) return [];
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/finances/revenue-trend`,
       {
         method: "GET",
@@ -1428,7 +1430,7 @@ export async function fetchMatchesAwaitingApproval(
 ): Promise<AdminPendingApproval[]> {
   if (!token) return [];
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/matches/awaiting-approval`,
       {
         method: "GET",
@@ -1448,7 +1450,7 @@ export async function fetchUpcomingStarts(
 ): Promise<AdminUpcomingStart[]> {
   if (!token) return [];
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/engagements/upcoming-starts`,
       {
         method: "GET",
@@ -1477,7 +1479,7 @@ export async function adminApproveMatch(
 ): Promise<{ success: boolean; error?: string }> {
   if (!token) return { success: false, error: "No token" };
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/matches/${matchId}/approve`,
       {
         method: "POST",
@@ -1506,7 +1508,7 @@ export async function adminRejectMatch(
 ): Promise<{ success: boolean; error?: string }> {
   if (!token) return { success: false, error: "No token" };
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/matches/${matchId}/reject`,
       {
         method: "POST",
@@ -1534,7 +1536,7 @@ export async function adminConfirmEngagementStart(
 ): Promise<{ success: boolean; error?: string }> {
   if (!token) return { success: false, error: "No token" };
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/engagements/${engagementId}/confirm-start`,
       {
         method: "POST",
@@ -1574,7 +1576,7 @@ export async function updateAdminEngagement(
   if (!token) return { success: false, error: "No token" };
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/engagements/${id}`,
       {
         method: "PATCH",

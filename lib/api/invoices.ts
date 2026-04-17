@@ -1,4 +1,5 @@
 import type { InvoiceStatus } from "@/app/admin/dashboard/_components/dashboard-data";
+import { fetchWithRetry } from "./fetch-with-retry";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -56,7 +57,7 @@ export async function fetchInvoices(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/invoices`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/invoices`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -76,7 +77,7 @@ export async function fetchInvoice(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/invoices/${id}`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/invoices/${id}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -96,7 +97,7 @@ export async function fetchInvoicesByCompany(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices?companyId=${companyId}`,
       {
         method: "GET",
@@ -118,7 +119,7 @@ export async function fetchInvoiceSummary(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices/summary`,
       {
         method: "GET",
@@ -141,7 +142,7 @@ export async function fetchCompanyInvoiceSummary(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices/summary?companyId=${companyId}`,
       {
         method: "GET",
@@ -174,7 +175,7 @@ export async function adminCreateInvoice(
 ): Promise<{ success: true; invoiceId: string } | { success: false; error: string }> {
   if (!token) return { success: false, error: "No token" };
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/invoices`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/invoices`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -209,7 +210,7 @@ export async function updateInvoice(
 ): Promise<{ success: boolean; error?: string }> {
   if (!token) return { success: false, error: "No token" };
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/invoices/${invoiceId}`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/invoices/${invoiceId}`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -242,7 +243,7 @@ export async function addInvoiceLineItem(
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   if (!token) return { success: false, error: "No token" };
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices/${invoiceId}/line-items`,
       {
         method: "POST",
@@ -280,7 +281,7 @@ export async function updateInvoiceLineItem(
 ): Promise<{ success: boolean; error?: string }> {
   if (!token) return { success: false, error: "No token" };
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices/${invoiceId}/line-items/${lineId}`,
       {
         method: "PATCH",
@@ -309,7 +310,7 @@ export async function deleteInvoiceLineItem(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices/${invoiceId}/line-items/${lineId}`,
       {
         method: "DELETE",
@@ -329,7 +330,7 @@ export async function sendInvoiceToCompany(
 ): Promise<{ success: boolean; error?: string }> {
   if (!token) return { success: false, error: "No token" };
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices/${invoiceId}/send`,
       {
         method: "POST",
@@ -355,7 +356,7 @@ export async function updateInvoiceStatus(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices/${invoiceId}/status`,
       {
         method: "PATCH",
@@ -382,7 +383,7 @@ export async function deleteInvoice(
   if (!token) return false;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/invoices/${invoiceId}`,
       {
         method: "DELETE",

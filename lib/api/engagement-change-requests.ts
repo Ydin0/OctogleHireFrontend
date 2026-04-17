@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "./fetch-with-retry";
+
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -41,7 +43,7 @@ export async function fetchAdminChangeRequests(
   const qs = searchParams.toString();
   const url = `${apiBaseUrl}/api/admin/engagement-change-requests${qs ? `?${qs}` : ""}`;
 
-  const response = await fetch(url, {
+  const response = await fetchWithRetry(url, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
@@ -59,7 +61,7 @@ export async function reviewChangeRequest(
 ): Promise<EngagementChangeRequestAdmin> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/admin/engagement-change-requests/${id}/review`,
     {
       method: "PATCH",

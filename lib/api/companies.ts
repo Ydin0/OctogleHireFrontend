@@ -1,4 +1,5 @@
 import type { CompanyStatus } from "@/app/admin/dashboard/_components/dashboard-data";
+import { fetchWithRetry } from "./fetch-with-retry";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -388,7 +389,7 @@ export async function fetchCompanyProfile(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/profile`,
       {
         method: "GET",
@@ -410,7 +411,7 @@ export async function fetchCompanyTeam(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/team`,
       {
         method: "GET",
@@ -432,7 +433,7 @@ export async function fetchCompanyEngagements(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/engagements`,
       {
         method: "GET",
@@ -454,7 +455,7 @@ export async function fetchEngagementTimeEntries(
 ): Promise<CompanyTimeEntry[]> {
   if (!token) return [];
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/engagements/${engagementId}/time-entries`,
     {
       method: "GET",
@@ -481,7 +482,7 @@ export async function fetchCompanyTimeEntries(
   const qs = searchParams.toString();
   const url = `${apiBaseUrl}/api/companies/time-entries${qs ? `?${qs}` : ""}`;
 
-  const response = await fetch(url, {
+  const response = await fetchWithRetry(url, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
@@ -497,7 +498,7 @@ export async function approveCompanyTimeEntry(
 ): Promise<CompanyTimeEntryFull | null> {
   if (!token) return null;
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/time-entries/${id}/approve`,
     {
       method: "PATCH",
@@ -520,7 +521,7 @@ export async function rejectCompanyTimeEntry(
 ): Promise<CompanyTimeEntryFull | null> {
   if (!token) return null;
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/time-entries/${id}/reject`,
     {
       method: "PATCH",
@@ -543,7 +544,7 @@ export async function fetchEngagementChangeRequests(
 ): Promise<EngagementChangeRequest[]> {
   if (!token) return [];
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/engagements/${engagementId}/change-requests`,
     {
       method: "GET",
@@ -569,7 +570,7 @@ export async function createChangeRequest(
 ): Promise<EngagementChangeRequest> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/engagements/${engagementId}/change-requests`,
     {
       method: "POST",
@@ -596,7 +597,7 @@ export async function fetchCompanyRequirements(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/requirements`,
       {
         method: "GET",
@@ -620,7 +621,7 @@ export async function fetchCompanyRequirement(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/requirements/${requirementId}`,
       {
         method: "GET",
@@ -642,7 +643,7 @@ export async function createJobRequirement(
 ): Promise<JobRequirement> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/requirements`,
     {
       method: "POST",
@@ -670,7 +671,7 @@ export async function updateJobRequirement(
 ): Promise<JobRequirement> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/requirements/${requirementId}`,
     {
       method: "PATCH",
@@ -698,7 +699,7 @@ export async function updateRequirementStatus(
 ): Promise<JobRequirement> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/requirements/${requirementId}/status`,
     {
       method: "PATCH",
@@ -728,7 +729,7 @@ export async function respondToMatch(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/matches/${matchId}/respond`,
       {
         method: "PATCH",
@@ -754,7 +755,7 @@ export async function inviteCompanyTeamMember(
 ): Promise<TeamMember> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/team/invite`,
     {
       method: "POST",
@@ -781,7 +782,7 @@ export async function removeCompanyTeamMember(
 ): Promise<boolean> {
   if (!token) return false;
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/team/${memberId}`,
     {
       method: "DELETE",
@@ -800,7 +801,7 @@ export async function updateCompanyTeamMember(
 ): Promise<TeamMember> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/team/${memberId}`,
     {
       method: "PATCH",
@@ -831,7 +832,7 @@ export async function uploadTeamMemberAvatar(
   const formData = new FormData();
   formData.append("avatar", file);
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/team/${memberId}/avatar`,
     {
       method: "POST",
@@ -858,7 +859,7 @@ export async function fetchLinkedInJobs(
 ): Promise<LinkedInJob[]> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/linkedin-jobs`,
     {
       method: "POST",
@@ -891,7 +892,7 @@ export async function parseLinkedInJob(
 ): Promise<ParsedJobData> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/linkedin-jobs/parse`,
     {
       method: "POST",
@@ -921,7 +922,7 @@ export async function parseJobDocument(
   const formData = new FormData();
   formData.append("document", file);
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/requirements/parse-document`,
     {
       method: "POST",
@@ -949,7 +950,7 @@ export async function updateCompanyProfile(
 ): Promise<CompanyProfileSummary> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/profile`,
     {
       method: "PATCH",
@@ -979,7 +980,7 @@ export async function uploadCompanyLogo(
   const formData = new FormData();
   formData.append("logo", file);
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/profile/logo`,
     {
       method: "POST",
@@ -1002,7 +1003,7 @@ export async function getDiscoveredJobs(
 ): Promise<DiscoverJobsResponse> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/discover-jobs`,
     {
       method: "GET",
@@ -1025,7 +1026,7 @@ export async function discoverJobs(
 ): Promise<DiscoverJobsResponse> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/discover-jobs`,
     {
       method: "POST",
@@ -1052,7 +1053,7 @@ export async function parseDiscoveredJobs(
 ): Promise<Array<{ discoveredJobId: string; parsed: ParsedJobData }>> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/discover-jobs/parse`,
     {
       method: "POST",
@@ -1096,7 +1097,7 @@ export async function importDiscoveredJobs(
 ): Promise<JobRequirement[]> {
   if (!token) throw new Error("Not authenticated");
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/companies/discover-jobs/import`,
     {
       method: "POST",
@@ -1126,7 +1127,7 @@ export async function fetchCompanies(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies`,
       {
         method: "GET",
@@ -1149,7 +1150,7 @@ export async function fetchCompany(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies/${companyId}`,
       {
         method: "GET",
@@ -1176,7 +1177,7 @@ export async function fetchCompanyRequirementAdmin(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/requirements/${requirementId}`,
       {
         method: "GET",
@@ -1208,7 +1209,7 @@ export async function updateCompanyStatus(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies/${companyId}/status`,
       {
         method: "PATCH",
@@ -1236,7 +1237,7 @@ export async function updateCompanyCurrency(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies/${companyId}/currency`,
       {
         method: "PATCH",
@@ -1262,7 +1263,7 @@ export async function activateCompany(
 ): Promise<CompanyProfile | null> {
   if (!token) return null;
 
-  const response = await fetch(
+  const response = await fetchWithRetry(
     `${apiBaseUrl}/api/admin/companies/${companyId}/activate`,
     {
       method: "POST",
@@ -1290,7 +1291,7 @@ export async function proposeMatch(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/requirements/${requirementId}/matches`,
       {
         method: "POST",
@@ -1317,7 +1318,7 @@ export async function removeMatch(
   if (!token) return false;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/matches/${matchId}`,
       {
         method: "DELETE",
@@ -1339,7 +1340,7 @@ export async function updateMatch(
 ): Promise<ProposedMatch | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/matches/${matchId}`,
       {
         method: "PATCH",
@@ -1365,7 +1366,7 @@ export async function deleteCompany(
   if (!token) return { ok: false, message: "No token" };
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies/${companyId}`,
       {
         method: "DELETE",
@@ -1399,7 +1400,7 @@ export async function createCompany(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies`,
       {
         method: "POST",
@@ -1474,7 +1475,7 @@ export async function browseCompanyDevelopers(
   const qs = query.toString();
   const url = `${apiBaseUrl}/api/companies/developers${qs ? `?${qs}` : ""}`;
 
-  const response = await fetch(url, {
+  const response = await fetchWithRetry(url, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
@@ -1593,7 +1594,7 @@ export async function fetchCompanyInvoices(
 ): Promise<CompanyInvoice[]> {
   if (!token) return [];
   try {
-    const response = await fetch(`${apiBaseUrl}/api/companies/invoices`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/companies/invoices`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -1610,7 +1611,7 @@ export async function fetchCompanyInvoiceSummaryData(
 ): Promise<CompanyInvoiceSummary | null> {
   if (!token) return null;
   try {
-    const response = await fetch(`${apiBaseUrl}/api/companies/invoices/summary`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/companies/invoices/summary`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -1628,7 +1629,7 @@ export async function fetchCompanyDeveloperProfile(
 ): Promise<CompanyDeveloperProfile | null> {
   if (!token) return null;
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/developers/${developerId}`,
       {
         method: "GET",
@@ -1660,7 +1661,7 @@ export async function fetchAvailableSlots(
     if (params?.weeksAhead) sp.set("weeksAhead", String(params.weeksAhead));
     const qs = sp.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/matches/${matchId}/available-slots${qs ? `?${qs}` : ""}`,
       { method: "GET", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
     );
@@ -1686,7 +1687,7 @@ export async function requestInterview(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/matches/${matchId}/request-interview`,
       {
         method: "POST",
@@ -1711,7 +1712,7 @@ export async function fetchCompanyInterviews(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/companies/interviews`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/companies/interviews`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 60 },
@@ -1730,7 +1731,7 @@ export async function fetchCompanyInterview(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/interviews/${interviewId}`,
       { method: "GET", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
     );
@@ -1754,7 +1755,7 @@ export async function updateCompanyInterview(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/interviews/${interviewId}`,
       {
         method: "PATCH",
@@ -1778,7 +1779,7 @@ export async function completeInterview(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/interviews/${interviewId}/complete`,
       {
         method: "POST",
@@ -1836,7 +1837,7 @@ export async function fetchCalendarStatus(
 ): Promise<CalendarConnection> {
   if (!token) return { connected: false };
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/status`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/calendar/status`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -1853,7 +1854,7 @@ export async function startCalendarConnect(
 ): Promise<{ authUrl: string } | null> {
   if (!token) return null;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/connect?provider=${provider}`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/calendar/connect?provider=${provider}`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -1869,7 +1870,7 @@ export async function disconnectCalendar(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/connection`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/calendar/connection`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -1886,7 +1887,7 @@ export async function fetchCalendarAvailability(
 ): Promise<CalendarBusyBlock[]> {
   if (!token) return [];
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/calendar/availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
       { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
     );
@@ -1903,7 +1904,7 @@ export async function fetchCompanySlots(
 ): Promise<CompanyAvailabilitySlot[]> {
   if (!token) return [];
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/slots`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/calendar/slots`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -1920,7 +1921,7 @@ export async function createCompanySlot(
 ): Promise<CompanyAvailabilitySlot | null> {
   if (!token) return null;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/slots`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/calendar/slots`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(slot),
@@ -1938,7 +1939,7 @@ export async function deleteCompanySlot(
 ): Promise<boolean> {
   if (!token) return false;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/calendar/slots/${slotId}`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/calendar/slots/${slotId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -1955,7 +1956,7 @@ export async function fetchCalendarInterviews(
 ): Promise<CalendarInterview[]> {
   if (!token) return [];
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/calendar/interviews?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
       { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
     );
@@ -1995,7 +1996,7 @@ export async function fetchOnboardingTemplate(
 ): Promise<{ items: OnboardingTemplateItem[] } | null> {
   if (!token) return null;
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/onboarding-template`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/onboarding-template`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -2011,7 +2012,7 @@ export async function updateOnboardingTemplate(
   items: OnboardingTemplateItem[],
 ): Promise<boolean> {
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/onboarding-template`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/onboarding-template`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -2031,7 +2032,7 @@ export async function fetchEngagementOnboarding(
 ): Promise<OnboardingChecklistItem[]> {
   if (!token) return [];
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/engagements/${engagementId}/onboarding`,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -2056,7 +2057,7 @@ export async function toggleOnboardingItem(
     const body: Record<string, unknown> = { isCompleted };
     if (notes !== undefined) body.notes = notes;
 
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/engagements/${engagementId}/onboarding/${itemId}`,
       {
         method: "PATCH",
@@ -2080,7 +2081,7 @@ export async function addOnboardingItem(
   item: { label: string; description?: string; category?: string },
 ): Promise<OnboardingChecklistItem | null> {
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/engagements/${engagementId}/onboarding/items`,
       {
         method: "POST",
@@ -2104,7 +2105,7 @@ export async function deleteOnboardingItem(
   itemId: string,
 ): Promise<boolean> {
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/companies/engagements/${engagementId}/onboarding/${itemId}`,
       {
         method: "DELETE",
@@ -2142,7 +2143,7 @@ export async function fetchCompanyAgreements(
   token: string | null,
 ): Promise<Agreement[]> {
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/agreements`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/agreements`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -2158,7 +2159,7 @@ export async function fetchCompanyAgreement(
   id: string,
 ): Promise<AgreementDetail | null> {
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/agreements/${id}`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/agreements/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
@@ -2175,7 +2176,7 @@ export async function signAgreement(
   payload: { name: string; title: string },
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const res = await fetch(`${apiBaseUrl}/api/companies/agreements/${id}/sign`, {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/agreements/${id}/sign`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -2200,7 +2201,7 @@ export async function sendCompanyMsa(
   companyId: string,
 ): Promise<{ success: boolean; agreement?: Agreement; error?: string }> {
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies/${companyId}/agreements/msa`,
       {
         method: "POST",
@@ -2222,7 +2223,7 @@ export async function fetchAdminCompanyAgreements(
   companyId: string,
 ): Promise<Agreement[]> {
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies/${companyId}/agreements`,
       {
         headers: { Authorization: `Bearer ${token}` },

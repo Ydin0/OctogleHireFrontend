@@ -1,4 +1,5 @@
 import type { TimeEntryStatus } from "@/app/admin/dashboard/_components/dashboard-data";
+import { fetchWithRetry } from "./fetch-with-retry";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -50,7 +51,7 @@ export async function fetchTimeEntries(
     if (params?.companyId) searchParams.set("companyId", params.companyId);
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/time-entries${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -73,7 +74,7 @@ export async function approveTimeEntry(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/time-entries/${id}/approve`,
       {
         method: "PATCH",
@@ -99,7 +100,7 @@ export async function rejectTimeEntry(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/time-entries/${id}/reject`,
       {
         method: "PATCH",
@@ -125,7 +126,7 @@ export async function deleteTimeEntry(
   if (!token) return false;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/time-entries/${entryId}`,
       {
         method: "DELETE",

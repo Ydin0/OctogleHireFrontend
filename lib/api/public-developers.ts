@@ -1,4 +1,5 @@
 import type { Developer } from "@/lib/data/developers";
+import { fetchWithRetry } from "./fetch-with-retry";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -28,7 +29,7 @@ export async function fetchPublicDevelopers(
     const qs = searchParams.toString();
     const url = `${apiBaseUrl}/api/public/developers${qs ? `?${qs}` : ""}`;
 
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "GET",
       cache: "no-store",
       signal: AbortSignal.timeout(10_000),
@@ -48,7 +49,7 @@ export async function fetchPublicDeveloper(
   slug: string,
 ): Promise<Developer | null> {
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/public/developers/${encodeURIComponent(slug)}`,
       {
         method: "GET",

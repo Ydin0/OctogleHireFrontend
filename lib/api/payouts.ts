@@ -1,4 +1,5 @@
 import type { PayoutStatus } from "@/app/admin/dashboard/_components/dashboard-data";
+import { fetchWithRetry } from "./fetch-with-retry";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -57,7 +58,7 @@ export async function fetchPayouts(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/payouts`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/payouts`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -77,7 +78,7 @@ export async function fetchPayout(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/admin/payouts/${id}`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/payouts/${id}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -97,7 +98,7 @@ export async function fetchPayoutsByDeveloper(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/payouts?developerId=${developerId}`,
       {
         method: "GET",
@@ -119,7 +120,7 @@ export async function fetchPayoutSummary(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/payouts/summary`,
       {
         method: "GET",
@@ -142,7 +143,7 @@ export async function fetchDeveloperPayoutSummary(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/payouts/summary?developerId=${developerId}`,
       {
         method: "GET",
@@ -166,7 +167,7 @@ export async function updatePayoutStatus(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/payouts/${payoutId}/status`,
       {
         method: "PATCH",
@@ -193,7 +194,7 @@ export async function deletePayout(
   if (!token) return false;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/payouts/${payoutId}`,
       {
         method: "DELETE",

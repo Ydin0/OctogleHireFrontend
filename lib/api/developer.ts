@@ -1,3 +1,5 @@
+import { fetchWithRetry } from "./fetch-with-retry";
+
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -187,7 +189,7 @@ export async function fetchDeveloperEngagements(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/developers/engagements`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/developers/engagements`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 60 },
@@ -212,7 +214,7 @@ export async function fetchDeveloperTimeEntries(
     if (params?.period) searchParams.set("period", params.period);
     const qs = searchParams.toString();
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/developers/time-entries${qs ? `?${qs}` : ""}`,
       {
         method: "GET",
@@ -240,7 +242,7 @@ export async function submitTimeEntry(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/developers/time-entries`,
       {
         method: "POST",
@@ -269,7 +271,7 @@ export async function fetchDeveloperEarnings(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/developers/earnings`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/developers/earnings`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 60 },
@@ -288,7 +290,7 @@ export async function fetchDeveloperEarningsSummary(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/developers/earnings/summary`,
       {
         method: "GET",
@@ -312,7 +314,7 @@ export async function fetchDeveloperProfile(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/developers/profile`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/developers/profile`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 60 },
@@ -332,7 +334,7 @@ export async function updateDeveloperProfile(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/developers/profile`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/developers/profile`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -360,7 +362,7 @@ export async function fetchDeveloperOffers(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/developers/offers`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/developers/offers`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 60 },
@@ -381,7 +383,7 @@ export async function respondToDeveloperOffer(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/developers/offers/${offerId}/respond`,
       {
         method: "PATCH",
@@ -412,7 +414,7 @@ export async function fetchDeveloperOpportunities(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/developers/opportunities`,
       {
         method: "GET",
@@ -437,7 +439,7 @@ export async function respondToDeveloperOpportunity(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/developers/opportunities/${matchId}/respond`,
       {
         method: "PATCH",
@@ -468,7 +470,7 @@ export async function fetchDeveloperAvailability(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/developers/availability`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/developers/availability`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
@@ -490,7 +492,7 @@ export async function saveDeveloperAvailability(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/developers/availability`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/developers/availability`, {
       method: "PUT",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -514,7 +516,7 @@ export async function fetchDeveloperInterviews(
   if (!token) return null;
 
   try {
-    const response = await fetch(`${apiBaseUrl}/api/developers/interviews`, {
+    const response = await fetchWithRetry(`${apiBaseUrl}/api/developers/interviews`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       next: { revalidate: 60 },
@@ -539,7 +541,7 @@ export async function respondToInterview(
   if (!token) return null;
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${apiBaseUrl}/api/developers/interviews/${interviewId}/respond`,
       {
         method: "PATCH",
@@ -580,7 +582,7 @@ export async function fetchDeveloperEngagementOnboarding(
 ): Promise<DeveloperOnboardingChecklistItem[]> {
   if (!token) return [];
   try {
-    const res = await fetch(
+    const res = await fetchWithRetry(
       `${apiBaseUrl}/api/developers/engagements/${engagementId}/onboarding`,
       {
         headers: { Authorization: `Bearer ${token}` },
