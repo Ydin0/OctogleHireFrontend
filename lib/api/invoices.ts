@@ -7,10 +7,11 @@ const apiBaseUrl =
 
 export interface InvoiceLineItem {
   id: string;
-  developerId: string;
-  developerName: string;
-  developerRole: string;
-  requirementTitle: string;
+  developerId: string | null;
+  developerName: string | null;
+  developerRole: string | null;
+  requirementTitle: string | null;
+  description: string | null;
   hourlyRate: number;
   hoursWorked: number;
   amount: number;
@@ -190,6 +191,157 @@ export async function adminCreateInvoice(
     }
     const data = (await response.json()) as { id: string };
     return { success: true, invoiceId: data.id };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function updateInvoice(
+  token: string | null,
+  invoiceId: string,
+  payload: {
+    dueDate?: string | null;
+    taxRate?: number;
+    currency?: string;
+    notes?: string | null;
+    status?: InvoiceStatus;
+  },
+): Promise<{ success: boolean; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/admin/invoices/${invoiceId}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { success: false, error: body.message ?? "Failed to update invoice" };
+    }
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function addInvoiceLineItem(
+  token: string | null,
+  invoiceId: string,
+  payload: {
+    description?: string;
+    developerName?: string;
+    developerRole?: string;
+    hourlyRate?: number;
+    hoursWorked?: number;
+    amount?: number;
+  },
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/invoices/${invoiceId}/line-items`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { success: false, error: body.message ?? "Failed to add line item" };
+    }
+    const data = (await response.json()) as { id: string };
+    return { success: true, id: data.id };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function updateInvoiceLineItem(
+  token: string | null,
+  invoiceId: string,
+  lineId: string,
+  payload: {
+    description?: string | null;
+    developerName?: string | null;
+    developerRole?: string | null;
+    hourlyRate?: number;
+    hoursWorked?: number;
+    amount?: number;
+  },
+): Promise<{ success: boolean; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/invoices/${invoiceId}/line-items/${lineId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { success: false, error: body.message ?? "Failed to update line item" };
+    }
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function deleteInvoiceLineItem(
+  token: string | null,
+  invoiceId: string,
+  lineId: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/invoices/${invoiceId}/line-items/${lineId}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function sendInvoiceToCompany(
+  token: string | null,
+  invoiceId: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/invoices/${invoiceId}/send`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { success: false, error: body.message ?? "Failed to send invoice" };
+    }
+    return { success: true };
   } catch {
     return { success: false, error: "Network error" };
   }

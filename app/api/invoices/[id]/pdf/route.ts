@@ -1,18 +1,16 @@
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
-import { renderToBuffer } from "@react-pdf/renderer";
-import React from "react";
 import { auth } from "@clerk/nextjs/server";
-
-import type { Invoice } from "@/lib/api/invoices";
-import { InvoicePDF } from "@/lib/pdf/invoice-template";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
+// This route proxies to the backend's authoritative PDF renderer so the
+// preview iframe (which can't send Bearer headers itself) and the email
+// attachment use exactly the same PDF source.
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
@@ -26,44 +24,32 @@ export async function GET(
     );
   }
 
-  // Try admin endpoint first, then company endpoint
-  let invoice: Invoice | null = null;
+  const url = new URL(request.url);
+  const isDownload = url.searchParams.get("download") === "1";
 
-  const adminResponse = await fetch(`${apiBaseUrl}/api/admin/invoices/${id}`, {
+  const upstream = await fetch(`${apiBaseUrl}/api/admin/invoices/${id}/pdf`, {
     headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
   });
 
-  if (adminResponse.ok) {
-    invoice = (await adminResponse.json()) as Invoice;
-  } else {
-    const companyResponse = await fetch(
-      `${apiBaseUrl}/api/companies/invoices/${id}`,
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-
-    if (companyResponse.ok) {
-      invoice = (await companyResponse.json()) as Invoice;
-    }
-  }
-
-  if (!invoice) {
+  if (!upstream.ok) {
     return NextResponse.json(
       { error: "not_found", message: "Invoice not found." },
-      { status: 404 },
+      { status: upstream.status },
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const element = React.createElement(InvoicePDF, { invoice }) as any;
-  const buffer = await renderToBuffer(element);
-
-  const filename = `${invoice.invoiceNumber}.pdf`;
+  const buffer = Buffer.from(await upstream.arrayBuffer());
+  const filename = upstream.headers
+    .get("content-disposition")
+    ?.match(/filename="([^"]+)"/)?.[1] ?? `invoice-${id}.pdf`;
 
   return new NextResponse(new Uint8Array(buffer), {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${filename}"`,
+      "Content-Disposition": `${isDownload ? "attachment" : "inline"}; filename="${filename}"`,
+      "Cache-Control": "no-store",
     },
   });
 }

@@ -370,12 +370,16 @@ export const formatCurrency = (
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-export const formatDate = (dateStr: string) =>
-  new Date(dateStr).toLocaleDateString("en-US", {
+export const formatDate = (dateStr: string | null | undefined) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime()) || d.getFullYear() < 2000) return "—";
+  return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+};
 
 export const getInitials = (name: string) =>
   name
