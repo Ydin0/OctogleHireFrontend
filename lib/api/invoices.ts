@@ -156,6 +156,45 @@ export async function fetchCompanyInvoiceSummary(
   }
 }
 
+export interface AdminCreateInvoicePayload {
+  engagementId: string;
+  period: string; // YYYY-MM
+  hours: number;
+  hourlyRate: number;
+  currency?: string;
+  taxRate?: number;
+  dueInDays?: number;
+  notes?: string;
+}
+
+export async function adminCreateInvoice(
+  token: string | null,
+  payload: AdminCreateInvoicePayload,
+): Promise<{ success: true; invoiceId: string } | { success: false; error: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/admin/invoices`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      return { success: false, error: body.message ?? "Failed to create invoice" };
+    }
+    const data = (await response.json()) as { id: string };
+    return { success: true, invoiceId: data.id };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
 export async function updateInvoiceStatus(
   token: string | null,
   invoiceId: string,

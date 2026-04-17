@@ -12,23 +12,46 @@ interface ExchangeRateResult {
   stale: boolean;
 }
 
+interface RatesState {
+  base: string;
+  rates: Record<string, number>;
+  loading: boolean;
+  error: string | null;
+  stale: boolean;
+}
+
 export function useExchangeRates(
   baseCurrency: string,
   token: string | null,
 ): ExchangeRateResult {
-  const [rates, setRates] = useState<Record<string, number>>({ [baseCurrency]: 1 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [stale, setStale] = useState(false);
+  const [state, setState] = useState<RatesState>({
+    base: baseCurrency,
+    rates: { [baseCurrency]: 1 },
+    loading: true,
+    error: null,
+    stale: false,
+  });
 
   useEffect(() => {
     if (!token) {
-      setLoading(false);
+      setState({
+        base: baseCurrency,
+        rates: { [baseCurrency]: 1 },
+        loading: false,
+        error: null,
+        stale: false,
+      });
       return;
     }
 
     let cancelled = false;
-    setLoading(true);
+    setState({
+      base: baseCurrency,
+      rates: { [baseCurrency]: 1 },
+      loading: true,
+      error: null,
+      stale: false,
+    });
 
     fetch(
       `${apiBaseUrl}/api/admin/exchange-rates?base=${encodeURIComponent(baseCurrency)}`,
@@ -37,15 +60,21 @@ export function useExchangeRates(
       .then((res) => res.json())
       .then((data: { rates: Record<string, number>; stale: boolean }) => {
         if (cancelled) return;
-        setRates(data.rates);
-        setStale(data.stale);
-        setError(null);
-        setLoading(false);
+        setState({
+          base: baseCurrency,
+          rates: data.rates,
+          loading: false,
+          error: null,
+          stale: data.stale,
+        });
       })
       .catch((err) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Failed to fetch rates");
-        setLoading(false);
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error: err instanceof Error ? err.message : "Failed to fetch rates",
+        }));
       });
 
     return () => {
@@ -53,5 +82,15 @@ export function useExchangeRates(
     };
   }, [baseCurrency, token]);
 
-  return { rates, loading, error, stale };
+  // If state is for a different base than what's being asked for (transient),
+  // expose a safe placeholder so consumers don't apply mismatched rates.
+  const safeRates =
+    state.base === baseCurrency ? state.rates : { [baseCurrency]: 1 };
+
+  return {
+    rates: safeRates,
+    loading: state.loading,
+    error: state.error,
+    stale: state.stale,
+  };
 }

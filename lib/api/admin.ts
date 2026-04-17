@@ -1299,43 +1299,40 @@ export async function createAdminTimeEntry(
 
 // ── Admin Finances ────────────────────────────────────────────────────────
 
+export interface InvoiceCurrencyBucket {
+  paid: number;
+  outstanding: number;
+  overdue: number;
+  thisMonth: number;
+  invoiceCount: number;
+  overdueCount: number;
+}
+
+export interface PayoutCurrencyBucket {
+  paid: number;
+  pending: number;
+  count: number;
+}
+
+export interface EngagementCurrencyBucket {
+  count: number;
+  monthlyBilling: number;
+  monthlyPayout: number;
+  monthlyMargin: number;
+  predictedNextMonth: number;
+  annualizedRevenue: number;
+  annualizedMargin: number;
+}
+
 export interface AdminFinanceSummary {
-  revenue: {
-    total: number;
-    paid: number;
-    outstanding: number;
-    overdue: number;
-    thisMonth: number;
-    invoiceCount: number;
-    overdueCount: number;
-  };
-  payouts: {
-    paid: number;
-    pending: number;
-    count: number;
-  };
-  margin: {
-    realized: number;
-    realizedPercent: number;
-    projected: number;
-    projectedPercent: number;
-  };
+  invoicesByCurrency: Record<string, InvoiceCurrencyBucket>;
+  payoutsByCurrency: Record<string, PayoutCurrencyBucket>;
+  currencyBreakdown: Record<string, EngagementCurrencyBucket>;
   engagements: {
     activeCount: number;
     pendingCount: number;
     upcomingStartCount: number;
-    monthlyBilling: number;
-    monthlyPayout: number;
   };
-  forecast: {
-    predictedNextMonthRevenue: number;
-    annualizedRevenue: number;
-    annualizedMargin: number;
-  };
-  currencyBreakdown: Record<
-    string,
-    { count: number; monthlyBilling: number; monthlyPayout: number }
-  >;
 }
 
 export interface RevenueTrendPoint {
@@ -1469,7 +1466,14 @@ export async function fetchUpcomingStarts(
 export async function adminApproveMatch(
   token: string | null,
   matchId: string,
-  payload?: { startDate?: string },
+  payload?: {
+    startDate?: string;
+    engagementType?: string;
+    monthlyHoursExpected?: number | null;
+    companyBillingRate?: number;
+    developerPayoutRate?: number;
+    currency?: string;
+  },
 ): Promise<{ success: boolean; error?: string }> {
   if (!token) return { success: false, error: "No token" };
   try {

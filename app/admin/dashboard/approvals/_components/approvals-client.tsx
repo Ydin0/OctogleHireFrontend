@@ -38,8 +38,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { formatCurrency } from "../../_components/dashboard-data";
 import { useAdminCurrency } from "../../_components/admin-currency-context";
 
 interface ApprovalsClientProps {
@@ -76,10 +85,38 @@ function ApprovalsClient({ pending, upcoming, token }: ApprovalsClientProps) {
   const [approveTarget, setApproveTarget] = useState<AdminPendingApproval | null>(
     null,
   );
-  const [approveStartDate, setApproveStartDate] = useState<Date | undefined>(
-    undefined,
-  );
+  const [approveForm, setApproveForm] = useState({
+    engagementType: "full-time",
+    monthlyHoursExpected: "160",
+    companyBillingRate: "",
+    developerPayoutRate: "",
+    currency: "USD",
+    startDate: undefined as Date | undefined,
+  });
   const [approveSubmitting, setApproveSubmitting] = useState(false);
+
+  const openApproveDialog = (m: AdminPendingApproval) => {
+    const type = m.engagementType || "full-time";
+    setApproveForm({
+      engagementType: type,
+      monthlyHoursExpected:
+        type === "full-time" ? "160" : type === "part-time" ? "80" : "",
+      companyBillingRate: String(m.proposedHourlyRate),
+      developerPayoutRate: String(m.proposedHourlyRate),
+      currency: m.currency,
+      startDate: undefined,
+    });
+    setApproveTarget(m);
+  };
+
+  const onTypeChange = (type: string) => {
+    setApproveForm((f) => ({
+      ...f,
+      engagementType: type,
+      monthlyHoursExpected:
+        type === "full-time" ? "160" : type === "part-time" ? "80" : "",
+    }));
+  };
 
   // Reject dialog
   const [rejectTarget, setRejectTarget] = useState<AdminPendingApproval | null>(
@@ -109,18 +146,30 @@ function ApprovalsClient({ pending, upcoming, token }: ApprovalsClientProps) {
 
   const handleApprove = async () => {
     if (!approveTarget) return;
+    if (!approveForm.companyBillingRate) {
+      toast.error("Billing rate is required");
+      return;
+    }
     setApproveSubmitting(true);
     const result = await adminApproveMatch(token, approveTarget.id, {
-      startDate: approveStartDate?.toISOString(),
+      startDate: approveForm.startDate?.toISOString(),
+      engagementType: approveForm.engagementType,
+      monthlyHoursExpected: approveForm.monthlyHoursExpected
+        ? Number(approveForm.monthlyHoursExpected)
+        : null,
+      companyBillingRate: Number(approveForm.companyBillingRate),
+      developerPayoutRate: approveForm.developerPayoutRate
+        ? Number(approveForm.developerPayoutRate)
+        : undefined,
+      currency: approveForm.currency,
     });
     if (result.success) {
       toast.success(
-        approveStartDate && approveStartDate.getTime() > Date.now()
+        approveForm.startDate && approveForm.startDate.getTime() > Date.now()
           ? "Engagement scheduled — confirm on the start date"
           : "Engagement created and active",
       );
       setApproveTarget(null);
-      setApproveStartDate(undefined);
       refresh();
     } else {
       toast.error(result.error ?? "Failed to approve");
@@ -361,7 +410,7 @@ function ApprovalsClient({ pending, upcoming, token }: ApprovalsClientProps) {
                         <X className="mr-1 size-3.5" />
                         Reject
                       </Button>
-                      <Button size="sm" onClick={() => setApproveTarget(m)}>
+                      <Button size="sm" onClick={() => openApproveDialog(m)}>
                         <Check className="mr-1 size-3.5" />
                         Approve
                       </Button>
@@ -504,17 +553,16 @@ function ApprovalsClient({ pending, upcoming, token }: ApprovalsClientProps) {
         onOpenChange={(open) => {
           if (!open) {
             setApproveTarget(null);
-            setApproveStartDate(undefined);
           }
         }}
       >
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Approve developer</DialogTitle>
             <DialogDescription>
               Confirm <strong>{approveTarget?.developerName}</strong> for{" "}
-              <strong>{approveTarget?.companyName}</strong>. This creates the
-              engagement on the company’s behalf.
+              <strong>{approveTarget?.companyName}</strong>. Set the actual
+              arrangement — these values define the engagement.
             </DialogDescription>
           </DialogHeader>
 
@@ -528,35 +576,154 @@ function ApprovalsClient({ pending, upcoming, token }: ApprovalsClientProps) {
                   </span>
                 </p>
                 <p className="text-muted-foreground">
-                  Billing rate:{" "}
+                  Proposed:{" "}
                   <span className="font-mono font-medium text-foreground">
-                    {fmtMoney(
+                    {formatCurrency(
                       approveTarget.proposedHourlyRate,
                       approveTarget.currency,
                     )}
-                    /hr
+                    /hr · {approveTarget.engagementType.replace(/-/g, " ")}
                   </span>
                 </p>
-                <p className="text-muted-foreground">
-                  Engagement:{" "}
-                  <span className="capitalize text-foreground">
-                    {approveTarget.engagementType.replace(/-/g, " ")}
-                  </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Engagement Type</Label>
+                  <Select
+                    value={approveForm.engagementType}
+                    onValueChange={onTypeChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="full-time">Full-time (160h)</SelectItem>
+                      <SelectItem value="part-time">Part-time (80h)</SelectItem>
+                      <SelectItem value="contract">Contract</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Monthly Hours</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 80"
+                    value={approveForm.monthlyHoursExpected}
+                    onChange={(e) =>
+                      setApproveForm((f) => ({
+                        ...f,
+                        monthlyHoursExpected: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Billing Rate (/hr)</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={approveForm.companyBillingRate}
+                    onChange={(e) =>
+                      setApproveForm((f) => ({
+                        ...f,
+                        companyBillingRate: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Currency</Label>
+                  <Select
+                    value={approveForm.currency}
+                    onValueChange={(v) =>
+                      setApproveForm((f) => ({ ...f, currency: v }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="AED">AED</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Developer Payout Rate (/hr)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={approveForm.developerPayoutRate}
+                  onChange={(e) =>
+                    setApproveForm((f) => ({
+                      ...f,
+                      developerPayoutRate: e.target.value,
+                    }))
+                  }
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  What you pay the developer per hour. Defaults to the proposed
+                  rate.
                 </p>
               </div>
 
               <div className="space-y-2">
                 <Label>Start date (optional)</Label>
                 <DatePicker
-                  value={approveStartDate}
-                  onChange={(d) => setApproveStartDate(d ?? undefined)}
+                  value={approveForm.startDate}
+                  onChange={(d) =>
+                    setApproveForm((f) => ({ ...f, startDate: d ?? undefined }))
+                  }
                 />
                 <p className="text-[10px] text-muted-foreground">
                   Leave blank to start immediately. Future dates create a{" "}
-                  <span className="font-mono">pending</span> engagement that you
-                  can confirm on the start date.
+                  <span className="font-mono">pending</span> engagement to
+                  confirm on the start date.
                 </p>
               </div>
+
+              {approveForm.companyBillingRate && approveForm.monthlyHoursExpected && (
+                <div className="rounded-md border border-pulse/20 bg-pulse/5 p-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      Predicted monthly bill
+                    </p>
+                    <p className="font-mono text-base font-semibold">
+                      {formatCurrency(
+                        Number(approveForm.companyBillingRate) *
+                          Number(approveForm.monthlyHoursExpected),
+                        approveForm.currency,
+                      )}
+                    </p>
+                  </div>
+                  {approveForm.developerPayoutRate && (
+                    <div className="mt-1 flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        Predicted monthly margin
+                      </p>
+                      <p className="font-mono text-xs">
+                        {formatCurrency(
+                          (Number(approveForm.companyBillingRate) -
+                            Number(approveForm.developerPayoutRate)) *
+                            Number(approveForm.monthlyHoursExpected),
+                          approveForm.currency,
+                        )}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -568,7 +735,10 @@ function ApprovalsClient({ pending, upcoming, token }: ApprovalsClientProps) {
             >
               Cancel
             </Button>
-            <Button onClick={handleApprove} disabled={approveSubmitting}>
+            <Button
+              onClick={handleApprove}
+              disabled={approveSubmitting || !approveForm.companyBillingRate}
+            >
               {approveSubmitting ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />

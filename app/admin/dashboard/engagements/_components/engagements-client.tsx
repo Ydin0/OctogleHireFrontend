@@ -13,7 +13,6 @@ import {
 
 import type { AdminEngagement } from "@/lib/api/admin";
 import { createAdminTimeEntry, updateAdminEngagement } from "@/lib/api/admin";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -51,13 +50,17 @@ const formatCurrency = (amount: number, currency = "USD") =>
     minimumFractionDigits: 2,
   }).format(amount);
 
-function computeMonthlyBill(engagements: AdminEngagement[]): number {
-  return engagements
-    .filter((e) => e.status === "active")
-    .reduce((sum, e) => {
-      const hours = e.monthlyHoursCap ?? e.monthlyHoursExpected ?? 0;
-      return sum + e.companyBillingRate * hours;
-    }, 0);
+function computeMonthlyBillByCurrency(
+  engagements: AdminEngagement[],
+): Record<string, number> {
+  const totals: Record<string, number> = {};
+  for (const e of engagements) {
+    if (e.status !== "active") continue;
+    const hours = e.monthlyHoursCap ?? e.monthlyHoursExpected ?? 0;
+    const cur = e.currency ?? "USD";
+    totals[cur] = (totals[cur] ?? 0) + e.companyBillingRate * hours;
+  }
+  return totals;
 }
 
 function currentPeriod(): string {
@@ -122,9 +125,13 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
 
   // Currency display
   let formatDisplay: ((amount: number, from: string) => string) | undefined;
+  let convert: ((amount: number, from: string) => number) | undefined;
+  let displayCurrency: string = "USD";
   try {
     const ctx = useAdminCurrency();
     formatDisplay = ctx.formatDisplay;
+    convert = ctx.convert;
+    displayCurrency = ctx.displayCurrency;
   } catch {
     // Outside provider — ignore
   }
@@ -134,7 +141,15 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
   const uniqueDevs = new Set(
     engagements.filter((e) => e.status === "active").map((e) => e.developerId),
   ).size;
-  const predictedBill = computeMonthlyBill(engagements);
+
+  // Sum per-currency, then convert each bucket to display currency before
+  // summing — never add raw amounts across currencies.
+  const billByCurrency = computeMonthlyBillByCurrency(engagements);
+  const predictedBill = Object.entries(billByCurrency).reduce(
+    (sum, [cur, amt]) => sum + (convert ? convert(amt, cur) : amt),
+    0,
+  );
+
   const pendingRequests = engagements.filter(
     (e) => e.pendingChangeRequests > 0,
   ).length;
@@ -142,7 +157,7 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
   const kpis = [
     { label: "Active Engagements", value: String(activeCount), icon: Briefcase, highlight: false, mono: false },
     { label: "Active Developers", value: String(uniqueDevs), icon: Users, highlight: false, mono: false },
-    { label: "Predicted Monthly Bill", value: formatDisplay ? formatDisplay(predictedBill, "USD") : formatCurrency(predictedBill), icon: DollarSign, highlight: false, mono: true },
+    { label: "Predicted Monthly Bill", value: formatCurrency(predictedBill, displayCurrency), icon: DollarSign, highlight: false, mono: true },
     { label: "Pending Requests", value: String(pendingRequests), icon: AlertCircle, highlight: pendingRequests > 0, mono: false },
   ];
 
