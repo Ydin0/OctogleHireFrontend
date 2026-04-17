@@ -79,20 +79,20 @@ export function BlurredCounter({
   if (variant === "inline") {
     return (
       <div className="flex flex-col items-center gap-3 py-6">
-        <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-emerald-500">
+        <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-pulse-500">
           <TrendingUp className="size-3" />
           Estimated annual savings
         </p>
         <div className="relative">
           <p
             className={`font-mono text-5xl font-bold tracking-tight transition-all duration-700 sm:text-7xl ${
-              revealed ? "text-emerald-500" : "text-foreground/90"
+              revealed ? "text-pulse-500" : "text-foreground/90"
             }`}
           >
             {displayValue}
           </p>
           {revealed && (
-            <div className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-lg bg-emerald-500/20 blur-3xl" />
+            <div className="pointer-events-none absolute inset-0 -z-10 animate-pulse rounded-lg bg-pulse-500/20 blur-3xl" />
           )}
         </div>
         <p className="text-xs text-muted-foreground">per year</p>
@@ -110,7 +110,7 @@ export function BlurredCounter({
         {step && totalSteps && (
           <div className="absolute inset-x-0 top-0 h-0.5 bg-foreground/5">
             <div
-              className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 transition-all duration-500 ease-out"
+              className="h-full bg-gradient-to-r from-pulse-400 to-pulse-500 transition-all duration-500 ease-out"
               style={{ width: `${stepProgress}%` }}
             />
           </div>
@@ -120,7 +120,7 @@ export function BlurredCounter({
           {/* Left: label + value */}
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.15em] text-muted-foreground sm:text-[10px]">
-              <TrendingUp className="size-2.5 text-emerald-500 sm:size-3" />
+              <TrendingUp className="size-2.5 text-pulse-500 sm:size-3" />
               Your potential annual savings
             </p>
             <div className="relative mt-1 inline-flex items-baseline gap-2">
@@ -128,7 +128,7 @@ export function BlurredCounter({
                 key={pulseKey}
                 className={`font-mono text-2xl font-bold tracking-tight tabular-nums transition-colors duration-700 sm:text-4xl ${
                   revealed
-                    ? "text-emerald-500 animate-in zoom-in-50"
+                    ? "text-pulse-500 animate-in zoom-in-50"
                     : "text-foreground/90"
                 }`}
               >
@@ -140,21 +140,21 @@ export function BlurredCounter({
               {value > 0 && !revealed && (
                 <span
                   key={`bump-${pulseKey}`}
-                  className="absolute -right-2 -top-2 flex size-5 animate-in fade-in zoom-in items-center justify-center rounded-full bg-emerald-500/20 text-emerald-500 sm:-right-4 sm:size-6"
+                  className="absolute -right-2 -top-2 flex size-5 animate-in fade-in zoom-in items-center justify-center rounded-full bg-pulse-500/20 text-pulse-500 sm:-right-4 sm:size-6"
                 >
                   <Zap className="size-3 sm:size-3.5" fill="currentColor" />
                 </span>
               )}
             </div>
             {revealed && (
-              <div className="absolute inset-0 -z-10 animate-pulse bg-emerald-500/5 blur-2xl" />
+              <div className="absolute inset-0 -z-10 animate-pulse bg-pulse-500/5 blur-2xl" />
             )}
           </div>
 
           {/* Right: status badge */}
           <div className="shrink-0">
             {revealed ? (
-              <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-3 py-1.5 text-[10px] font-semibold text-emerald-500 sm:px-4 sm:py-2 sm:text-xs">
+              <div className="flex items-center gap-1.5 rounded-full bg-pulse-500/15 px-3 py-1.5 text-[10px] font-semibold text-pulse-500 sm:px-4 sm:py-2 sm:text-xs">
                 <Sparkles className="size-3 sm:size-3.5" />
                 Unlocked
               </div>
