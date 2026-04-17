@@ -4,9 +4,11 @@ import { useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { toast } from "sonner";
+import { Loader2, Plus } from "lucide-react";
 import type { AdminTimeEntry } from "@/lib/api/time-entries";
 import { approveTimeEntry, rejectTimeEntry, deleteTimeEntry } from "@/lib/api/time-entries";
-import type { Pagination } from "@/lib/api/admin";
+import type { AdminEngagement, Pagination } from "@/lib/api/admin";
+import { createAdminTimeEntry } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,7 +18,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { MonthPicker } from "@/components/ui/month-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { DataTable } from "../../_components/data-table";
+import { formatCurrency } from "../../_components/dashboard-data";
 import { getColumns } from "./columns";
 import { useAdminCurrency } from "../../_components/admin-currency-context";
 import { TimeEntryFiltersBar } from "./filters-bar";
@@ -24,11 +38,17 @@ import { Card, CardContent } from "@/components/ui/card";
 
 interface TimeEntriesClientProps {
   timeEntries: AdminTimeEntry[];
+  engagements: AdminEngagement[];
   token: string;
   isSuperAdmin?: boolean;
 }
 
-function TimeEntriesClient({ timeEntries, token, isSuperAdmin }: TimeEntriesClientProps) {
+const currentMonthKey = (): string => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+};
+
+function TimeEntriesClient({ timeEntries, engagements, token, isSuperAdmin }: TimeEntriesClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
@@ -179,6 +199,70 @@ function TimeEntriesClient({ timeEntries, token, isSuperAdmin }: TimeEntriesClie
   const [deleteTarget, setDeleteTarget] = useState<AdminTimeEntry | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Add Timesheet dialog
+  const activeEngagements = useMemo(
+    () =>
+      engagements.filter(
+        (e) => e.status === "active" || e.status === "pending",
+      ),
+    [engagements],
+  );
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    engagementId: "",
+    period: currentMonthKey(),
+    hours: "",
+    description: "",
+  });
+
+  const selectedEng = activeEngagements.find(
+    (e) => e.id === createForm.engagementId,
+  );
+
+  const onPickEngagement = (id: string) => {
+    const eng = activeEngagements.find((e) => e.id === id);
+    setCreateForm((f) => ({
+      ...f,
+      engagementId: id,
+      hours: eng?.monthlyHoursExpected ? String(eng.monthlyHoursExpected) : f.hours,
+    }));
+  };
+
+  const previewBilling = selectedEng
+    ? Number(createForm.hours || 0) * selectedEng.companyBillingRate
+    : 0;
+
+  const handleCreate = async () => {
+    if (!createForm.engagementId || !createForm.hours || !createForm.period) {
+      toast.error("Engagement, period and hours are required");
+      return;
+    }
+    setCreateSubmitting(true);
+    const result = await createAdminTimeEntry(token, {
+      engagementId: createForm.engagementId,
+      period: createForm.period,
+      hours: Number(createForm.hours),
+      description: createForm.description || undefined,
+    });
+    if (result.success) {
+      toast.success("Timesheet submitted — invoice generates after approvals");
+      setCreateOpen(false);
+      setCreateForm({
+        engagementId: "",
+        period: currentMonthKey(),
+        hours: "",
+        description: "",
+      });
+      startTransition(() => {
+        router.refresh();
+      });
+    } else {
+      toast.error(result.error ?? "Failed to create timesheet");
+    }
+    setCreateSubmitting(false);
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -203,11 +287,17 @@ function TimeEntriesClient({ timeEntries, token, isSuperAdmin }: TimeEntriesClie
 
   return (
     <>
-      <div>
-        <h1 className="text-lg font-semibold">Timesheets</h1>
-        <p className="text-sm text-muted-foreground">
-          Review and approve developer time submissions across all engagements.
-        </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-lg font-semibold">Timesheets</h1>
+          <p className="text-sm text-muted-foreground">
+            Review and approve developer time submissions across all engagements.
+          </p>
+        </div>
+        <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
+          <Plus className="size-4" />
+          Add Timesheet
+        </Button>
       </div>
 
       {/* Summary Cards */}
@@ -268,6 +358,134 @@ function TimeEntriesClient({ timeEntries, token, isSuperAdmin }: TimeEntriesClie
             : undefined
         }
       />
+
+      {/* Add Timesheet Dialog */}
+      <Dialog
+        open={createOpen}
+        onOpenChange={(open) => {
+          if (!open && !createSubmitting) setCreateOpen(false);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Timesheet</DialogTitle>
+            <DialogDescription>
+              Submit hours for an engagement. The timesheet enters{" "}
+              <strong>submitted</strong> status; an invoice is auto-generated
+              once both admin and company approve.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Engagement</Label>
+              <Select
+                value={createForm.engagementId}
+                onValueChange={onPickEngagement}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select developer + company…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {activeEngagements.length === 0 && (
+                    <div className="px-3 py-2 text-xs text-muted-foreground">
+                      No active engagements.
+                    </div>
+                  )}
+                  {activeEngagements.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.developerName} · {e.companyName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedEng && (
+                <p className="text-[10px] text-muted-foreground">
+                  Billing rate{" "}
+                  <span className="font-mono">
+                    {formatCurrency(
+                      selectedEng.companyBillingRate,
+                      selectedEng.currency,
+                    )}
+                    /hr
+                  </span>{" "}
+                  · expected {selectedEng.monthlyHoursExpected ?? "—"}h/mo
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Period</Label>
+                <MonthPicker
+                  value={createForm.period}
+                  onChange={(v) =>
+                    setCreateForm((f) => ({ ...f, period: v }))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Hours</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  placeholder="e.g. 80"
+                  value={createForm.hours}
+                  onChange={(e) =>
+                    setCreateForm((f) => ({ ...f, hours: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description (optional)</Label>
+              <Textarea
+                rows={2}
+                placeholder="Notes about this timesheet…"
+                value={createForm.description}
+                onChange={(e) =>
+                  setCreateForm((f) => ({ ...f, description: e.target.value }))
+                }
+              />
+            </div>
+
+            {selectedEng && Number(createForm.hours) > 0 && (
+              <div className="rounded-md border border-pulse/20 bg-pulse/5 p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    Billing amount (after approval)
+                  </p>
+                  <p className="font-mono text-base font-semibold">
+                    {formatCurrency(previewBilling, selectedEng.currency)}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCreateOpen(false)}
+              disabled={createSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreate} disabled={createSubmitting}>
+              {createSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Submitting…
+                </>
+              ) : (
+                "Submit Timesheet"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <DialogContent>
