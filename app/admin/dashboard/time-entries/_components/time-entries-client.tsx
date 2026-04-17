@@ -246,7 +246,7 @@ function TimeEntriesClient({ timeEntries, engagements, token, isSuperAdmin }: Ti
       description: createForm.description || undefined,
     });
     if (result.success) {
-      toast.success("Timesheet submitted — invoice generates after approvals");
+      toast.success("Timesheet submitted — invoice generated");
       setCreateOpen(false);
       setCreateForm({
         engagementId: "",
@@ -370,9 +370,8 @@ function TimeEntriesClient({ timeEntries, engagements, token, isSuperAdmin }: Ti
           <DialogHeader>
             <DialogTitle>Add Timesheet</DialogTitle>
             <DialogDescription>
-              Submit hours for an engagement. The timesheet enters{" "}
-              <strong>submitted</strong> status; an invoice is auto-generated
-              once both admin and company approve.
+              Submit hours for an engagement. Admin-created timesheets are
+              auto-approved and an invoice is generated immediately.
             </DialogDescription>
           </DialogHeader>
 

@@ -55,7 +55,7 @@ export async function fetchTimeEntries(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 60 },
+        cache: "no-store",
       },
     );
 

@@ -58,7 +58,7 @@ export async function fetchInvoices(
     const response = await fetch(`${apiBaseUrl}/api/admin/invoices`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
 
     if (!response.ok) throw new Error("API error");
@@ -78,7 +78,7 @@ export async function fetchInvoice(
     const response = await fetch(`${apiBaseUrl}/api/admin/invoices/${id}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
 
     if (!response.ok) throw new Error("API error");
@@ -100,7 +100,7 @@ export async function fetchInvoicesByCompany(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 60 },
+        cache: "no-store",
       },
     );
 
@@ -122,7 +122,7 @@ export async function fetchInvoiceSummary(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 60 },
+        cache: "no-store",
       },
     );
 
@@ -145,7 +145,7 @@ export async function fetchCompanyInvoiceSummary(
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
-        next: { revalidate: 60 },
+        cache: "no-store",
       },
     );
 
