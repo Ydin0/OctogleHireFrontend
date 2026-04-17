@@ -6,10 +6,12 @@ import {
   Bot,
   Briefcase,
   Building2,
+  ClipboardCheck,
   Clock,
   GitPullRequestArrow,
   Handshake,
   Layers,
+  LineChart,
   LogOut,
   Receipt,
   Send,
@@ -47,6 +49,7 @@ const navGroups = [
       { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
       { href: "/admin/dashboard/requirements", label: "Requirements", icon: Store, badgeKey: "requirements" as const },
       { href: "/admin/dashboard/interviews", label: "Interviews", icon: Video },
+      { href: "/admin/dashboard/approvals", label: "Approvals", icon: ClipboardCheck, badgeKey: "approvals" as const },
     ],
   },
   {
@@ -66,6 +69,13 @@ const navGroups = [
       { href: "/admin/dashboard/change-requests", label: "Requests", icon: GitPullRequestArrow },
       { href: "/admin/dashboard/invoices", label: "Invoices", icon: Receipt },
       { href: "/admin/dashboard/payouts", label: "Payouts", icon: Wallet },
+    ],
+  },
+  {
+    label: "FINANCE",
+    superAdminOnly: true,
+    items: [
+      { href: "/admin/dashboard/finances", label: "Finances", icon: LineChart },
     ],
   },
   {
@@ -91,6 +101,7 @@ interface AdminSidebarProps {
   };
   isSuperAdmin: boolean;
   openRequirementCount: number;
+  pendingApprovalCount: number;
 }
 
 const currencies = ["USD", "GBP", "AED"] as const;
@@ -120,7 +131,7 @@ function CurrencyToggle() {
   );
 }
 
-function SidebarContent({ user, isSuperAdmin, openRequirementCount }: AdminSidebarProps) {
+function SidebarContent({ user, isSuperAdmin, openRequirementCount, pendingApprovalCount }: AdminSidebarProps) {
   const pathname = usePathname();
   const { signOut } = useClerk();
 
@@ -158,7 +169,9 @@ function SidebarContent({ user, isSuperAdmin, openRequirementCount }: AdminSideb
                 const badgeCount =
                   "badgeKey" in item && item.badgeKey === "requirements"
                     ? openRequirementCount
-                    : 0;
+                    : "badgeKey" in item && item.badgeKey === "approvals"
+                      ? pendingApprovalCount
+                      : 0;
 
                 return (
                   <Link
@@ -221,10 +234,10 @@ function SidebarContent({ user, isSuperAdmin, openRequirementCount }: AdminSideb
   );
 }
 
-function AdminSidebar({ user, isSuperAdmin, openRequirementCount }: AdminSidebarProps) {
+function AdminSidebar({ user, isSuperAdmin, openRequirementCount, pendingApprovalCount }: AdminSidebarProps) {
   return (
     <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-border/70 lg:bg-background">
-      <SidebarContent user={user} isSuperAdmin={isSuperAdmin} openRequirementCount={openRequirementCount} />
+      <SidebarContent user={user} isSuperAdmin={isSuperAdmin} openRequirementCount={openRequirementCount} pendingApprovalCount={pendingApprovalCount} />
     </aside>
   );
 }

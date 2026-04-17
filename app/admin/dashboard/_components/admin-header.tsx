@@ -13,7 +13,7 @@ import {
 import { Logo } from "@/components/logo";
 import { SidebarContent, type AdminSidebarProps } from "./admin-sidebar";
 
-function AdminHeader({ user, isSuperAdmin, openRequirementCount }: AdminSidebarProps) {
+function AdminHeader({ user, isSuperAdmin, openRequirementCount, pendingApprovalCount }: AdminSidebarProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -41,6 +41,7 @@ function AdminHeader({ user, isSuperAdmin, openRequirementCount }: AdminSidebarP
               user={user}
               isSuperAdmin={isSuperAdmin}
               openRequirementCount={openRequirementCount}
+              pendingApprovalCount={pendingApprovalCount}
             />
           </div>
         </SheetContent>

@@ -7,7 +7,10 @@ import { AdminHeader } from "./_components/admin-header";
 import { AdminCurrencyProvider } from "./_components/admin-currency-context";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
-import { fetchOpenRequirementCount } from "@/lib/api/admin";
+import {
+  fetchOpenRequirementCount,
+  fetchPendingApprovalCount,
+} from "@/lib/api/admin";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | OctogleHire",
@@ -36,7 +39,10 @@ export default async function AdminDashboardLayout({
     }
   }
 
-  const openRequirementCount = await fetchOpenRequirementCount(token);
+  const [openRequirementCount, pendingApprovalCount] = await Promise.all([
+    fetchOpenRequirementCount(token),
+    fetchPendingApprovalCount(token),
+  ]);
 
   const clerkUser = await currentUser();
   const user = {
@@ -55,11 +61,13 @@ export default async function AdminDashboardLayout({
           user={user}
           isSuperAdmin={isSuperAdmin}
           openRequirementCount={openRequirementCount}
+          pendingApprovalCount={pendingApprovalCount}
         />
         <AdminHeader
           user={user}
           isSuperAdmin={isSuperAdmin}
           openRequirementCount={openRequirementCount}
+          pendingApprovalCount={pendingApprovalCount}
         />
         <main className="lg:ml-64">
           <div className="space-y-6 px-6 py-6 lg:py-8">

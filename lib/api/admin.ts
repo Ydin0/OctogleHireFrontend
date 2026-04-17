@@ -1020,6 +1020,27 @@ export async function fetchInterviews(
   }
 }
 
+export async function fetchPendingApprovalCount(
+  token: string | null,
+): Promise<number> {
+  if (!token) return 0;
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/matches/awaiting-approval`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return 0;
+    const data = (await response.json()) as unknown[];
+    return Array.isArray(data) ? data.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
 export async function fetchOpenRequirementCount(
   token: string | null,
 ): Promise<number> {
@@ -1270,6 +1291,260 @@ export async function createAdminTimeEntry(
       return { success: false, error: body.message || "Failed to create time entry" };
     }
 
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+// ── Admin Finances ────────────────────────────────────────────────────────
+
+export interface AdminFinanceSummary {
+  revenue: {
+    total: number;
+    paid: number;
+    outstanding: number;
+    overdue: number;
+    thisMonth: number;
+    invoiceCount: number;
+    overdueCount: number;
+  };
+  payouts: {
+    paid: number;
+    pending: number;
+    count: number;
+  };
+  margin: {
+    realized: number;
+    realizedPercent: number;
+    projected: number;
+    projectedPercent: number;
+  };
+  engagements: {
+    activeCount: number;
+    pendingCount: number;
+    upcomingStartCount: number;
+    monthlyBilling: number;
+    monthlyPayout: number;
+  };
+  forecast: {
+    predictedNextMonthRevenue: number;
+    annualizedRevenue: number;
+    annualizedMargin: number;
+  };
+  currencyBreakdown: Record<
+    string,
+    { count: number; monthlyBilling: number; monthlyPayout: number }
+  >;
+}
+
+export interface RevenueTrendPoint {
+  month: string;
+  invoiced: number;
+  paid: number;
+}
+
+export async function fetchAdminFinanceSummary(
+  token: string | null,
+): Promise<AdminFinanceSummary | null> {
+  if (!token) return null;
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/admin/finances/summary`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as AdminFinanceSummary;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchAdminRevenueTrend(
+  token: string | null,
+): Promise<RevenueTrendPoint[]> {
+  if (!token) return [];
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/finances/revenue-trend`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return [];
+    const data = (await response.json()) as { trend: RevenueTrendPoint[] };
+    return data.trend ?? [];
+  } catch {
+    return [];
+  }
+}
+
+// ── Admin Match Approvals ─────────────────────────────────────────────────
+
+export interface AdminPendingApproval {
+  id: string;
+  status: string;
+  proposedHourlyRate: number;
+  proposedMonthlyRate: number;
+  currency: string;
+  developerId: string;
+  developerName: string;
+  developerEmail: string;
+  developerRole: string;
+  developerAvatar: string;
+  requirementId: string;
+  requirementTitle: string;
+  engagementType: string;
+  companyId: string | null;
+  companyName: string;
+  companyLogoUrl: string | null;
+  proposedAt: string;
+  respondedAt: string | null;
+}
+
+export interface AdminUpcomingStart {
+  id: string;
+  status: string;
+  startDate: string | null;
+  engagementType: string;
+  companyBillingRate: number;
+  developerPayoutRate: number;
+  currency: string;
+  monthlyHoursExpected: number | null;
+  developerId: string;
+  developerName: string;
+  developerEmail: string;
+  developerRole: string;
+  developerAvatar: string;
+  requirementId: string;
+  requirementTitle: string;
+  companyId: string;
+  companyName: string;
+  companyLogoUrl: string | null;
+}
+
+export async function fetchMatchesAwaitingApproval(
+  token: string | null,
+): Promise<AdminPendingApproval[]> {
+  if (!token) return [];
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/matches/awaiting-approval`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return [];
+    return (await response.json()) as AdminPendingApproval[];
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchUpcomingStarts(
+  token: string | null,
+): Promise<AdminUpcomingStart[]> {
+  if (!token) return [];
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/engagements/upcoming-starts`,
+      {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return [];
+    return (await response.json()) as AdminUpcomingStart[];
+  } catch {
+    return [];
+  }
+}
+
+export async function adminApproveMatch(
+  token: string | null,
+  matchId: string,
+  payload?: { startDate?: string },
+): Promise<{ success: boolean; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/matches/${matchId}/approve`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload ?? {}),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { success: false, error: body.message ?? "Failed to approve match" };
+    }
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function adminRejectMatch(
+  token: string | null,
+  matchId: string,
+  reason?: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/matches/${matchId}/reject`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ reason }),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return { success: false, error: body.message ?? "Failed to reject match" };
+    }
+    return { success: true };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function adminConfirmEngagementStart(
+  token: string | null,
+  engagementId: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/admin/engagements/${engagementId}/confirm-start`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: body.message ?? "Failed to confirm engagement start",
+      };
+    }
     return { success: true };
   } catch {
     return { success: false, error: "Network error" };
