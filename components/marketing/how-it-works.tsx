@@ -427,4 +427,4 @@ const HowItWorks = ({ className }: HowItWorksProps) => {
   );
 };
 
-export { HowItWorks };
+export { HowItWorks, VettingPipeline };

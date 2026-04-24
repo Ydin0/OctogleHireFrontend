@@ -526,4 +526,4 @@ const FeaturesShowcase = ({ className }: FeaturesShowcaseProps) => {
   );
 };
 
-export { FeaturesShowcase };
+export { FeaturesShowcase, PostRoleMockup, MatchesMockup, EngagementMockup };

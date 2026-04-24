@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
+import { Quote } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 
 interface SavingsComparisonProps {
   className?: string;
@@ -17,10 +16,11 @@ const stories = [
     role: "CEO",
     company: "Beekey",
     logo: "/company-logos/Solidus.svg",
-    logoSize: "h-10",
+    logoSize: "h-6",
     avatar: "/Ricardo-Recruitment.jpg",
+    avatarPosition: "object-[50%_15%]",
     quote:
-      "We were about to commit to three senior frontend engineers at London rates. OctogleHire matched us with equally talented engineers in under a week — and we're saving over $200k a year.",
+      "We were about to commit to three senior frontend engineers at London rates. OctogleHire matched us with equally talented engineers in under a week — and we're saving over £200k a year.",
     hiredRole: "Senior Frontend Engineer",
     hiredCount: 3,
     localRate: 9500,
@@ -34,23 +34,27 @@ const stories = [
     role: "Founder",
     company: "Artistatours",
     logo: "/company-logos/ArtistaTours.svg",
+    logoSize: "h-5",
     avatar: "/review-4.jpg",
+    avatarPosition: "object-[50%_25%]",
     quote:
-      "Hiring two developers locally in Spain was going to cost us over \u20AC14,000 a month. OctogleHire matched us with two equally talented engineers for just \u20AC5,800 — cutting our costs by more than half.",
+      "Hiring two developers locally in Spain was going to cost us over €14,000 a month. OctogleHire matched us with two equally talented engineers for just €5,800 — cutting our costs by more than half.",
     hiredRole: "Full-Stack Developer",
     hiredCount: 2,
     localRate: 7000,
     octogleRate: 2900,
     market: "Spain",
     flag: "es",
-    currency: "\u20AC",
+    currency: "€",
   },
   {
     name: "Eduardo Middleton",
     role: "Founder",
     company: "1VA",
     logo: "/company-logos/1VA.svg",
+    logoSize: "h-5",
     avatar: "/Eduardo.png",
+    avatarPosition: "object-[50%_25%]",
     quote:
       "Our initial budget for a developer in the UK was £75,000. OctogleHire placed an equally skilled engineer for just £38,000 — saving us nearly half without compromising on quality.",
     hiredRole: "Full-Stack Engineer",
@@ -66,9 +70,11 @@ const stories = [
     role: "Co-Founder",
     company: "Hireflow",
     logo: "/company-logos/Hireflow.svg",
+    logoSize: "h-5",
     avatar: "/review-3.jpg",
+    avatarPosition: "object-[50%_25%]",
     quote:
-      "Hiring three engineers locally in the UK was going to cost us \u00A315,000 a month. OctogleHire placed all three at \u00A32,000 each \u2014 saving us over \u00A3108k a year without compromising on quality.",
+      "Hiring three engineers locally in the UK was going to cost us £15,000 a month. OctogleHire placed all three at £2,000 each — saving us over £108k a year without compromising on quality.",
     hiredRole: "Full-Stack Engineer",
     hiredCount: 3,
     localRate: 5000,
@@ -79,20 +85,29 @@ const stories = [
   },
 ];
 
+const AUTO_ADVANCE_MS = 9000;
+
 const SavingsComparison = ({ className }: SavingsComparisonProps) => {
   const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState<"left" | "right">("right");
-  const [animKey, setAnimKey] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
 
-  const go = (dir: "left" | "right") => {
-    setDirection(dir);
-    setAnimKey((k) => k + 1);
-    setIndex((i) =>
-      dir === "right"
-        ? (i + 1) % stories.length
-        : (i - 1 + stories.length) % stories.length,
+  useEffect(() => {
+    if (paused) return;
+    const t = setTimeout(
+      () => setIndex((i) => (i + 1) % stories.length),
+      AUTO_ADVANCE_MS,
     );
-  };
+    return () => clearTimeout(t);
+  }, [index, paused]);
+
+  useEffect(() => {
+    const el = progressRef.current;
+    if (!el) return;
+    el.style.animation = "none";
+    void el.offsetHeight;
+    el.style.animation = `progress-fill ${AUTO_ADVANCE_MS}ms linear forwards`;
+  }, [index]);
 
   const s = stories[index];
   const savingsPercent = Math.round(
@@ -101,170 +116,245 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
   const annualSavings = (s.localRate - s.octogleRate) * s.hiredCount * 12;
 
   return (
-    <section className={cn("py-24 container mx-auto px-6", className)}>
-      {/* Preload all images */}
+    <section
+      className={cn("py-20 container mx-auto px-6", className)}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      {/* Preload photos */}
       <div className="hidden">
         {stories.map((story) => (
-          <span key={story.name}>
-            <img src={story.avatar} alt="" />
-            <img src={story.logo} alt="" />
-          </span>
+          <Image
+            key={story.name}
+            src={story.avatar}
+            alt=""
+            width={600}
+            height={600}
+            priority
+          />
         ))}
       </div>
 
       {/* Header */}
-      <div className="mb-12 flex flex-col gap-2">
+      <div className="mb-10 flex flex-col items-center gap-3 text-center">
         <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
           Customer Stories
         </span>
-        <h2 className="text-4xl font-medium tracking-tight lg:text-5xl">
-          Real savings. Real teams.
+        <h2 className="max-w-2xl text-3xl font-medium tracking-tight lg:text-4xl">
+          Real teams.{" "}
+          <span className="text-muted-foreground">Real savings.</span>
         </h2>
-        <p className="text-muted-foreground">
-          See what companies were quoted locally — and what they actually paid.
+        <p className="max-w-xl text-sm text-muted-foreground">
+          What companies were quoted locally — and what they actually paid with
+          OctogleHire.
         </p>
       </div>
 
-      {/* Carousel */}
-      <div className="flex items-center gap-4 md:gap-6">
-        {/* Left arrow */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => go("left")}
-          className="rounded-full size-11 shrink-0"
-          aria-label="Previous story"
-        >
-          <ArrowLeft className="size-4" />
-        </Button>
+      {/* Editorial card */}
+      <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          {/* Left: portrait */}
+          <div className="relative min-h-[280px] md:min-h-[340px] lg:min-h-[380px] overflow-hidden bg-muted">
+            {stories.map((story, i) => (
+              <div
+                key={story.name}
+                className={cn(
+                  "absolute inset-0 transition-all duration-700 ease-out",
+                  i === index
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-[1.03]",
+                )}
+              >
+                <Image
+                  src={story.avatar}
+                  alt={story.name}
+                  fill
+                  sizes="(min-width: 768px) 40vw, 100vw"
+                  className={cn("object-cover", story.avatarPosition)}
+                  priority={i === 0}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent" />
+              </div>
+            ))}
 
-        {/* Card */}
-        <div className="flex-1 overflow-hidden rounded-2xl border border-border bg-card">
-          <div
-            key={animKey}
-            className={cn(
-              "animate-in duration-300",
-              direction === "right"
-                ? "fade-in slide-in-from-right-4"
-                : "fade-in slide-in-from-left-4",
-            )}
-          >
-            {/* Top: Author + company */}
-            <div className="p-6 md:p-8 pb-0 md:pb-0 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Avatar className="size-12 ring-2 ring-border shrink-0">
-                  <AvatarImage src={s.avatar} alt={s.name} />
-                  <AvatarFallback>{s.name[0]}</AvatarFallback>
-                </Avatar>
+            {/* Top-left flag chip */}
+            <div className="absolute left-4 top-4 z-10 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-2.5 py-1 backdrop-blur-md">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`https://flagcdn.com/w40/${s.flag}.png`}
+                alt=""
+                className="h-3 w-auto rounded-[2px]"
+              />
+              <span className="font-mono text-[9px] font-semibold uppercase tracking-wider text-white">
+                {s.market}
+              </span>
+            </div>
+
+            {/* Bottom overlay */}
+            <div className="absolute inset-x-4 bottom-4 z-10 flex items-end justify-between gap-3">
+              <div className="space-y-0.5">
+                <p className="font-mono text-[9px] font-semibold uppercase tracking-wider text-white/70">
+                  Hired via OctogleHire
+                </p>
+                <p className="text-sm font-semibold text-white leading-tight">
+                  {s.hiredCount}× {s.hiredRole}
+                </p>
+              </div>
+              <div className="inline-flex shrink-0 items-center rounded-full bg-pulse px-2.5 py-0.5 shadow-[0_0_20px_oklch(from_var(--pulse)_l_c_h_/_0.4)]">
+                <span className="font-mono text-xs font-semibold text-background">
+                  −{savingsPercent}%
+                </span>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="absolute bottom-0 left-0 right-0 z-10 h-[2px] bg-white/10">
+              <div
+                ref={progressRef}
+                className="h-full origin-left bg-white/90"
+                style={{ transform: "scaleX(0)" }}
+              />
+            </div>
+          </div>
+
+          {/* Right: quote + receipt */}
+          <div className="flex flex-col justify-between gap-5 p-6 md:p-8">
+            <div className="space-y-4">
+              <Quote className="size-6 text-pulse/50" strokeWidth={1.25} />
+
+              <div className="relative">
+                {stories.map((story, i) => (
+                  <blockquote
+                    key={story.name}
+                    className={cn(
+                      "text-base font-medium leading-[1.45] tracking-tight md:text-lg lg:text-xl transition-all duration-500",
+                      i === index
+                        ? "opacity-100 translate-y-0"
+                        : "pointer-events-none absolute inset-0 opacity-0 translate-y-2",
+                    )}
+                  >
+                    {story.quote}
+                  </blockquote>
+                ))}
+              </div>
+
+              <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
                 <div>
                   <p className="text-sm font-semibold">{s.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {s.role}, {s.company}
                   </p>
                 </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={s.logo}
+                  alt={s.company}
+                  className={cn(
+                    s.logoSize ?? "h-5",
+                    "w-auto opacity-60 invert dark:invert-0 hidden sm:block",
+                  )}
+                />
               </div>
-              <img
-                src={s.logo}
-                alt={s.company}
-                className={`${s.logoSize ?? "h-6"} w-auto opacity-40 invert dark:invert-0 hidden sm:block`}
-              />
             </div>
 
-            {/* Quote */}
-            <div className="px-6 md:px-8 py-6">
-              <blockquote className="text-xl font-medium leading-relaxed lg:text-2xl">
-                &ldquo;{s.quote}&rdquo;
-              </blockquote>
-            </div>
-
-            {/* Savings strip */}
-            <div className="border-t border-border bg-muted/30 px-6 md:px-8 py-5">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                {/* Rate comparison */}
-                <div className="flex items-center gap-6">
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      <img
-                        src={`https://flagcdn.com/w20/${s.flag}.png`}
-                        alt=""
-                        className="inline h-3 w-auto rounded-sm mr-1.5"
-                        width={20}
-                        height={14}
-                      />
-                      {s.market} rate
-                    </p>
-                    <p className="mt-1 font-mono text-xl font-semibold tracking-tight line-through decoration-muted-foreground/40">
-                      {s.currency}{s.localRate.toLocaleString()}
-                      <span className="text-xs text-muted-foreground no-underline">/mo</span>
-                    </p>
-                  </div>
-                  <div>
-                    <ArrowRight className="size-4 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      OctogleHire
-                    </p>
-                    <p className="mt-1 font-mono text-xl font-semibold tracking-tight text-pulse">
-                      {s.currency}{s.octogleRate.toLocaleString()}
-                      <span className="text-xs text-muted-foreground">/mo</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Savings summary */}
-                <div className="flex items-center gap-4">
-                  <div className="text-right sm:text-left">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      {s.hiredCount} engineers hired
-                    </p>
-                    <p className="mt-1 font-mono text-xl font-semibold tracking-tight">
-                      {s.currency}{annualSavings.toLocaleString()}
-                      <span className="text-xs text-muted-foreground">/yr saved</span>
-                    </p>
-                  </div>
-                  <div className="inline-flex items-center rounded-full bg-foreground px-3 py-1">
-                    <span className="text-sm font-semibold text-background">
-                      -{savingsPercent}%
-                    </span>
-                  </div>
-                </div>
+            {/* Receipt */}
+            <div className="grid grid-cols-3 gap-3 rounded-xl border border-border bg-muted/40 p-3 md:p-4">
+              <div className="space-y-0.5 border-r border-border pr-3">
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {s.market} Rate
+                </p>
+                <p className="font-mono text-sm font-semibold tracking-tight line-through decoration-muted-foreground/50 md:text-base">
+                  {s.currency}
+                  {s.localRate.toLocaleString()}
+                  <span className="text-[10px] text-muted-foreground no-underline">
+                    /mo
+                  </span>
+                </p>
+              </div>
+              <div className="space-y-0.5 border-r border-border pr-3">
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  OctogleHire
+                </p>
+                <p className="font-mono text-sm font-semibold tracking-tight text-pulse md:text-base">
+                  {s.currency}
+                  {s.octogleRate.toLocaleString()}
+                  <span className="text-[10px] text-muted-foreground">/mo</span>
+                </p>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Saved / Yr
+                </p>
+                <p className="font-mono text-sm font-semibold tracking-tight md:text-base">
+                  {s.currency}
+                  {(annualSavings / 1000).toFixed(0)}k
+                </p>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Right arrow */}
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => go("right")}
-          className="rounded-full size-11 shrink-0"
-          aria-label="Next story"
-        >
-          <ArrowRight className="size-4" />
-        </Button>
       </div>
 
-      {/* Dot indicators */}
-      <div className="mt-6 flex items-center justify-center gap-2">
-        {stories.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => {
-              setDirection(i > index ? "right" : "left");
-              setAnimKey((k) => k + 1);
-              setIndex(i);
-            }}
-            className={cn(
-              "h-1.5 rounded-full transition-all duration-300",
-              i === index ? "bg-foreground w-6" : "bg-border w-1.5",
-            )}
-          />
-        ))}
+      {/* Tile selector — compact */}
+      <div className="mx-auto mt-4 grid max-w-5xl grid-cols-4 gap-2 md:gap-3">
+        {stories.map((story, i) => {
+          const isActive = i === index;
+          const pct = Math.round(
+            ((story.localRate - story.octogleRate) / story.localRate) * 100,
+          );
+
+          return (
+            <button
+              key={story.name}
+              onClick={() => setIndex(i)}
+              aria-label={`View ${story.name} story`}
+              className={cn(
+                "group relative overflow-hidden rounded-xl border text-left transition-all duration-300",
+                isActive
+                  ? "border-pulse shadow-[0_0_0_1px_oklch(from_var(--pulse)_l_c_h_/_0.3)]"
+                  : "border-border hover:border-foreground/40",
+              )}
+            >
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <Image
+                  src={story.avatar}
+                  alt={story.name}
+                  fill
+                  sizes="(min-width: 768px) 20vw, 25vw"
+                  className={cn(
+                    "object-cover transition-all duration-500",
+                    story.avatarPosition,
+                    !isActive && "grayscale-[35%] group-hover:grayscale-0",
+                  )}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+
+                <div
+                  className={cn(
+                    "absolute right-2 top-2 inline-flex items-center rounded-full px-1.5 py-0.5 font-mono text-[9px] font-semibold transition-colors",
+                    isActive
+                      ? "bg-pulse text-background"
+                      : "bg-black/55 text-white backdrop-blur-md",
+                  )}
+                >
+                  −{pct}%
+                </div>
+
+                <div className="absolute inset-x-2 bottom-1.5">
+                  <p className="text-[11px] font-semibold text-white leading-tight truncate">
+                    {story.name}
+                  </p>
+                  <p className="text-[9px] text-white/70 leading-tight truncate">
+                    {story.company}
+                  </p>
+                </div>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      <p className="mt-6 text-center text-[10px] text-muted-foreground">
+      <p className="mt-5 text-center text-[10px] text-muted-foreground">
         Based on 2024–2025 hiring data across 300+ placements
       </p>
     </section>
