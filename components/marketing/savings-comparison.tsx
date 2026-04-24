@@ -50,8 +50,7 @@ const stories = [
     role: "Founder",
     company: "1VA",
     logo: "/company-logos/1VA.svg",
-    avatar:
-      "https://media.licdn.com/dms/image/v2/D4D03AQF1HZ_soFlz_A/profile-displayphoto-crop_800_800/B4DZqnZwyBGsAI-/0/1763745140907?e=1775692800&v=beta&t=ymhZJ57Gb1efoAix0Q_0WLZnfA4hw9_CbTjKP7JMXJE",
+    avatar: "/Eduardo.png",
     quote:
       "Our initial budget for a developer in the UK was £75,000. OctogleHire placed an equally skilled engineer for just £38,000 — saving us nearly half without compromising on quality.",
     hiredRole: "Full-Stack Engineer",

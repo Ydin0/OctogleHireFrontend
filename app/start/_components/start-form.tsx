@@ -73,7 +73,7 @@ const quotes = [
   { text: "We're saving over £200k a year.", name: "Ricardo M.", company: "Beekey", avatar: "/Ricardo-Recruitment.jpg", stat: "60% saved" },
   { text: "Cutting our costs by more than half.", name: "Antonio C.", company: "Artistatours", avatar: "/review-4.jpg", stat: "59% saved" },
   { text: "Three engineers placed in under a week.", name: "Connor B.", company: "Hireflow", avatar: "/review-3.jpg", stat: "3 hired" },
-  { text: "Equally skilled engineer for half the price.", name: "Eduardo M.", company: "1VA", avatar: "https://media.licdn.com/dms/image/v2/D4D03AQF1HZ_soFlz_A/profile-displayphoto-crop_800_800/B4DZqnZwyBGsAI-/0/1763745140907?e=1775692800&v=beta&t=ymhZJ57Gb1efoAix0Q_0WLZnfA4hw9_CbTjKP7JMXJE", stat: "50% saved" },
+  { text: "Equally skilled engineer for half the price.", name: "Eduardo M.", company: "1VA", avatar: "/Eduardo.png", stat: "50% saved" },
 ];
 
 function RotatingQuote() {
