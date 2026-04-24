@@ -1,466 +1,427 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  ArrowRight,
+  MessagesSquare,
+  ShieldCheck,
+  Sparkles,
+  UserRound,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 interface HowItWorksProps {
   className?: string;
 }
 
-const DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
-
-const STEPS = [
-  { value: "post", label: "Post a Role" },
-  { value: "match", label: "Get Matched" },
-  { value: "hire", label: "Start Hiring" },
-] as const;
-
-type StepValue = (typeof STEPS)[number]["value"];
-
-// ── Role data for cycling Post a Role mockup ──────────────────────────────────
-const roles = [
+const STAGES = [
   {
-    title: "Senior React Engineer",
-    stack: [
-      { label: "React", icon: `${DEVICON}/react/react-original.svg` },
-      { label: "TypeScript", icon: `${DEVICON}/typescript/typescript-original.svg` },
-      { label: "Node.js", icon: `${DEVICON}/nodejs/nodejs-original.svg` },
-    ],
-    budget: "$50–$80/hr",
-    start: "ASAP",
+    num: "01",
+    icon: MessagesSquare,
+    name: "HR + Communication Screen",
+    subtitle: "Live English fluency and product-mindset interview",
+    duration: "30 min",
+    pass: 40,
+    funnel: "25,000 → 10,000",
+    isAi: false,
   },
   {
-    title: "Backend Python Engineer",
-    stack: [
-      { label: "Python", icon: `${DEVICON}/python/python-original.svg` },
-      { label: "PostgreSQL", icon: `${DEVICON}/postgresql/postgresql-original.svg` },
-      { label: "Docker", icon: `${DEVICON}/docker/docker-original.svg` },
-    ],
-    budget: "$55–$75/hr",
-    start: "2 weeks",
+    num: "02",
+    icon: Sparkles,
+    name: "AI-Led Technical Interview",
+    subtitle:
+      "30–50 min adaptive interview tailored to the candidate's CV and role criteria",
+    duration: "30–50 min",
+    pass: 40,
+    funnel: "10,000 → 4,000",
+    isAi: true,
   },
   {
-    title: "DevOps / Cloud Engineer",
-    stack: [
-      { label: "AWS", icon: `${DEVICON}/amazonwebservices/amazonwebservices-original-wordmark.svg` },
-      { label: "Kubernetes", icon: `${DEVICON}/kubernetes/kubernetes-original.svg` },
-      { label: "Terraform", icon: `${DEVICON}/terraform/terraform-original.svg` },
-    ],
-    budget: "$60–$90/hr",
-    start: "ASAP",
-  },
-];
-
-const PostRoleMockup = () => {
-  const [idx, setIdx] = useState(0);
-  const [animKey, setAnimKey] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setIdx((i) => (i + 1) % roles.length);
-      setAnimKey((k) => k + 1);
-    }, 3200);
-    return () => clearInterval(id);
-  }, []);
-
-  const role = roles[idx];
-
-  return (
-    <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">New Role</p>
-        <Badge variant="outline" className="text-[10px]">Draft</Badge>
-      </div>
-
-      <div key={animKey} className="space-y-3 animate-in fade-in duration-300">
-        <div className="rounded-lg bg-muted px-4 py-3">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Role title</p>
-          <p className="text-sm font-medium">{role.title}</p>
-        </div>
-
-        <div className="rounded-lg bg-muted px-4 py-3">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">Tech stack</p>
-          <div className="flex flex-wrap gap-2">
-            {role.stack.map((s) => (
-              <Badge key={s.label} variant="secondary" className="text-[10px] gap-1.5 px-2 py-0.5">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={s.icon} alt="" className="size-3.5" />
-                {s.label}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-muted px-4 py-3">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Budget</p>
-            <p className="text-sm font-mono font-medium">{role.budget}</p>
-          </div>
-          <div className="rounded-lg bg-muted px-4 py-3">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Start</p>
-            <p className="text-sm font-medium">{role.start}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Dots */}
-      <div className="flex justify-center gap-1.5">
-        {roles.map((_, i) => (
-          <span
-            key={i}
-            className={cn(
-              "h-1 rounded-full transition-all duration-300",
-              i === idx ? "w-4 bg-foreground" : "w-1.5 bg-border",
-            )}
-          />
-        ))}
-      </div>
-
-      <Button className="w-full rounded-full" size="sm">Post Role Free</Button>
-    </div>
-  );
-};
-
-// ── Get Matched mockup — shimmer loading → staggered results ──────────────────
-const matchData = [
-  {
-    name: "Arjun Kumar",
-    role: "React • 6 yrs exp",
-    rate: "$65/hr",
-    score: "98%",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
-    online: true,
-    stack: [
-      `${DEVICON}/react/react-original.svg`,
-      `${DEVICON}/typescript/typescript-original.svg`,
-    ],
+    num: "03",
+    icon: UserRound,
+    name: "Tech Lead Interview",
+    subtitle:
+      "Face-to-face with one of our senior tech leads — system design & judgement",
+    duration: "60–90 min",
+    pass: 40,
+    funnel: "4,000 → 1,600",
+    isAi: false,
   },
   {
-    name: "Priya Mehta",
-    role: "React • 5 yrs exp",
-    rate: "$60/hr",
-    score: "95%",
-    avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&crop=face",
-    online: true,
-    stack: [
-      `${DEVICON}/react/react-original.svg`,
-      `${DEVICON}/nodejs/nodejs-original.svg`,
-    ],
-  },
-  {
-    name: "Rahul Verma",
-    role: "React • 7 yrs exp",
-    rate: "$75/hr",
-    score: "93%",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face",
-    online: false,
-    stack: [
-      `${DEVICON}/react/react-original.svg`,
-      `${DEVICON}/tailwindcss/tailwindcss-original.svg`,
-    ],
+    num: "04",
+    icon: ShieldCheck,
+    name: "Background + Reference Checks",
+    subtitle: "Work-history verification, ID, and three professional references",
+    duration: "3d",
+    pass: 63,
+    funnel: "1,600 → 1,000",
+    isAi: false,
   },
 ];
 
-const GetMatchedMockup = () => {
-  const [phase, setPhase] = useState<"loading" | "results">("loading");
-  const [cycleKey, setCycleKey] = useState(0);
-
-  useEffect(() => {
-    let t: ReturnType<typeof setTimeout>;
-    const run = () => {
-      setPhase("loading");
-      setCycleKey((k) => k + 1);
-      t = setTimeout(() => {
-        setPhase("results");
-        t = setTimeout(run, 4500);
-      }, 1200);
-    };
-    run();
-    return () => clearTimeout(t);
-  }, []);
+// ── Progress bar that animates from 0 to target width ───────────────────────
+const StageRow = ({
+  stage,
+  active,
+  index,
+}: {
+  stage: (typeof STAGES)[number];
+  active: boolean;
+  index: number;
+}) => {
+  const Icon = stage.icon;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">Your Matches</p>
-        <Badge variant="outline" className="text-[10px]">Delivered in 48h</Badge>
-      </div>
-
-      {phase === "loading" ? (
-        <div className="space-y-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="flex items-center gap-3 rounded-xl border border-border p-3 animate-pulse">
-              <div className="size-10 rounded-full bg-muted shrink-0" />
-              <div className="flex-1 space-y-1.5">
-                <div className="h-3 rounded-full bg-muted w-24" />
-                <div className="h-2 rounded-full bg-muted w-16" />
-              </div>
-              <div className="space-y-1.5 shrink-0">
-                <div className="h-3 rounded-full bg-muted w-12 ml-auto" />
-                <div className="h-2 rounded-full bg-muted w-10 ml-auto" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-3" key={cycleKey}>
-          {matchData.map((d, i) => (
-            <div
-              key={d.name}
-              className="flex items-center gap-3 rounded-xl border border-border p-3 transition-colors hover:bg-muted/40 animate-in fade-in slide-in-from-bottom-2 duration-300"
-              style={{ animationDelay: `${i * 120}ms`, animationFillMode: "backwards" }}
-            >
-              <div className="relative shrink-0">
-                <Avatar className="size-10">
-                  <AvatarImage src={d.avatar} alt={d.name} />
-                  <AvatarFallback>{d.name[0]}</AvatarFallback>
-                </Avatar>
-                {d.online && (
-                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-card bg-emerald-500" />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{d.name}</p>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  {d.stack.map((icon, si) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={si} src={icon} alt="" className="size-3" />
-                  ))}
-                  <span className="text-xs text-muted-foreground ml-0.5">{d.role}</span>
-                </div>
-              </div>
-              <div className="text-right shrink-0">
-                <p className="text-sm font-mono font-medium">{d.rate}</p>
-                <p className="text-[10px] text-pulse font-mono font-semibold">{d.score} match</p>
-              </div>
-            </div>
-          ))}
-        </div>
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-2xl border bg-background p-4 transition-all duration-500",
+        active
+          ? stage.isAi
+            ? "border-pulse/50 shadow-[0_0_0_1px_oklch(from_var(--pulse)_l_c_h_/_0.2),0_8px_24px_-12px_oklch(from_var(--pulse)_l_c_h_/_0.35)]"
+            : "border-pulse/30 shadow-[0_0_0_1px_oklch(from_var(--pulse)_l_c_h_/_0.12)]"
+          : "border-border",
       )}
-    </div>
-  );
-};
-
-// ── Start Hiring mockup — onboarding steps check off sequentially ─────────────
-const onboardingSteps = [
-  "Contract signed",
-  "Compliance verified",
-  "First day scheduled",
-  "Tool access granted",
-];
-
-const StartHiringMockup = () => {
-  const [checkedCount, setCheckedCount] = useState(0);
-
-  useEffect(() => {
-    let t: ReturnType<typeof setTimeout>;
-    if (checkedCount >= onboardingSteps.length) {
-      t = setTimeout(() => setCheckedCount(0), 2400);
-    } else {
-      t = setTimeout(
-        () => setCheckedCount((c) => c + 1),
-        checkedCount === 0 ? 800 : 600,
-      );
-    }
-    return () => clearTimeout(t);
-  }, [checkedCount]);
-
-  return (
-    <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
-      <div className="flex items-center gap-3 pb-4 border-b border-border">
-        <Avatar className="size-12">
-          <AvatarImage
-            src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face"
-            alt="Arjun Kumar"
-          />
-          <AvatarFallback>AK</AvatarFallback>
-        </Avatar>
-        <div className="flex-1">
-          <p className="text-sm font-semibold">Onboarding Arjun Kumar</p>
-          <p className="text-xs text-muted-foreground">Senior React Engineer</p>
-        </div>
-        <Badge
-          variant="outline"
+      style={{
+        transitionDelay: `${index * 40}ms`,
+      }}
+    >
+      {/* AI stage — subtle animated gradient wash */}
+      {stage.isAi && (
+        <div
           className={cn(
-            "text-[10px] transition-colors duration-500",
-            checkedCount === onboardingSteps.length
-              ? "border-emerald-500/30 text-emerald-600"
-              : "text-muted-foreground",
+            "pointer-events-none absolute inset-0 transition-opacity duration-700",
+            active ? "opacity-100" : "opacity-0",
           )}
         >
-          {checkedCount === onboardingSteps.length ? "Ready" : `${checkedCount}/${onboardingSteps.length}`}
-        </Badge>
-      </div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,oklch(from_var(--pulse)_l_c_h_/_0.14),transparent_60%)]" />
+          <div className="absolute -right-8 -top-8 size-32 rounded-full bg-pulse/10 blur-2xl animate-pulse" />
+        </div>
+      )}
 
-      <div className="space-y-2">
-        {onboardingSteps.map((step, i) => {
-          const isDone = i < checkedCount;
-          const isActive = i === checkedCount;
+      <div className="relative flex items-center gap-3">
+        {/* Stage number bubble */}
+        <span
+          className={cn(
+            "inline-flex size-9 shrink-0 items-center justify-center rounded-full border font-mono text-[11px] font-semibold transition-all duration-500",
+            active
+              ? "border-pulse bg-pulse text-background"
+              : "border-border bg-muted/40 text-muted-foreground",
+          )}
+        >
+          {stage.num}
+        </span>
 
-          return (
-            <div
-              key={step}
+        {/* Icon + name */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <Icon
               className={cn(
-                "flex items-center gap-3 rounded-lg px-4 py-2.5 transition-all duration-300",
-                isDone ? "bg-pulse/10" : isActive ? "bg-muted border border-border" : "bg-muted/50",
+                "size-3.5 transition-colors duration-500 shrink-0",
+                active ? "text-pulse" : "text-muted-foreground",
+                stage.isAi && active && "animate-pulse",
               )}
-            >
+              strokeWidth={1.75}
+            />
+            <p className="text-sm font-semibold truncate">{stage.name}</p>
+            {stage.isAi && (
               <span
                 className={cn(
-                  "flex size-4 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300",
-                  isDone
-                    ? "border-transparent bg-pulse"
-                    : isActive
-                      ? "border-pulse animate-pulse"
-                      : "border-border",
+                  "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider shrink-0 transition-all duration-500",
+                  active
+                    ? "border-pulse/40 bg-pulse/10 text-pulse"
+                    : "border-border text-muted-foreground",
                 )}
               >
-                {isDone && (
-                  <CheckCircle className="size-3 text-background" strokeWidth={2.5} />
-                )}
+                <Sparkles className="size-2.5" strokeWidth={2} />
+                AI
               </span>
-              <span className={cn("text-sm transition-colors duration-300", !isDone && !isActive && "text-muted-foreground")}>
-                {step}
-              </span>
-              {isDone && (
-                <span className="ml-auto text-[10px] font-mono text-pulse uppercase tracking-wider">
-                  Done
-                </span>
-              )}
-              {isActive && (
-                <span className="ml-auto text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
-                  Active
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="rounded-xl border border-border bg-muted/40 p-4 text-center">
-        <p className="text-xs text-muted-foreground">Compliance managed in</p>
-        <p className="text-3xl font-mono font-semibold mt-1">150+</p>
-        <p className="text-xs text-muted-foreground">countries</p>
-      </div>
-    </div>
-  );
-};
-
-const stepContent: Record<
-  StepValue,
-  {
-    num: string;
-    title: string;
-    description: string;
-    cta: string;
-    href: string;
-  }
-> = {
-  post: {
-    num: "01",
-    title: "Book a Demo",
-    description:
-      "Jump on a quick call with our team to walk through your requirements — role, tech stack, timeline, and budget. We'll show you how we match against 1,000+ pre-vetted engineers across 40+ stacks.",
-    cta: "Book a Demo",
-    href: "/companies/signup",
-  },
-  match: {
-    num: "02",
-    title: "Receive 3–5 vetted profiles within 48 hours",
-    description:
-      "Within 48 hours, receive 3–5 pre-vetted profiles matched to your exact requirements. Every candidate has passed our 5-stage process (25,000+ reviewed, 1,000 accepted). Review skills, rates, and availability.",
-    cta: "See Sample Profiles",
-    href: "/marketplace",
-  },
-  hire: {
-    num: "03",
-    title: "Interview, select, and onboard instantly",
-    description:
-      "Interview your shortlist and choose your hire. We handle contracts, compliance, and payroll across 30+ countries. Most companies go from brief to signed contract in under 5 business days.",
-    cta: "Start Hiring Today",
-    href: "/companies/signup",
-  },
-};
-
-const stepMockups: Record<StepValue, React.ReactNode> = {
-  post: <PostRoleMockup />,
-  match: <GetMatchedMockup />,
-  hire: <StartHiringMockup />,
-};
-
-const HowItWorks = ({ className }: HowItWorksProps) => {
-  const [active, setActive] = useState<StepValue>("post");
-  const content = stepContent[active];
-
-  return (
-    <section id="how-it-works" className={cn("py-24 container mx-auto px-6", className)}>
-      {/* Header */}
-      <div className="mb-12 flex flex-col gap-4">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Process
-        </span>
-        <h2 className="max-w-2xl text-4xl font-medium tracking-tight lg:text-5xl">
-          Hire world-class engineers
-          in three simple steps
-        </h2>
-      </div>
-
-      {/* Tab selector */}
-      <div className="mb-10 flex gap-0 border-b border-border">
-        {STEPS.map((step) => (
-          <button
-            key={step.value}
-            onClick={() => setActive(step.value)}
-            className={cn(
-              "relative px-6 py-3 text-sm font-mono uppercase tracking-[0.06em] transition-colors duration-200",
-              active === step.value
-                ? "text-foreground"
-                : "text-muted-foreground hover:text-foreground",
             )}
-          >
-            {step.label}
-            <span
-              className={cn(
-                "absolute bottom-0 left-0 h-0.5 w-full bg-foreground transition-all duration-300",
-                active === step.value ? "opacity-100" : "opacity-0",
-              )}
-            />
-          </button>
-        ))}
-      </div>
-
-      {/* Content — animates on tab change */}
-      <div
-        key={active}
-        className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16 lg:items-center animate-in fade-in slide-in-from-bottom-2 duration-300"
-      >
-        {/* Left: text */}
-        <div className="space-y-6">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Step {content.num}
-          </span>
-          <h3 className="text-3xl font-medium tracking-tight">{content.title}</h3>
-          <p className="text-muted-foreground leading-relaxed">{content.description}</p>
-          <Button asChild className="rounded-full gap-2">
-            <a href={content.href}>
-              {content.cta}
-              <ArrowRight className="size-4" />
-            </a>
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Trusted by{" "}
-            <span className="font-mono font-medium text-foreground">300+</span>{" "}
-            companies worldwide
+          </div>
+          <p className="mt-0.5 text-[11px] text-muted-foreground truncate">
+            {stage.subtitle}
           </p>
         </div>
 
-        {/* Right: mockup */}
-        <div>{stepMockups[active]}</div>
+        {/* Duration chip */}
+        <span
+          className={cn(
+            "font-mono text-[10px] uppercase tracking-wider rounded-full border px-2 py-0.5 shrink-0 transition-colors duration-500",
+            active
+              ? "border-pulse/30 text-pulse"
+              : "border-border text-muted-foreground",
+          )}
+        >
+          {stage.duration}
+        </span>
+      </div>
+
+      {/* Progress track with pass rate + funnel count */}
+      <div className="relative mt-3 flex items-center gap-3">
+        <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-muted">
+          <div
+            className={cn(
+              "absolute inset-y-0 left-0 transition-all duration-[900ms] ease-out",
+              stage.isAi
+                ? "bg-gradient-to-r from-pulse via-pulse to-pulse/80"
+                : "bg-pulse",
+              active ? "opacity-100" : "opacity-40",
+            )}
+            style={{ width: active ? `${stage.pass}%` : "0%" }}
+          />
+          {stage.isAi && active && (
+            <div
+              className="absolute inset-y-0 left-0 w-12 animate-shimmer bg-gradient-to-r from-transparent via-white/40 to-transparent"
+              style={{ maxWidth: `${stage.pass}%` }}
+            />
+          )}
+        </div>
+        <span
+          className={cn(
+            "font-mono text-[10px] shrink-0 tabular-nums transition-colors duration-500",
+            active ? "text-foreground" : "text-muted-foreground",
+          )}
+        >
+          {stage.pass}%
+        </span>
+        <span className="font-mono text-[10px] text-muted-foreground shrink-0 tabular-nums">
+          {stage.funnel}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// ── Main pipeline: stages reveal sequentially, then loop ────────────────────
+const VettingPipeline = () => {
+  const [activeCount, setActiveCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+
+  // Start only when in viewport
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView) return;
+    let mounted = true;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const run = () => {
+      if (!mounted) return;
+      setActiveCount(0);
+
+      STAGES.forEach((_, i) => {
+        timers.push(
+          setTimeout(
+            () => {
+              if (!mounted) return;
+              setActiveCount(i + 1);
+            },
+            700 * (i + 1),
+          ),
+        );
+      });
+
+      timers.push(
+        setTimeout(
+          run,
+          700 * (STAGES.length + 1) + 3000,
+        ),
+      );
+    };
+
+    run();
+    return () => {
+      mounted = false;
+      timers.forEach(clearTimeout);
+    };
+  }, [inView]);
+
+  const complete = activeCount === STAGES.length;
+
+  return (
+    <div
+      ref={ref}
+      className="rounded-3xl border border-border bg-muted/30 p-5 md:p-6"
+    >
+      {/* Header inside card */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <p className="text-sm font-semibold">The Gauntlet</p>
+        </div>
+        <span className="font-mono text-[10px] uppercase tracking-wider rounded-full border border-border bg-background px-2.5 py-1 text-muted-foreground">
+          4-Stage Pipeline
+        </span>
+      </div>
+
+      {/* Stages */}
+      <div className="space-y-2">
+        {STAGES.map((stage, i) => (
+          <StageRow
+            key={stage.num}
+            stage={stage}
+            active={i < activeCount}
+            index={i}
+          />
+        ))}
+      </div>
+
+      {/* Final accepted capsule */}
+      <div
+        className={cn(
+          "mt-3 rounded-2xl border-2 border-dashed p-4 transition-all duration-700",
+          complete
+            ? "border-pulse/50 bg-pulse/[0.06]"
+            : "border-border bg-background",
+        )}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span
+              className={cn(
+                "inline-flex size-7 items-center justify-center rounded-full transition-all duration-500",
+                complete
+                  ? "bg-pulse text-background"
+                  : "border border-border bg-muted/40 text-muted-foreground",
+              )}
+            >
+              <ShieldCheck className="size-3.5" strokeWidth={2} />
+            </span>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                Accepted into network
+              </p>
+              <p className="font-mono text-lg font-semibold leading-tight">
+                1,000 engineers
+              </p>
+            </div>
+          </div>
+          <span
+            className={cn(
+              "font-mono text-[10px] uppercase tracking-wider rounded-full px-2.5 py-1 shrink-0 transition-all duration-500",
+              complete
+                ? "bg-pulse text-background"
+                : "border border-border text-muted-foreground",
+            )}
+          >
+            {complete ? "4% pass rate" : "Pending"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Main section ─────────────────────────────────────────────────────────────
+const HowItWorks = ({ className }: HowItWorksProps) => {
+  return (
+    <section
+      id="how-it-works"
+      className={cn("py-24 container mx-auto px-6", className)}
+    >
+      <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 lg:items-center">
+        {/* Left: headline + stats + bullets + CTA */}
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <ShieldCheck className="size-3" />
+              How We Vet
+            </div>
+            <h2 className="text-4xl font-medium tracking-tight lg:text-5xl">
+              Only{" "}
+              <span className="font-mono text-pulse">1 in 25</span>{" "}
+              engineers make it through
+            </h2>
+            <p className="max-w-xl text-base text-muted-foreground leading-relaxed">
+              Every engineer in our network passes a five-stage gauntlet — not a
+              take-home and a vibe check. Technical depth, system design
+              judgement, communication, and background checks are all verified
+              before a single profile reaches your shortlist.
+            </p>
+          </div>
+
+          {/* Stats strip */}
+          <div className="grid grid-cols-3 gap-4 border-y border-border py-6">
+            <div className="space-y-1">
+              <p className="font-mono text-3xl font-semibold tracking-tight tabular-nums">
+                25K+
+              </p>
+              <p className="text-xs text-muted-foreground leading-tight">
+                Applications reviewed
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="font-mono text-3xl font-semibold tracking-tight tabular-nums">
+                1,000
+              </p>
+              <p className="text-xs text-muted-foreground leading-tight">
+                Engineers in network
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="font-mono text-3xl font-semibold tracking-tight tabular-nums text-pulse">
+                4%
+              </p>
+              <p className="text-xs text-muted-foreground leading-tight">
+                Acceptance rate
+              </p>
+            </div>
+          </div>
+
+          {/* What we test */}
+          <ul className="space-y-3 text-sm">
+            {[
+              "Live HR + English fluency screen before any technical stage",
+              "Adaptive 30–50 min AI-led interview tuned to the candidate's CV and role brief",
+              "Face-to-face interview with one of our senior tech leads",
+              "Background verification, ID, and three professional references",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2.5">
+                <span className="mt-[7px] size-1.5 shrink-0 rounded-full bg-pulse" />
+                <span className="text-foreground/80">{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* CTA */}
+          <div className="flex flex-wrap gap-3">
+            <Button asChild className="rounded-full gap-2">
+              <a href="/how-we-vet">
+                See our full playbook
+                <ArrowRight className="size-4" />
+              </a>
+            </Button>
+            <Button
+              asChild
+              variant="ghost"
+              className="rounded-full gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <a href="/marketplace">
+                Browse engineers
+                <ArrowRight className="size-4" />
+              </a>
+            </Button>
+          </div>
+        </div>
+
+        {/* Right: animated pipeline */}
+        <VettingPipeline />
       </div>
     </section>
   );

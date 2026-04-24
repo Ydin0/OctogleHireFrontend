@@ -222,60 +222,80 @@ const MatchesMockup = () => {
         </span>
       </div>
 
-      {phase === "loading" ? (
-        <div className="space-y-3 pt-1">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="flex items-center gap-3 animate-pulse">
-              <div className="size-10 rounded-full bg-muted shrink-0" />
-              <div className="flex-1 space-y-1.5">
-                <div className="h-2.5 rounded-full bg-muted w-28" />
-                <div className="h-2 rounded-full bg-muted w-20" />
-              </div>
-              <div className="space-y-1.5 shrink-0 text-right">
-                <div className="h-2.5 rounded-full bg-muted w-14 ml-auto" />
-                <div className="h-2 rounded-full bg-muted w-12 ml-auto" />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-2.5 pt-1">
-          {MATCHES.map((m, i) => (
+      <div className="space-y-2">
+        {MATCHES.map((m, i) => {
+          const revealed = phase === "results" && i < visibleCount;
+          return (
             <div
               key={m.name}
-              className={cn(
-                "flex items-center gap-3 rounded-xl border border-transparent p-2 -mx-2 transition-all duration-500",
-                i < visibleCount
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-2",
-              )}
+              className="flex h-14 items-center gap-3 rounded-xl px-2 -mx-2"
             >
-              <div className="relative size-10 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
+              {/* Avatar slot — skeleton or real photo */}
+              <div
+                className={cn(
+                  "relative size-10 shrink-0 overflow-hidden rounded-full ring-1 ring-border transition-opacity duration-500",
+                  revealed ? "bg-transparent" : "bg-muted animate-pulse",
+                )}
+              >
                 <Image
                   src={m.image}
                   alt={m.name}
                   fill
                   sizes="40px"
-                  className="object-cover"
+                  className={cn(
+                    "object-cover transition-opacity duration-500",
+                    revealed ? "opacity-100" : "opacity-0",
+                  )}
                 />
-                <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-background bg-emerald-500" />
+                <span
+                  className={cn(
+                    "absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-background bg-emerald-500 transition-opacity duration-500",
+                    revealed ? "opacity-100" : "opacity-0",
+                  )}
+                />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold truncate">{m.name}</p>
-                <p className="text-[10px] text-muted-foreground truncate">
-                  {m.role}
-                </p>
+
+              {/* Name + role */}
+              <div className="flex-1 min-w-0 space-y-1">
+                {revealed ? (
+                  <>
+                    <p className="text-xs font-semibold truncate animate-in fade-in slide-in-from-left-1 duration-300">
+                      {m.name}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground truncate animate-in fade-in slide-in-from-left-1 duration-300 delay-75">
+                      {m.role}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-2.5 rounded-full bg-muted w-28 animate-pulse" />
+                    <div className="h-2 rounded-full bg-muted w-20 animate-pulse" />
+                  </>
+                )}
               </div>
-              <div className="text-right shrink-0">
-                <p className="text-xs font-mono font-semibold">{m.rate}</p>
-                <p className="text-[10px] font-mono text-pulse">
-                  {m.match} match
-                </p>
+
+              {/* Rate + match */}
+              <div className="shrink-0 text-right space-y-1">
+                {revealed ? (
+                  <>
+                    <p className="text-xs font-mono font-semibold animate-in fade-in slide-in-from-right-1 duration-300">
+                      {m.rate}
+                    </p>
+                    <p className="text-[10px] font-mono text-pulse animate-in fade-in slide-in-from-right-1 duration-300 delay-75">
+                      {m.match} match
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="h-2.5 rounded-full bg-muted w-14 ml-auto animate-pulse" />
+                    <div className="h-2 rounded-full bg-muted w-12 ml-auto animate-pulse" />
+                  </>
+                )}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 };
