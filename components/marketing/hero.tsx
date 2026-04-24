@@ -1,165 +1,326 @@
 "use client";
 
 import AutoScroll from "embla-carousel-auto-scroll";
-import { ArrowRight } from "lucide-react";
+import Autoplay from "embla-carousel-autoplay";
+import { ArrowRight, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { REGIONAL_COUNTRIES, countryToSlug } from "@/lib/seo-data";
 
 interface HeroProps {
   className?: string;
 }
 
-const EXCLUDED = new Set([
-  "GB", "US", "CA", "DE", "FR", "NL", "IT", "AU",
-  "ET", "KE", "NG", "GH", "TZ", "UG",
-]);
+const DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
 
-const hireFromCountries = (() => {
-  const filtered = REGIONAL_COUNTRIES.filter(
-    (c) => !EXCLUDED.has(c.isoCode),
-  );
-  const india = filtered.find((c) => c.isoCode === "IN");
-  const rest = filtered.filter((c) => c.isoCode !== "IN");
-  if (!india) return rest;
-  const mid = Math.floor(rest.length / 2);
-  return [...rest.slice(0, mid), india, ...rest.slice(mid)];
-})();
+/* ─── Real client logos (from /public/company-logos) ──────────────────────── */
 
-const badges = [
-  { src: "/security/ISO copy.png", alt: "ISO 27001 Certified", href: "https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C" },
-  { src: "/security/GDPR copy.png", alt: "GDPR Compliant", href: undefined },
-  { src: "/security/CCPA copy.png", alt: "CCPA Compliant", href: undefined },
+const logos = [
+  { name: "Beekey",       src: "/company-logos/Beekey.svg",            h: "h-6" },
+  { name: "Hireflow",     src: "/company-logos/Hireflow.svg",          h: "h-5" },
+  { name: "Corpwise",     src: "/company-logos/Corpwise.svg",          h: "h-6" },
+  { name: "Solidus",      src: "/company-logos/Solidus.svg",           h: "h-6" },
+  { name: "SquareLogik",  src: "/company-logos/SquareLogik.svg",       h: "h-6" },
+  { name: "Unichats",     src: "/company-logos/Unichats.svg",          h: "h-6" },
+  { name: "DNO",          src: "/company-logos/DNO%20Investments.svg", h: "h-6" },
+  { name: "The Care App", src: "/company-logos/thecareapp.svg",        h: "h-6" },
+  { name: "ArtistaTours", src: "/company-logos/ArtistaTours.svg",      h: "h-6" },
+  { name: "Workchats",    src: "/company-logos/Workchats.svg",         h: "h-6" },
 ];
 
-const Hero = ({ className }: HeroProps) => {
-  const allCountries = [...hireFromCountries, ...hireFromCountries];
+/* ─── Featured developer profiles (use public/featured-developers/XX.png) ── */
 
+type Profile = {
+  image: string;
+  name: string;
+  role: string;
+  location: string;
+  flag: string; // ISO code
+  stacks: string[];
+  rate: string;
+  available: boolean;
+  aiCertified: boolean;
+};
+
+const profiles: Profile[] = [
+  { image: "/featured-developers/01.png", name: "Priya Sharma",     role: "Senior Full-Stack",  location: "Bengaluru",  flag: "IN", stacks: ["react", "typescript", "ai"],          rate: "$65/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/02.png", name: "Arjun Kumar",      role: "Backend Engineer",   location: "Mumbai",     flag: "IN", stacks: ["python", "postgresql", "ai"],         rate: "$60/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/03.png", name: "Ananya Reddy",     role: "Frontend Engineer",  location: "Hyderabad",  flag: "IN", stacks: ["vuejs", "typescript", "tailwindcss"], rate: "$50/hr", available: false, aiCertified: true },
+  { image: "/featured-developers/04.png", name: "Rohan Mehta",      role: "Platform Engineer",  location: "Pune",       flag: "IN", stacks: ["go", "kubernetes", "aws"],            rate: "$70/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/05.png", name: "Vikram Iyer",      role: "AI / ML Engineer",   location: "Chennai",    flag: "IN", stacks: ["python", "pytorch", "ai"],            rate: "$75/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/06.png", name: "Aryan Gupta",      role: "DevOps Engineer",    location: "New Delhi",  flag: "IN", stacks: ["aws", "docker", "kubernetes"],        rate: "$68/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/07.png", name: "Karthik Nair",     role: "Full-Stack",         location: "Bengaluru",  flag: "IN", stacks: ["nextjs", "typescript", "ai"],         rate: "$58/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/08.png", name: "Ayesha Khan",      role: "Senior Backend",     location: "Lucknow",    flag: "IN", stacks: ["go", "postgresql", "ai"],             rate: "$72/hr", available: false, aiCertified: true },
+  { image: "/featured-developers/09.png", name: "Rahul Joshi",      role: "Mobile Engineer",    location: "Ahmedabad",  flag: "IN", stacks: ["flutter", "typescript"],              rate: "$55/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/10.png", name: "Meera Pillai",     role: "Backend Engineer",   location: "Kochi",      flag: "IN", stacks: ["java", "spring", "aws"],              rate: "$48/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/11.png", name: "Siddharth Rao",    role: "Frontend Engineer",  location: "Hyderabad",  flag: "IN", stacks: ["react", "typescript", "tailwindcss"], rate: "$45/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/12.png", name: "Divya Menon",      role: "Data Engineer",      location: "Chennai",    flag: "IN", stacks: ["python", "ai", "postgresql"],         rate: "$62/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/13.png", name: "Neha Tiwari",      role: "ML Engineer",        location: "New Delhi",  flag: "IN", stacks: ["typescript", "nextjs", "postgresql"], rate: "$78/hr", available: false, aiCertified: true },
+  { image: "/featured-developers/14.png", name: "Kavya Patel",      role: "Product Engineer",   location: "Ahmedabad",  flag: "IN", stacks: ["react", "nodejs", "ai"],              rate: "$52/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/15.png", name: "Aditya Desai",     role: "Staff Engineer",     location: "Mumbai",     flag: "IN", stacks: ["go", "kubernetes", "ai"],             rate: "$85/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/16.png", name: "Ishaan Verma",     role: "Backend Engineer",   location: "Pune",       flag: "IN", stacks: ["python", "pytorch", "ai"],            rate: "$58/hr", available: true,  aiCertified: true },
+];
+
+const STACK_ICON: Record<string, string> = {
+  react:        `${DEVICON}/react/react-original.svg`,
+  typescript:   `${DEVICON}/typescript/typescript-original.svg`,
+  python:       `${DEVICON}/python/python-original.svg`,
+  postgresql:   `${DEVICON}/postgresql/postgresql-original.svg`,
+  tailwindcss:  `${DEVICON}/tailwindcss/tailwindcss-original.svg`,
+  go:           `${DEVICON}/go/go-original-wordmark.svg`,
+  kubernetes:   `${DEVICON}/kubernetes/kubernetes-original.svg`,
+  aws:          `${DEVICON}/amazonwebservices/amazonwebservices-plain-wordmark.svg`,
+  docker:       `${DEVICON}/docker/docker-original.svg`,
+  vuejs:        `${DEVICON}/vuejs/vuejs-original.svg`,
+  nodejs:       `${DEVICON}/nodejs/nodejs-original.svg`,
+  flutter:      `${DEVICON}/flutter/flutter-original.svg`,
+  pytorch:      `${DEVICON}/pytorch/pytorch-original.svg`,
+  nextjs:       `${DEVICON}/nextjs/nextjs-original.svg`,
+  java:         `${DEVICON}/java/java-original.svg`,
+  spring:       `${DEVICON}/spring/spring-original.svg`,
+};
+
+/* ─── Profile card (marketplace-style) ────────────────────────────────────── */
+
+function ProfileCard({ profile }: { profile: Profile }) {
   return (
-    <section className={cn("flex h-[calc(100dvh-64px)] flex-col", className)}>
-      <div className="container mx-auto flex flex-1 flex-col justify-center px-6">
-        {/* Badge */}
-        <div className="flex justify-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5">
-            <span className="size-2 rounded-full bg-pulse animate-pulse" />
-            <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
-              Introducing OctogleHire
+    <div className="group/card flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-card transition-all duration-300 ease-out hover:scale-[1.02] hover:border-pulse/40 hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.15)] dark:hover:shadow-[0_20px_40px_-12px_rgba(0,0,0,0.5)]">
+      {/* Photo — top portion */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={profile.image}
+          alt={profile.name}
+          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover/card:scale-110"
+        />
+
+        {/* Availability badge — top-left */}
+        {profile.available && (
+          <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-2.5 py-1 backdrop-blur-md">
+            <span className="relative inline-flex">
+              <span className="size-1.5 rounded-full bg-emerald-400" />
+              <span className="absolute inset-0 size-1.5 rounded-full bg-emerald-400 animate-ping opacity-60" />
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-wider text-white">
+              Available
             </span>
           </div>
-        </div>
+        )}
 
-        {/* Headline */}
-        <h1 className="mt-6 text-center text-5xl font-medium tracking-tight text-foreground sm:text-6xl md:text-7xl lg:text-8xl">
-          World-Class Developers,
-          <br />
-          Fraction of the
-          <br />
-          <span className="text-pulse">Cost.</span>
-        </h1>
-
-        {/* Description */}
-        <p className="mx-auto mt-6 max-w-xl text-center text-base text-muted-foreground sm:text-lg">
-          OctogleHire delivers pre-vetted engineers from 30+ countries
-          at 40–60% below US/UK rates. Receive 3–5 curated profiles within 48
-          hours — no recruitment fees, no long-term lock-in.
-        </p>
-
-        {/* CTAs + Badges row */}
-        <div className="mt-8 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
-          {/* Buttons */}
-          <div className="flex items-center gap-3">
-            <Button asChild size="lg" className="rounded-full px-6">
-              <a href="/companies/signup">
-                Start Hiring
-                <ArrowRight className="ml-2 size-4 -rotate-45" />
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-full px-6">
-              <a href="/companies/signup">
-                Book a Demo
-              </a>
-            </Button>
+        {/* AI certified badge — top-right */}
+        {profile.aiCertified && (
+          <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/50 px-2.5 py-1 backdrop-blur-md">
+            <span className="relative inline-flex">
+              <span className="size-1.5 rounded-full bg-pulse" />
+              <span className="absolute inset-0 size-1.5 rounded-full bg-pulse animate-ping opacity-60" />
+            </span>
+            <span className="font-mono text-[9px] uppercase tracking-wider text-white">
+              AI Native
+            </span>
           </div>
+        )}
 
-          {/* Divider (desktop only) */}
-          <div className="hidden lg:block h-10 w-px bg-border" />
-
-          {/* Certification badges */}
-          <div className="flex items-center gap-5">
-            {badges.map((badge) =>
-              badge.href ? (
-                <a key={badge.alt} href={badge.href} target="_blank" rel="noopener noreferrer">
-                  <Image
-                    src={badge.src}
-                    alt={badge.alt}
-                    width={120}
-                    height={120}
-                    className="h-16 w-auto brightness-0 dark:brightness-200 opacity-80 hover:opacity-100 transition-opacity"
-                  />
-                </a>
-              ) : (
-                <Image
-                  key={badge.alt}
-                  src={badge.src}
-                  alt={badge.alt}
-                  width={120}
-                  height={120}
-                  className="h-16 w-auto brightness-0 dark:brightness-200 opacity-80 hover:opacity-100 transition-opacity"
-                />
-              )
-            )}
-          </div>
+        {/* Country flag — bottom-left */}
+        <div className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/40 px-2 py-0.5 backdrop-blur-md">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`https://flagcdn.com/w20/${profile.flag.toLowerCase()}.png`}
+            alt={profile.location}
+            className="h-2.5 w-auto rounded-[2px]"
+          />
+          <span className="text-[10px] text-white/90">{profile.location}</span>
         </div>
-
-        {/* Hire from 30+ countries */}
-        <p className="mt-8 text-center text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Hire from 30+ countries
-        </p>
       </div>
 
-      {/* Country flag carousel — full width, inside viewport */}
-      <div className="relative mt-3 shrink-0 pb-4">
-        <Carousel
-          plugins={[AutoScroll({ playOnInit: true, speed: 0.4, stopOnInteraction: false })]}
-          opts={{ loop: true, align: "start" }}
-        >
-          <CarouselContent className="ml-0">
-            {allCountries.map((country, i) => (
-              <CarouselItem
-                key={`${country.isoCode}-${i}`}
-                className="basis-1/4 pl-0 pr-4 sm:basis-1/5 md:basis-1/6 lg:basis-1/8 xl:basis-1/10"
+      {/* Info */}
+      <div className="flex flex-col gap-2.5 p-4 text-left">
+        {/* Name + role */}
+        <div>
+          <p className="truncate text-sm font-semibold text-foreground">
+            {profile.name}
+          </p>
+          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-pulse">
+            <MapPin className="size-3" />
+            {profile.role}
+          </div>
+        </div>
+
+        {/* Stack chips — fixed min-height so 2-chip and 3-chip cards are uniform */}
+        <div className="flex flex-wrap content-start gap-1.5 min-h-[46px]">
+          {profile.stacks.map((s) =>
+            s === "ai" ? null : STACK_ICON[s] ? (
+              <Badge
+                key={s}
+                variant="secondary"
+                className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] font-normal text-muted-foreground"
               >
-                <Link
-                  href={`/hire/developers-in/${countryToSlug(country.name)}`}
-                  className="flex flex-col items-center gap-2 group"
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={STACK_ICON[s]} alt="" className="mr-1 size-3" />
+                {s[0].toUpperCase() + s.slice(1)}
+              </Badge>
+            ) : null,
+          )}
+        </div>
+
+        {/* Rate + CTA */}
+        <div className="mt-1 flex items-center justify-between border-t border-border pt-2.5">
+          <span className="font-mono text-sm font-semibold text-foreground">
+            {profile.rate}
+          </span>
+          <span className="inline-flex size-7 items-center justify-center rounded-full border border-border bg-background text-foreground transition-all duration-300 group-hover/card:border-pulse group-hover/card:bg-pulse group-hover/card:text-pulse-foreground">
+            <ArrowRight className="size-3.5 transition-transform duration-300 group-hover/card:translate-x-0.5" />
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Hero ────────────────────────────────────────────────────────────────── */
+
+const Hero = ({ className }: HeroProps) => {
+  return (
+    <section className={cn("relative pt-20 pb-0", className)}>
+      <div className="container mx-auto flex flex-col items-center justify-center gap-4 px-6 text-center">
+        {/* Eyebrow pill */}
+        <Link
+          href="/marketplace"
+          className="group inline-flex w-fit items-center gap-2.5 rounded-full border border-border bg-muted/70 px-4 py-1.5 transition-colors hover:bg-muted"
+        >
+          <span className="relative inline-flex">
+            <span className="size-2 rounded-full bg-emerald-500" />
+            <span className="absolute inset-0 size-2 rounded-full bg-emerald-500 animate-ping opacity-60" />
+          </span>
+          <span className="font-mono text-[11px] uppercase tracking-wider text-foreground/80">
+            Live now · 1,000+ engineers active
+          </span>
+          <ArrowRight className="size-3.5 text-foreground/50 transition group-hover:translate-x-0.5 group-hover:text-foreground" />
+        </Link>
+
+        {/* Headline */}
+        <h1 className="mt-3 max-w-4xl text-balance text-5xl font-medium tracking-tight text-foreground md:text-6xl lg:text-7xl xl:text-[5.25rem]">
+          <span className="text-pulse">AI Native</span> Engineers.
+          <br />
+          <span className="font-mono">40–60%</span> Lower Cost.
+        </h1>
+
+        {/* Subheadline */}
+        <p className="mx-auto mt-3 max-w-xl text-balance text-base text-muted-foreground md:text-lg">
+          Pre-vetted. AI-fluent. Delivered from 30+ countries in{" "}
+          <span className="font-mono text-foreground">48 hours</span>. No
+          recruitment fees, no long-term lock-in.
+        </p>
+
+        {/* CTAs */}
+        <div className="mt-6 flex items-center gap-3">
+          <Button asChild size="lg" className="rounded-full px-6">
+            <a href="/companies/signup">
+              Start Hiring
+              <ArrowRight className="ml-2 size-4 -rotate-45 transition-transform group-hover:rotate-0" />
+            </a>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="rounded-full px-6">
+            <a href="/how-we-vet#ai-playbook">See AI Playbook</a>
+          </Button>
+        </div>
+
+        {/* Trust badges — ISO / GDPR / CCPA */}
+        <div className="mt-6 flex items-center gap-5">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            Certified
+          </span>
+          <div className="h-3 w-px bg-border" />
+          <a
+            href="https://www.iafcertsearch.org/certified-entity/YgnCzSQq4p76plJ5hUNVNd5C"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="ISO 27001 Certified"
+          >
+            <Image
+              src="/security/ISO copy.png"
+              alt="ISO 27001"
+              width={120}
+              height={120}
+              className="h-10 w-auto opacity-60 brightness-0 transition-opacity hover:opacity-90 dark:brightness-200 dark:opacity-80 dark:hover:opacity-100"
+            />
+          </a>
+          <Image
+            src="/security/GDPR copy.png"
+            alt="GDPR Compliant"
+            width={120}
+            height={120}
+            className="h-10 w-auto opacity-60 brightness-0 dark:brightness-200 dark:opacity-80"
+          />
+          <Image
+            src="/security/CCPA copy.png"
+            alt="CCPA Compliant"
+            width={120}
+            height={120}
+            className="h-10 w-auto opacity-60 brightness-0 dark:brightness-200 dark:opacity-80"
+          />
+        </div>
+
+        {/* Logo strip — auto-scrolling */}
+        <div className="relative mt-12 w-full">
+          <Carousel
+            plugins={[AutoScroll({ playOnInit: true, speed: 0.3, stopOnInteraction: false })]}
+            opts={{ loop: true, align: "start" }}
+          >
+            <CarouselContent className="ml-0">
+              {[...logos, ...logos].map((logo, i) => (
+                <CarouselItem
+                  key={`${logo.name}-${i}`}
+                  className="mr-20 flex basis-auto items-center justify-center pl-0"
                 >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`https://flagcdn.com/w40/${country.isoCode.toLowerCase()}.png`}
-                    srcSet={`https://flagcdn.com/w80/${country.isoCode.toLowerCase()}.png 2x`}
-                    alt={country.name}
-                    className="h-8 w-auto rounded-sm shadow-sm transition-transform group-hover:scale-110"
-                    width={40}
-                    height={27}
+                    src={logo.src}
+                    alt={logo.name}
+                    className={cn(
+                      logo.h,
+                      "w-auto brightness-0 opacity-60 transition-opacity hover:opacity-90 dark:brightness-100 dark:opacity-70 dark:hover:opacity-100",
+                    )}
                   />
-                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors whitespace-nowrap">
-                    {country.name}
-                  </span>
-                </Link>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-linear-to-r from-background to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-linear-to-l from-background to-transparent" />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-linear-to-r from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-linear-to-l from-background to-transparent" />
+        </div>
+
+        {/* Profile card carousel */}
+        <div className="relative mx-auto mt-6 flex w-full items-center justify-center pb-16">
+          <Carousel
+            plugins={[Autoplay({ delay: 5000, stopOnInteraction: false })]}
+            opts={{ loop: true, align: "start" }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {profiles.map((p, i) => (
+                <CarouselItem
+                  key={`${p.name}-${i}`}
+                  className="basis-4/5 pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
+                >
+                  <div className="py-4">
+                    <ProfileCard profile={p} />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-linear-to-r from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-linear-to-l from-background to-transparent" />
+        </div>
       </div>
     </section>
   );

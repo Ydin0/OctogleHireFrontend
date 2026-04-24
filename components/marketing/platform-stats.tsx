@@ -38,11 +38,11 @@ const stats = [
     description: "Startups to enterprise",
   },
   {
-    value: 150,
+    value: 100,
     prefix: "",
-    suffix: "+",
-    label: "Countries Covered",
-    description: "Truly global coverage",
+    suffix: "%",
+    label: "AI-Certified",
+    description: "Every engineer trained on the Octogle AI Playbook",
   },
   {
     value: 94,

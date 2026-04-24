@@ -1,9 +1,8 @@
 import {
-  Clock,
   Globe,
-  Headphones,
   Scale,
   Shield,
+  Sparkles,
   Users,
   Zap,
 } from "lucide-react";
@@ -46,10 +45,10 @@ const benefits = [
       "Every client is assigned a dedicated account manager who handles onboarding, ongoing support, and replacements.",
   },
   {
-    icon: Clock,
-    title: "Flexible Engagements",
+    icon: Sparkles,
+    title: "AI Native Toolchain",
     description:
-      "Hire hourly, weekly, monthly, or full-time. 94% of placements extend beyond 6 months — but there's no lock-in or cancellation fees.",
+      "Every engineer ships with Cursor, Claude Code, RAG, and agentic workflow muscle memory — trained on the Octogle AI Playbook before their first match.",
   },
 ];
 

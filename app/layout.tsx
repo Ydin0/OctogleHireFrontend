@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import localFont from "next/font/local";
-import { DM_Mono } from "next/font/google";
+import { Geist, DM_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GoogleAnalytics } from "@/components/analytics/google-analytics";
@@ -13,35 +12,10 @@ import { SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION, ORGANIZATION_SCHEMA, WEBSITE_
 import { JsonLd } from "@/components/json-ld";
 import "./globals.css";
 
-const volksans = localFont({
-  src: [
-    {
-      path: "../public/fonts/volksansTest-Light-BF63eee6e34a6ac.otf",
-      weight: "300",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/volksansTest-Normal-BF63eee6e350bce.otf",
-      weight: "350",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/volksansTest-Regular-BF63eee6e3c8d0e.otf",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/volksansTest-SemiBold-BF63eee6e3e5233.otf",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "../public/fonts/volksansTest-Bold-BF63eee6e2577d0.otf",
-      weight: "700",
-      style: "normal",
-    },
-  ],
-  variable: "--font-volksans",
+const geist = Geist({
+  variable: "--font-geist",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
   preload: true,
   display: "swap",
 });
@@ -100,7 +74,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
-        className={`${volksans.variable} ${dmMono.variable} antialiased`}
+        className={`${geist.variable} ${dmMono.variable} antialiased`}
       >
         <JsonLd data={[ORGANIZATION_SCHEMA, WEBSITE_SCHEMA]} />
         <GoogleAnalytics />

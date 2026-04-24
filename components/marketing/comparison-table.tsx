@@ -19,6 +19,7 @@ const competitors = [
     traits: [
       { label: "Vetting", value: "None — self-reported", pass: false },
       { label: "Talent Quality", value: "Inconsistent", pass: false },
+      { label: "AI Native Training", value: "Not included", pass: false },
       { label: "Time to Hire", value: "Weeks of filtering", pass: false },
       { label: "Pricing", value: "Low, variable quality", pass: false },
       { label: "Compliance", value: "You manage it", pass: false },
@@ -33,6 +34,7 @@ const competitors = [
     traits: [
       { label: "Vetting", value: "None — bid-based", pass: false },
       { label: "Talent Quality", value: "Race to the bottom", pass: false },
+      { label: "AI Native Training", value: "Not included", pass: false },
       { label: "Time to Hire", value: "Days of reviewing bids", pass: false },
       { label: "Pricing", value: "Cheapest wins", pass: false },
       { label: "Compliance", value: "You manage it", pass: false },
@@ -47,6 +49,7 @@ const competitors = [
     traits: [
       { label: "Vetting", value: "Rigorous screening", pass: true },
       { label: "Talent Quality", value: "Top talent", pass: true },
+      { label: "AI Native Training", value: "Not included", pass: false },
       { label: "Time to Hire", value: "1–3 weeks", pass: false },
       { label: "Pricing", value: "Premium — $150+/hr", pass: false },
       { label: "Compliance", value: "Managed for you", pass: true },
@@ -61,6 +64,7 @@ const octogle = {
   traits: [
     { label: "Vetting", value: "5-stage technical vetting" },
     { label: "Talent Quality", value: "Top talent — verified" },
+    { label: "AI Native Training", value: "Certified across 6 modules" },
     { label: "Time to Hire", value: "48 hours average" },
     { label: "Pricing", value: "Competitive & transparent" },
     { label: "Compliance", value: "Fully managed globally" },

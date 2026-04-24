@@ -19,6 +19,14 @@ const faqs = [
     a: "Every developer passes a 5-stage process: application screening, stack-specific technical assessment, live system design interview, soft-skills and communication evaluation, and reference checks. From over 25,000 applicants reviewed, only 1,000 have been accepted into our network.",
   },
   {
+    q: "What does \"AI native\" actually mean here?",
+    a: "Every engineer in our network completes the Octogle AI Playbook — 40+ hours of hands-on training across six modules: Cursor & Claude Code, RAG & context engineering, agentic development, prompt-driven testing, model selection & cost control, and spec-first collaboration. They arrive already fluent in the tools that define modern software — not just aware of them.",
+  },
+  {
+    q: "Do your engineers just use AI, or do they understand it?",
+    a: "Both. Our vetting evaluates real engineering fundamentals — system design, debugging, production judgement — and we train explicitly against over-reliance on AI output. Every certified engineer is assessed on when to lean on AI, when to override it, and how to evaluate model responses critically. AI multiplies their output; it doesn't replace their judgement.",
+  },
+  {
     q: "What roles and tech stacks do you cover?",
     a: "We cover the full spectrum of software engineering: React, Node.js, Python, Go, Java, .NET, mobile (iOS/Android/Flutter), DevOps, cloud infrastructure, AI/ML, data engineering, and more. If it ships software, we can staff it.",
   },
