@@ -15,6 +15,9 @@ import { Faq } from "@/components/marketing/faq";
 import { Footer } from "@/components/marketing/footer";
 import { SITE_URL, SITE_NAME, webPageSchema, breadcrumbSchema } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
+import { fetchApprovedReviews } from "@/lib/api/reviews";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "OctogleHire — AI Native Engineers, 40–60% Lower Cost",
@@ -43,7 +46,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
+export default async function Home() {
+  const approvedReviews = (await fetchApprovedReviews()) ?? [];
+
   const homeSchema = [
     webPageSchema({
       path: "",
@@ -118,7 +123,7 @@ export default function Home() {
       <Hero />
       <FeaturesShowcase />
       <HowItWorks />
-      <SavingsComparison />
+      <SavingsComparison reviews={approvedReviews} />
       <HiringCalculator />
       <DeveloperSpecializations />
       <Benefits />

@@ -13,6 +13,7 @@ import {
   Layers,
   LineChart,
   LogOut,
+  MessageSquareQuote,
   Receipt,
   Send,
   Shield,
@@ -39,6 +40,7 @@ const navGroups = [
     superAdminOnly: false,
     items: [
       { href: "/admin/dashboard", label: "Overview", icon: Layers },
+      { href: "/admin/dashboard/reviews", label: "Reviews", icon: MessageSquareQuote },
     ],
   },
   {

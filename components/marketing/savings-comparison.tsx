@@ -1,16 +1,37 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Quote } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import type { Review } from "@/lib/api/reviews";
 
 interface SavingsComparisonProps {
   className?: string;
+  /** Approved reviews from /reviews submissions. When present, these replace the seed. */
+  reviews?: Review[];
 }
 
-const stories = [
+interface Story {
+  name: string;
+  role: string;
+  company: string;
+  logo: string | null;
+  logoSize: string;
+  avatar: string;
+  avatarPosition: string;
+  quote: string;
+  hiredRole: string;
+  hiredCount: number;
+  localRate: number;
+  octogleRate: number;
+  market: string;
+  flag: string;
+  currency: string;
+}
+
+const SEED_STORIES: Story[] = [
   {
     name: "Ricardo Machado",
     role: "CEO",
@@ -87,10 +108,43 @@ const stories = [
 
 const AUTO_ADVANCE_MS = 9000;
 
-const SavingsComparison = ({ className }: SavingsComparisonProps) => {
+const reviewToStory = (r: Review): Story => ({
+  name: r.name,
+  role: r.role,
+  company: r.company,
+  logo: r.logoUrl,
+  logoSize: "h-5",
+  avatar: r.avatarUrl ?? "",
+  avatarPosition: "object-[50%_20%]",
+  quote: r.quote,
+  hiredRole: r.hiredRole,
+  hiredCount: r.hiredCount,
+  localRate: r.localRate,
+  octogleRate: r.octogleRate,
+  market: r.market,
+  flag: r.flag,
+  currency: r.currency,
+});
+
+const SavingsComparison = ({
+  className,
+  reviews,
+}: SavingsComparisonProps) => {
+  const stories = useMemo<Story[]>(() => {
+    const fromReviews = (reviews ?? [])
+      .filter((r) => !!r.avatarUrl)
+      .map(reviewToStory);
+    return fromReviews.length > 0 ? fromReviews : SEED_STORIES;
+  }, [reviews]);
+
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
+
+  // Clamp index when the stories source changes (e.g. reviews load after mount)
+  useEffect(() => {
+    if (index >= stories.length) setIndex(0);
+  }, [stories.length, index]);
 
   useEffect(() => {
     if (paused) return;
@@ -99,7 +153,7 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
       AUTO_ADVANCE_MS,
     );
     return () => clearTimeout(t);
-  }, [index, paused]);
+  }, [index, paused, stories.length]);
 
   useEffect(() => {
     const el = progressRef.current;
@@ -245,15 +299,17 @@ const SavingsComparison = ({ className }: SavingsComparisonProps) => {
                     {s.role}, {s.company}
                   </p>
                 </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={s.logo}
-                  alt={s.company}
-                  className={cn(
-                    s.logoSize ?? "h-5",
-                    "w-auto opacity-60 invert dark:invert-0 hidden sm:block",
-                  )}
-                />
+                {s.logo && (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={s.logo}
+                    alt={s.company}
+                    className={cn(
+                      s.logoSize ?? "h-5",
+                      "w-auto opacity-60 invert dark:invert-0 hidden sm:block",
+                    )}
+                  />
+                )}
               </div>
             </div>
 
