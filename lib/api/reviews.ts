@@ -101,20 +101,38 @@ export async function submitReview(
 /**
  * Fetch approved reviews to render on the homepage. Returns `null` when the
  * endpoint isn't available yet so callers can fall back to the hardcoded seed.
+ *
+ * Implementation notes:
+ * - Plain `fetch` (no retry wrapper). The retry policy is wrong for this call —
+ *   when the backend endpoint doesn't exist yet it returns Railway's catch-all
+ *   404 ("Route does not exist."), which the retry wrapper would then back off
+ *   on for ~7.5s before giving up. That blocks homepage rendering.
+ * - 1500ms AbortController timeout — if the backend is unreachable the
+ *   homepage falls back to the seed within 1.5s rather than hanging.
+ * - `next: { revalidate: 300 }` — caches the result in Next.js's data cache
+ *   for 5 minutes, allowing the homepage to remain statically rendered.
  */
 export async function fetchApprovedReviews(): Promise<Review[] | null> {
+  if (!process.env.NEXT_PUBLIC_API_BASE_URL) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 1500);
+
   try {
-    const response = await fetchWithRetry(
+    const response = await fetch(
       `${apiBaseUrl}/api/public/reviews?status=approved`,
       {
         method: "GET",
-        cache: "no-store",
+        signal: controller.signal,
+        next: { revalidate: 300 },
       },
     );
+    clearTimeout(timer);
     if (!response.ok) return null;
     const data = (await response.json()) as { reviews?: Review[] };
     return data.reviews ?? [];
   } catch {
+    clearTimeout(timer);
     return null;
   }
 }
