@@ -242,14 +242,10 @@ const styles = StyleSheet.create({
   },
 });
 
-// Octogle invoices are always issued in AED, regardless of what is stored on
-// the invoice record. Older records may carry "USD" — render them as AED.
-const INVOICE_CURRENCY = "AED";
-
-function formatMoney(amount: number, _currency: string = "AED"): string {
+function formatMoney(amount: number, currency: string = "USD"): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: INVOICE_CURRENCY,
+    currency,
     minimumFractionDigits: 2,
   }).format(amount);
 }
