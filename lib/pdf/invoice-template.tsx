@@ -242,10 +242,14 @@ const styles = StyleSheet.create({
   },
 });
 
-function formatMoney(amount: number, currency: string = "USD"): string {
+// Octogle invoices are always issued in AED, regardless of what is stored on
+// the invoice record. Older records may carry "USD" — render them as AED.
+const INVOICE_CURRENCY = "AED";
+
+function formatMoney(amount: number, _currency: string = "AED"): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency,
+    currency: INVOICE_CURRENCY,
     minimumFractionDigits: 2,
   }).format(amount);
 }
@@ -417,7 +421,7 @@ function InvoicePDF({ invoice }: InvoicePDFProps) {
           <View style={styles.bankRow}>
             <Text style={styles.bankLabel}>Beneficiary</Text>
             <Text style={styles.bankValue}>
-              Octogle Technologies CO L.L.C
+              OCTOGLE TECHNOLOGIES CO. L.L.C
             </Text>
           </View>
           <View style={styles.bankRow}>
@@ -427,21 +431,21 @@ function InvoicePDF({ invoice }: InvoicePDFProps) {
           <View style={styles.bankRow}>
             <Text style={styles.bankLabel}>IBAN</Text>
             <Text style={styles.bankValue}>
-              AE07 0860 0000 0120 3456 789
+              AE17 0860 0000 0925 4740 761
             </Text>
           </View>
           <View style={styles.bankRow}>
             <Text style={styles.bankLabel}>SWIFT / BIC</Text>
-            <Text style={styles.bankValue}>WIABORAX</Text>
+            <Text style={styles.bankValue}>WIOBAEADXXX</Text>
           </View>
           <View style={styles.bankRow}>
             <Text style={styles.bankLabel}>Account Currency</Text>
-            <Text style={styles.bankValue}>USD</Text>
+            <Text style={styles.bankValue}>AED</Text>
           </View>
           <View style={styles.bankRow}>
             <Text style={styles.bankLabel}>Bank Address</Text>
             <Text style={styles.bankValue}>
-              Abu Dhabi, United Arab Emirates
+              Etihad Airways Centre, 5th Floor, Abu Dhabi, UAE
             </Text>
           </View>
         </View>
