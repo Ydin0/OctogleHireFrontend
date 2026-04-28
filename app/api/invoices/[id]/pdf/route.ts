@@ -27,15 +27,29 @@ export async function GET(
   const url = new URL(request.url);
   const isDownload = url.searchParams.get("download") === "1";
 
-  const upstream = await fetch(`${apiBaseUrl}/api/admin/invoices/${id}/pdf`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: "no-store",
-  });
+  // Admin and company users both download via this proxy. Try the company
+  // endpoint first when the session has an orgId (companies log in through
+  // a Clerk org); fall back to the admin endpoint for admins-without-orgs
+  // and for the case where the company endpoint can't see this invoice.
+  const headers = { Authorization: `Bearer ${token}` };
+  const candidates = [
+    `${apiBaseUrl}/api/companies/invoices/${id}/pdf`,
+    `${apiBaseUrl}/api/admin/invoices/${id}/pdf`,
+  ];
 
-  if (!upstream.ok) {
+  let upstream: Response | null = null;
+  for (const endpoint of candidates) {
+    const res = await fetch(endpoint, { headers, cache: "no-store" });
+    if (res.ok) {
+      upstream = res;
+      break;
+    }
+  }
+
+  if (!upstream) {
     return NextResponse.json(
       { error: "not_found", message: "Invoice not found." },
-      { status: upstream.status },
+      { status: 404 },
     );
   }
 
