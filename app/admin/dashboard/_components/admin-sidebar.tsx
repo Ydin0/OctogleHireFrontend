@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BadgeDollarSign,
   Bot,
   Briefcase,
   Building2,
@@ -48,6 +49,7 @@ const navGroups = [
     superAdminOnly: false,
     items: [
       { href: "/admin/dashboard/applicants", label: "Applicants", icon: Users },
+      { href: "/admin/dashboard/sales-reps", label: "Sales Reps", icon: BadgeDollarSign },
       { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
       { href: "/admin/dashboard/requirements", label: "Requirements", icon: Store, badgeKey: "requirements" as const },
       { href: "/admin/dashboard/interviews", label: "Interviews", icon: Video },

@@ -14,6 +14,74 @@ export type ApplicationStatus =
   | "contacted"
   | "interviewing";
 
+export type SalesRepApplicationStatus =
+  | "draft"
+  | "hr_screening"
+  | "discovery_interview"
+  | "role_play_assessment"
+  | "background_checks"
+  | "offer_extended"
+  | "offer_declined"
+  | "approved"
+  | "rejected";
+
+export const SALES_REP_PIPELINE_STAGES: SalesRepApplicationStatus[] = [
+  "draft",
+  "hr_screening",
+  "discovery_interview",
+  "role_play_assessment",
+  "background_checks",
+  "offer_extended",
+  "approved",
+];
+
+export const SALES_REP_ALL_STATUSES: SalesRepApplicationStatus[] = [
+  ...SALES_REP_PIPELINE_STAGES,
+  "offer_declined",
+  "rejected",
+];
+
+export const salesRepApplicationStatusLabel: Record<
+  SalesRepApplicationStatus,
+  string
+> = {
+  draft: "Draft",
+  hr_screening: "HR Screening",
+  discovery_interview: "Discovery Interview",
+  role_play_assessment: "Role-Play Assessment",
+  background_checks: "Background Checks",
+  offer_extended: "Offer Extended",
+  offer_declined: "Offer Declined",
+  approved: "Approved",
+  rejected: "Rejected",
+};
+
+export const salesRepApplicationStatusBadgeClass = (
+  status: SalesRepApplicationStatus
+) => {
+  switch (status) {
+    case "draft":
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
+    case "hr_screening":
+      return "bg-amber-500/8 text-amber-500 border-amber-500/15";
+    case "discovery_interview":
+      return "bg-sky-500/8 text-sky-500 border-sky-500/15";
+    case "role_play_assessment":
+      return "bg-violet-500/8 text-violet-500 border-violet-500/15";
+    case "background_checks":
+      return "bg-orange-500/8 text-orange-500 border-orange-500/15";
+    case "offer_extended":
+      return "bg-blue-500/8 text-blue-500 border-blue-500/15";
+    case "approved":
+      return "bg-emerald-500/8 text-emerald-500 border-emerald-500/15";
+    case "rejected":
+    case "offer_declined":
+      return "bg-rose-500/8 text-rose-500 border-rose-500/15";
+    default:
+      return "bg-zinc-500/8 text-zinc-400 border-zinc-500/15";
+  }
+};
+
 export type CompanyStatus = "enquired" | "pending" | "contacted" | "active" | "inactive";
 
 export type RequirementStatus =
