@@ -46,7 +46,6 @@ const avatars = [
   { src: "/review-1.jpg", alt: "Client" },
   { src: "/review-2.jpg", alt: "Client" },
   { src: "/review-3.jpg", alt: "Client" },
-  { src: "/review-4.jpg", alt: "Client" },
 ];
 
 const roles = [
@@ -71,7 +70,6 @@ const timelines = [
 
 const quotes = [
   { text: "We're saving over £200k a year.", name: "Ricardo M.", company: "Beekey", avatar: "/Ricardo-Recruitment.jpg", stat: "60% saved" },
-  { text: "Cutting our costs by more than half.", name: "Antonio C.", company: "Artistatours", avatar: "/review-4.jpg", stat: "59% saved" },
   { text: "Three engineers placed in under a week.", name: "Connor B.", company: "Hireflow", avatar: "/review-3.jpg", stat: "3 hired" },
   { text: "Equally skilled engineer for half the price.", name: "Eduardo M.", company: "1VA", avatar: "/Eduardo.png", stat: "50% saved" },
 ];

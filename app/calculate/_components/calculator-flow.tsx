@@ -116,7 +116,6 @@ const avatars = [
   { src: "/review-1.jpg", alt: "Client" },
   { src: "/review-2.jpg", alt: "Client" },
   { src: "/review-3.jpg", alt: "Client" },
-  { src: "/review-4.jpg", alt: "Client" },
 ];
 
 /* Step badges — show what was just locked in */

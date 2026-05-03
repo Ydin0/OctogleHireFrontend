@@ -33,7 +33,6 @@ const logos = [
   { name: "Unichats",     src: "/company-logos/Unichats.svg",          h: "h-6" },
   { name: "DNO",          src: "/company-logos/DNO%20Investments.svg", h: "h-6" },
   { name: "The Care App", src: "/company-logos/thecareapp.svg",        h: "h-6" },
-  { name: "ArtistaTours", src: "/company-logos/ArtistaTours.svg",      h: "h-6" },
   { name: "Workchats",    src: "/company-logos/Workchats.svg",         h: "h-6" },
 ];
 

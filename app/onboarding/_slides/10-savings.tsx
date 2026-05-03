@@ -39,21 +39,6 @@ const STORIES = [
     currency: "£",
   },
   {
-    name: "Antonio Coman",
-    role: "Founder",
-    company: "Artistatours",
-    avatar: "/review-4.jpg",
-    quote:
-      "Hiring two developers locally in Spain was going to cost us over €14,000 a month. OctogleHire matched us for just €5,800 — cutting our costs by more than half.",
-    hiredRole: "Full-Stack Developer",
-    hiredCount: 2,
-    localRate: 7000,
-    octogleRate: 2900,
-    market: "Spain",
-    flag: "es",
-    currency: "€",
-  },
-  {
     name: "Connor Berwick",
     role: "Co-Founder",
     company: "Hireflow",
