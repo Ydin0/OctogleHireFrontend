@@ -298,7 +298,7 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
         )}
       </div>
 
-      <InvoiceSummaryCards summary={summary} />
+      <InvoiceSummaryCards invoices={invoices} summary={summary} />
 
       <InvoiceFiltersBar />
 

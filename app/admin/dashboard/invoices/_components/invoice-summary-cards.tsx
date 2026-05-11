@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -7,16 +8,33 @@ import {
   DollarSign,
 } from "lucide-react";
 
-import type { InvoiceSummary } from "@/lib/api/invoices";
+import type { Invoice, InvoiceSummary } from "@/lib/api/invoices";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAdminCurrency } from "../../_components/admin-currency-context";
+import { formatCurrency } from "../../_components/dashboard-data";
 
 interface InvoiceSummaryCardsProps {
+  invoices: Invoice[];
   summary: InvoiceSummary;
 }
 
-function InvoiceSummaryCards({ summary }: InvoiceSummaryCardsProps) {
-  const { formatDisplay } = useAdminCurrency();
+function InvoiceSummaryCards({ invoices, summary }: InvoiceSummaryCardsProps) {
+  const { displayCurrency, convert } = useAdminCurrency();
+
+  const totals = useMemo(() => {
+    let revenue = 0;
+    let paid = 0;
+    let outstanding = 0;
+    for (const inv of invoices) {
+      const amount = convert(inv.total, inv.currency);
+      revenue += amount;
+      if (inv.status === "paid") paid += amount;
+      if (inv.status === "sent" || inv.status === "overdue") {
+        outstanding += amount;
+      }
+    }
+    return { revenue, paid, outstanding };
+  }, [invoices, convert]);
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -30,7 +48,7 @@ function InvoiceSummaryCards({ summary }: InvoiceSummaryCardsProps) {
               Total Revenue
             </p>
             <p className="font-mono text-lg font-semibold">
-              {formatDisplay(summary.totalRevenue, "USD")}
+              {formatCurrency(totals.revenue, displayCurrency)}
             </p>
           </div>
         </CardContent>
@@ -46,13 +64,13 @@ function InvoiceSummaryCards({ summary }: InvoiceSummaryCardsProps) {
               Paid
             </p>
             <p className="font-mono text-lg font-semibold">
-              {formatDisplay(summary.totalPaid, "USD")}
+              {formatCurrency(totals.paid, displayCurrency)}
             </p>
           </div>
         </CardContent>
       </Card>
 
-      <Card className={summary.totalOutstanding > 0 ? "border-amber-600/20" : undefined}>
+      <Card className={totals.outstanding > 0 ? "border-amber-600/20" : undefined}>
         <CardContent className="flex items-center gap-3 p-4">
           <div className="flex size-10 items-center justify-center rounded-lg bg-amber-500/10">
             <Clock className="size-5 text-amber-600" />
@@ -62,7 +80,7 @@ function InvoiceSummaryCards({ summary }: InvoiceSummaryCardsProps) {
               Outstanding
             </p>
             <p className="font-mono text-lg font-semibold">
-              {formatDisplay(summary.totalOutstanding, "USD")}
+              {formatCurrency(totals.outstanding, displayCurrency)}
             </p>
           </div>
         </CardContent>
