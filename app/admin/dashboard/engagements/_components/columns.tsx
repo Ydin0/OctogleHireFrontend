@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
-import { Building2, Clock, MoreHorizontal, Pencil } from "lucide-react";
+import { Ban, Building2, CircleStop, Clock, MoreHorizontal, Pencil, RotateCcw } from "lucide-react";
 
 import type { AdminEngagement } from "@/lib/api/admin";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,6 +12,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -59,6 +60,10 @@ const getInitials = (name: string) =>
 interface GetColumnsOptions {
   onAddTimesheet?: (engagement: AdminEngagement) => void;
   onEdit?: (engagement: AdminEngagement) => void;
+  onStatusChange?: (
+    engagement: AdminEngagement,
+    status: "active" | "ended" | "cancelled",
+  ) => void;
   formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
@@ -248,6 +253,7 @@ export function getColumns(
       size: 50,
       cell: ({ row }) => {
         const eng = row.original;
+        const isInactive = eng.status === "ended" || eng.status === "cancelled";
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -275,6 +281,45 @@ export function getColumns(
                 <Clock className="mr-2 size-3.5" />
                 Add Timesheet
               </DropdownMenuItem>
+
+              {options.onStatusChange && (
+                <>
+                  <DropdownMenuSeparator />
+                  {isInactive ? (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        options.onStatusChange?.(eng, "active");
+                      }}
+                    >
+                      <RotateCcw className="mr-2 size-3.5" />
+                      Reactivate
+                    </DropdownMenuItem>
+                  ) : (
+                    <>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          options.onStatusChange?.(eng, "ended");
+                        }}
+                      >
+                        <CircleStop className="mr-2 size-3.5" />
+                        Mark as Ended
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          options.onStatusChange?.(eng, "cancelled");
+                        }}
+                        className="text-red-600 focus:text-red-700"
+                      >
+                        <Ban className="mr-2 size-3.5" />
+                        Mark as Cancelled
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );

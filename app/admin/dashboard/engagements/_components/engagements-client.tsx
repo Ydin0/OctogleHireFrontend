@@ -189,8 +189,55 @@ function EngagementsClient({ engagements, token }: EngagementsClientProps) {
   const safePage = Math.min(page, totalPages);
   const paginatedData = filtered.slice((safePage - 1) * limit, safePage * limit);
 
+  const handleStatusChange = async (
+    eng: AdminEngagement,
+    nextStatus: "active" | "ended" | "cancelled",
+  ) => {
+    const verb =
+      nextStatus === "active"
+        ? "Reactivate"
+        : nextStatus === "ended"
+          ? "End"
+          : "Cancel";
+    const ok = window.confirm(
+      `${verb} engagement for ${eng.developerName} at ${eng.companyName}?`,
+    );
+    if (!ok) return;
+
+    const result = await updateAdminEngagement(token, eng.id, {
+      status: nextStatus,
+      // Auto-set endDate when ending; clear it on reactivate
+      endDate:
+        nextStatus === "ended"
+          ? new Date().toISOString().split("T")[0]!
+          : nextStatus === "active"
+            ? null
+            : undefined,
+    });
+
+    if (result.success) {
+      toast.success(
+        nextStatus === "active"
+          ? "Engagement reactivated"
+          : `Engagement marked as ${nextStatus}`,
+      );
+      startTransition(() => {
+        router.refresh();
+      });
+    } else {
+      toast.error(result.error ?? "Failed to update engagement status");
+    }
+  };
+
   const columns = useMemo(
-    () => getColumns({ onAddTimesheet: setTimesheetTarget, onEdit: openEditDialog, formatDisplay }),
+    () =>
+      getColumns({
+        onAddTimesheet: setTimesheetTarget,
+        onEdit: openEditDialog,
+        onStatusChange: handleStatusChange,
+        formatDisplay,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [formatDisplay],
   );
 
