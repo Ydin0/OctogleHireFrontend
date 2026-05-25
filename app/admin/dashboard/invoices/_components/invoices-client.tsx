@@ -239,7 +239,7 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
       notes: createForm.notes || undefined,
     });
     if (result.success) {
-      toast.success("Invoice created");
+      toast.success("Draft invoice saved");
       setCreateOpen(false);
       setCreateForm({
         engagementId: "",
@@ -341,8 +341,9 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
             <DialogTitle>Create Invoice</DialogTitle>
             <DialogDescription>
               Issue an invoice for a developer engagement on a custom
-              arrangement. The invoice is created in <strong>sent</strong>{" "}
-              status.
+              arrangement. The invoice is saved as a <strong>draft</strong> so
+              you can review it; send it from the invoice detail page when
+              ready.
             </DialogDescription>
           </DialogHeader>
 
@@ -527,10 +528,10 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
               {createSubmitting ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
-                  Creating…
+                  Saving…
                 </>
               ) : (
-                "Create Invoice"
+                "Save as Draft"
               )}
             </Button>
           </DialogFooter>
