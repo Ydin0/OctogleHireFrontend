@@ -66,6 +66,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
+import { formatBudget } from "@/lib/utils/format-budget";
 import {
   Select,
   SelectContent,
@@ -680,9 +681,14 @@ const CompanyDetailPage = ({
                               <span className="capitalize">
                                 {req.engagementType?.replace("-", " ") ?? "-"}
                               </span>
-                              {req.budgetMin && req.budgetMax ? (
+                              {req.budgetMin || req.budgetMax ? (
                                 <span className="font-mono">
-                                  ${req.budgetMin}–${req.budgetMax}{req.budgetType === "annual" ? "/yr" : req.budgetType === "monthly" ? "/mo" : "/hr"}
+                                  {formatBudget(
+                                    req.budgetMin,
+                                    req.budgetMax,
+                                    req.budgetCurrency,
+                                    req.budgetType,
+                                  )}
                                 </span>
                               ) : (
                                 <span>Flexible budget</span>

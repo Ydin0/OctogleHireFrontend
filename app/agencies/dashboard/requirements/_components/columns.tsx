@@ -7,6 +7,7 @@ import { Building2, Users } from "lucide-react";
 import type { AgencyRequirement } from "@/lib/api/agencies";
 import { Badge } from "@/components/ui/badge";
 import { CountryFlags } from "@/lib/utils/country-flags";
+import { formatBudget } from "@/lib/utils/format-budget";
 
 const experienceLevelLabel: Record<string, string> = {
   junior: "Junior",
@@ -154,33 +155,42 @@ export function getColumns(): ColumnDef<AgencyRequirement>[] {
     {
       id: "budget",
       header: "Budget",
-      size: 130,
+      size: 150,
       cell: ({ row }) => {
-        const { budgetMinCents, budgetMaxCents } = row.original;
+        const { budgetMinCents, budgetMaxCents, budgetCurrency } = row.original;
         if (!budgetMinCents && !budgetMaxCents) {
           return <span className="text-sm text-muted-foreground">Flexible</span>;
         }
-        const fmt = (cents: number) =>
-          `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
         return (
           <span className="font-mono text-sm">
-            {budgetMinCents ? fmt(budgetMinCents) : "?"}
-            {" – "}
-            {budgetMaxCents ? fmt(budgetMaxCents) : "?"}
+            {formatBudget(budgetMinCents, budgetMaxCents, budgetCurrency, undefined, { fromCents: true })}
           </span>
         );
       },
     },
     {
-      id: "countries",
-      header: "Countries",
-      size: 100,
+      id: "location",
+      header: "Location",
+      size: 140,
       cell: ({ row }) => {
-        const codes = row.original.hiringCountries;
-        if (!codes?.length) {
-          return <span className="text-sm text-muted-foreground">Any</span>;
-        }
-        return <CountryFlags codes={codes} max={3} />;
+        const { hiringCountries: codes, city, workMode } = row.original;
+        const modeLabel =
+          workMode === "office" ? "Office" : workMode === "hybrid" ? "Hybrid" : "Remote";
+        return (
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center gap-1.5">
+              {codes?.length ? (
+                <CountryFlags codes={codes} max={3} />
+              ) : (
+                <span className="text-sm text-muted-foreground">Any</span>
+              )}
+              {city && <span className="text-sm">{city}</span>}
+            </div>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              {modeLabel}
+            </span>
+          </div>
+        );
       },
     },
     {

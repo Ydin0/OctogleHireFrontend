@@ -30,6 +30,7 @@ import {
   requirementStatusLabel,
 } from "@/app/admin/dashboard/_components/dashboard-data";
 import { CountryFlags } from "@/lib/utils/country-flags";
+import { formatBudget } from "@/lib/utils/format-budget";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -173,24 +174,13 @@ function getColumns(): ColumnDef<JobRequirement>[] {
       header: "Budget",
       size: 150,
       cell: ({ row }) => {
-        const { budgetMin, budgetMax, budgetType } = row.original;
+        const { budgetMin, budgetMax, budgetType, budgetCurrency } = row.original;
         if (!budgetMin && !budgetMax) {
           return <span className="text-sm text-muted-foreground">-</span>;
         }
-        const suffix =
-          budgetType === "monthly"
-            ? "/mo"
-            : budgetType === "annual"
-              ? "/yr"
-              : "/hr";
         return (
           <span className="font-mono text-sm">
-            {budgetMin && budgetMax
-              ? `$${budgetMin}–$${budgetMax}`
-              : budgetMin
-                ? `$${budgetMin}+`
-                : `Up to $${budgetMax}`}
-            <span className="text-[10px] text-muted-foreground">{suffix}</span>
+            {formatBudget(budgetMin, budgetMax, budgetCurrency, budgetType)}
           </span>
         );
       },

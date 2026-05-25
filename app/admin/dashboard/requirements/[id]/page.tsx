@@ -33,6 +33,7 @@ import {
 import { getTimezoneLabel } from "@/lib/constants/timezones";
 import { experienceLabel } from "@/lib/utils/experience";
 import { CountryFlags } from "@/lib/utils/country-flags";
+import { formatBudget } from "@/lib/utils/format-budget";
 import {
   type RequirementStatus,
   requirementStatusBadgeClass,
@@ -697,10 +698,29 @@ const RequirementDetailPage = ({
                     <dt className="text-muted-foreground">Budget</dt>
                     <dd className="font-mono">
                       {requirement.budgetMin || requirement.budgetMax
-                        ? `$${requirement.budgetMin ?? "?"}–$${requirement.budgetMax ?? "?"}/${requirement.budgetType === "annual" ? "yr" : requirement.budgetType === "monthly" ? "mo" : "hr"}`
+                        ? formatBudget(
+                            requirement.budgetMin,
+                            requirement.budgetMax,
+                            requirement.budgetCurrency,
+                            requirement.budgetType,
+                          )
                         : "Flexible"}
                     </dd>
                   </div>
+                  <Separator />
+                  <div className="flex justify-between">
+                    <dt className="text-muted-foreground">Work Mode</dt>
+                    <dd className="capitalize">{requirement.workMode ?? "remote"}</dd>
+                  </div>
+                  {requirement.city && (
+                    <>
+                      <Separator />
+                      <div className="flex justify-between">
+                        <dt className="text-muted-foreground">City</dt>
+                        <dd>{requirement.city}</dd>
+                      </div>
+                    </>
+                  )}
                   <Separator />
                   <div className="flex justify-between">
                     <dt className="text-muted-foreground">Timezone</dt>

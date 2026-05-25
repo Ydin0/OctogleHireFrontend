@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Building2, Clock, MoreHorizontal, Pencil, Star, Trash2, User, Users } from "lucide-react";
 
 import type { AdminRequirement } from "@/lib/api/admin";
+import { formatBudget } from "@/lib/utils/format-budget";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -311,20 +312,34 @@ export function getColumns(
     {
       id: "budget",
       header: "Budget",
-      size: 130,
+      size: 150,
       cell: ({ row }) => {
-        const { budgetMinCents, budgetMaxCents } = row.original;
+        const { budgetMinCents, budgetMaxCents, budgetCurrency } = row.original;
         if (!budgetMinCents && !budgetMaxCents) {
           return <span className="text-sm text-muted-foreground">-</span>;
         }
-        const fmt = (cents: number) =>
-          `$${(cents / 100).toLocaleString("en-US", { minimumFractionDigits: 0 })}`;
         return (
           <span className="font-mono text-sm">
-            {budgetMinCents ? fmt(budgetMinCents) : "?"}
-            {" - "}
-            {budgetMaxCents ? fmt(budgetMaxCents) : "?"}
+            {formatBudget(budgetMinCents, budgetMaxCents, budgetCurrency, undefined, { fromCents: true })}
           </span>
+        );
+      },
+    },
+    {
+      id: "location",
+      header: "Location",
+      size: 140,
+      cell: ({ row }) => {
+        const { city, workMode } = row.original;
+        const modeLabel =
+          workMode === "office" ? "Office" : workMode === "hybrid" ? "Hybrid" : "Remote";
+        return (
+          <div className="flex flex-col gap-0.5 text-sm">
+            <span>{city ?? <span className="text-muted-foreground">—</span>}</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              {modeLabel}
+            </span>
+          </div>
         );
       },
     },

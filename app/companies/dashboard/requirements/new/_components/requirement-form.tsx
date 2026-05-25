@@ -24,6 +24,7 @@ import {
 } from "@/lib/schemas/job-requirement";
 import { TIMEZONE_OPTIONS } from "@/lib/constants/timezones";
 import { MARKETPLACE_TECH_STACK_OPTIONS } from "@/lib/data/developers";
+import { CURRENCIES } from "@/lib/data/currencies";
 import {
   createJobRequirement,
   updateJobRequirement,
@@ -91,6 +92,12 @@ function prefillForm(
     setValue("startDate", parsed.startDate, { shouldValidate: true });
   if (parsed.priority)
     setValue("priority", parsed.priority as JobRequirementFormData["priority"], { shouldValidate: true });
+  if (parsed.city)
+    setValue("city", parsed.city, { shouldValidate: true });
+  if (parsed.workMode)
+    setValue("workMode", parsed.workMode as JobRequirementFormData["workMode"], { shouldValidate: true });
+  if (parsed.budgetCurrency)
+    setValue("budgetCurrency", parsed.budgetCurrency, { shouldValidate: true });
 }
 
 interface RequirementFormProps {
@@ -129,6 +136,8 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
     defaultValues: {
       techStack: [],
       hiringCountries: [],
+      city: "",
+      workMode: "remote",
       experienceYearsMin: 3,
       experienceYearsMax: 5,
       developersNeeded: 1,
@@ -136,6 +145,7 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
       timezonePreference: "any",
       priority: "medium",
       budgetType: "hourly",
+      budgetCurrency: "USD",
       ...initialValues,
     },
   });
@@ -146,10 +156,12 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
   const yearsMin = watch("experienceYearsMin");
   const yearsMax = watch("experienceYearsMax");
   const budgetType = watch("budgetType");
+  const budgetCurrency = watch("budgetCurrency");
   const developersNeeded = watch("developersNeeded");
   const engagementType = watch("engagementType");
   const timezonePreference = watch("timezonePreference");
   const priority = watch("priority");
+  const workMode = watch("workMode");
 
   const budgetLabel =
     budgetType === "annual" ? "/yr" : budgetType === "monthly" ? "/mo" : "/hr";
@@ -233,6 +245,9 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
         budgetMin: data.budgetMin ? Number(data.budgetMin) : undefined,
         budgetMax: data.budgetMax ? Number(data.budgetMax) : undefined,
         budgetType: data.budgetType,
+        budgetCurrency: data.budgetCurrency,
+        city: data.city?.trim() || null,
+        workMode: data.workMode,
       };
       if (isEdit && requirementId) {
         await updateJobRequirement(token, requirementId, payload);
@@ -584,6 +599,32 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="workMode">Work Mode</Label>
+              <Select
+                value={workMode}
+                onValueChange={(val) =>
+                  setValue(
+                    "workMode",
+                    val as JobRequirementFormData["workMode"],
+                    { shouldValidate: true },
+                  )
+                }
+              >
+                <SelectTrigger id="workMode">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="remote">Remote</SelectItem>
+                  <SelectItem value="office">Office</SelectItem>
+                  <SelectItem value="hybrid">Hybrid</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.workMode && (
+                <p className="text-xs text-red-600">{errors.workMode.message}</p>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="timezonePreference">Timezone Preference</Label>
@@ -652,7 +693,39 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
               )}
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="city">City (optional)</Label>
+              <Input
+                id="city"
+                placeholder="e.g. Pune, London, San Francisco"
+                {...register("city")}
+              />
+              <p className="text-xs text-muted-foreground">
+                Leave blank for fully remote roles, or enter the office city.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+              <div className="space-y-2">
+                <Label>Currency</Label>
+                <Select
+                  value={budgetCurrency}
+                  onValueChange={(v) =>
+                    setValue("budgetCurrency", v, { shouldValidate: true })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-72">
+                    {CURRENCIES.map((c) => (
+                      <SelectItem key={c.code} value={c.code}>
+                        {c.code} — {c.symbol}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label>Budget Type</Label>
                 <Select

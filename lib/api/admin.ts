@@ -704,8 +704,11 @@ export interface AdminRequirement {
   engagementType: string;
   timezonePreference: string;
   hiringCountries: string[];
+  city: string | null;
+  workMode: "office" | "remote" | "hybrid";
   budgetMinCents: number | null;
   budgetMaxCents: number | null;
+  budgetCurrency: string;
   description: string;
   startDate: string | null;
   priority: string;
@@ -743,9 +746,12 @@ export interface CreateAdminRequirementPayload {
   engagementType: string;
   timezonePreference?: string;
   hiringCountries?: string[];
+  city?: string | null;
+  workMode?: "office" | "remote" | "hybrid";
   budgetMin?: number;
   budgetMax?: number;
   budgetType?: string;
+  budgetCurrency?: string;
   description: string;
   startDate?: string;
   priority?: string;

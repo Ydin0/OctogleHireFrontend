@@ -27,9 +27,15 @@ export const jobRequirementSchema = z
     ]),
     timezonePreference: z.enum(timezoneValues),
     hiringCountries: z.array(z.string()).min(1, "Select at least one country"),
+    city: z.string().optional(),
+    workMode: z.enum(["office", "remote", "hybrid"]),
     budgetMin: z.string().optional(),
     budgetMax: z.string().optional(),
     budgetType: z.enum(["hourly", "monthly", "annual"]),
+    budgetCurrency: z
+      .string()
+      .length(3, "Currency code must be 3 letters")
+      .transform((v) => v.toUpperCase()),
     description: z
       .string()
       .min(20, "Description must be at least 20 characters"),

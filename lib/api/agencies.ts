@@ -49,8 +49,11 @@ export interface AgencyRequirement {
   engagementType: string;
   timezonePreference: string;
   hiringCountries: string[];
+  city: string | null;
+  workMode: "office" | "remote" | "hybrid";
   budgetMinCents: number | null;
   budgetMaxCents: number | null;
+  budgetCurrency: string;
   description: string;
   startDate: string | null;
   priority: string;

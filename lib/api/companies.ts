@@ -160,9 +160,12 @@ export interface JobRequirement {
   engagementType: EngagementType;
   timezonePreference: string;
   hiringCountries: string[];
+  city?: string | null;
+  workMode: "office" | "remote" | "hybrid";
   budgetMin?: number;
   budgetMax?: number;
   budgetType?: "hourly" | "monthly" | "annual";
+  budgetCurrency: string;
   description: string;
   startDate: string;
   priority: Priority;
@@ -311,9 +314,12 @@ export interface CreateJobRequirementPayload {
   engagementType: EngagementType;
   timezonePreference: string;
   hiringCountries: string[];
+  city?: string | null;
+  workMode: "office" | "remote" | "hybrid";
   budgetMin?: number;
   budgetMax?: number;
   budgetType?: "hourly" | "monthly" | "annual";
+  budgetCurrency: string;
   description: string;
   startDate: string;
   priority: Priority;
@@ -340,9 +346,12 @@ export interface ParsedJobData {
   engagementType: string;
   timezonePreference: string;
   hiringCountries: string[];
+  city?: string;
+  workMode?: "office" | "remote" | "hybrid";
   budgetMin?: number;
   budgetMax?: number;
   budgetType?: "hourly" | "monthly" | "annual";
+  budgetCurrency?: string;
   description: string;
   startDate?: string;
   priority: string;

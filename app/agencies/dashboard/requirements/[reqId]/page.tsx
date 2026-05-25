@@ -6,6 +6,7 @@ import { ArrowLeft, Building2, Calendar } from "lucide-react";
 
 import { fetchAgencyRequirementDetail } from "@/lib/api/agencies";
 import { CountryFlags } from "@/lib/utils/country-flags";
+import { formatBudget } from "@/lib/utils/format-budget";
 import { MarkdownDisplay } from "@/components/markdown-display";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -49,11 +50,6 @@ const statusBadgeClass = (s: string) => {
     default:
       return "bg-amber-500/8 text-amber-500 border-amber-500/15";
   }
-};
-
-const formatBudget = (cents: number | null) => {
-  if (cents == null) return "?";
-  return `$${(cents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 };
 
 const formatDate = (iso: string) =>
@@ -177,10 +173,30 @@ export default async function AgencyRequirementDetailPage({
                   <dt className="text-muted-foreground">Budget</dt>
                   <dd className="font-mono">
                     {requirement.budgetMinCents || requirement.budgetMaxCents
-                      ? `${formatBudget(requirement.budgetMinCents)} – ${formatBudget(requirement.budgetMaxCents)}`
+                      ? formatBudget(
+                          requirement.budgetMinCents,
+                          requirement.budgetMaxCents,
+                          requirement.budgetCurrency,
+                          undefined,
+                          { fromCents: true },
+                        )
                       : "Flexible"}
                   </dd>
                 </div>
+                <Separator />
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Work Mode</dt>
+                  <dd className="capitalize">{requirement.workMode ?? "remote"}</dd>
+                </div>
+                {requirement.city && (
+                  <>
+                    <Separator />
+                    <div className="flex justify-between">
+                      <dt className="text-muted-foreground">City</dt>
+                      <dd>{requirement.city}</dd>
+                    </div>
+                  </>
+                )}
                 <Separator />
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Timezone</dt>

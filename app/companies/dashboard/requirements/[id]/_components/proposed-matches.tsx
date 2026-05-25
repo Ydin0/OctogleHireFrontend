@@ -48,6 +48,7 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { CountryFlags } from "@/lib/utils/country-flags";
+import { formatBudget } from "@/lib/utils/format-budget";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -354,11 +355,30 @@ const ProposedMatchesClient = ({
                   Budget
                 </p>
                 <p className="font-mono">
-                  {requirement.budgetMin && requirement.budgetMax
-                    ? `$${requirement.budgetMin}–$${requirement.budgetMax}${requirement.budgetType === "annual" ? "/yr" : requirement.budgetType === "monthly" ? "/mo" : "/hr"}`
+                  {requirement.budgetMin || requirement.budgetMax
+                    ? formatBudget(
+                        requirement.budgetMin,
+                        requirement.budgetMax,
+                        requirement.budgetCurrency,
+                        requirement.budgetType,
+                      )
                     : "Flexible"}
                 </p>
               </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Work Mode
+                </p>
+                <p className="capitalize">{requirement.workMode ?? "remote"}</p>
+              </div>
+              {requirement.city && (
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    City
+                  </p>
+                  <p>{requirement.city}</p>
+                </div>
+              )}
             </div>
           </section>
 
