@@ -33,6 +33,8 @@ import {
 import { getTimezoneLabel } from "@/lib/constants/timezones";
 import { experienceLabel } from "@/lib/utils/experience";
 import { CountryFlags } from "@/lib/utils/country-flags";
+import { CountrySelector } from "@/components/country-selector";
+import { CURRENCIES } from "@/lib/data/currencies";
 import { formatBudget } from "@/lib/utils/format-budget";
 import {
   type RequirementStatus,
@@ -90,15 +92,22 @@ const RequirementDetailPage = ({
     title: "",
     description: "",
     experienceLevel: "",
+    experienceYearsMin: "",
+    experienceYearsMax: "",
     priority: "",
     status: "",
     engagementType: "",
+    workMode: "remote" as "office" | "remote" | "hybrid",
     budgetMin: "",
     budgetMax: "",
+    budgetType: "hourly" as "hourly" | "monthly" | "annual",
+    budgetCurrency: "USD",
     developersNeeded: "",
     timezonePreference: "",
     startDate: "",
     techStack: "",
+    hiringCountries: [] as string[],
+    city: "",
   });
 
   const loadRequirement = useCallback(async () => {
@@ -116,15 +125,27 @@ const RequirementDetailPage = ({
         title: data.title,
         description: data.description,
         experienceLevel: data.experienceLevel,
+        experienceYearsMin:
+          data.experienceYearsMin != null ? String(data.experienceYearsMin) : "",
+        experienceYearsMax:
+          data.experienceYearsMax != null ? String(data.experienceYearsMax) : "",
         priority: data.priority,
         status: data.status,
         engagementType: data.engagementType,
+        workMode: (data.workMode ?? "remote") as "office" | "remote" | "hybrid",
         budgetMin: data.budgetMin ? String(data.budgetMin) : "",
         budgetMax: data.budgetMax ? String(data.budgetMax) : "",
+        budgetType: (data.budgetType ?? "hourly") as
+          | "hourly"
+          | "monthly"
+          | "annual",
+        budgetCurrency: data.budgetCurrency ?? "USD",
         developersNeeded: String(data.developersNeeded),
         timezonePreference: data.timezonePreference,
         startDate: data.startDate ?? "",
         techStack: data.techStack.join(", "),
+        hiringCountries: data.hiringCountries ?? [],
+        city: data.city ?? "",
       });
     }
 
@@ -148,6 +169,7 @@ const RequirementDetailPage = ({
       priority: editForm.priority,
       status: editForm.status,
       engagementType: editForm.engagementType,
+      workMode: editForm.workMode,
       developersNeeded: parseInt(editForm.developersNeeded) || 1,
       timezonePreference: editForm.timezonePreference,
       startDate: editForm.startDate || null,
@@ -155,7 +177,18 @@ const RequirementDetailPage = ({
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean),
+      hiringCountries: editForm.hiringCountries,
+      city: editForm.city.trim() || null,
+      budgetCurrency: editForm.budgetCurrency,
+      budgetType: editForm.budgetType,
     };
+
+    if (editForm.experienceYearsMin) {
+      updates.experienceYearsMin = parseInt(editForm.experienceYearsMin, 10);
+    }
+    if (editForm.experienceYearsMax) {
+      updates.experienceYearsMax = parseInt(editForm.experienceYearsMax, 10);
+    }
 
     if (editForm.budgetMin) {
       updates.budgetMinCents = Math.round(parseFloat(editForm.budgetMin) * 100);
@@ -480,6 +513,40 @@ const RequirementDetailPage = ({
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
+                  <Label>Min Years Experience</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={50}
+                    value={editForm.experienceYearsMin}
+                    onChange={(e) =>
+                      setEditForm((f) => ({
+                        ...f,
+                        experienceYearsMin: e.target.value,
+                      }))
+                    }
+                    placeholder="3"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Max Years Experience</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    max={50}
+                    value={editForm.experienceYearsMax}
+                    onChange={(e) =>
+                      setEditForm((f) => ({
+                        ...f,
+                        experienceYearsMax: e.target.value,
+                      }))
+                    }
+                    placeholder="5"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
                   <Label>Experience Level</Label>
                   <Select
                     value={editForm.experienceLevel}
@@ -578,9 +645,71 @@ const RequirementDetailPage = ({
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label>Work Mode</Label>
+                <Select
+                  value={editForm.workMode}
+                  onValueChange={(v) =>
+                    setEditForm((f) => ({
+                      ...f,
+                      workMode: v as "office" | "remote" | "hybrid",
+                    }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="remote">Remote</SelectItem>
+                    <SelectItem value="office">Office</SelectItem>
+                    <SelectItem value="hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                 <div className="space-y-1.5">
-                  <Label>Budget Min ($)</Label>
+                  <Label>Currency</Label>
+                  <Select
+                    value={editForm.budgetCurrency}
+                    onValueChange={(v) =>
+                      setEditForm((f) => ({ ...f, budgetCurrency: v }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {CURRENCIES.map((c) => (
+                        <SelectItem key={c.code} value={c.code}>
+                          {c.code} — {c.symbol}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Budget Type</Label>
+                  <Select
+                    value={editForm.budgetType}
+                    onValueChange={(v) =>
+                      setEditForm((f) => ({
+                        ...f,
+                        budgetType: v as "hourly" | "monthly" | "annual",
+                      }))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hourly">Hourly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="annual">Annual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Budget Min</Label>
                   <Input
                     type="number"
                     value={editForm.budgetMin}
@@ -594,7 +723,7 @@ const RequirementDetailPage = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Budget Max ($)</Label>
+                  <Label>Budget Max</Label>
                   <Input
                     type="number"
                     value={editForm.budgetMax}
@@ -648,6 +777,28 @@ const RequirementDetailPage = ({
                   }
                   placeholder="any"
                 />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Hiring Countries</Label>
+                <CountrySelector
+                  value={editForm.hiringCountries}
+                  onChange={(codes) =>
+                    setEditForm((f) => ({ ...f, hiringCountries: codes }))
+                  }
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>City (optional)</Label>
+                <Input
+                  value={editForm.city}
+                  onChange={(e) =>
+                    setEditForm((f) => ({ ...f, city: e.target.value }))
+                  }
+                  placeholder="e.g. Pune, London, San Francisco"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave blank for fully remote roles, or enter the office city.
+                </p>
               </div>
             </CardContent>
           </Card>
