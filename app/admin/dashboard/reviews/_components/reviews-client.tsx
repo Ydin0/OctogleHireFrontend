@@ -21,6 +21,7 @@ import {
   type ReviewStatus,
   updateReviewStatus,
 } from "@/lib/api/reviews";
+import { revalidateHomepageReviews } from "../_actions";
 
 type Tab = "pending" | "approved" | "rejected" | "all";
 
@@ -94,9 +95,17 @@ export const ReviewsClient = ({
       return;
     }
 
+    // Bust the homepage's cached approved-reviews so it reflects this change
+    // immediately on next render, rather than waiting up to 5 min for ISR.
+    try {
+      await revalidateHomepageReviews();
+    } catch {
+      // Non-fatal — the 300s ISR window will catch up eventually.
+    }
+
     toast.success(
       status === "approved"
-        ? `Approved — live on homepage`
+        ? "Approved — live on homepage"
         : status === "rejected"
           ? "Rejected"
           : "Moved back to pending",
@@ -113,6 +122,12 @@ export const ReviewsClient = ({
       delete next[review.id];
       return next;
     });
+
+    // Jump to the destination tab so the user can see where the review went —
+    // otherwise filtering it out of "pending" makes it feel like it disappeared.
+    if (tab !== "all" && tab !== status) {
+      changeTab(status);
+    }
   };
 
   return (

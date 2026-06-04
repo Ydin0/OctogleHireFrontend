@@ -124,7 +124,10 @@ export async function fetchApprovedReviews(): Promise<Review[] | null> {
       {
         method: "GET",
         signal: controller.signal,
-        next: { revalidate: 300 },
+        // Tagged so an admin approve/reject can revalidateTag("approved-reviews")
+        // and bust this fetch + every page that consumed it. The 300s revalidate
+        // remains as a safety net for ambient updates.
+        next: { revalidate: 300, tags: ["approved-reviews"] },
       },
     );
     clearTimeout(timer);
