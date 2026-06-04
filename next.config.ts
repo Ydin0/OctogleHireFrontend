@@ -32,6 +32,12 @@ const nextConfig: NextConfig = {
         hostname: "www.google.com",
         pathname: "/s2/favicons**",
       },
+      {
+        // Cloudflare R2 public buckets serve from pub-<id>.r2.dev — review
+        // avatars and logos uploaded via /reviews live here.
+        protocol: "https",
+        hostname: "*.r2.dev",
+      },
     ],
     formats: ["image/avif", "image/webp"],
   },
