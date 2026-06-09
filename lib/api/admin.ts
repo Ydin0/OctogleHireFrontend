@@ -1654,8 +1654,9 @@ export interface AdminOverview {
     conversionRate: OverviewDelta;
     newCompanies: OverviewDelta;
     newActiveEngagements: OverviewDelta;
-    revenue: OverviewDelta;
-    newInvoicesPaid: OverviewDelta;
+    /** Current live-marketplace developer count, with the count at the
+     *  start of the window as `previous` so the delta reflects net growth. */
+    liveDevelopers: OverviewDelta;
   };
   applicantsByPeriod: Array<{
     bucket: string;

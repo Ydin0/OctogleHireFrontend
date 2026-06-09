@@ -1,25 +1,23 @@
 "use client";
 
 import {
-  Banknote,
   Briefcase,
   Building2,
   ClipboardList,
+  Globe,
 } from "lucide-react";
 
 import type { AdminOverview } from "@/lib/api/admin";
-import { useAdminCurrency } from "../admin-currency-context";
-import { formatCurrency } from "../dashboard-data";
 import { KpiCard } from "./kpi-card";
 
 interface BusinessPulseRowProps {
   overview: AdminOverview;
 }
 
-/** Top-row business pulse: New Companies / Active Engagements / Revenue /
- *  Open Work. Always reflects the active time window. */
+/** Top-row business pulse: New Companies (demand) / Engagements Started
+ *  (delivery) / Live Developers (supply) / Open Work (ops backlog). Every
+ *  card respects the active time window. */
 export function BusinessPulseRow({ overview }: BusinessPulseRowProps) {
-  const { displayCurrency } = useAdminCurrency();
   const d = overview.delta;
   const openWorkTotal =
     overview.openWork.openRequirements +
@@ -28,6 +26,15 @@ export function BusinessPulseRow({ overview }: BusinessPulseRowProps) {
     overview.openWork.pendingEnquiries;
 
   const hint = `vs prior ${overview.range.days}d`;
+
+  // Net change in live developer count across the window. Pulled out so the
+  // hint reads naturally: "+3 since 30d ago" / "no change".
+  const liveDelta =
+    d.liveDevelopers.current - d.liveDevelopers.previous;
+  const liveHint =
+    liveDelta === 0
+      ? "no change in window"
+      : `${liveDelta > 0 ? "+" : ""}${liveDelta} in window`;
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -48,12 +55,12 @@ export function BusinessPulseRow({ overview }: BusinessPulseRowProps) {
         hint={hint}
       />
       <KpiCard
-        icon={<Banknote className="size-5 text-emerald-600" />}
-        tint="bg-emerald-500/10"
-        label="Revenue collected"
-        value={formatCurrency(d.revenue.current, displayCurrency)}
-        pctChange={d.revenue.pctChange}
-        hint={`${d.newInvoicesPaid.current} invoices paid`}
+        icon={<Globe className="size-5 text-cyan-600" />}
+        tint="bg-cyan-500/10"
+        label="Live Developers"
+        value={String(d.liveDevelopers.current)}
+        pctChange={d.liveDevelopers.pctChange}
+        hint={liveHint}
       />
       <KpiCard
         icon={<ClipboardList className="size-5 text-amber-600" />}
