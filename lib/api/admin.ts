@@ -1605,3 +1605,103 @@ export async function updateAdminEngagement(
     return { success: false, error: "Network error" };
   }
 }
+
+// ── Admin main dashboard overview ───────────────────────────────────────────
+
+/** Time-window + category filter for the admin main dashboard. */
+export interface AdminOverviewFilters {
+  /** Chip preset: 7d | 30d | 90d | 12m | custom. UI-only — the server only
+   *  cares about the resolved `from`/`to`. */
+  range?: "7d" | "30d" | "90d" | "12m" | "custom";
+  /** YYYY-MM-DD. */
+  from?: string;
+  to?: string;
+  /** Multi-select on `developer_applications.professional_category`. */
+  categories?: string[];
+}
+
+export interface OverviewDelta {
+  current: number;
+  previous: number;
+  /** Percent change, rounded to 1dp. null when previous = 0 and we can't
+   *  compute a meaningful percentage. */
+  pctChange: number | null;
+}
+
+export interface OverviewActivityEvent {
+  kind:
+    | "applicant_approved"
+    | "applicant_rejected"
+    | "engagement_started"
+    | "company_signed"
+    | "invoice_paid";
+  at: string;
+  summary: string;
+  href?: string;
+}
+
+export interface AdminOverview {
+  range: {
+    from: string;
+    to: string;
+    days: number;
+    granularity: "day" | "week" | "month";
+  };
+  delta: {
+    newApplicants: OverviewDelta;
+    approvedApplicants: OverviewDelta;
+    rejectedApplicants: OverviewDelta;
+    conversionRate: OverviewDelta;
+    newCompanies: OverviewDelta;
+    newActiveEngagements: OverviewDelta;
+    revenue: OverviewDelta;
+    newInvoicesPaid: OverviewDelta;
+  };
+  applicantsByPeriod: Array<{
+    bucket: string;
+    applied: number;
+    approved: number;
+    rejected: number;
+  }>;
+  pipelineSnapshot: Record<string, number>;
+  topStacks: Array<{ name: string; count: number }>;
+  topCategories: Array<{ name: string; count: number }>;
+  topLocations: Array<{ name: string; count: number }>;
+  sourceBreakdown: Array<{ source: string; count: number }>;
+  recentActivity: OverviewActivityEvent[];
+  openWork: {
+    openRequirements: number;
+    pendingApprovals: number;
+    pendingReviews: number;
+    pendingEnquiries: number;
+  };
+}
+
+export function buildOverviewQuery(filters: AdminOverviewFilters): string {
+  const sp = new URLSearchParams();
+  if (filters.from) sp.set("from", filters.from);
+  if (filters.to) sp.set("to", filters.to);
+  if (filters.categories?.length)
+    sp.set("categories", filters.categories.join(","));
+  return sp.toString();
+}
+
+export async function fetchAdminOverview(
+  token: string | null,
+  filters: AdminOverviewFilters = {},
+): Promise<AdminOverview | null> {
+  if (!token) return null;
+  try {
+    const qs = buildOverviewQuery(filters);
+    const url = `${apiBaseUrl}/api/admin/overview${qs ? `?${qs}` : ""}`;
+    const response = await fetchWithRetry(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as AdminOverview;
+  } catch {
+    return null;
+  }
+}
