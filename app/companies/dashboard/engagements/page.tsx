@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 
 import { fetchCompanyEngagements, fetchCompanyProfile } from "@/lib/api/companies";
-import { EngagementsClient } from "./_components/engagements-client";
+import { HiresConsole } from "./_components/hires-console";
 
 export default async function EngagementsPage() {
   const { getToken } = await auth();
@@ -13,7 +13,7 @@ export default async function EngagementsPage() {
   ]);
 
   return (
-    <EngagementsClient
+    <HiresConsole
       engagements={engagements ?? []}
       token={token!}
       companyId={companyProfile?.id}

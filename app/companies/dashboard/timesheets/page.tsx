@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { ConsoleScroll } from "../_components/console-scroll";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 import { Check, Clock, X } from "lucide-react";
@@ -153,7 +154,8 @@ export default function TimesheetsPage() {
     : 0;
 
   return (
-    <div className="space-y-5">
+    <ConsoleScroll>
+      <div className="space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold">Timesheets</h1>
@@ -326,6 +328,7 @@ export default function TimesheetsPage() {
             </Card>
           );
         })}
-    </div>
+      </div>
+    </ConsoleScroll>
   );
 }

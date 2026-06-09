@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { fetchCompanyAgreement } from "@/lib/api/companies";
 import { AgreementDetailClient } from "./_components/agreement-detail-client";
+import { ConsoleScroll } from "../../_components/console-scroll";
 
 export default async function AgreementDetailPage({
   params,
@@ -16,5 +17,9 @@ export default async function AgreementDetailPage({
   const agreement = await fetchCompanyAgreement(token, id);
   if (!agreement) redirect("/companies/dashboard/agreements");
 
-  return <AgreementDetailClient agreement={agreement} token={token!} />;
+  return (
+    <ConsoleScroll>
+      <AgreementDetailClient agreement={agreement} token={token!} />
+    </ConsoleScroll>
+  );
 }

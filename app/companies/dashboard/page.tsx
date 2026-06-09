@@ -1,36 +1,23 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { CompanyOverviewClient } from "./_components/company-overview-client";
-import {
-  fetchCompanyRequirements,
-  fetchCompanyTeam,
-  fetchCompanyEngagements,
-  fetchCompanyProfile,
-  fetchCompanyAgreements,
-} from "@/lib/api/companies";
+import { fetchPublicDevelopers } from "@/lib/api/public-developers";
+import { fetchPublicMarketplaceSettings } from "@/lib/api/public-marketplace";
+import { DiscoverConsole } from "./_components/discover-console";
 
-export default async function CompanyOverviewPage() {
-  const { userId, getToken } = await auth();
+export default async function CompanyDiscoverPage() {
+  const { userId } = await auth();
   if (!userId) redirect("/login");
 
-  const token = await getToken();
-
-  const [requirements, team, engagements, profile, agreements] = await Promise.all([
-    fetchCompanyRequirements(token),
-    fetchCompanyTeam(token),
-    fetchCompanyEngagements(token),
-    fetchCompanyProfile(token),
-    fetchCompanyAgreements(token),
+  const [devResult, settings] = await Promise.all([
+    fetchPublicDevelopers({ limit: 60 }),
+    fetchPublicMarketplaceSettings(),
   ]);
 
   return (
-    <CompanyOverviewClient
-      requirements={requirements ?? []}
-      team={team ?? []}
-      engagements={engagements ?? []}
-      profile={profile}
-      pendingAgreements={agreements.filter((a) => a.status === "pending").length}
+    <DiscoverConsole
+      developers={devResult?.developers ?? []}
+      settings={settings}
     />
   );
 }

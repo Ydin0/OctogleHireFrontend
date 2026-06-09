@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { ConsoleScroll } from "../_components/console-scroll";
 import { useAuth } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -114,7 +115,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <>
+    <ConsoleScroll>
       <div>
         <h1 className="text-lg font-semibold">Calendar</h1>
         <p className="text-sm text-muted-foreground">
@@ -139,6 +140,6 @@ export default function CalendarPage() {
         onCreateSlot={handleCreateSlot}
         onWeekChange={handleWeekChange}
       />
-    </>
+    </ConsoleScroll>
   );
 }

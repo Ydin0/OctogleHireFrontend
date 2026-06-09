@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ConsoleScroll } from "../../_components/console-scroll";
 import {
   ArrowLeft,
   Award,
@@ -84,7 +85,8 @@ export default async function CompanyDeveloperProfilePage({
   );
 
   return (
-    <div className="space-y-6">
+    <ConsoleScroll>
+      <div className="space-y-6">
       {/* Back link + page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
@@ -142,7 +144,8 @@ export default async function CompanyDeveloperProfilePage({
           </Tabs>
         </div>
       </div>
-    </div>
+      </div>
+    </ConsoleScroll>
   );
 }
 

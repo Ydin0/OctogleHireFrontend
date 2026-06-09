@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ConsoleScroll } from "../../../_components/console-scroll";
 import { useParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
@@ -62,10 +63,12 @@ export default function EditRequirementPage() {
   };
 
   return (
-    <RequirementForm
-      mode="edit"
-      requirementId={id}
-      initialValues={initialValues}
-    />
+    <ConsoleScroll>
+      <RequirementForm
+        mode="edit"
+        requirementId={id}
+        initialValues={initialValues}
+      />
+    </ConsoleScroll>
   );
 }

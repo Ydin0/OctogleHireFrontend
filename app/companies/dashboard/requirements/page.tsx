@@ -1,7 +1,12 @@
-import { RequirementsListClient } from "./_components/requirements-list-client";
+import { auth } from "@clerk/nextjs/server";
 
-const RequirementsPage = () => {
-  return <RequirementsListClient />;
-};
+import { fetchCompanyRequirements } from "@/lib/api/companies";
+import { RolesConsole } from "./_components/roles-console";
 
-export default RequirementsPage;
+export default async function RequirementsPage() {
+  const { getToken } = await auth();
+  const token = await getToken();
+  const requirements = await fetchCompanyRequirements(token);
+
+  return <RolesConsole requirements={requirements ?? []} />;
+}

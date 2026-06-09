@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 import {
-  ChevronDown,
-  ChevronUp,
-  DollarSign,
+  CalendarDays,
+  CheckCircle2,
+  ChevronRight,
+  Coins,
   Download,
-  FileText,
   Loader2,
   Receipt,
 } from "lucide-react";
@@ -18,32 +18,89 @@ import {
   fetchCompanyInvoices,
   fetchCompanyInvoiceSummaryData,
 } from "@/lib/api/companies";
+import { formatCurrency, formatDate } from "@/app/admin/dashboard/_components/dashboard-data";
+import { cn } from "@/lib/utils";
 import {
-  formatCurrency,
-  formatDate,
-  invoiceStatusBadgeClass,
-  invoiceStatusLabel,
-  type InvoiceStatus,
-} from "@/app/admin/dashboard/_components/dashboard-data";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  EmptyState,
+  Mono,
+  PageHead,
+  PageScroll,
+  StatusPill,
+  SummaryStat,
+} from "../_components/console-ui";
 
-const InvoicesPage = () => {
+function InvoiceRow({ inv }: { inv: CompanyInvoice }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="border-b border-border">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="grid w-full grid-cols-[20px_1.4fr_1fr_1fr_auto] items-center gap-3 px-1 py-3.5 text-left"
+      >
+        <ChevronRight
+          className={cn(
+            "size-3.5 text-muted-foreground transition-transform",
+            open && "rotate-90",
+          )}
+        />
+        <span>
+          <span className="font-mono text-[13.5px] font-semibold">{inv.invoiceNumber}</span>
+          <span className="block text-[11.5px] text-muted-foreground">
+            {formatDate(inv.periodStart)} – {formatDate(inv.periodEnd)}
+          </span>
+        </span>
+        <span className="text-[12.5px] text-muted-foreground">
+          {inv.issuedAt ? formatDate(inv.issuedAt) : "—"}
+        </span>
+        <span className="font-mono text-sm font-semibold">
+          {formatCurrency(inv.total, inv.currency)}
+        </span>
+        <span className="inline-flex items-center gap-3 justify-self-end">
+          <StatusPill status={inv.status} />
+          <Download className="size-3.5 text-muted-foreground" />
+        </span>
+      </button>
+      {open && (
+        <div className="flex flex-col gap-2 px-1 pb-4 pl-9">
+          {inv.lineItems.map((li) => (
+            <div key={li.id} className="flex items-center justify-between text-[13px]">
+              <span className="text-muted-foreground">
+                {li.developerName} · {li.requirementTitle || "EOR + payroll"}
+              </span>
+              <span className="font-mono">{formatCurrency(li.amount, inv.currency)}</span>
+            </div>
+          ))}
+          <div className="mt-1 flex items-center justify-between border-t border-border/60 pt-2">
+            <a
+              href={`/api/invoices/${inv.id}/pdf`}
+              download={`${inv.invoiceNumber}.pdf`}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <Download className="size-3" /> Download PDF
+            </a>
+            <span className="text-[13px] font-semibold">
+              Total{" "}
+              <span className="font-mono">{formatCurrency(inv.total, inv.currency)}</span>
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const INCLUDED = [
+  "Global contracts & EOR in 30+ countries",
+  "Payroll, benefits & local tax compliance",
+  "One consolidated invoice — no per-hire fees",
+  "14-day replacement guarantee on every hire",
+];
+
+export default function BillingPage() {
   const { getToken } = useAuth();
   const [invoices, setInvoices] = useState<CompanyInvoice[]>([]);
   const [summary, setSummary] = useState<CompanyInvoiceSummary | null>(null);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const token = await getToken();
@@ -60,309 +117,103 @@ const InvoicesPage = () => {
     load();
   }, [load]);
 
-  const filtered = useMemo(() => {
-    if (statusFilter === "all") return invoices;
-    return invoices.filter((inv) => inv.status === statusFilter);
-  }, [invoices, statusFilter]);
+  const next = useMemo(
+    () =>
+      invoices.find((i) => i.status === "overdue") ??
+      invoices.find((i) => i.status === "sent") ??
+      null,
+    [invoices],
+  );
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex flex-1 items-center justify-center bg-background">
         <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  const statusFilters = [
-    { label: "All", value: "all", count: invoices.length },
-    { label: "Sent", value: "sent", count: invoices.filter((i) => i.status === "sent").length },
-    { label: "Paid", value: "paid", count: invoices.filter((i) => i.status === "paid").length },
-    { label: "Overdue", value: "overdue", count: invoices.filter((i) => i.status === "overdue").length },
-    { label: "Draft", value: "draft", count: invoices.filter((i) => i.status === "draft").length },
-  ];
-
   return (
-    <>
-      {/* Page Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-lg font-semibold">Invoices</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage pending, overdue, and paid invoices for your offshore team.
-          </p>
+    <PageScroll>
+      <PageHead
+        eyebrow="Billing"
+        title="Billing & invoices"
+        subtitle="You only pay when you hire. One invoice covers payroll, compliance, and contracts across every engagement."
+      />
+      <div className="mb-6 flex flex-wrap gap-3.5">
+        <SummaryStat
+          icon={<Receipt className="size-4" />}
+          value={next ? formatCurrency(next.total, next.currency) : "—"}
+          label="Next invoice"
+          accent
+        />
+        <SummaryStat
+          icon={<CalendarDays className="size-4" />}
+          value={next?.dueDate ? formatDate(next.dueDate) : "—"}
+          label="Due date"
+        />
+        <SummaryStat
+          icon={<Coins className="size-4" />}
+          value={formatCurrency(summary?.totalOutstanding ?? 0)}
+          label="Outstanding"
+        />
+        <SummaryStat
+          icon={<CheckCircle2 className="size-4" />}
+          value={formatCurrency(summary?.totalPaid ?? 0)}
+          label="Lifetime paid"
+        />
+      </div>
+
+      <div className="grid items-start gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-[17px] font-semibold">Invoice history</h2>
+            <Mono className="text-[10px] text-muted-foreground">
+              {invoices.length} invoice{invoices.length === 1 ? "" : "s"}
+            </Mono>
+          </div>
+          {invoices.length === 0 ? (
+            <EmptyState
+              icon={<Receipt className="size-6" />}
+              title="No invoices yet"
+              body="Invoices appear here once billing is set up for your active engagements."
+            />
+          ) : (
+            <>
+              <div className="grid grid-cols-[20px_1.4fr_1fr_1fr_auto] gap-3 border-b border-border px-1 pb-2">
+                {["", "Invoice", "Issued", "Amount", "Status"].map((h, i) => (
+                  <Mono
+                    key={i}
+                    className={cn(
+                      "text-[9px] text-muted-foreground",
+                      i === 4 && "justify-self-end",
+                    )}
+                  >
+                    {h}
+                  </Mono>
+                ))}
+              </div>
+              {invoices.map((inv) => (
+                <InvoiceRow key={inv.id} inv={inv} />
+              ))}
+            </>
+          )}
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <Mono className="text-[10px] text-pulse">What you&apos;re paying for</Mono>
+          <div className="mt-3.5 flex flex-col gap-3">
+            {INCLUDED.map((t) => (
+              <div key={t} className="flex items-start gap-2.5">
+                <span className="mt-0.5 inline-flex size-[18px] shrink-0 items-center justify-center rounded-full bg-emerald-400/15 text-emerald-500">
+                  <CheckCircle2 className="size-3" />
+                </span>
+                <span className="text-[13px] leading-snug">{t}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-full bg-blue-500/10">
-                <FileText className="size-4 text-blue-600" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Total Invoices
-                </p>
-                <p className="font-mono text-lg font-semibold">
-                  {summary?.totalInvoices ?? 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-full bg-emerald-500/10">
-                <DollarSign className="size-4 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Total Billed
-                </p>
-                <p className="font-mono text-lg font-semibold">
-                  {formatCurrency(summary?.totalBilled ?? 0)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-full bg-amber-500/10">
-                <Receipt className="size-4 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Outstanding
-                </p>
-                <p className="font-mono text-lg font-semibold">
-                  {formatCurrency(summary?.totalOutstanding ?? 0)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-full bg-emerald-500/10">
-                <DollarSign className="size-4 text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Total Paid
-                </p>
-                <p className="font-mono text-lg font-semibold">
-                  {formatCurrency(summary?.totalPaid ?? 0)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Status Filters */}
-      <div className="flex flex-wrap items-center gap-2">
-        {statusFilters.map((f) => (
-          <button
-            key={f.value}
-            type="button"
-            onClick={() => setStatusFilter(f.value)}
-            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-              statusFilter === f.value
-                ? "border-pulse/40 bg-pulse/10 text-pulse"
-                : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
-            }`}
-          >
-            {f.label} ({f.count})
-          </button>
-        ))}
-      </div>
-
-      {/* Invoices List */}
-      <Card>
-        <CardContent className="pt-6">
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-                <FileText className="size-6 text-muted-foreground" />
-              </div>
-              <h3 className="mt-4 text-sm font-semibold">No invoices yet</h3>
-              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                Invoices will appear here once billing is set up for your active
-                engagements.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filtered.map((inv) => {
-                const isOpen = expandedId === inv.id;
-                return (
-                  <div
-                    key={inv.id}
-                    className="rounded-lg border border-border/70"
-                  >
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-muted/30"
-                      onClick={() =>
-                        setExpandedId(isOpen ? null : inv.id)
-                      }
-                    >
-                      {isOpen ? (
-                        <ChevronUp className="size-4 shrink-0 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
-                      )}
-                      <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-6 gap-y-1">
-                        <span className="font-mono text-sm font-medium">
-                          {inv.invoiceNumber}
-                        </span>
-                        <span className="text-sm font-medium">
-                          {inv.developerName ?? "Multiple Developers"}
-                        </span>
-                        {inv.developerRole && (
-                          <span className="text-xs text-muted-foreground">
-                            {inv.developerRole}
-                          </span>
-                        )}
-                        <span className="text-sm text-muted-foreground">
-                          {formatDate(inv.periodStart)} –{" "}
-                          {formatDate(inv.periodEnd)}
-                        </span>
-                        <Badge
-                          variant="outline"
-                          className={invoiceStatusBadgeClass(
-                            inv.status as InvoiceStatus,
-                          )}
-                        >
-                          {invoiceStatusLabel[inv.status as InvoiceStatus] ??
-                            inv.status}
-                        </Badge>
-                      </div>
-                      <div className="shrink-0 text-right">
-                        <p className="font-mono text-sm font-semibold">
-                          {formatCurrency(inv.total, inv.currency)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Due {inv.dueDate ? formatDate(inv.dueDate) : "—"}
-                        </p>
-                      </div>
-                    </button>
-
-                    {isOpen && (
-                      <div className="border-t border-border/70 bg-muted/20 p-4">
-                        <p className="mb-3 text-[10px] uppercase tracking-wider text-muted-foreground">
-                          Line Items
-                        </p>
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Developer</TableHead>
-                              <TableHead>Requirement</TableHead>
-                              <TableHead className="text-right">
-                                Rate
-                              </TableHead>
-                              <TableHead className="text-right">
-                                Hours
-                              </TableHead>
-                              <TableHead className="text-right">
-                                Amount
-                              </TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {inv.lineItems.map((li) => (
-                              <TableRow key={li.id}>
-                                <TableCell>
-                                  <p className="text-sm font-medium">
-                                    {li.developerName}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {li.developerRole}
-                                  </p>
-                                </TableCell>
-                                <TableCell className="text-sm text-muted-foreground">
-                                  {li.requirementTitle}
-                                </TableCell>
-                                <TableCell className="text-right font-mono text-sm">
-                                  {formatCurrency(li.hourlyRate, inv.currency)}
-                                  /hr
-                                </TableCell>
-                                <TableCell className="text-right font-mono text-sm">
-                                  {li.hoursWorked}h
-                                </TableCell>
-                                <TableCell className="text-right font-mono text-sm font-semibold">
-                                  {formatCurrency(li.amount, inv.currency)}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                        <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-3">
-                          <div className="flex items-center gap-3">
-                            <p className="text-xs text-muted-foreground">
-                              Issued{" "}
-                              {inv.issuedAt ? formatDate(inv.issuedAt) : "—"}
-                              {inv.paidAt &&
-                                ` · Paid ${formatDate(inv.paidAt)}`}
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 gap-1.5 text-xs"
-                              asChild
-                            >
-                              <a
-                                href={`/api/invoices/${inv.id}/pdf`}
-                                download={`${inv.invoiceNumber}.pdf`}
-                              >
-                                <Download className="size-3" />
-                                Download PDF
-                              </a>
-                            </Button>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xs text-muted-foreground">
-                              Subtotal:{" "}
-                              <span className="font-mono">
-                                {formatCurrency(inv.subtotal, inv.currency)}
-                              </span>
-                            </p>
-                            {inv.taxAmount > 0 && (
-                              <p className="text-xs text-muted-foreground">
-                                Tax ({inv.taxRate}%):{" "}
-                                <span className="font-mono">
-                                  {formatCurrency(
-                                    inv.taxAmount,
-                                    inv.currency,
-                                  )}
-                                </span>
-                              </p>
-                            )}
-                            <p className="text-sm font-semibold">
-                              Total:{" "}
-                              <span className="font-mono">
-                                {formatCurrency(inv.total, inv.currency)}
-                              </span>
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </>
+    </PageScroll>
   );
-};
-
-export default InvoicesPage;
+}

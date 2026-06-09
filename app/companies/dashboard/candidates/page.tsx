@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { ConsoleScroll } from "../_components/console-scroll";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Loader2, UserSearch } from "lucide-react";
@@ -139,7 +140,7 @@ export default function CandidatesPage() {
   }
 
   return (
-    <>
+    <ConsoleScroll>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold">Candidates</h1>
@@ -280,6 +281,6 @@ export default function CandidatesPage() {
           </div>
         </div>
       )}
-    </>
+    </ConsoleScroll>
   );
 }

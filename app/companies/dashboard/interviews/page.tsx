@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { ConsoleScroll } from "../_components/console-scroll";
 import { useRouter } from "next/navigation";
 import {
   CalendarDays,
@@ -143,7 +144,7 @@ export default function InterviewsPage() {
     tab === "upcoming" ? upcoming : tab === "past" ? past : interviews;
 
   return (
-    <>
+    <ConsoleScroll>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold">Interviews</h1>
@@ -313,6 +314,6 @@ export default function InterviewsPage() {
           </div>
         </div>
       )}
-    </>
+    </ConsoleScroll>
   );
 }

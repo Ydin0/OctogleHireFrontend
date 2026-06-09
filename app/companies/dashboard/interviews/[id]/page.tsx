@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { ConsoleScroll } from "../../_components/console-scroll";
 import { useAuth } from "@clerk/nextjs";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -283,7 +284,8 @@ export default function InterviewDetailPage() {
   const isCompleted = status === "completed";
 
   return (
-    <div className="space-y-6">
+    <ConsoleScroll>
+      <div className="space-y-6">
       {/* Back button */}
       <Button
         variant="ghost"
@@ -629,6 +631,7 @@ export default function InterviewDetailPage() {
           </Card>
         </div>
       </div>
-    </div>
+      </div>
+    </ConsoleScroll>
   );
 }

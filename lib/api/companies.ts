@@ -1,4 +1,5 @@
 import type { CompanyStatus } from "@/app/admin/dashboard/_components/dashboard-data";
+import type { Developer } from "@/lib/data/developers";
 import { fetchWithRetry } from "./fetch-with-retry";
 
 const apiBaseUrl =
@@ -2243,5 +2244,65 @@ export async function fetchAdminCompanyAgreements(
     return (await res.json()) as Agreement[];
   } catch {
     return [];
+  }
+}
+
+// ── Shortlist ("Saved" tab) ──────────────────────────────────────────────────
+
+export async function fetchCompanyShortlist(
+  token: string | null,
+): Promise<Developer[]> {
+  if (!token) return [];
+  try {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/shortlist`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as { developers: Developer[] };
+    return data.developers ?? [];
+  } catch {
+    return [];
+  }
+}
+
+export async function addToShortlist(
+  token: string | null,
+  developerId: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const res = await fetchWithRetry(`${apiBaseUrl}/api/companies/shortlist`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ developerId }),
+      cache: "no-store",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function removeFromShortlist(
+  token: string | null,
+  developerId: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const res = await fetchWithRetry(
+      `${apiBaseUrl}/api/companies/shortlist/${encodeURIComponent(developerId)}`,
+      {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      },
+    );
+    return res.ok;
+  } catch {
+    return false;
   }
 }

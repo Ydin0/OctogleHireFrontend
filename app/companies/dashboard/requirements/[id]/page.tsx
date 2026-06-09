@@ -1,4 +1,5 @@
 import { ProposedMatchesClient } from "./_components/proposed-matches";
+import { ConsoleScroll } from "../../_components/console-scroll";
 
 const RequirementDetailPage = async ({
   params,
@@ -6,7 +7,11 @@ const RequirementDetailPage = async ({
   params: Promise<{ id: string }>;
 }) => {
   const { id } = await params;
-  return <ProposedMatchesClient requirementId={id} />;
+  return (
+    <ConsoleScroll>
+      <ProposedMatchesClient requirementId={id} />
+    </ConsoleScroll>
+  );
 };
 
 export default RequirementDetailPage;

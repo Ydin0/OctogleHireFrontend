@@ -1,5 +1,6 @@
 "use client";
 
+import { ConsoleScroll } from "../_components/console-scroll";
 import { useEffect, useState, useRef } from "react";
 import {
   Camera,
@@ -334,7 +335,7 @@ const TeamPage = () => {
   const members = team ?? [];
 
   return (
-    <>
+    <ConsoleScroll>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold">Team</h1>
@@ -534,7 +535,7 @@ const TeamPage = () => {
           </CardContent>
         </Card>
       )}
-    </>
+    </ConsoleScroll>
   );
 };
 

@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-import { CompanySidebar } from "./_components/company-sidebar";
-import { CompanyHeader } from "./_components/company-header";
+import { CompanyRail } from "./_components/company-rail";
 import { ChatWidget } from "./_components/chat-widget";
+import { ShortlistProvider } from "./_components/shortlist-context";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
-import { fetchCompanyProfile, fetchCompanyTeam, fetchCompanyRequirements, fetchCompanyAgreements } from "@/lib/api/companies";
+import { fetchCompanyProfile, fetchCompanyRequirements, fetchCompanyAgreements, fetchCompanyShortlist } from "@/lib/api/companies";
 
 export const metadata: Metadata = {
   title: "Company Dashboard | OctogleHire",
@@ -36,54 +36,45 @@ export default async function CompanyDashboardLayout({
     }
   }
 
-  const clerkUser = await currentUser();
-  const [companyProfile, teamMembers, requirements, agreements] = await Promise.all([
+  const [companyProfile, requirements, agreements, shortlist] = await Promise.all([
     fetchCompanyProfile(token),
-    fetchCompanyTeam(token),
     fetchCompanyRequirements(token),
     fetchCompanyAgreements(token),
+    fetchCompanyShortlist(token),
   ]);
 
   const sidebarCounts = {
     requirements: (requirements ?? []).filter((r) => r.status === "open" || r.status === "matching" || r.status === "partially_filled").length,
     candidates: (requirements ?? []).reduce((sum, r) => {
-      const matches = (r as any).proposedMatches ?? [];
-      return sum + matches.filter((m: any) => m.status === "accepted" || m.status === "interview_scheduled").length;
+      const matches = r.proposedMatches ?? [];
+      return sum + matches.filter((m) => m.status === "accepted" || m.status === "interview_scheduled").length;
     }, 0),
     agreements: agreements.filter((a) => a.status === "pending").length,
   };
 
-  const userEmail = clerkUser?.emailAddresses?.[0]?.emailAddress ?? null;
-  // Prefer team member avatar (uploaded via team page) over Clerk default
-  const teamMemberAvatar = userEmail
-    ? teamMembers?.find(
-        (m) => m.email.toLowerCase() === userEmail.toLowerCase(),
-      )?.avatar
-    : null;
+  const companyName = companyProfile?.companyName ?? "Acme Corp";
+  const companyInitials = companyName
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-  const user = {
-    fullName: clerkUser
-      ? [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
-        null
-      : null,
-    email: userEmail,
-    imageUrl: teamMemberAvatar || clerkUser?.imageUrl || null,
-  };
+  const initialShortlistIds = (shortlist ?? []).map((d) => d.id);
 
   return (
-    <div className="min-h-screen bg-background">
-      <CompanySidebar user={user} companyProfile={companyProfile} roles={roles} activeRole={accountType ?? "company"} counts={sidebarCounts} />
-      <CompanyHeader user={user} companyProfile={companyProfile} roles={roles} activeRole={accountType ?? "company"} counts={sidebarCounts} />
-      <main className="lg:ml-64">
-        <div className="space-y-6 px-6 py-6 lg:py-8">
+    <ShortlistProvider initialIds={initialShortlistIds}>
+      <div className="marketplace-route flex h-screen overflow-hidden bg-background text-foreground">
+        <CompanyRail counts={sidebarCounts} companyInitials={companyInitials} />
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
           {children}
-        </div>
-      </main>
-      <ChatWidget
-        accountManagerId={companyProfile?.accountManagerId ?? undefined}
-        accountManagerName={companyProfile?.accountManager?.name}
-        accountManagerAvatar={companyProfile?.accountManager?.profilePhotoUrl}
-      />
-    </div>
+        </main>
+        <ChatWidget
+          accountManagerId={companyProfile?.accountManagerId ?? undefined}
+          accountManagerName={companyProfile?.accountManager?.name}
+          accountManagerAvatar={companyProfile?.accountManager?.profilePhotoUrl}
+        />
+      </div>
+    </ShortlistProvider>
   );
 }
