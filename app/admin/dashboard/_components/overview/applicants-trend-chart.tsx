@@ -174,7 +174,11 @@ export function ApplicantsTrendChart({
           ref={containerRef}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
-          className="relative w-full overflow-x-auto"
+          // overflow-y has to be explicit. CSS spec: when overflow-x is `auto`
+          // the browser promotes `overflow-y: visible` to `auto`, which would
+          // spawn a vertical scrollbar whenever the tooltip nudges past the
+          // container's height. `overflow-y-hidden` keeps the chart card calm.
+          className="relative w-full overflow-x-auto overflow-y-hidden"
         >
           <svg
             viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
@@ -356,6 +360,9 @@ export function ApplicantsTrendChart({
               containerWidth={
                 containerRef.current?.getBoundingClientRect().width ?? 0
               }
+              containerHeight={
+                containerRef.current?.getBoundingClientRect().height ?? 0
+              }
             />
           )}
         </div>
@@ -387,6 +394,7 @@ interface TooltipProps {
   granularity: "day" | "week" | "month";
   position: { x: number; y: number };
   containerWidth: number;
+  containerHeight: number;
 }
 
 function Tooltip({
@@ -394,16 +402,21 @@ function Tooltip({
   granularity,
   position,
   containerWidth,
+  containerHeight,
 }: TooltipProps) {
-  // Keep the tooltip inside the container — flip to the left side of the
-  // cursor when we'd otherwise overflow the right edge.
+  // Keep the tooltip inside the container on both axes — flip to the left
+  // side of the cursor when we'd overflow the right edge, and clamp the
+  // top so we never trigger the parent's overflow.
   const W = 200;
+  const H_EST = 116; // rough tooltip height for clamp; tighter than measuring
   const offset = 14;
   const flipLeft = position.x + offset + W > containerWidth;
   const left = flipLeft
     ? Math.max(8, position.x - offset - W)
     : position.x + offset;
-  const top = Math.max(8, position.y - 12);
+  const desiredTop = position.y - 12;
+  const maxTop = Math.max(8, containerHeight - H_EST - 8);
+  const top = Math.max(8, Math.min(desiredTop, maxTop));
   const total = point.applied + point.approved + point.rejected;
   const rows: { key: keyof typeof COLORS; label: string; value: number }[] = [
     { key: "applied", label: "Applied", value: point.applied },
