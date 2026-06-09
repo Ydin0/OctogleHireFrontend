@@ -12,6 +12,7 @@ import {
   GitPullRequestArrow,
   Handshake,
   Layers,
+  LayoutGrid,
   LineChart,
   LogOut,
   MessageSquareQuote,
@@ -41,6 +42,7 @@ const navGroups = [
     superAdminOnly: false,
     items: [
       { href: "/admin/dashboard", label: "Overview", icon: Layers },
+      { href: "/admin/dashboard/marketplace", label: "Marketplace", icon: LayoutGrid },
       { href: "/admin/dashboard/reviews", label: "Reviews", icon: MessageSquareQuote },
     ],
   },

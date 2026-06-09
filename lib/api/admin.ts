@@ -1,4 +1,5 @@
 import { fetchWithRetry } from "./fetch-with-retry";
+import type { MarketplaceProfile } from "@/lib/data/developers";
 
 const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
@@ -29,6 +30,9 @@ export interface AdminApplication {
   agencyId: string | null;
   agencyName: string | null;
   agencyLogo: string | null;
+  hourlyRateCents: number | null;
+  marketplaceRating: string | null;
+  marketplaceProfile: MarketplaceProfile | null;
 }
 
 export interface AdminApplicationFull {
@@ -70,6 +74,7 @@ export interface AdminApplicationFull {
   marketplaceProjects: number | null;
   marketplaceAchievements: string[] | null;
   marketplaceAwards: { title: string; issuer: string; year: string }[] | null;
+  marketplaceProfile: MarketplaceProfile | null;
   aboutLong: string | null;
   offer: ApplicationOffer | null;
   introVideoPath: string | null;
@@ -642,6 +647,7 @@ export interface MarketplaceProfilePayload {
   marketplaceProjects?: number | null;
   marketplaceAchievements?: string[] | null;
   marketplaceAwards?: { title: string; issuer: string; year: string }[] | null;
+  marketplaceProfile?: MarketplaceProfile | null;
   aboutLong?: string | null;
 }
 
@@ -1655,8 +1661,10 @@ export interface AdminOverview {
     newCompanies: OverviewDelta;
     newActiveEngagements: OverviewDelta;
     /** Current live-marketplace developer count, with the count at the
-     *  start of the window as `previous` so the delta reflects net growth. */
-    liveDevelopers: OverviewDelta;
+     *  start of the window as `previous` so the delta reflects net growth.
+     *  Optional because during a cross-repo deploy window the backend may
+     *  briefly serve an older response shape — guard in the renderer. */
+    liveDevelopers?: OverviewDelta;
   };
   applicantsByPeriod: Array<{
     bucket: string;

@@ -31,6 +31,140 @@ export interface Award {
   year: string;
 }
 
+// ── Marketplace design enrichment ──────────────────────────────────────────
+// Extra presentation fields introduced by the Developer Marketplace design.
+// On the backend these live in developer_applications.marketplace_profile
+// (jsonb); see octoglehire-backend/src/types/marketplace.ts.
+
+/** A skill with a 0–100 proficiency level (drives the proficiency bars). */
+export interface MarketplaceSkill {
+  name: string;
+  level: number;
+}
+
+/** Per-stage scores for the 5-stage "Octogle Gauntlet". */
+export interface GauntletScores {
+  identity: number;
+  technical: number;
+  live: number;
+  system: number;
+  comms: number;
+}
+
+export interface MarketplaceGauntlet {
+  overall: number;
+  percentile: string;
+  scores: GauntletScores;
+}
+
+export interface MarketplaceLanguage {
+  name: string;
+  level: string;
+}
+
+export interface MarketplacePortfolioItem {
+  name: string;
+  blurb: string;
+  tags: string[];
+  metric: string;
+}
+
+/** The enrichment blob the admin edits and the company view renders. */
+export interface MarketplaceProfile {
+  tag?: string;
+  tagEmoji?: string;
+  localRateCents?: number;
+  timezone?: string;
+  overlap?: string;
+  responseTime?: string;
+  repeatHire?: number;
+  skills?: MarketplaceSkill[];
+  gauntlet?: MarketplaceGauntlet;
+  languages?: MarketplaceLanguage[];
+  portfolio?: MarketplacePortfolioItem[];
+}
+
+/** Marketplace-wide configuration (mirrors the backend MarketplaceSettings). */
+export interface MarketplaceSettings {
+  hero: {
+    eyebrow: string;
+    title: string;
+    titleAccent: string;
+    description: string;
+  };
+  filters: {
+    techStacks: string[];
+    rateMin: number;
+    rateMax: number;
+    experienceRanges: string[];
+  };
+  included: string[];
+  showGauntlet: boolean;
+  defaultRateFraming: "hourly" | "monthly";
+  defaultSort: string;
+}
+
+export const DEFAULT_MARKETPLACE_SETTINGS: MarketplaceSettings = {
+  hero: {
+    eyebrow: "Developer Marketplace",
+    title: "Find your next",
+    titleAccent: "developer",
+    description:
+      "Browse pre-vetted engineers who've cleared our 5-stage AI gauntlet. Filter by stack, country, seniority, and rate — then hire compliantly through OctogleHire.",
+  },
+  filters: {
+    techStacks: ["React", "Python", "Go", "AWS", "Next.js", "PyTorch"],
+    rateMin: 45,
+    rateMax: 150,
+    experienceRanges: ["0–2 years", "3–5 years", "6–8 years", "9+ years"],
+  },
+  included: [
+    "Payroll & global EOR contracts",
+    "Local tax & compliance handled",
+    "Invoiced in USD, monthly",
+    "Free 2-week trial + replacement guarantee",
+  ],
+  showGauntlet: true,
+  defaultRateFraming: "hourly",
+  defaultSort: "gauntlet",
+};
+
+/** The five-stage gauntlet definition shared by editor + profile view. */
+export const GAUNTLET_STAGES = [
+  {
+    key: "identity",
+    label: "Identity & Background",
+    desc: "Government ID, right-to-work, and reference verification.",
+  },
+  {
+    key: "technical",
+    label: "Technical Assessment",
+    desc: "AI-scored deep-dive across the engineer's core stack.",
+  },
+  {
+    key: "live",
+    label: "Live Coding",
+    desc: "AI-proctored pair-programming under real constraints.",
+  },
+  {
+    key: "system",
+    label: "System Design",
+    desc: "Architecture interview graded on scalability & tradeoffs.",
+  },
+  {
+    key: "comms",
+    label: "Communication & Culture",
+    desc: "Async writing, spoken English, and collaboration signal.",
+  },
+] as const;
+
+export const MARKETPLACE_TAGS = [
+  { tag: "Proven Pro", tagEmoji: "⭐" },
+  { tag: "Industry Veteran", tagEmoji: "🛡️" },
+  { tag: "Rising Star", tagEmoji: "🔥" },
+  { tag: "Top Rated", tagEmoji: "🏆" },
+] as const;
+
 export interface Developer {
   id: string;
   name: string;
@@ -51,6 +185,20 @@ export interface Developer {
   education: Education[];
   awards: Award[];
   reviews?: Review[];
+  // ── Marketplace design enrichment (optional; from the public API) ──────────
+  tag?: string | null;
+  tagEmoji?: string | null;
+  timezone?: string | null;
+  overlap?: string | null;
+  responseTime?: string | null;
+  repeatHire?: number | null;
+  localRate?: number | null;
+  skillLevels?: MarketplaceSkill[];
+  gauntlet?: MarketplaceGauntlet | null;
+  languages?: MarketplaceLanguage[];
+  portfolio?: MarketplacePortfolioItem[];
+  isFeatured?: boolean;
+  introVideoUrl?: string | null;
 }
 
 export const TECH_STACKS = [
