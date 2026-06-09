@@ -1,15 +1,23 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import type { RowSelectionState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { toast } from "sonner";
 import { Loader2, Plus } from "lucide-react";
-import type { Invoice, InvoiceSummary } from "@/lib/api/invoices";
+import type {
+  Invoice,
+  InvoiceFilters,
+  InvoiceSummary,
+} from "@/lib/api/invoices";
 import {
   updateInvoiceStatus,
   deleteInvoice,
   adminCreateInvoice,
+  bulkMarkInvoicesPaid,
+  bulkSendInvoices,
+  bulkDeleteInvoices,
 } from "@/lib/api/invoices";
 import type { AdminEngagement, Pagination } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
@@ -36,13 +44,23 @@ import { DataTable } from "../../_components/data-table";
 import { formatCurrency } from "../../_components/dashboard-data";
 import { getColumns } from "./columns";
 import { InvoiceFiltersBar } from "./filters-bar";
-import { InvoiceSummaryCards } from "./invoice-summary-cards";
+import { InvoiceSummarySection } from "./summary-section";
+import { InvoiceBulkActionBar } from "./bulk-action-bar";
 import { useAdminCurrency } from "../../_components/admin-currency-context";
+
+export interface CompanyOption {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+}
 
 interface InvoicesClientProps {
   invoices: Invoice[];
+  pagination: Pagination;
   summary: InvoiceSummary;
   engagements: AdminEngagement[];
+  companies: CompanyOption[];
+  filters: InvoiceFilters;
   token: string;
   isSuperAdmin?: boolean;
 }
@@ -52,134 +70,132 @@ const currentPeriod = (): string => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 };
 
-function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }: InvoicesClientProps) {
+function InvoicesClient({
+  invoices,
+  pagination,
+  summary,
+  engagements,
+  companies,
+  filters,
+  token,
+  isSuperAdmin,
+}: InvoicesClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
 
-  const currentSearch = searchParams.get("search") ?? "";
-  const currentStatus = searchParams.get("status") ?? "all";
-  const currentSortBy = searchParams.get("sortBy") ?? "";
-  const currentSortOrder = searchParams.get("sortOrder") ?? "";
-  const currentPage = parseInt(searchParams.get("page") ?? "1", 10);
-  const currentLimit = parseInt(searchParams.get("limit") ?? "20", 10);
-
-  const pushParams = (updates: Record<string, string>) => {
+  // Server drives all filtering / sorting / pagination — we just nudge
+  // the URL and let the page server-component refetch.
+  const setParam = (key: string, value: string | undefined) => {
     const params = new URLSearchParams(searchParams.toString());
-    for (const [key, value] of Object.entries(updates)) {
-      if (value) {
-        params.set(key, value);
-      } else {
-        params.delete(key);
-      }
+    if (value && value !== "") {
+      params.set(key, value);
+    } else {
+      params.delete(key);
     }
+    // Any filter change resets pagination to page 1.
+    if (key !== "page") params.delete("page");
     startTransition(() => {
       router.push(`?${params.toString()}`);
     });
   };
 
-  // Client-side filtering
-  const filteredInvoices = useMemo(() => {
-    let result = invoices;
-
-    if (currentSearch) {
-      const q = currentSearch.toLowerCase();
-      result = result.filter(
-        (inv) =>
-          inv.companyName.toLowerCase().includes(q) ||
-          inv.invoiceNumber.toLowerCase().includes(q),
-      );
-    }
-
-    if (currentStatus && currentStatus !== "all") {
-      result = result.filter((inv) => inv.status === currentStatus);
-    }
-
-    return result;
-  }, [invoices, currentSearch, currentStatus]);
-
-  // Client-side sorting
-  const sortedInvoices = useMemo(() => {
-    if (!currentSortBy) return filteredInvoices;
-
-    const sorted = [...filteredInvoices];
-    const order = currentSortOrder === "desc" ? -1 : 1;
-
-    sorted.sort((a, b) => {
-      switch (currentSortBy) {
-        case "invoiceNumber":
-          return order * a.invoiceNumber.localeCompare(b.invoiceNumber);
-        case "companyName":
-          return order * a.companyName.localeCompare(b.companyName);
-        case "total":
-          return order * (a.total - b.total);
-        case "status":
-          return order * a.status.localeCompare(b.status);
-        case "issuedAt":
-          return (
-            order *
-            (new Date(a.issuedAt).getTime() - new Date(b.issuedAt).getTime())
-          );
-        case "dueDate":
-          return (
-            order *
-            (new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-          );
-        default:
-          return 0;
-      }
-    });
-
-    return sorted;
-  }, [filteredInvoices, currentSortBy, currentSortOrder]);
-
-  // Client-side pagination
-  const total = sortedInvoices.length;
-  const totalPages = Math.max(1, Math.ceil(total / currentLimit));
-  const safePage = Math.min(currentPage, totalPages);
-  const paginatedInvoices = sortedInvoices.slice(
-    (safePage - 1) * currentLimit,
-    safePage * currentLimit,
-  );
-
-  const pagination: Pagination = {
-    page: safePage,
-    limit: currentLimit,
-    total,
-    totalPages,
-  };
-
   const handleSortChange = (column: string) => {
+    const currentSortBy = filters.sortBy ?? "issuedAt";
+    const currentSortOrder = filters.sortOrder ?? "desc";
+    const params = new URLSearchParams(searchParams.toString());
     if (currentSortBy === column) {
-      if (currentSortOrder === "asc") {
-        pushParams({ sortBy: column, sortOrder: "desc" });
+      // toggle direction; remove on second toggle
+      if (currentSortOrder === "desc") {
+        params.set("sortBy", column);
+        params.set("sortOrder", "asc");
       } else {
-        pushParams({ sortBy: "", sortOrder: "" });
+        params.delete("sortBy");
+        params.delete("sortOrder");
       }
     } else {
-      pushParams({ sortBy: column, sortOrder: "asc" });
+      params.set("sortBy", column);
+      params.set("sortOrder", "desc");
     }
+    params.delete("page");
+    startTransition(() => {
+      router.push(`?${params.toString()}`);
+    });
   };
 
+  // Row selection state for bulk actions.
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const selectedIds = useMemo(() => {
+    return invoices.filter((_, idx) => rowSelection[idx]).map((i) => i.id);
+  }, [invoices, rowSelection]);
+
+  const clearSelection = () => setRowSelection({});
+
+  const refreshAndClear = () => {
+    clearSelection();
+    startTransition(() => {
+      router.refresh();
+    });
+  };
+
+  // Single-row actions
   const handleMarkPaid = async (invoice: Invoice) => {
     try {
       await updateInvoiceStatus(token, invoice.id, "paid");
       toast.success("Invoice marked as paid");
-      startTransition(() => {
-        router.refresh();
-      });
+      refreshAndClear();
     } catch {
       toast.error("Failed to update invoice status");
     }
   };
 
-  // Delete state
+  // Bulk actions
+  const handleBulkMarkPaid = async () => {
+    const result = await bulkMarkInvoicesPaid(token, selectedIds);
+    if ("error" in result) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success(
+      `Marked ${result.updated} paid${result.skipped > 0 ? ` (skipped ${result.skipped} already paid)` : ""}`,
+    );
+    refreshAndClear();
+  };
+
+  const handleBulkSend = async () => {
+    const result = await bulkSendInvoices(token, selectedIds);
+    if ("error" in result) {
+      toast.error(result.error);
+      return;
+    }
+    const errSuffix =
+      result.errors.length > 0 ? `, ${result.errors.length} failed` : "";
+    toast.success(
+      `Sent ${result.sent}${result.skipped > 0 ? `, skipped ${result.skipped} non-drafts` : ""}${errSuffix}`,
+    );
+    refreshAndClear();
+  };
+
+  const handleBulkDelete = async () => {
+    const result = await bulkDeleteInvoices(token, selectedIds);
+    if ("error" in result) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success(`Deleted ${result.deleted} invoices`);
+    refreshAndClear();
+  };
+
+  // Delete state (single-row)
   const [deleteTarget, setDeleteTarget] = useState<Invoice | null>(null);
   const [deleting, setDeleting] = useState(false);
 
   // Create-invoice state (super admin)
   const activeEngagements = useMemo(
-    () => engagements.filter((e) => e.status === "active" || e.status === "pending"),
+    () =>
+      engagements.filter(
+        (e) => e.status === "active" || e.status === "pending",
+      ),
     [engagements],
   );
   const [createOpen, setCreateOpen] = useState(false);
@@ -251,9 +267,7 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
         dueInDays: "14",
         notes: "",
       });
-      startTransition(() => {
-        router.refresh();
-      });
+      refreshAndClear();
     } else {
       toast.error(result.error);
     }
@@ -267,7 +281,7 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
     if (ok) {
       toast.success("Invoice deleted");
       setDeleteTarget(null);
-      startTransition(() => { router.refresh(); });
+      refreshAndClear();
     } else {
       toast.error("Failed to delete invoice");
     }
@@ -281,13 +295,37 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
     formatDisplay,
   });
 
+  // Derive unique developer list from engagements + the visible page so the
+  // filter dropdown shows real options.
+  const developerOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const e of engagements) {
+      if (e.developerId) map.set(e.developerId, e.developerName);
+    }
+    for (const i of invoices) {
+      if (i.developerId && i.developerName)
+        map.set(i.developerId, i.developerName);
+    }
+    return Array.from(map.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [engagements, invoices]);
+
+  // Derive currency options from the visible invoices + any common ones.
+  const currencyOptions = useMemo(() => {
+    const seen = new Set<string>(["USD", "GBP", "EUR", "AED"]);
+    for (const i of invoices) seen.add(i.currency);
+    return Array.from(seen).sort();
+  }, [invoices]);
+
   return (
     <>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-lg font-semibold">Invoices</h1>
           <p className="text-sm text-muted-foreground">
-            Track billing, payments, and outstanding invoices for all companies.
+            Track billing, payments, and outstanding invoices for all
+            companies.
           </p>
         </div>
         {isSuperAdmin && (
@@ -298,15 +336,20 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
         )}
       </div>
 
-      <InvoiceSummaryCards invoices={invoices} summary={summary} />
+      <InvoiceSummarySection summary={summary} />
 
-      <InvoiceFiltersBar />
+      <InvoiceFiltersBar
+        filters={filters}
+        companies={companies}
+        developers={developerOptions}
+        currencies={currencyOptions}
+      />
 
       <DataTable
         columns={columns}
-        data={paginatedInvoices}
+        data={invoices}
         pagination={pagination}
-        onPageChange={(page) => pushParams({ page: String(page) })}
+        onPageChange={(page) => setParam("page", String(page))}
         onLimitChange={(limit) => {
           const params = new URLSearchParams(searchParams.toString());
           params.set("limit", String(limit));
@@ -317,16 +360,27 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
         }}
         onSortChange={handleSortChange}
         currentSort={
-          currentSortBy
+          filters.sortBy
             ? {
-                column: currentSortBy,
-                order: currentSortOrder as "asc" | "desc",
+                column: filters.sortBy,
+                order: (filters.sortOrder ?? "desc") as "asc" | "desc",
               }
             : undefined
         }
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
         onRowClick={(invoice) =>
           router.push(`/admin/dashboard/invoices/${invoice.id}`)
         }
+      />
+
+      <InvoiceBulkActionBar
+        selectedCount={selectedIds.length}
+        isSuperAdmin={!!isSuperAdmin}
+        onMarkPaid={handleBulkMarkPaid}
+        onSend={handleBulkSend}
+        onDelete={handleBulkDelete}
+        onClear={clearSelection}
       />
 
       {/* Create Invoice Dialog */}
@@ -539,22 +593,35 @@ function InvoicesClient({ invoices, summary, engagements, token, isSuperAdmin }:
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+      <Dialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Invoice</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete invoice{" "}
               <strong>{deleteTarget?.invoiceNumber}</strong> for{" "}
-              <strong>{deleteTarget?.companyName}</strong>? This will also remove
-              all associated line items. This action cannot be undone.
+              <strong>{deleteTarget?.companyName}</strong>? This will also
+              remove all associated line items. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              disabled={deleting}
+            >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
               {deleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>

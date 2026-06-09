@@ -7,6 +7,7 @@ import { Download, Eye, MoreHorizontal, Trash2 } from "lucide-react";
 import type { Invoice } from "@/lib/api/invoices";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,14 +29,47 @@ interface GetColumnsOptions {
   formatDisplay?: (amount: number, fromCurrency: string) => string;
 }
 
+const stop = (e: React.MouseEvent) => e.stopPropagation();
+
 export function getColumns(
   options: GetColumnsOptions = {},
 ): ColumnDef<Invoice>[] {
   return [
+    // ── Selection ─────────────────────────────────────────────────────────
+    {
+      id: "select",
+      size: 36,
+      header: ({ table }) => (
+        <div className="flex items-center" onClick={stop}>
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected()
+                ? true
+                : table.getIsSomePageRowsSelected()
+                  ? "indeterminate"
+                  : false
+            }
+            onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+            aria-label="Select all"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center" onClick={stop}>
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(v) => row.toggleSelected(!!v)}
+            aria-label="Select row"
+          />
+        </div>
+      ),
+      enableSorting: false,
+    },
+    // ── Invoice + period ──────────────────────────────────────────────────
     {
       accessorKey: "invoiceNumber",
       header: "Invoice",
-      size: 180,
+      size: 170,
       meta: { sortKey: "invoiceNumber" },
       cell: ({ row }) => {
         const { invoiceNumber, periodStart, periodEnd } = row.original;
@@ -56,10 +90,11 @@ export function getColumns(
         );
       },
     },
+    // ── Company ──────────────────────────────────────────────────────────
     {
       accessorKey: "companyName",
       header: "Company",
-      size: 180,
+      size: 170,
       meta: { sortKey: "companyName" },
       cell: ({ getValue }) => (
         <span className="block truncate text-sm">
@@ -67,34 +102,84 @@ export function getColumns(
         </span>
       ),
     },
+    // ── Developer ─────────────────────────────────────────────────────────
     {
-      accessorKey: "total",
-      header: "Amount",
-      size: 120,
-      meta: { sortKey: "total" },
-      cell: ({ row }) => (
-        <span className="block font-mono text-sm">
-          {(options.formatDisplay ?? formatCurrency)(row.original.total, row.original.currency)}
-        </span>
-      ),
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      size: 110,
-      meta: { sortKey: "status" },
-      cell: ({ getValue }) => {
-        const status = getValue() as InvoiceStatus;
+      id: "developer",
+      header: "Developer",
+      size: 150,
+      cell: ({ row }) => {
+        const { developerName, developerRole } = row.original;
+        if (!developerName)
+          return <span className="text-sm text-muted-foreground">—</span>;
         return (
-          <Badge
-            variant="outline"
-            className={invoiceStatusBadgeClass(status)}
-          >
-            {invoiceStatusLabel[status] ?? status}
-          </Badge>
+          <div className="min-w-0">
+            <p className="truncate text-sm">{developerName}</p>
+            {developerRole && (
+              <p className="truncate text-xs text-muted-foreground">
+                {developerRole}
+              </p>
+            )}
+          </div>
         );
       },
     },
+    // ── Amount ────────────────────────────────────────────────────────────
+    {
+      accessorKey: "total",
+      header: "Amount",
+      size: 130,
+      meta: { sortKey: "total" },
+      cell: ({ row }) => (
+        <span className="block font-mono text-sm">
+          {(options.formatDisplay ?? formatCurrency)(
+            row.original.total,
+            row.original.currency,
+          )}
+        </span>
+      ),
+    },
+    // ── Currency (small) ──────────────────────────────────────────────────
+    {
+      accessorKey: "currency",
+      header: "Currency",
+      size: 80,
+      cell: ({ getValue }) => (
+        <span className="text-xs font-mono text-muted-foreground">
+          {getValue() as string}
+        </span>
+      ),
+    },
+    // ── Effective status ──────────────────────────────────────────────────
+    {
+      id: "effectiveStatus",
+      header: "Status",
+      size: 130,
+      meta: { sortKey: "status" },
+      cell: ({ row }) => {
+        const { status, effectiveStatus } = row.original;
+        const display = (effectiveStatus ?? status) as InvoiceStatus;
+        const isAuto = effectiveStatus && effectiveStatus !== status;
+        return (
+          <div className="flex items-center gap-1.5">
+            <Badge
+              variant="outline"
+              className={invoiceStatusBadgeClass(display)}
+            >
+              {invoiceStatusLabel[display] ?? display}
+            </Badge>
+            {isAuto && (
+              <span
+                className="text-[9px] uppercase tracking-wider text-muted-foreground"
+                title="Auto-detected from due date"
+              >
+                auto
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    // ── Issued ────────────────────────────────────────────────────────────
     {
       accessorKey: "issuedAt",
       header: "Issued",
@@ -111,16 +196,17 @@ export function getColumns(
         );
       },
     },
+    // ── Due ───────────────────────────────────────────────────────────────
     {
       accessorKey: "dueDate",
       header: "Due",
       size: 100,
       meta: { sortKey: "dueDate" },
       cell: ({ row }) => {
-        const { dueDate, status } = row.original;
+        const { dueDate, effectiveStatus } = row.original;
         if (!dueDate)
           return <span className="text-sm text-muted-foreground">-</span>;
-        const isOverdue = status === "overdue";
+        const isOverdue = effectiveStatus === "overdue";
         return (
           <span
             className={`text-sm ${isOverdue ? "font-medium text-red-600" : "text-muted-foreground"}`}
@@ -130,6 +216,24 @@ export function getColumns(
         );
       },
     },
+    // ── Days overdue ──────────────────────────────────────────────────────
+    {
+      id: "daysOverdue",
+      header: "Late",
+      size: 70,
+      cell: ({ row }) => {
+        const { daysOverdue, effectiveStatus } = row.original;
+        if (effectiveStatus !== "overdue" || !daysOverdue) {
+          return <span className="text-sm text-muted-foreground">—</span>;
+        }
+        return (
+          <span className="font-mono text-sm font-medium text-red-600">
+            {daysOverdue}d
+          </span>
+        );
+      },
+    },
+    // ── Actions ───────────────────────────────────────────────────────────
     {
       id: "actions",
       header: "",
@@ -139,7 +243,12 @@ export function getColumns(
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="size-8">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                onClick={stop}
+              >
                 <MoreHorizontal className="size-4" />
                 <span className="sr-only">Actions</span>
               </Button>

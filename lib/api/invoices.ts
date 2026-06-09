@@ -24,6 +24,9 @@ export interface Invoice {
   companyId: string;
   companyName: string;
   companyEmail: string;
+  developerId?: string | null;
+  developerName?: string | null;
+  developerRole?: string | null;
   periodStart: string;
   periodEnd: string;
   issuedAt: string;
@@ -35,10 +38,37 @@ export interface Invoice {
   taxAmount: number;
   total: number;
   status: InvoiceStatus;
+  /** Status with the "sent past due-date → overdue" rule applied. Always set. */
+  effectiveStatus: InvoiceStatus;
+  /** Days past due date for unpaid/uncancelled invoices. 0 otherwise. */
+  daysOverdue: number;
   lineItems: InvoiceLineItem[];
   notes?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface InvoiceAgingBuckets {
+  current: number;
+  d1to30: number;
+  d31to60: number;
+  d61to90: number;
+  d90plus: number;
+}
+
+export interface MonthlyRevenuePoint {
+  /** YYYY-MM */
+  month: string;
+  currency: string;
+  total: number;
+}
+
+export interface TopClientOutstanding {
+  companyId: string;
+  companyName: string;
+  logoUrl: string | null;
+  currency: string;
+  outstanding: number;
 }
 
 export interface InvoiceSummary {
@@ -47,24 +77,101 @@ export interface InvoiceSummary {
   totalPaid: number;
   totalOutstanding: number;
   overdueCount: number;
+  agingBuckets: InvoiceAgingBuckets;
+  monthlyRevenue: MonthlyRevenuePoint[];
+  topClientsByOutstanding: TopClientOutstanding[];
+  avgDaysToPayLast90Days: number | null;
+}
+
+/**
+ * Filter shape consumed by every list / summary / export call. All optional;
+ * pass only the keys the user has actively set so the URL stays clean.
+ */
+export interface InvoiceFilters {
+  search?: string;
+  statuses?: string[];      // multi
+  companyIds?: string[];    // multi
+  developerIds?: string[];  // multi
+  currencies?: string[];    // multi
+  issuedFrom?: string;      // YYYY-MM-DD
+  issuedTo?: string;
+  dueFrom?: string;
+  dueTo?: string;
+  periodFrom?: string;      // YYYY-MM
+  periodTo?: string;
+  minTotal?: number;
+  maxTotal?: number;
+  overdueOnly?: boolean;
+  sortBy?:
+    | "issuedAt"
+    | "dueDate"
+    | "total"
+    | "status"
+    | "companyName"
+    | "invoiceNumber";
+  sortOrder?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+}
+
+export interface InvoiceListResponse {
+  invoices: Invoice[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+/** Build a URL search string from an InvoiceFilters object, omitting empty values. */
+export function buildInvoiceFiltersQuery(filters: InvoiceFilters): string {
+  const sp = new URLSearchParams();
+  if (filters.search) sp.set("search", filters.search);
+  if (filters.statuses?.length) sp.set("status", filters.statuses.join(","));
+  if (filters.companyIds?.length)
+    sp.set("companyIds", filters.companyIds.join(","));
+  if (filters.developerIds?.length)
+    sp.set("developerIds", filters.developerIds.join(","));
+  if (filters.currencies?.length)
+    sp.set("currencies", filters.currencies.join(","));
+  if (filters.issuedFrom) sp.set("issuedFrom", filters.issuedFrom);
+  if (filters.issuedTo) sp.set("issuedTo", filters.issuedTo);
+  if (filters.dueFrom) sp.set("dueFrom", filters.dueFrom);
+  if (filters.dueTo) sp.set("dueTo", filters.dueTo);
+  if (filters.periodFrom) sp.set("periodFrom", filters.periodFrom);
+  if (filters.periodTo) sp.set("periodTo", filters.periodTo);
+  if (filters.minTotal !== undefined)
+    sp.set("minTotal", String(filters.minTotal));
+  if (filters.maxTotal !== undefined)
+    sp.set("maxTotal", String(filters.maxTotal));
+  if (filters.overdueOnly) sp.set("overdueOnly", "true");
+  if (filters.sortBy) sp.set("sortBy", filters.sortBy);
+  if (filters.sortOrder) sp.set("sortOrder", filters.sortOrder);
+  if (filters.page) sp.set("page", String(filters.page));
+  if (filters.limit) sp.set("limit", String(filters.limit));
+  return sp.toString();
 }
 
 // ── API Functions ────────────────────────────────────────────────────────────
 
 export async function fetchInvoices(
   token: string | null,
-): Promise<Invoice[] | null> {
+  filters: InvoiceFilters = {},
+): Promise<InvoiceListResponse | null> {
   if (!token) return null;
 
   try {
-    const response = await fetchWithRetry(`${apiBaseUrl}/api/admin/invoices`, {
+    const qs = buildInvoiceFiltersQuery(filters);
+    const url = `${apiBaseUrl}/api/admin/invoices${qs ? `?${qs}` : ""}`;
+    const response = await fetchWithRetry(url, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
 
     if (!response.ok) throw new Error("API error");
-    return (await response.json()) as Invoice[];
+    return (await response.json()) as InvoiceListResponse;
   } catch {
     return null;
   }
@@ -97,8 +204,10 @@ export async function fetchInvoicesByCompany(
   if (!token) return null;
 
   try {
+    // The list endpoint now returns { invoices, pagination } — pull a big page
+    // so the company-detail panel sees them all (small per-company N).
     const response = await fetchWithRetry(
-      `${apiBaseUrl}/api/admin/invoices?companyId=${companyId}`,
+      `${apiBaseUrl}/api/admin/invoices?companyIds=${companyId}&limit=100`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
@@ -107,7 +216,8 @@ export async function fetchInvoicesByCompany(
     );
 
     if (!response.ok) throw new Error("API error");
-    return (await response.json()) as Invoice[];
+    const data = (await response.json()) as InvoiceListResponse;
+    return data.invoices;
   } catch {
     return null;
   }
@@ -115,18 +225,18 @@ export async function fetchInvoicesByCompany(
 
 export async function fetchInvoiceSummary(
   token: string | null,
+  filters: InvoiceFilters = {},
 ): Promise<InvoiceSummary | null> {
   if (!token) return null;
 
   try {
-    const response = await fetchWithRetry(
-      `${apiBaseUrl}/api/admin/invoices/summary`,
-      {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
-      },
-    );
+    const qs = buildInvoiceFiltersQuery(filters);
+    const url = `${apiBaseUrl}/api/admin/invoices/summary${qs ? `?${qs}` : ""}`;
+    const response = await fetchWithRetry(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
 
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as InvoiceSummary;
@@ -143,7 +253,7 @@ export async function fetchCompanyInvoiceSummary(
 
   try {
     const response = await fetchWithRetry(
-      `${apiBaseUrl}/api/admin/invoices/summary?companyId=${companyId}`,
+      `${apiBaseUrl}/api/admin/invoices/summary?companyIds=${companyId}`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
@@ -156,6 +266,111 @@ export async function fetchCompanyInvoiceSummary(
   } catch {
     return null;
   }
+}
+
+// ── Bulk actions + CSV export ──────────────────────────────────────────────
+
+export async function bulkMarkInvoicesPaid(
+  token: string | null,
+  ids: string[],
+): Promise<{ updated: number; skipped: number } | { error: string }> {
+  if (!token) return { error: "No token" };
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/invoices/bulk/mark-paid`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids }),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      return { error: body.message ?? "Bulk mark-paid failed" };
+    }
+    return (await response.json()) as { updated: number; skipped: number };
+  } catch {
+    return { error: "Network error" };
+  }
+}
+
+export async function bulkSendInvoices(
+  token: string | null,
+  ids: string[],
+): Promise<
+  | { sent: number; skipped: number; errors: { id: string; message: string }[] }
+  | { error: string }
+> {
+  if (!token) return { error: "No token" };
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/invoices/bulk/send`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids }),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      return { error: body.message ?? "Bulk send failed" };
+    }
+    return (await response.json()) as {
+      sent: number;
+      skipped: number;
+      errors: { id: string; message: string }[];
+    };
+  } catch {
+    return { error: "Network error" };
+  }
+}
+
+export async function bulkDeleteInvoices(
+  token: string | null,
+  ids: string[],
+): Promise<{ deleted: number } | { error: string }> {
+  if (!token) return { error: "No token" };
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/invoices/bulk`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids }),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      return { error: body.message ?? "Bulk delete failed" };
+    }
+    return (await response.json()) as { deleted: number };
+  } catch {
+    return { error: "Network error" };
+  }
+}
+
+/** Builds the CSV-export URL for the Export button (browser navigates to it). */
+export function buildInvoicesCsvUrl(filters: InvoiceFilters): string {
+  const qs = buildInvoiceFiltersQuery(filters);
+  return `${apiBaseUrl}/api/admin/invoices/export${qs ? `?${qs}` : ""}`;
 }
 
 export interface AdminCreateInvoicePayload {
