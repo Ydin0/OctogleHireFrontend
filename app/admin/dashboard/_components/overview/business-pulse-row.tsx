@@ -27,10 +27,11 @@ export function BusinessPulseRow({ overview }: BusinessPulseRowProps) {
 
   const hint = `vs prior ${overview.range.days}d`;
 
-  // Net change in live developer count across the window. Pulled out so the
-  // hint reads naturally: "+3 since 30d ago" / "no change".
-  const liveDelta =
-    d.liveDevelopers.current - d.liveDevelopers.previous;
+  // Guard against a stale backend response during cross-repo deploy windows
+  // (Vercel and Railway don't release in lockstep). If liveDevelopers is
+  // missing we still render the card with a hyphen, never crash the page.
+  const live = d.liveDevelopers ?? { current: 0, previous: 0, pctChange: null };
+  const liveDelta = live.current - live.previous;
   const liveHint =
     liveDelta === 0
       ? "no change in window"
@@ -58,9 +59,9 @@ export function BusinessPulseRow({ overview }: BusinessPulseRowProps) {
         icon={<Globe className="size-5 text-cyan-600" />}
         tint="bg-cyan-500/10"
         label="Live Developers"
-        value={String(d.liveDevelopers.current)}
-        pctChange={d.liveDevelopers.pctChange}
-        hint={liveHint}
+        value={d.liveDevelopers ? String(live.current) : "—"}
+        pctChange={live.pctChange}
+        hint={d.liveDevelopers ? liveHint : "—"}
       />
       <KpiCard
         icon={<ClipboardList className="size-5 text-amber-600" />}
