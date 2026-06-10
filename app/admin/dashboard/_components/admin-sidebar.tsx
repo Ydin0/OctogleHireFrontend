@@ -54,7 +54,7 @@ const navGroups = [
       { href: "/admin/dashboard/sales-reps", label: "Sales Reps", icon: BadgeDollarSign },
       { href: "/admin/dashboard/companies", label: "Companies", icon: Building2 },
       { href: "/admin/dashboard/requirements", label: "Requirements", icon: Store, badgeKey: "requirements" as const },
-      { href: "/admin/dashboard/interviews", label: "Interviews", icon: Video },
+      { href: "/admin/dashboard/interviews", label: "Interviews", icon: Video, badgeKey: "interviews" as const },
       { href: "/admin/dashboard/approvals", label: "Approvals", icon: ClipboardCheck, badgeKey: "approvals" as const },
     ],
   },
@@ -108,6 +108,7 @@ interface AdminSidebarProps {
   isSuperAdmin: boolean;
   openRequirementCount: number;
   pendingApprovalCount: number;
+  pendingInterviewCount: number;
 }
 
 const currencies = ["USD", "GBP", "AED"] as const;
@@ -137,7 +138,7 @@ function CurrencyToggle() {
   );
 }
 
-function SidebarContent({ user, isSuperAdmin, openRequirementCount, pendingApprovalCount }: AdminSidebarProps) {
+function SidebarContent({ user, isSuperAdmin, openRequirementCount, pendingApprovalCount, pendingInterviewCount }: AdminSidebarProps) {
   const pathname = usePathname();
   const { signOut } = useClerk();
 
@@ -177,7 +178,9 @@ function SidebarContent({ user, isSuperAdmin, openRequirementCount, pendingAppro
                     ? openRequirementCount
                     : "badgeKey" in item && item.badgeKey === "approvals"
                       ? pendingApprovalCount
-                      : 0;
+                      : "badgeKey" in item && item.badgeKey === "interviews"
+                        ? pendingInterviewCount
+                        : 0;
 
                 return (
                   <Link
@@ -240,10 +243,10 @@ function SidebarContent({ user, isSuperAdmin, openRequirementCount, pendingAppro
   );
 }
 
-function AdminSidebar({ user, isSuperAdmin, openRequirementCount, pendingApprovalCount }: AdminSidebarProps) {
+function AdminSidebar({ user, isSuperAdmin, openRequirementCount, pendingApprovalCount, pendingInterviewCount }: AdminSidebarProps) {
   return (
     <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-border/70 lg:bg-background">
-      <SidebarContent user={user} isSuperAdmin={isSuperAdmin} openRequirementCount={openRequirementCount} pendingApprovalCount={pendingApprovalCount} />
+      <SidebarContent user={user} isSuperAdmin={isSuperAdmin} openRequirementCount={openRequirementCount} pendingApprovalCount={pendingApprovalCount} pendingInterviewCount={pendingInterviewCount} />
     </aside>
   );
 }

@@ -27,6 +27,7 @@ import {
 import { TECH_ICONS } from "@/lib/tech-icons";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useInterviewRequest } from "./interview-request-context";
 
 // ── Text + layout primitives ────────────────────────────────────────────────
 
@@ -446,6 +447,9 @@ export function ConsoleDetailPane({
   const skills = d.skillLevels?.length
     ? d.skillLevels
     : d.skills.map((name) => ({ name, level: 85 }));
+  const hasRate = d.hourlyRate > 0;
+  const interview = useInterviewRequest();
+  const alreadyRequested = interview.isRequested(d.id);
 
   return (
     <div ref={scrollRef} className="h-full min-h-0 overflow-y-auto bg-background">
@@ -503,35 +507,50 @@ export function ConsoleDetailPane({
           </div>
 
           {/* rate + CTAs */}
-          <div className="w-[220px] shrink-0 rounded-2xl border border-pulse/30 bg-card/70 p-4">
+          <div className="w-[252px] shrink-0 rounded-2xl border border-pulse/30 bg-card/70 p-5">
             <Mono className="text-[9px] text-pulse">Engagement rate</Mono>
-            <div className="mt-1.5 flex items-baseline gap-1.5">
-              <span className="font-mono text-3xl font-bold leading-none">
-                ${d.hourlyRate}
-              </span>
-              <span className="text-[13px] text-muted-foreground">/hr</span>
-            </div>
-            <div className="mt-1 text-xs text-muted-foreground">
-              ≈ ${d.monthlyRate.toLocaleString()}/mo · full-time
-            </div>
-            <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[9.5px] font-mono uppercase tracking-wider text-emerald-500">
-              <TrendingUp className="size-3" /> {savePct}% under local
-            </div>
-            <div className="mt-3.5 flex flex-col gap-2">
-              <Button className="w-full rounded-full">
-                <ArrowRight className="size-3.5" /> Request interview
+            {hasRate ? (
+              <>
+                <div className="mt-1.5 flex items-baseline gap-1.5">
+                  <span className="font-mono text-3xl font-bold leading-none">
+                    ${d.hourlyRate}
+                  </span>
+                  <span className="text-[13px] text-muted-foreground">/hr</span>
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground">
+                  ≈ ${d.monthlyRate.toLocaleString()}/mo · full-time
+                </div>
+                <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[9.5px] font-mono uppercase tracking-wider text-emerald-500">
+                  <TrendingUp className="size-3" /> {savePct}% under local
+                </div>
+              </>
+            ) : (
+              <div className="mt-1.5 text-lg font-semibold text-muted-foreground">
+                Rate on request
+              </div>
+            )}
+            <div className="mt-4 flex flex-col gap-2.5">
+              <Button
+                className="h-10 w-full rounded-full"
+                disabled={alreadyRequested}
+                onClick={() =>
+                  interview.open({ id: d.id, name: d.name })
+                }
+              >
+                <ArrowRight className="size-3.5" />
+                {alreadyRequested ? "Interview requested" : "Request interview"}
               </Button>
-              <div className="flex gap-2">
+              <div className="flex gap-2.5">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1 rounded-full"
+                  className="h-9 flex-1 rounded-full"
                   onClick={() => onSave(d.id)}
                 >
                   <Bookmark className={cn("size-3.5", saved && "fill-current")} />{" "}
                   {saved ? "Saved" : "Save"}
                 </Button>
-                <Button variant="outline" size="sm" className="flex-1 rounded-full">
+                <Button variant="outline" size="sm" className="h-9 flex-1 rounded-full">
                   <MessageSquare className="size-3.5" /> Chat
                 </Button>
               </div>

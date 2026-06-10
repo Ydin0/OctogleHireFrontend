@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { CompanyRail } from "./_components/company-rail";
 import { ChatWidget } from "./_components/chat-widget";
 import { ShortlistProvider } from "./_components/shortlist-context";
+import { InterviewRequestProvider } from "./_components/interview-request-context";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 import { fetchCompanyProfile, fetchCompanyRequirements, fetchCompanyAgreements, fetchCompanyShortlist } from "@/lib/api/companies";
@@ -62,19 +63,26 @@ export default async function CompanyDashboardLayout({
 
   const initialShortlistIds = (shortlist ?? []).map((d) => d.id);
 
+  // Open roles offered in the "request interview" dialog's role picker.
+  const openRoles = (requirements ?? [])
+    .filter((r) => r.status === "open" || r.status === "matching" || r.status === "partially_filled")
+    .map((r) => ({ id: r.id, title: r.title }));
+
   return (
     <ShortlistProvider initialIds={initialShortlistIds}>
-      <div className="marketplace-route flex h-screen overflow-hidden bg-background text-foreground">
-        <CompanyRail counts={sidebarCounts} companyInitials={companyInitials} />
-        <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          {children}
-        </main>
-        <ChatWidget
-          accountManagerId={companyProfile?.accountManagerId ?? undefined}
-          accountManagerName={companyProfile?.accountManager?.name}
-          accountManagerAvatar={companyProfile?.accountManager?.profilePhotoUrl}
-        />
-      </div>
+      <InterviewRequestProvider roles={openRoles}>
+        <div className="marketplace-route flex h-screen overflow-hidden bg-background text-foreground">
+          <CompanyRail counts={sidebarCounts} companyInitials={companyInitials} />
+          <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+            {children}
+          </main>
+          <ChatWidget
+            accountManagerId={companyProfile?.accountManagerId ?? undefined}
+            accountManagerName={companyProfile?.accountManager?.name}
+            accountManagerAvatar={companyProfile?.accountManager?.profilePhotoUrl}
+          />
+        </div>
+      </InterviewRequestProvider>
     </ShortlistProvider>
   );
 }

@@ -2306,3 +2306,42 @@ export async function removeFromShortlist(
     return false;
   }
 }
+
+// ── Marketplace interview request ────────────────────────────────────────────
+
+export interface MarketplaceInterviewRequest {
+  developerId: string;
+  requirementId?: string | null;
+  type?: "video" | "phone" | "in_person";
+  note?: string;
+  availabilityNote?: string;
+  companyTimezone?: string;
+}
+
+/**
+ * Request an interview with a developer straight from the Talent Console.
+ * Creates an account-manager-mediated request (no proposed match needed).
+ */
+export async function requestMarketplaceInterview(
+  token: string | null,
+  payload: MarketplaceInterviewRequest,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const res = await fetchWithRetry(
+      `${apiBaseUrl}/api/companies/interviews/request`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}

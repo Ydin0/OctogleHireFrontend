@@ -10,6 +10,7 @@ import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 import {
   fetchOpenRequirementCount,
   fetchPendingApprovalCount,
+  fetchInterviews,
 } from "@/lib/api/admin";
 
 export const metadata: Metadata = {
@@ -39,10 +40,12 @@ export default async function AdminDashboardLayout({
     }
   }
 
-  const [openRequirementCount, pendingApprovalCount] = await Promise.all([
+  const [openRequirementCount, pendingApprovalCount, pendingInterviews] = await Promise.all([
     fetchOpenRequirementCount(token),
     fetchPendingApprovalCount(token),
+    fetchInterviews(token, { status: "requested", source: "company_request" }),
   ]);
+  const pendingInterviewCount = pendingInterviews.length;
 
   const clerkUser = await currentUser();
   const user = {
@@ -62,12 +65,14 @@ export default async function AdminDashboardLayout({
           isSuperAdmin={isSuperAdmin}
           openRequirementCount={openRequirementCount}
           pendingApprovalCount={pendingApprovalCount}
+          pendingInterviewCount={pendingInterviewCount}
         />
         <AdminHeader
           user={user}
           isSuperAdmin={isSuperAdmin}
           openRequirementCount={openRequirementCount}
           pendingApprovalCount={pendingApprovalCount}
+          pendingInterviewCount={pendingInterviewCount}
         />
         <main className="lg:ml-64">
           <div className="space-y-6 px-6 py-6 lg:py-8">
