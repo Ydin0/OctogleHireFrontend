@@ -227,9 +227,6 @@ const Hero = ({ className }: HeroProps) => {
               <ArrowRight className="ml-2 size-4 -rotate-45 transition-transform group-hover:rotate-0" />
             </a>
           </Button>
-          <Button asChild variant="outline" size="lg" className="rounded-full px-6">
-            <a href="/how-we-vet#ai-playbook">See AI Playbook</a>
-          </Button>
         </div>
 
         {/* Trust badges — ISO / GDPR / CCPA */}
