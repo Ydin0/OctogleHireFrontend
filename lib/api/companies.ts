@@ -281,6 +281,7 @@ export interface CompanyProfileSummary {
   logoUrl?: string | null;
   status: CompanyStatus;
   invoiceCurrency: string;
+  marketplaceEnabled?: boolean;
   accountManagerId?: string | null;
   accountManager?: AccountManager | null;
   createdAt: string;
@@ -298,6 +299,7 @@ export interface CompanyProfile {
   logoUrl?: string | null;
   status: CompanyStatus;
   invoiceCurrency: string;
+  marketplaceEnabled?: boolean;
   accountManagerId?: string | null;
   accountManager?: AccountManager | null;
   requirements: JobRequirement[];
@@ -1262,6 +1264,38 @@ export async function updateCompanyCurrency(
 
     if (!response.ok) throw new Error("API error");
     return (await response.json()) as { id: string; companyName: string; invoiceCurrency: string };
+  } catch {
+    return null;
+  }
+}
+
+export async function updateCompanyMarketplaceAccess(
+  token: string | null,
+  companyId: string,
+  marketplaceEnabled: boolean,
+): Promise<{ id: string; companyName: string; marketplaceEnabled: boolean } | null> {
+  if (!token) return null;
+
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/marketplace`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ marketplaceEnabled }),
+        cache: "no-store",
+      },
+    );
+
+    if (!response.ok) throw new Error("API error");
+    return (await response.json()) as {
+      id: string;
+      companyName: string;
+      marketplaceEnabled: boolean;
+    };
   } catch {
     return null;
   }

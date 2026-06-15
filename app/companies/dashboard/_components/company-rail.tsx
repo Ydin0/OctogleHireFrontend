@@ -97,12 +97,24 @@ interface CompanyRailProps {
     agreements: number;
   };
   companyInitials: string;
+  marketplaceEnabled: boolean;
 }
 
-export function CompanyRail({ counts, companyInitials }: CompanyRailProps) {
+// Items hidden when a company's marketplace view is disabled.
+const MARKETPLACE_HREFS = new Set([BASE, `${BASE}/saved`]);
+
+export function CompanyRail({
+  counts,
+  companyInitials,
+  marketplaceEnabled,
+}: CompanyRailProps) {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const { count: savedCount } = useShortlist();
+
+  const primary = marketplaceEnabled
+    ? PRIMARY
+    : PRIMARY.filter((item) => !MARKETPLACE_HREFS.has(item.href));
 
   const badgeFor = (item: RailItem) => {
     switch (item.badgeKey) {
@@ -132,7 +144,7 @@ export function CompanyRail({ counts, companyInitials }: CompanyRailProps) {
       </Link>
 
       <div className="flex w-full flex-1 flex-col items-center gap-1 overflow-y-auto">
-        {PRIMARY.map((item) => (
+        {primary.map((item) => (
           <RailButton
             key={item.href}
             item={item}

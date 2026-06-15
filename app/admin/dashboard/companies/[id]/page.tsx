@@ -32,6 +32,7 @@ import {
   fetchCompany,
   updateCompanyStatus,
   updateCompanyCurrency,
+  updateCompanyMarketplaceAccess,
   fetchAdminCompanyAgreements,
   sendCompanyMsa,
 } from "@/lib/api/companies";
@@ -77,6 +78,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 
 const allCompanyStatuses: CompanyStatus[] = [
   "enquired",
@@ -169,6 +171,21 @@ const CompanyDetailPage = ({
     const token = await getToken();
     await updateCompanyCurrency(token, company.id, newCurrency);
     toast.success("Invoice currency updated");
+  };
+
+  const handleMarketplaceToggle = async (enabled: boolean) => {
+    if (!company) return;
+    setCompany({ ...company, marketplaceEnabled: enabled });
+    const token = await getToken();
+    const result = await updateCompanyMarketplaceAccess(token, company.id, enabled);
+    if (!result) {
+      setCompany({ ...company, marketplaceEnabled: !enabled });
+      toast.error("Failed to update marketplace access");
+      return;
+    }
+    toast.success(
+      enabled ? "Marketplace enabled for this company" : "Marketplace disabled for this company",
+    );
   };
 
   const handleSendMsa = async () => {
@@ -456,6 +473,20 @@ const CompanyDetailPage = ({
             </div>
 
             <div className="flex items-end gap-4">
+              <div className="flex flex-col items-end gap-1.5">
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Marketplace
+                </p>
+                <div className="flex h-9 items-center gap-2 rounded-md border border-border px-3">
+                  <Switch
+                    checked={company.marketplaceEnabled !== false}
+                    onCheckedChange={handleMarketplaceToggle}
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {company.marketplaceEnabled !== false ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+              </div>
               <div className="flex flex-col items-end gap-1.5">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   Invoice Currency
