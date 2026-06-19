@@ -70,6 +70,7 @@ function RoleListItem({
   onClick: () => void;
 }) {
   const count = visibleMatches(req).length;
+  const hasReady = count > 0;
   return (
     <button
       onClick={onClick}
@@ -77,16 +78,24 @@ function RoleListItem({
         "mb-2.5 block w-full rounded-2xl border p-3.5 text-left transition-colors",
         active
           ? "border-pulse/45 bg-pulse/10"
-          : "border-border bg-card/50 hover:border-pulse/30",
+          : hasReady
+            ? "border-emerald-500/40 bg-emerald-500/[0.06] ring-1 ring-emerald-500/20 hover:border-emerald-500/60"
+            : "border-border bg-card/50 hover:border-pulse/30",
       )}
     >
       <div className="flex items-start justify-between gap-2.5">
         <span
           className={cn(
-            "text-sm font-semibold",
+            "flex items-center gap-2 text-sm font-semibold",
             active ? "text-pulse" : "text-foreground",
           )}
         >
+          {hasReady && (
+            <span className="relative flex size-2 shrink-0">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-500/70" />
+              <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+            </span>
+          )}
           {req.title}
         </span>
         <StatusPill status={req.status} />
@@ -101,11 +110,18 @@ function RoleListItem({
           </span>
         ))}
       </div>
-      <div className="flex items-center justify-between text-[11.5px] text-muted-foreground">
-        <span className="inline-flex items-center gap-1.5">
-          <Users className="size-3" /> {count} candidate{count === 1 ? "" : "s"}
-        </span>
-        <Mono className="text-[9.5px]">{timeAgo(req.createdAt)}</Mono>
+      <div className="flex items-center justify-between text-[11.5px]">
+        {hasReady ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <Check className="size-3" strokeWidth={3} />
+            {count} ready to review
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+            <Users className="size-3" /> No candidates yet
+          </span>
+        )}
+        <Mono className="text-[9.5px] text-muted-foreground">{timeAgo(req.createdAt)}</Mono>
       </div>
     </button>
   );
