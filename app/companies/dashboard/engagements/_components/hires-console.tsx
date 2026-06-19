@@ -14,6 +14,7 @@ import {
 
 import type { CompanyEngagement } from "@/lib/api/companies";
 import { cn } from "@/lib/utils";
+import { formatRate } from "@/lib/utils/format-rate";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -29,8 +30,6 @@ import {
   SummaryStat,
 } from "../../_components/console-ui";
 import { EngagementDetails } from "./engagement-details";
-
-const money = (n: number) => "$" + Math.round(n).toLocaleString();
 
 interface HiresConsoleProps {
   engagements: CompanyEngagement[];
@@ -101,8 +100,8 @@ function HireCard({
           <div className="mt-3.5 flex flex-wrap gap-6">
             {[
               ["Started", e.startDate ? new Date(e.startDate).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "—"],
-              ["Rate", `${money(e.companyBillingRate)}/hr`],
-              ["Run-rate", `${money(monthly)}/mo`],
+              ["Rate", `${formatRate(e.companyBillingRate, e.currency)}/hr`],
+              ["Run-rate", `${formatRate(monthly, e.currency)}/mo`],
               ["Type", e.engagementType],
             ].map(([k, v]) => (
               <div key={k}>
@@ -167,6 +166,10 @@ export function HiresConsole({
     (s, e) => s + e.companyBillingRate * (e.monthlyHoursExpected ?? 160),
     0,
   );
+  // Run-rate is shown in the currency of the active engagements (they share the
+  // company's billing currency); fall back to the first engagement, then USD.
+  const runRateCurrency =
+    active[0]?.currency ?? engagements[0]?.currency ?? "USD";
   const countries = new Set(
     engagements.map((e) => e.requirementTitle).filter(Boolean),
   ).size;
@@ -183,7 +186,7 @@ export function HiresConsole({
         <>
           <div className="mb-6 flex flex-wrap gap-3.5">
             <SummaryStat icon={<Users className="size-4" />} value={active.length} label="Active engagements" />
-            <SummaryStat icon={<Coins className="size-4" />} value={`${money(runRate)}/mo`} label="Monthly run-rate" accent />
+            <SummaryStat icon={<Coins className="size-4" />} value={`${formatRate(runRate, runRateCurrency)}/mo`} label="Monthly run-rate" accent />
             <SummaryStat icon={<Globe className="size-4" />} value={countries} label="Active roles" />
             <SummaryStat icon={<MessageSquare className="size-4" />} value={pending} label="Pending requests" />
           </div>

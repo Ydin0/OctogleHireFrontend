@@ -64,7 +64,7 @@ function DeveloperOnboardingChecklist({
     async function load() {
       try {
         const data = await fetchEngagementOnboarding(token, engagementId);
-        if (!cancelled) setItems(data);
+        if (!cancelled) setItems(Array.isArray(data) ? data : []);
       } catch {
         // silently fail
       } finally {

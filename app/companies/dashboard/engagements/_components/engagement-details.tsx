@@ -106,8 +106,11 @@ function EngagementDetails({ engagement, token, companyId, companyName, companyL
           fetchEngagementChangeRequests(token, engagement.id),
         ]);
         if (!cancelled) {
-          setTimeEntries(te);
-          setChangeRequests(cr);
+          // Defend against a non-array body (e.g. an error object from a 5xx
+          // that still parsed as JSON) so a malformed response can't crash the
+          // page when we later call .filter on these.
+          setTimeEntries(Array.isArray(te) ? te : []);
+          setChangeRequests(Array.isArray(cr) ? cr : []);
         }
       } catch {
         // Silently fail, show empty state
@@ -124,7 +127,9 @@ function EngagementDetails({ engagement, token, companyId, companyName, companyL
 
   const effectiveHours = engagement.monthlyHoursCap ?? engagement.monthlyHoursExpected;
   const pendingTypes = new Set(
-    (changeRequests ?? []).filter((cr) => cr.status === "pending").map((cr) => cr.type),
+    (Array.isArray(changeRequests) ? changeRequests : [])
+      .filter((cr) => cr.status === "pending")
+      .map((cr) => cr.type),
   );
 
   const startDate = engagement.startDate

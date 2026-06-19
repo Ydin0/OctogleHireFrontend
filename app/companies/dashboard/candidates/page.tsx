@@ -7,12 +7,9 @@ import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  Briefcase,
   Check,
-  Clock,
   Coins,
   Loader2,
-  MapPin,
   Users,
   UserSearch,
   X,
@@ -28,6 +25,7 @@ import {
 } from "@/lib/api/companies";
 import { formatDate } from "@/app/admin/dashboard/_components/dashboard-data";
 import { formatRate } from "@/lib/utils/format-rate";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   EmptyState,
@@ -70,7 +68,7 @@ function CandidateCard({
   const dev = c.match.developer;
   const canRespond = c.match.status === "accepted";
   const monthly = monthlyEstimate(c.match);
-  const breakdown =
+  const type =
     c.match.hoursPerDay && c.match.workingDaysPerMonth
       ? `${c.match.hoursPerDay}h × ${c.match.workingDaysPerMonth}d`
       : "full-time";
@@ -99,67 +97,59 @@ function CandidateCard({
 
         <div className="min-w-[240px] flex-1">
           <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div>
               <button
                 onClick={onOpen}
                 className="text-base font-semibold hover:underline"
               >
                 {dev?.name ?? "Unknown"}
               </button>
-              <div className="text-[12.5px] text-pulse">{dev?.role ?? ""}</div>
-              {dev?.location && (
-                <div className="mt-1 inline-flex items-center gap-1.5 text-[12px] text-muted-foreground">
-                  <MapPin className="size-3.5" /> {dev.location}
-                </div>
-              )}
+              <div className="text-[12.5px] text-pulse">
+                {dev?.role}
+                {" · "}
+                <Link
+                  href={`/companies/dashboard/requirements/${c.requirementId}`}
+                  className="hover:underline"
+                >
+                  {c.requirementTitle}
+                </Link>
+              </div>
             </div>
             <StatusPill status={c.match.status} />
           </div>
 
-          {/* role they're put forward for */}
-          <Link
-            href={`/companies/dashboard/requirements/${c.requirementId}`}
-            className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-3 py-1.5 text-[12.5px] transition-colors hover:border-pulse/40 hover:text-pulse"
-          >
-            <Briefcase className="size-3.5 text-pulse" />
-            <span className="text-muted-foreground">Put forward for</span>
-            <span className="font-medium">{c.requirementTitle}</span>
-            <ArrowRight className="size-3" />
-          </Link>
-
-          {/* rate + estimate strip */}
           <div className="mt-3.5 flex flex-wrap gap-6">
-            <div>
-              <Mono className="mb-1 block text-[9px] text-muted-foreground">Rate</Mono>
-              <span className="font-mono text-[13px] font-medium">
-                {formatRate(c.match.proposedHourlyRate, c.match.currency)}/hr
-              </span>
-            </div>
-            <div>
-              <Mono className="mb-1 block text-[9px] text-muted-foreground">Monthly est.</Mono>
-              <span className="font-mono text-[13px] font-medium">
-                {formatRate(monthly, c.match.currency)}/mo
-              </span>
-              <span className="ml-1.5 text-[11px] text-muted-foreground">{breakdown}</span>
-            </div>
-            <div>
-              <Mono className="mb-1 block text-[9px] text-muted-foreground">Proposed</Mono>
-              <span className="inline-flex items-center gap-1.5 text-[13px] font-medium">
-                <Clock className="size-3.5 text-muted-foreground" />
-                {formatDate(c.match.proposedAt)}
-              </span>
-            </div>
+            {[
+              ["Proposed", formatDate(c.match.proposedAt)],
+              ["Rate", `${formatRate(c.match.proposedHourlyRate, c.match.currency)}/hr`],
+              ["Monthly est.", `${formatRate(monthly, c.match.currency)}/mo`],
+              ["Type", type],
+            ].map(([k, v]) => (
+              <div key={k}>
+                <Mono className="mb-1 block text-[9px] text-muted-foreground">{k}</Mono>
+                <span
+                  className={cn(
+                    "text-[13px] font-medium",
+                    (k === "Rate" || k === "Monthly est.") && "font-mono",
+                  )}
+                >
+                  {v}
+                </span>
+              </div>
+            ))}
           </div>
 
-          {/* actions */}
-          <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Button size="sm" variant="outline" className="rounded-full" onClick={onOpen}>
-              View profile
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button asChild size="sm" className="rounded-full">
+              <Link href={`/companies/dashboard/developers/${c.match.developerId}`}>
+                View profile
+              </Link>
             </Button>
             {canRespond && (
               <>
                 <Button
                   size="sm"
+                  variant="outline"
                   className="rounded-full"
                   disabled={busy}
                   onClick={() => onRespond("accepted")}
