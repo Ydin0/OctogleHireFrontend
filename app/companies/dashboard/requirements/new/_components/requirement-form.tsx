@@ -7,6 +7,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   FileText,
   Linkedin,
   Loader2,
@@ -40,13 +43,7 @@ import { TechStackSelector } from "@/app/apply/_components/tech-stack-selector";
 import { CountrySelector } from "@/components/country-selector";
 import { MarkdownEditor } from "@/components/markdown-editor";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -57,8 +54,97 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const ALLOWED_TECH_SET = new Set(MARKETPLACE_TECH_STACK_OPTIONS);
+
+// ── Console form primitives ───────────────────────────────────────────────
+const INPUT_CLS = "h-12 rounded-xl text-[15px]";
+
+function Field({
+  label,
+  hint,
+  error,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-2.5">
+      <Label className="text-sm font-semibold">
+        {label}
+        {hint && <span className="ml-1.5 font-normal text-muted-foreground">{hint}</span>}
+      </Label>
+      {children}
+      {error && <p className="text-xs text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+function Stepper({
+  value,
+  onInc,
+  onDec,
+}: {
+  value: number | string;
+  onInc: () => void;
+  onDec: () => void;
+}) {
+  return (
+    <div className="flex h-12 items-center rounded-xl border border-border bg-background/55 pl-4 pr-2">
+      <span className="flex-1 font-mono text-base font-medium">{value}</span>
+      <div className="flex flex-col gap-0.5">
+        <button
+          type="button"
+          onClick={onInc}
+          className="flex h-[18px] w-[30px] items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-pulse hover:text-pulse"
+        >
+          <ChevronUp className="size-3" strokeWidth={3} />
+        </button>
+        <button
+          type="button"
+          onClick={onDec}
+          className="flex h-[18px] w-[30px] items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-pulse hover:text-pulse"
+        >
+          <ChevronDown className="size-3" strokeWidth={3} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (v: T) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1 rounded-2xl border border-border bg-secondary p-1">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onChange(o.value)}
+          className={cn(
+            "flex-1 whitespace-nowrap rounded-[9px] px-3 py-2 text-[13px] font-medium transition-colors",
+            value === o.value
+              ? "bg-card text-pulse shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function prefillForm(
   parsed: ParsedJobData,
@@ -267,90 +353,100 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
 
   return (
     <>
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="size-8" asChild>
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-[42px] rounded-full"
+          asChild
+        >
           <Link href={isEdit && requirementId ? `/companies/dashboard/requirements/${requirementId}` : "/companies/dashboard/requirements"}>
-            <ArrowLeft className="size-4" />
+            <ArrowLeft className="size-[18px]" />
           </Link>
         </Button>
         <div>
-          <h1 className="text-lg font-semibold">{isEdit ? "Edit Requirement" : "Post New Requirement"}</h1>
-          <p className="text-sm text-muted-foreground">
-            {isEdit ? "Update the details for this requirement." : "Describe the role and we\u2019ll match you with engineers."}
+          <h1 className="text-[28px] font-semibold leading-tight tracking-tight">
+            {isEdit ? "Edit requirement" : "Post a new requirement"}
+          </h1>
+          <p className="mt-1 text-[15px] text-muted-foreground">
+            {isEdit
+              ? "Update the details for this requirement."
+              : "Describe the role and we\u2019ll match you with engineers in 48 hours."}
           </p>
         </div>
       </div>
 
       {/* ── Import Methods ─────────────────────────────────────────────── */}
       {!isEdit && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div>
-            <h2 className="flex items-center gap-2 text-base font-semibold">
-              <Sparkles className="size-4" />
-              Quick Import
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Save time by importing an existing job description. AI will parse and pre-fill the form for you.
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="size-[18px] text-pulse" />
+              <h2 className="text-[17px] font-semibold tracking-tight">Quick import</h2>
+              <span className="rounded-full border border-pulse/30 bg-pulse/12 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.08em] text-pulse">
+                AI
+              </span>
+            </div>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              Save time by importing an existing job description — AI parses and pre-fills the form for you.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2">
             {/* LinkedIn Option */}
             <button
               type="button"
               onClick={() => setImportMode(importMode === "linkedin" ? null : "linkedin")}
-              className={`group relative flex flex-col items-start gap-3 rounded-xl border-2 p-5 text-left transition-all ${
-                importMode === "linkedin"
-                  ? "border-[#0A66C2] bg-[#0A66C2]/[0.03]"
-                  : "border-border hover:border-[#0A66C2]/40 hover:bg-muted/30"
-              }`}
+              className={cn(
+                "group relative flex flex-col items-start gap-3.5 rounded-2xl border bg-gradient-to-b from-card to-pulse/[0.04] p-[22px] text-left transition-all hover:-translate-y-0.5 hover:border-pulse/45",
+                importMode === "linkedin" ? "border-pulse/45" : "border-border",
+              )}
             >
-              <div className={`flex size-11 items-center justify-center rounded-lg ${
-                importMode === "linkedin" ? "bg-[#0A66C2]/10" : "bg-muted"
-              }`}>
-                <Linkedin className={`size-5 ${importMode === "linkedin" ? "text-[#0A66C2]" : "text-muted-foreground"}`} />
-              </div>
+              <span className="flex size-[52px] items-center justify-center rounded-[14px] bg-secondary">
+                <Linkedin className="size-6 text-[#0A66C2]" />
+              </span>
               <div>
-                <p className="text-sm font-semibold">Import from LinkedIn</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Paste your company LinkedIn URL and select from your active job listings. AI extracts all the details instantly.
+                <p className="text-base font-semibold">Import from LinkedIn</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                  Paste your company LinkedIn URL and pick from your active job listings. AI extracts every detail instantly.
                 </p>
               </div>
-              <ArrowRight className={`absolute right-4 top-5 size-4 transition-transform ${
-                importMode === "linkedin" ? "rotate-90 text-[#0A66C2]" : "text-muted-foreground/50 group-hover:translate-x-0.5"
-              }`} />
+              <ArrowRight
+                className={cn(
+                  "absolute right-5 top-5 size-[18px] transition-transform",
+                  importMode === "linkedin"
+                    ? "rotate-90 text-pulse"
+                    : "text-muted-foreground/50 group-hover:translate-x-0.5",
+                )}
+              />
             </button>
 
             {/* PDF / Document Option */}
             <button
               type="button"
-              onClick={() => {
-                if (importMode === "document") {
-                  setImportMode(null);
-                } else {
-                  setImportMode("document");
-                }
-              }}
-              className={`group relative flex flex-col items-start gap-3 rounded-xl border-2 p-5 text-left transition-all ${
-                importMode === "document"
-                  ? "border-foreground/20 bg-foreground/[0.02]"
-                  : "border-border hover:border-foreground/20 hover:bg-muted/30"
-              }`}
+              onClick={() => setImportMode(importMode === "document" ? null : "document")}
+              className={cn(
+                "group relative flex flex-col items-start gap-3.5 rounded-2xl border bg-gradient-to-b from-card to-pulse/[0.04] p-[22px] text-left transition-all hover:-translate-y-0.5 hover:border-pulse/45",
+                importMode === "document" ? "border-pulse/45" : "border-border",
+              )}
             >
-              <div className={`flex size-11 items-center justify-center rounded-lg ${
-                importMode === "document" ? "bg-foreground/5" : "bg-muted"
-              }`}>
-                <FileText className={`size-5 ${importMode === "document" ? "text-foreground" : "text-muted-foreground"}`} />
-              </div>
+              <span className="flex size-[52px] items-center justify-center rounded-[14px] bg-secondary">
+                <FileText className="size-[23px] text-foreground" />
+              </span>
               <div>
-                <p className="text-sm font-semibold">Upload a Job Description</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Upload a PDF, DOCX, or TXT file and let AI parse the role, tech stack, experience level, and more in seconds.
+                <p className="text-base font-semibold">Upload a job description</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                  Drop a PDF, DOCX, or TXT and let AI parse the role, tech stack, and experience level in seconds.
                 </p>
               </div>
-              <ArrowRight className={`absolute right-4 top-5 size-4 transition-transform ${
-                importMode === "document" ? "rotate-90 text-foreground" : "text-muted-foreground/50 group-hover:translate-x-0.5"
-              }`} />
+              <ArrowRight
+                className={cn(
+                  "absolute right-5 top-5 size-[18px] transition-transform",
+                  importMode === "document"
+                    ? "rotate-90 text-pulse"
+                    : "text-muted-foreground/50 group-hover:translate-x-0.5",
+                )}
+              />
             </button>
           </div>
 
@@ -465,31 +561,38 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
         </div>
       )}
 
+      {/* ── "Or fill it in manually" divider ───────────────────────────── */}
+      {!isEdit && (
+        <div className="flex items-center gap-4">
+          <span className="h-px flex-1 bg-border" />
+          <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+            Or fill it in manually
+          </span>
+          <span className="h-px flex-1 bg-border" />
+        </div>
+      )}
+
       {/* ── Manual Form ────────────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Requirement Details</CardTitle>
-          <CardDescription>
-            Fill out the details below. Our team will start matching engineers
-            once submitted.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">Role Title</Label>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="rounded-3xl border border-border bg-card">
+          <div className="border-b border-border px-7 py-6">
+            <h2 className="text-lg font-semibold tracking-tight">Requirement details</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              The more precise the brief, the faster we match. Our team starts sourcing once submitted.
+            </p>
+          </div>
+
+          <div className="space-y-7 px-7 py-7">
+            <Field label="Role title" error={errors.title?.message}>
               <Input
                 id="title"
                 placeholder="e.g. Senior React Engineer"
+                className={INPUT_CLS}
                 {...register("title")}
               />
-              {errors.title && (
-                <p className="text-xs text-red-600">{errors.title.message}</p>
-              )}
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label>Tech Stack</Label>
+            <Field label="Tech stack" error={errors.techStack?.message}>
               <TechStackSelector
                 value={techStack}
                 onChange={(val) =>
@@ -497,137 +600,107 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
                 }
                 max={20}
               />
-              {errors.techStack && (
-                <p className="text-xs text-red-600">
-                  {errors.techStack.message}
-                </p>
-              )}
-            </div>
+            </Field>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="experienceYearsMin">Min Years Experience</Label>
-                <Input
-                  id="experienceYearsMin"
-                  type="number"
-                  min={0}
-                  max={50}
-                  placeholder="e.g. 3"
-                  className="font-mono"
-                  {...register("experienceYearsMin", { valueAsNumber: true })}
-                />
-                {errors.experienceYearsMin && (
-                  <p className="text-xs text-red-600">
-                    {errors.experienceYearsMin.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="experienceYearsMax">Max Years Experience</Label>
-                <Input
-                  id="experienceYearsMax"
-                  type="number"
-                  min={0}
-                  max={50}
-                  placeholder="e.g. 8"
-                  className="font-mono"
-                  {...register("experienceYearsMax", { valueAsNumber: true })}
-                />
-                {errors.experienceYearsMax && (
-                  <p className="text-xs text-red-600">
-                    {errors.experienceYearsMax.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {derivedLevel && (
-              <p className="text-xs text-muted-foreground">
-                &rarr;{" "}
-                {derivedLevel.charAt(0).toUpperCase() + derivedLevel.slice(1)}{" "}
-                level
-              </p>
-            )}
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="developersNeeded">Number of Developers</Label>
-                <Select
-                  value={String(developersNeeded)}
-                  onValueChange={(val) =>
-                    setValue("developersNeeded", Number(val), {
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              <Field
+                label="Min experience"
+                hint="years"
+                error={errors.experienceYearsMin?.message}
+              >
+                <Stepper
+                  value={yearsMin ?? 0}
+                  onInc={() => {
+                    const next = Math.min((yearsMin ?? 0) + 1, 50);
+                    setValue("experienceYearsMin", next, { shouldValidate: true });
+                    if ((yearsMax ?? 0) < next)
+                      setValue("experienceYearsMax", next, { shouldValidate: true });
+                  }}
+                  onDec={() =>
+                    setValue("experienceYearsMin", Math.max((yearsMin ?? 0) - 1, 0), {
                       shouldValidate: true,
                     })
                   }
-                >
-                  <SelectTrigger id="developersNeeded">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-                      <SelectItem key={n} value={String(n)}>
-                        {n}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                />
+              </Field>
 
-              <div className="space-y-2">
-                <Label htmlFor="engagementType">Engagement Type</Label>
-                <Select
-                  value={engagementType}
-                  onValueChange={(val) =>
+              <Field
+                label="Max experience"
+                hint="years"
+                error={errors.experienceYearsMax?.message}
+              >
+                <Stepper
+                  value={yearsMax ?? 0}
+                  onInc={() =>
+                    setValue("experienceYearsMax", Math.min((yearsMax ?? 0) + 1, 50), {
+                      shouldValidate: true,
+                    })
+                  }
+                  onDec={() =>
                     setValue(
-                      "engagementType",
-                      val as JobRequirementFormData["engagementType"],
+                      "experienceYearsMax",
+                      Math.max((yearsMax ?? 0) - 1, yearsMin ?? 0),
                       { shouldValidate: true },
                     )
                   }
-                >
-                  <SelectTrigger id="engagementType">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="full-time">Full-Time</SelectItem>
-                    <SelectItem value="part-time">Part-Time</SelectItem>
-                    <SelectItem value="contract">Contract</SelectItem>
-                    <SelectItem value="project-based">Project-Based</SelectItem>
-                  </SelectContent>
-                </Select>
+                />
+              </Field>
+
+              <Field label="Developers needed">
+                <Stepper
+                  value={developersNeeded ?? 1}
+                  onInc={() =>
+                    setValue("developersNeeded", Math.min((developersNeeded ?? 1) + 1, 10), {
+                      shouldValidate: true,
+                    })
+                  }
+                  onDec={() =>
+                    setValue("developersNeeded", Math.max((developersNeeded ?? 1) - 1, 1), {
+                      shouldValidate: true,
+                    })
+                  }
+                />
+              </Field>
+            </div>
+
+            {derivedLevel && (
+              <div className="-mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <CheckCircle2 className="size-3.5 text-pulse" />
+                Matches{" "}
+                <span className="font-medium text-foreground">
+                  {derivedLevel.charAt(0).toUpperCase() + derivedLevel.slice(1)}
+                </span>{" "}
+                level engineers
               </div>
-            </div>
+            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="workMode">Work Mode</Label>
-              <Select
+            <Field label="Engagement type">
+              <Segmented<JobRequirementFormData["engagementType"]>
+                value={engagementType}
+                onChange={(v) => setValue("engagementType", v, { shouldValidate: true })}
+                options={[
+                  { value: "full-time", label: "Full-Time" },
+                  { value: "part-time", label: "Part-Time" },
+                  { value: "contract", label: "Contract" },
+                  { value: "project-based", label: "Project-Based" },
+                ]}
+              />
+            </Field>
+
+            <Field label="Work mode" error={errors.workMode?.message}>
+              <Segmented<JobRequirementFormData["workMode"]>
                 value={workMode}
-                onValueChange={(val) =>
-                  setValue(
-                    "workMode",
-                    val as JobRequirementFormData["workMode"],
-                    { shouldValidate: true },
-                  )
-                }
-              >
-                <SelectTrigger id="workMode">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="remote">Remote</SelectItem>
-                  <SelectItem value="office">Office</SelectItem>
-                  <SelectItem value="hybrid">Hybrid</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.workMode && (
-                <p className="text-xs text-red-600">{errors.workMode.message}</p>
-              )}
-            </div>
+                onChange={(v) => setValue("workMode", v, { shouldValidate: true })}
+                options={[
+                  { value: "remote", label: "Remote" },
+                  { value: "office", label: "Office" },
+                  { value: "hybrid", label: "Hybrid" },
+                ]}
+              />
+            </Field>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="timezonePreference">Timezone Preference</Label>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <Field label="Timezone preference">
                 <Select
                   value={timezonePreference}
                   onValueChange={(val) =>
@@ -638,7 +711,7 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
                     )
                   }
                 >
-                  <SelectTrigger id="timezonePreference">
+                  <SelectTrigger id="timezonePreference" className={INPUT_CLS}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -649,10 +722,9 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </Field>
 
-              <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
+              <Field label="Priority">
                 <Select
                   value={priority}
                   onValueChange={(val) =>
@@ -663,7 +735,7 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
                     )
                   }
                 >
-                  <SelectTrigger id="priority">
+                  <SelectTrigger id="priority" className={INPUT_CLS}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -673,48 +745,46 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
                     <SelectItem value="urgent">Urgent</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </Field>
             </div>
 
-            <div className="space-y-2">
-              <Label>
-                Hiring Countries <span className="text-destructive">*</span>
-              </Label>
+            <Field
+              label="Hiring countries"
+              hint="required"
+              error={errors.hiringCountries?.message}
+            >
               <CountrySelector
                 value={hiringCountries}
                 onChange={(codes) =>
                   setValue("hiringCountries", codes, { shouldValidate: true })
                 }
               />
-              {errors.hiringCountries && (
-                <p className="text-sm text-destructive">
-                  {errors.hiringCountries.message}
-                </p>
-              )}
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="city">City (optional)</Label>
+            <Field
+              label="City"
+              hint="optional"
+            >
               <Input
                 id="city"
                 placeholder="e.g. Pune, London, San Francisco"
+                className={INPUT_CLS}
                 {...register("city")}
               />
               <p className="text-xs text-muted-foreground">
                 Leave blank for fully remote roles, or enter the office city.
               </p>
-            </div>
+            </Field>
 
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <div className="space-y-2">
-                <Label>Currency</Label>
+            <div className="grid grid-cols-2 gap-5 sm:grid-cols-4">
+              <Field label="Currency">
                 <Select
                   value={budgetCurrency}
                   onValueChange={(v) =>
                     setValue("budgetCurrency", v, { shouldValidate: true })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={INPUT_CLS}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="max-h-72">
@@ -725,16 +795,15 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Budget Type</Label>
+              </Field>
+              <Field label="Budget type">
                 <Select
                   value={budgetType}
                   onValueChange={(v) =>
                     setValue("budgetType", v as "hourly" | "monthly" | "annual", { shouldValidate: true })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={INPUT_CLS}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -743,73 +812,69 @@ const RequirementForm = ({ mode = "create", requirementId, initialValues }: Requ
                     <SelectItem value="annual">Annual</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="budgetMin">Budget Min ({budgetLabel}, optional)</Label>
+              </Field>
+              <Field label={`Budget min`} hint={`${budgetLabel}`}>
                 <Input
                   id="budgetMin"
                   type="number"
                   placeholder="e.g. 60"
-                  className="font-mono"
+                  className={cn(INPUT_CLS, "font-mono")}
                   {...register("budgetMin")}
                 />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="budgetMax">Budget Max ({budgetLabel}, optional)</Label>
+              </Field>
+              <Field label={`Budget max`} hint={`${budgetLabel}`}>
                 <Input
                   id="budgetMax"
                   type="number"
                   placeholder="e.g. 120"
-                  className="font-mono"
+                  className={cn(INPUT_CLS, "font-mono")}
                   {...register("budgetMax")}
                 />
-              </div>
+              </Field>
             </div>
 
-            <div className="space-y-2">
-              <Label>Description</Label>
+            <Field label="Description" error={errors.description?.message}>
               <MarkdownEditor
                 value={description ?? ""}
                 onChange={(val) =>
                   setValue("description", val, { shouldValidate: true })
                 }
               />
-              {errors.description && (
-                <p className="text-xs text-red-600">
-                  {errors.description.message}
-                </p>
-              )}
-            </div>
+            </Field>
 
-            <div className="space-y-2">
-              <Label htmlFor="startDate">Start Date</Label>
+            <Field label="Start date" error={errors.startDate?.message}>
               <DatePicker
                 value={watch("startDate") ? new Date(watch("startDate") + "T00:00:00") : undefined}
                 onChange={(d) => setValue("startDate", d ? d.toISOString().split("T")[0] : "", { shouldValidate: true })}
               />
-              {errors.startDate && (
-                <p className="text-xs text-red-600">
-                  {errors.startDate.message}
-                </p>
-              )}
-            </div>
+            </Field>
+          </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <Button variant="outline" asChild>
-                <Link href={isEdit && requirementId ? `/companies/dashboard/requirements/${requirementId}` : "/companies/dashboard/requirements"}>Cancel</Link>
+          {/* footer */}
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border px-7 py-5">
+            <span className="inline-flex items-center gap-2 text-[13px] text-muted-foreground">
+              <Sparkles className="size-4 text-pulse" />
+              Avg 3–5 matched profiles within 48 hours
+            </span>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" className="rounded-full" asChild>
+                <Link href={isEdit && requirementId ? `/companies/dashboard/requirements/${requirementId}` : "/companies/dashboard/requirements"}>
+                  Cancel
+                </Link>
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="gap-2 bg-pulse text-pulse-foreground hover:bg-pulse/90"
+                className="gap-2 rounded-full bg-pulse text-pulse-foreground hover:bg-pulse/90"
               >
                 {submitting && <Loader2 className="size-4 animate-spin" />}
-                {isEdit ? "Save Changes" : "Submit Requirement"}
+                {isEdit ? "Save Changes" : "Post requirement"}
+                {!submitting && <ArrowRight className="size-4" />}
               </Button>
             </div>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </form>
     </>
   );
 };

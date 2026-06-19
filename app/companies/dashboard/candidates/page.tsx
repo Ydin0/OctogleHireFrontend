@@ -2,51 +2,41 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ConsoleScroll } from "../_components/console-scroll";
+import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { Loader2, UserSearch } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Check,
+  Clock,
+  Coins,
+  Loader2,
+  MapPin,
+  Users,
+  UserSearch,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
 
 import {
   type JobRequirement,
   type MatchStatus,
   type ProposedMatch,
   fetchCompanyRequirements,
+  respondToMatch,
 } from "@/lib/api/companies";
+import { formatDate } from "@/app/admin/dashboard/_components/dashboard-data";
+import { formatRate } from "@/lib/utils/format-rate";
+import { Button } from "@/components/ui/button";
 import {
-  matchStatusLabel,
-  matchStatusBadgeClass,
-  formatDate,
-} from "@/app/admin/dashboard/_components/dashboard-data";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-const formatCurrency = (amount: number, currency = "USD") =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency || "USD",
-    // Preserve up to 2 decimals (10.50 stays 10.50, never rounds to 11).
-    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+  EmptyState,
+  Mono,
+  PageHead,
+  PageScroll,
+  StatusPill,
+  SummaryStat,
+} from "../_components/console-ui";
 
 type CandidateStatusFilter = "all" | MatchStatus;
 
@@ -56,12 +46,156 @@ interface FlatCandidate {
   requirementId: string;
 }
 
+// Monthly estimate: prefer the proposed monthly rate; otherwise derive from the
+// hourly rate × the proposed hours/day × working days/month (falling back to a
+// standard 160-hour month) so we never show a hardcoded figure.
+function monthlyEstimate(m: ProposedMatch): number {
+  if (m.proposedMonthlyRate > 0) return m.proposedMonthlyRate;
+  if (m.hoursPerDay && m.workingDaysPerMonth)
+    return m.proposedHourlyRate * m.hoursPerDay * m.workingDaysPerMonth;
+  return m.proposedHourlyRate * 160;
+}
+
+function CandidateCard({
+  c,
+  busy,
+  onOpen,
+  onRespond,
+}: {
+  c: FlatCandidate;
+  busy: boolean;
+  onOpen: () => void;
+  onRespond: (action: "accepted" | "rejected") => void;
+}) {
+  const dev = c.match.developer;
+  const canRespond = c.match.status === "accepted";
+  const monthly = monthlyEstimate(c.match);
+  const breakdown =
+    c.match.hoursPerDay && c.match.workingDaysPerMonth
+      ? `${c.match.hoursPerDay}h × ${c.match.workingDaysPerMonth}d`
+      : "full-time";
+
+  return (
+    <div className="rounded-2xl border border-border bg-card">
+      <div className="flex flex-wrap gap-4 p-5">
+        <button onClick={onOpen} className="shrink-0">
+          <span className="inline-flex size-[58px] overflow-hidden rounded-full border border-border bg-muted">
+            {dev?.avatar ? (
+              <Image
+                src={dev.avatar}
+                alt={dev.name}
+                width={58}
+                height={58}
+                className="size-full object-cover"
+                unoptimized
+              />
+            ) : (
+              <span className="flex size-full items-center justify-center text-sm font-semibold text-muted-foreground">
+                {dev?.name?.slice(0, 1) ?? "?"}
+              </span>
+            )}
+          </span>
+        </button>
+
+        <div className="min-w-[240px] flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <button
+                onClick={onOpen}
+                className="text-base font-semibold hover:underline"
+              >
+                {dev?.name ?? "Unknown"}
+              </button>
+              <div className="text-[12.5px] text-pulse">{dev?.role ?? ""}</div>
+              {dev?.location && (
+                <div className="mt-1 inline-flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                  <MapPin className="size-3.5" /> {dev.location}
+                </div>
+              )}
+            </div>
+            <StatusPill status={c.match.status} />
+          </div>
+
+          {/* role they're put forward for */}
+          <Link
+            href={`/companies/dashboard/requirements/${c.requirementId}`}
+            className="mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-background/40 px-3 py-1.5 text-[12.5px] transition-colors hover:border-pulse/40 hover:text-pulse"
+          >
+            <Briefcase className="size-3.5 text-pulse" />
+            <span className="text-muted-foreground">Put forward for</span>
+            <span className="font-medium">{c.requirementTitle}</span>
+            <ArrowRight className="size-3" />
+          </Link>
+
+          {/* rate + estimate strip */}
+          <div className="mt-3.5 flex flex-wrap gap-6">
+            <div>
+              <Mono className="mb-1 block text-[9px] text-muted-foreground">Rate</Mono>
+              <span className="font-mono text-[13px] font-medium">
+                {formatRate(c.match.proposedHourlyRate, c.match.currency)}/hr
+              </span>
+            </div>
+            <div>
+              <Mono className="mb-1 block text-[9px] text-muted-foreground">Monthly est.</Mono>
+              <span className="font-mono text-[13px] font-medium">
+                {formatRate(monthly, c.match.currency)}/mo
+              </span>
+              <span className="ml-1.5 text-[11px] text-muted-foreground">{breakdown}</span>
+            </div>
+            <div>
+              <Mono className="mb-1 block text-[9px] text-muted-foreground">Proposed</Mono>
+              <span className="inline-flex items-center gap-1.5 text-[13px] font-medium">
+                <Clock className="size-3.5 text-muted-foreground" />
+                {formatDate(c.match.proposedAt)}
+              </span>
+            </div>
+          </div>
+
+          {/* actions */}
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button size="sm" variant="outline" className="rounded-full" onClick={onOpen}>
+              View profile
+            </Button>
+            {canRespond && (
+              <>
+                <Button
+                  size="sm"
+                  className="rounded-full"
+                  disabled={busy}
+                  onClick={() => onRespond("accepted")}
+                >
+                  {busy ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Check className="size-3.5" />
+                  )}
+                  Accept
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-full"
+                  disabled={busy}
+                  onClick={() => onRespond("rejected")}
+                >
+                  <X className="size-3.5" /> Pass
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CandidatesPage() {
   const { getToken } = useAuth();
   const router = useRouter();
   const [requirements, setRequirements] = useState<JobRequirement[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<CandidateStatusFilter>("all");
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -85,6 +219,7 @@ export default function CandidatesPage() {
       }
     }
     flat.sort((a, b) => {
+      // Decision-needed (developer accepted) first, then most recent.
       if (a.match.status === "accepted" && b.match.status !== "accepted") return -1;
       if (b.match.status === "accepted" && a.match.status !== "accepted") return 1;
       return new Date(b.match.proposedAt).getTime() - new Date(a.match.proposedAt).getTime();
@@ -98,39 +233,69 @@ export default function CandidatesPage() {
   }, [candidates, statusFilter]);
 
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: candidates.length };
+    const counts: Record<string, number> = {};
     for (const c of candidates) {
       counts[c.match.status] = (counts[c.match.status] ?? 0) + 1;
     }
     return counts;
   }, [candidates]);
 
-  const filterOptions: { label: string; value: CandidateStatusFilter; count: number }[] = useMemo(() => {
-    const opts: { label: string; value: CandidateStatusFilter; count: number }[] = [
-      { label: "All", value: "all", count: candidates.length },
-    ];
-    const order: MatchStatus[] = [
-      "accepted",
-      "proposed",
-      "interview_requested",
-      "interview_scheduled",
-      "active",
-      "declined",
-      "rejected",
-      "ended",
-    ];
-    for (const status of order) {
-      const count = statusCounts[status];
-      if (count && count > 0) {
-        opts.push({
-          label: matchStatusLabel[status],
-          value: status,
-          count,
-        });
+  const decisionNeeded = statusCounts["accepted"] ?? 0;
+  const inProcess =
+    (statusCounts["interview_requested"] ?? 0) +
+    (statusCounts["interview_scheduled"] ?? 0) +
+    (statusCounts["active"] ?? 0);
+  const roleCount = useMemo(
+    () => new Set(candidates.map((c) => c.requirementId)).size,
+    [candidates],
+  );
+
+  const filterOptions: { label: string; value: CandidateStatusFilter; count: number }[] =
+    useMemo(() => {
+      const opts: { label: string; value: CandidateStatusFilter; count: number }[] = [
+        { label: "All", value: "all", count: candidates.length },
+      ];
+      const order: { status: MatchStatus; label: string }[] = [
+        { status: "accepted", label: "Awaiting your decision" },
+        { status: "proposed", label: "Proposed" },
+        { status: "interview_requested", label: "Interview requested" },
+        { status: "interview_scheduled", label: "Interview scheduled" },
+        { status: "active", label: "Active" },
+        { status: "declined", label: "Declined" },
+        { status: "rejected", label: "Passed" },
+        { status: "ended", label: "Ended" },
+      ];
+      for (const { status, label } of order) {
+        const count = statusCounts[status];
+        if (count && count > 0) opts.push({ label, value: status, count });
       }
+      return opts;
+    }, [candidates.length, statusCounts]);
+
+  const handleRespond = async (
+    match: ProposedMatch,
+    action: "accepted" | "rejected",
+  ) => {
+    setBusyId(match.id);
+    const token = await getToken();
+    const res = await respondToMatch(token, match.id, action);
+    setBusyId(null);
+    if (!res) {
+      toast.error("Couldn't update — you may need a signed MSA first.");
+      return;
     }
-    return opts;
-  }, [candidates.length, statusCounts]);
+    toast.success(action === "accepted" ? "Candidate accepted" : "Candidate passed");
+    // Reflect the new status locally without a full reload.
+    setRequirements((prev) =>
+      prev.map((req) => ({
+        ...req,
+        proposedMatches: (req.proposedMatches ?? []).map((m) =>
+          m.id === match.id ? { ...m, status: res.status } : m,
+        ),
+      })),
+    );
+    router.refresh();
+  };
 
   if (loading) {
     return (
@@ -141,147 +306,92 @@ export default function CandidatesPage() {
   }
 
   return (
-    <ConsoleScroll>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-lg font-semibold">Candidates</h1>
-          <p className="text-sm text-muted-foreground">
-            All proposed candidates across your open requirements.
-          </p>
-        </div>
-      </div>
+    <PageScroll>
+      <PageHead
+        eyebrow="Candidates"
+        title="Proposed candidates"
+        subtitle="Engineers your account manager has put forward across your open roles. Accept to move them into hiring, or pass to free up the slot."
+      />
 
-      <div className="flex flex-wrap items-center gap-2">
-        {filterOptions.map((f) => (
-          <button
-            key={f.value}
-            type="button"
-            onClick={() => setStatusFilter(f.value)}
-            className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-              statusFilter === f.value
-                ? "border-pulse/40 bg-pulse/10 text-pulse"
-                : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
-            }`}
-          >
-            {f.label} ({f.count})
-          </button>
-        ))}
-      </div>
-
-      {filtered.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-              <UserSearch className="size-6 text-muted-foreground" />
-            </div>
-            <h3 className="mt-4 text-sm font-semibold">No candidates found</h3>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-              {candidates.length === 0
-                ? "Candidates will appear here once they are matched to your requirements."
-                : "No candidates match this filter."}
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="rounded-md border">
-          <Table className="table-fixed">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-xs text-muted-foreground" style={{ width: 240 }}>
-                  Candidate
-                </TableHead>
-                <TableHead className="text-xs text-muted-foreground" style={{ width: 140 }}>
-                  Location
-                </TableHead>
-                <TableHead className="text-xs text-muted-foreground" style={{ width: 200 }}>
-                  Requirement
-                </TableHead>
-                <TableHead className="text-xs text-muted-foreground" style={{ width: 130 }}>
-                  Status
-                </TableHead>
-                <TableHead className="text-xs text-muted-foreground text-right" style={{ width: 100 }}>
-                  Rate
-                </TableHead>
-                <TableHead className="text-xs text-muted-foreground" style={{ width: 100 }}>
-                  Proposed
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.map((c) => {
-                const dev = c.match.developer;
-                return (
-                  <TableRow
-                    key={c.match.id}
-                    className="cursor-pointer"
-                    onClick={(e) => {
-                      const target = e.target as HTMLElement;
-                      if (target.closest("a")) return;
-                      router.push(`/companies/dashboard/developers/${c.match.developerId}`);
-                    }}
-                  >
-                    <TableCell className="overflow-hidden" style={{ width: 240 }}>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="size-8 shrink-0">
-                          <AvatarImage src={dev?.avatar} alt={dev?.name ?? ""} />
-                          <AvatarFallback className="text-[10px]">
-                            {dev?.name ? getInitials(dev.name) : "?"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium">
-                            {dev?.name ?? "Unknown"}
-                          </p>
-                          <p className="truncate text-xs text-muted-foreground">
-                            {dev?.role ?? ""}
-                          </p>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="overflow-hidden" style={{ width: 140 }}>
-                      <span className="block truncate text-sm text-muted-foreground">
-                        {dev?.location ?? "-"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="overflow-hidden" style={{ width: 200 }}>
-                      <Link
-                        href={`/companies/dashboard/requirements/${c.requirementId}`}
-                        className="block truncate text-sm hover:underline"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {c.requirementTitle}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="overflow-hidden" style={{ width: 130 }}>
-                      <Badge
-                        variant="outline"
-                        className={matchStatusBadgeClass(c.match.status)}
-                      >
-                        {matchStatusLabel[c.match.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="overflow-hidden text-right" style={{ width: 100 }}>
-                      <span className="font-mono text-sm">
-                        {formatCurrency(c.match.proposedHourlyRate, c.match.currency)}/hr
-                      </span>
-                    </TableCell>
-                    <TableCell className="overflow-hidden" style={{ width: 100 }}>
-                      <span className="text-sm text-muted-foreground">
-                        {formatDate(c.match.proposedAt)}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          <div className="flex items-center justify-between border-t px-4 py-3">
-            <span className="text-xs text-muted-foreground">
-              {filtered.length} of {candidates.length} candidate{candidates.length !== 1 ? "s" : ""}
-            </span>
+      {candidates.length > 0 ? (
+        <>
+          <div className="mb-6 flex flex-wrap gap-3.5">
+            <SummaryStat
+              icon={<Users className="size-4" />}
+              value={candidates.length}
+              label="Proposed candidates"
+            />
+            <SummaryStat
+              icon={<Check className="size-4" />}
+              value={decisionNeeded}
+              label="Awaiting your decision"
+              accent
+            />
+            <SummaryStat
+              icon={<ArrowRight className="size-4" />}
+              value={inProcess}
+              label="In process"
+            />
+            <SummaryStat
+              icon={<Coins className="size-4" />}
+              value={roleCount}
+              label="Roles with candidates"
+            />
           </div>
-        </div>
+
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            {filterOptions.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => setStatusFilter(f.value)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                  statusFilter === f.value
+                    ? "border-pulse/40 bg-pulse/10 text-pulse"
+                    : "border-border text-muted-foreground hover:border-pulse/25 hover:text-foreground"
+                }`}
+              >
+                {f.label} ({f.count})
+              </button>
+            ))}
+          </div>
+
+          {filtered.length > 0 ? (
+            <div className="flex flex-col gap-3.5">
+              {filtered.map((c) => (
+                <CandidateCard
+                  key={c.match.id}
+                  c={c}
+                  busy={busyId === c.match.id}
+                  onOpen={() =>
+                    router.push(
+                      `/companies/dashboard/developers/${c.match.developerId}`,
+                    )
+                  }
+                  onRespond={(action) => handleRespond(c.match, action)}
+                />
+              ))}
+            </div>
+          ) : (
+            <EmptyState
+              icon={<UserSearch className="size-6" />}
+              title="No candidates match this filter"
+              body="Try a different status filter to see more of your proposed candidates."
+            />
+          )}
+        </>
+      ) : (
+        <EmptyState
+          icon={<UserSearch className="size-6" />}
+          title="No candidates yet"
+          body="Candidates appear here once your account manager matches vetted engineers to your open roles — typically within 48 hours."
+          action={
+            <Button asChild className="rounded-full">
+              <Link href="/companies/dashboard/requirements/new">Post a role</Link>
+            </Button>
+          }
+        />
       )}
-    </ConsoleScroll>
+    </PageScroll>
   );
 }
