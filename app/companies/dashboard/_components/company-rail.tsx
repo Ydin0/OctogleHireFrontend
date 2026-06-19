@@ -130,9 +130,9 @@ export function CompanyRail({
   return (
     <div className="flex h-full w-[78px] shrink-0 flex-col items-center gap-1.5 border-r border-border bg-card/55 py-3.5">
       <Link href={BASE} className="mb-3 inline-flex">
-        {/* Dark icon on light theme, light icon on dark theme. */}
+        {/* Light-mode icon on light theme, dark-mode icon on dark theme. */}
         <Image
-          src="/Octogle%20Icon.svg"
+          src="/Octogle%20Icon%20Light.svg"
           alt="OctogleHire"
           width={30}
           height={30}
@@ -140,7 +140,7 @@ export function CompanyRail({
           className="size-[30px] object-contain dark:hidden"
         />
         <Image
-          src="/Octogle%20Icon%20Light.svg"
+          src="/Octogle%20Icon.svg"
           alt="OctogleHire"
           width={30}
           height={30}
