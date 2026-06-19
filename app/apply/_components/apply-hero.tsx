@@ -647,8 +647,16 @@ const ApplyHero = ({ onStart }: ApplyHeroProps) => {
       <Navbar />
 
       {/* ── 1. Hero ── */}
-      <section className="pt-20 pb-0">
-        <div className="container mx-auto px-6">
+      <section className="bg-grid-zinc relative overflow-hidden pt-20 pb-0">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-[-80px] h-[500px] w-[900px] -translate-x-1/2"
+          style={{
+            background:
+              "radial-gradient(ellipse, color-mix(in oklab, var(--pulse) 14%, transparent), transparent 65%)",
+          }}
+        />
+        <div className="container relative z-10 mx-auto px-6">
           {/* Badge */}
           <div className="flex justify-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5">
@@ -677,11 +685,20 @@ const ApplyHero = ({ onStart }: ApplyHeroProps) => {
 
           {/* CTAs */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button size="lg" className="rounded-full px-6 gap-2" onClick={onStart}>
+            <Button
+              size="lg"
+              onClick={onStart}
+              className="h-[52px] gap-2.5 rounded-full bg-pulse px-7 font-mono text-[14px] uppercase tracking-[0.08em] text-pulse-foreground shadow-[0_12px_32px_-10px_color-mix(in_oklab,var(--pulse)_60%,transparent)] hover:bg-pulse/90"
+            >
               Apply Now
-              <ArrowRight className="size-4 -rotate-45" />
+              <ArrowRight className="size-4" />
             </Button>
-            <Button asChild variant="outline" size="lg" className="rounded-full px-6">
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="h-[52px] gap-2.5 rounded-full px-6 font-mono text-[14px] uppercase tracking-[0.08em]"
+            >
               <a href="#process">How It Works</a>
             </Button>
           </div>
