@@ -1142,11 +1142,12 @@ const CompanyDetailPage = ({
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="edit-location">Location</Label>
+              <Label htmlFor="edit-location">Address</Label>
               <Input
                 id="edit-location"
                 value={editForm.location}
                 onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                placeholder="e.g. Office 2020, Business Bay, Dubai, UAE"
               />
             </div>
           </div>

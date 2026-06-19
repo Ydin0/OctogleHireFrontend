@@ -24,6 +24,7 @@ import {
   respondToMatch,
 } from "@/lib/api/companies";
 import { TECH_ICONS } from "@/lib/tech-icons";
+import { formatRate } from "@/lib/utils/format-rate";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -147,7 +148,7 @@ function MatchRow({
       </button>
       <div className="text-right">
         <div className="font-mono text-sm font-semibold">
-          ${match.proposedHourlyRate}
+          {formatRate(match.proposedHourlyRate, match.currency)}
           <span className="text-[10px] font-normal text-muted-foreground">/hr</span>
         </div>
         <StatusPill status={match.status} />
@@ -284,7 +285,9 @@ export function RolesConsole({
                   </Chip>
                 ))}
                 <Chip>{sel.experienceLevel}</Chip>
-                {sel.budgetMax != null && <Chip>≤ ${sel.budgetMax}/hr</Chip>}
+                {sel.budgetMax != null && (
+                  <Chip>≤ {formatRate(sel.budgetMax, sel.budgetCurrency)}/hr</Chip>
+                )}
               </div>
             </div>
 

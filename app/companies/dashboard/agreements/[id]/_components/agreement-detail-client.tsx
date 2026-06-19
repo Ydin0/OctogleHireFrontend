@@ -97,11 +97,14 @@ export function AgreementDetailClient({
         </Badge>
       </div>
 
-      {/* Agreement Content */}
-      <Card>
-        <CardContent className="py-6">
+      {/* Agreement Content — always a white document, regardless of theme */}
+      <Card className="overflow-hidden">
+        <CardContent
+          className="bg-zinc-200 py-6"
+          style={{ colorScheme: "light" }}
+        >
           <div
-            className="prose prose-sm max-w-none dark:prose-invert"
+            className="mx-auto max-w-[880px] rounded-lg bg-white text-zinc-900 shadow-sm"
             dangerouslySetInnerHTML={{ __html: agreement.contentSnapshot }}
           />
         </CardContent>

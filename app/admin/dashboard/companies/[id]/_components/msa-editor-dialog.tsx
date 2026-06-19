@@ -23,7 +23,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
 
 interface MsaEditorDialogProps {
   companyId: string;
@@ -144,11 +143,14 @@ export function MsaEditorDialog({
             />
           ) : (
             <div
-              className={cn(
-                "prose prose-sm max-w-none p-4 dark:prose-invert",
-              )}
-              dangerouslySetInnerHTML={{ __html: content }}
-            />
+              style={{ colorScheme: "light" }}
+              className="bg-zinc-200 p-6"
+            >
+              <div
+                className="mx-auto max-w-[880px] rounded-lg bg-white text-zinc-900 shadow-sm"
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
+            </div>
           )}
         </div>
 

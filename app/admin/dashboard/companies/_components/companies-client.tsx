@@ -479,12 +479,12 @@ function CompaniesClient({ companies, token }: CompaniesClientProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="create-location">Location</Label>
+              <Label htmlFor="create-location">Address</Label>
               <Input
                 id="create-location"
                 value={createForm.location}
                 onChange={(e) => setCreateForm((f) => ({ ...f, location: e.target.value }))}
-                placeholder="New York, NY"
+                placeholder="e.g. Office 2020, Business Bay, Dubai, UAE (optional)"
               />
             </div>
           </div>

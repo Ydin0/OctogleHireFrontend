@@ -42,9 +42,10 @@ function getInitials(name: string): string {
 const formatCurrency = (amount: number, currency = "USD") =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    currency: currency || "USD",
+    // Preserve up to 2 decimals (10.50 stays 10.50, never rounds to 11).
+    minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 
 type CandidateStatusFilter = "all" | MatchStatus;

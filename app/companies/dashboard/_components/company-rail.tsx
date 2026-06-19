@@ -6,9 +6,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
 import {
   Bookmark,
-  CalendarDays,
   ClipboardList,
-  Clock,
   FileSignature,
   Moon,
   Receipt,
@@ -17,7 +15,6 @@ import {
   Sun,
   Target,
   Users,
-  Video,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -43,10 +40,9 @@ const PRIMARY: RailItem[] = [
 
 const SECONDARY: RailItem[] = [
   { href: `${BASE}/candidates`, label: "Cands", icon: ClipboardList, badgeKey: "candidates" },
-  { href: `${BASE}/interviews`, label: "Calls", icon: Video },
-  { href: `${BASE}/calendar`, label: "Cal", icon: CalendarDays },
+  // Interviews ("Calls"), Calendar ("Cal") and Timesheets ("Time") are hidden
+  // until those surfaces are ready for companies.
   { href: `${BASE}/team`, label: "Team", icon: Users },
-  { href: `${BASE}/timesheets`, label: "Time", icon: Clock },
   { href: `${BASE}/agreements`, label: "Docs", icon: FileSignature, badgeKey: "agreements" },
   { href: `${BASE}/settings`, label: "Setup", icon: Settings },
 ];
