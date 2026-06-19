@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -12,6 +12,7 @@ import {
   Calendar,
   Camera,
   ExternalLink,
+  Eye,
   FileSignature,
   FileText,
   Loader2,
@@ -95,6 +96,10 @@ const CompanyDetailPage = ({
 }) => {
   const { id } = use(params);
   const { getToken } = useAuth();
+  const { user } = useUser();
+  const isSuperAdmin = String(user?.publicMetadata?.accountType ?? "").includes(
+    "super_admin",
+  );
   const [company, setCompany] = useState<CompanyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
@@ -446,6 +451,25 @@ const CompanyDetailPage = ({
                   >
                     <Pencil className="size-3.5" />
                   </Button>
+                  {isSuperAdmin &&
+                    (company.status === "active" ||
+                      company.status === "inactive") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-1 gap-1.5 rounded-full"
+                        onClick={() =>
+                          window.open(
+                            `/impersonate?companyId=${company.id}`,
+                            "_blank",
+                          )
+                        }
+                        title="Open a new tab signed in as this company"
+                      >
+                        <Eye className="size-3.5" />
+                        View as company
+                      </Button>
+                    )}
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {company.contactName}

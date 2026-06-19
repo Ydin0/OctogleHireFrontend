@@ -6,6 +6,7 @@ import { CompanyRail } from "./_components/company-rail";
 import { ChatWidget } from "./_components/chat-widget";
 import { ShortlistProvider } from "./_components/shortlist-context";
 import { InterviewRequestProvider } from "./_components/interview-request-context";
+import { ImpersonationBanner } from "./_components/impersonation-banner";
 import { resolveDashboardPathFromRole } from "@/lib/auth/account-type";
 import { fetchUserRole } from "@/lib/auth/fetch-user-role";
 import { fetchCompanyProfile, fetchCompanyRequirements, fetchCompanyAgreements, fetchCompanyShortlist } from "@/lib/api/companies";
@@ -21,11 +22,14 @@ export default async function CompanyDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { userId, getToken } = await auth();
+  const { userId, getToken, sessionClaims } = await auth();
 
   if (!userId) {
     redirect("/login");
   }
+
+  // Present only on impersonated sessions (Clerk actor token's `act` claim).
+  const isImpersonating = !!(sessionClaims as { act?: unknown } | null)?.act;
 
   const token = await getToken();
   const { accountType, orgId, roles } = await fetchUserRole(token);
@@ -71,15 +75,18 @@ export default async function CompanyDashboardLayout({
   return (
     <ShortlistProvider initialIds={initialShortlistIds}>
       <InterviewRequestProvider roles={openRoles}>
-        <div className="marketplace-route flex h-screen overflow-hidden bg-background text-foreground">
-          <CompanyRail
-            counts={sidebarCounts}
-            companyInitials={companyInitials}
-            marketplaceEnabled={companyProfile?.marketplaceEnabled !== false}
-          />
-          <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-            {children}
-          </main>
+        <div className="marketplace-route flex h-screen flex-col overflow-hidden bg-background text-foreground">
+          {isImpersonating && <ImpersonationBanner companyName={companyName} />}
+          <div className="flex min-h-0 flex-1">
+            <CompanyRail
+              counts={sidebarCounts}
+              companyInitials={companyInitials}
+              marketplaceEnabled={companyProfile?.marketplaceEnabled !== false}
+            />
+            <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+              {children}
+            </main>
+          </div>
           <ChatWidget
             accountManagerId={companyProfile?.accountManagerId ?? undefined}
             accountManagerName={companyProfile?.accountManager?.name}

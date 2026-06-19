@@ -1301,6 +1301,38 @@ export async function updateCompanyMarketplaceAccess(
   }
 }
 
+export interface CompanyImpersonationTicket {
+  ticket: string;
+  organizationId: string;
+  companyName: string;
+  targetUserId: string;
+}
+
+/** Admin (super-admin) only: mint a Clerk actor token to view as a company. */
+export async function createCompanyImpersonationTicket(
+  token: string | null,
+  companyId: string,
+): Promise<CompanyImpersonationTicket | null> {
+  if (!token) return null;
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/impersonate`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as CompanyImpersonationTicket;
+  } catch {
+    return null;
+  }
+}
+
 export async function activateCompany(
   token: string | null,
   companyId: string,
