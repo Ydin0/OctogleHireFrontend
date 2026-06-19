@@ -15,6 +15,7 @@ import { useAuth } from "@clerk/nextjs";
 
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
+import { useBriefWizard } from "@/components/marketing/brief-wizard-context";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -373,6 +374,7 @@ function MobileDirectLink({ href, label }: { href: string; label: string }) {
 
 const Navbar = ({ className }: NavbarProps) => {
   const { isSignedIn } = useAuth();
+  const { open: openBrief } = useBriefWizard();
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -425,11 +427,13 @@ const Navbar = ({ className }: NavbarProps) => {
                   <Button asChild variant="ghost" size="sm">
                     <Link href="/login">Sign In</Link>
                   </Button>
-                  <Button asChild size="sm" className="rounded-full gap-1.5">
-                    <Link href="/companies/signup">
-                      Start Hiring
-                      <ArrowRight className="size-3.5" />
-                    </Link>
+                  <Button
+                    size="sm"
+                    className="rounded-full gap-1.5"
+                    onClick={() => openBrief({ sourcePage: "Navbar" })}
+                  >
+                    Start Hiring
+                    <ArrowRight className="size-3.5" />
                   </Button>
                 </>
               )}
@@ -519,11 +523,12 @@ const Navbar = ({ className }: NavbarProps) => {
                           <Button asChild variant="outline">
                             <Link href="/login">Sign In</Link>
                           </Button>
-                          <Button asChild className="gap-1.5">
-                            <Link href="/companies/signup">
-                              Start Hiring
-                              <ArrowRight className="size-3.5" />
-                            </Link>
+                          <Button
+                            className="gap-1.5"
+                            onClick={() => openBrief({ sourcePage: "Navbar (mobile)" })}
+                          >
+                            Start Hiring
+                            <ArrowRight className="size-3.5" />
                           </Button>
                         </>
                       )}

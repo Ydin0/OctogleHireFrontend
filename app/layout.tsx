@@ -10,6 +10,7 @@ import { Toaster } from "sonner";
 import { AIReferralTracker } from "@/components/analytics/ai-referral-tracker";
 import { SITE_URL, SITE_NAME, DEFAULT_DESCRIPTION, ORGANIZATION_SCHEMA, WEBSITE_SCHEMA } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
+import { BriefWizardProvider } from "@/components/marketing/brief-wizard-context";
 import "./globals.css";
 
 const geist = Geist({
@@ -87,7 +88,7 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
           >
-            {children}
+            <BriefWizardProvider>{children}</BriefWizardProvider>
             <Toaster richColors closeButton position="top-right" />
             <Suspense>
               <AIReferralTracker />

@@ -10,6 +10,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useBriefWizard } from "@/components/marketing/brief-wizard-context";
 import {
   Carousel,
   CarouselContent,
@@ -187,9 +188,19 @@ function ProfileCard({ profile }: { profile: Profile }) {
 /* ─── Hero ────────────────────────────────────────────────────────────────── */
 
 const Hero = ({ className }: HeroProps) => {
+  const { open: openBrief } = useBriefWizard();
   return (
-    <section className={cn("relative pt-20 pb-0", className)}>
-      <div className="container mx-auto flex flex-col items-center justify-center gap-4 px-6 text-center">
+    <section className={cn("bg-grid-zinc relative overflow-hidden pt-20 pb-0", className)}>
+      {/* radial pulse glow — same flare as the hire pages */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-[-120px] h-[520px] w-[900px] -translate-x-1/2"
+        style={{
+          background:
+            "radial-gradient(ellipse, color-mix(in oklab, var(--pulse) 16%, transparent), transparent 65%)",
+        }}
+      />
+      <div className="container relative z-10 mx-auto flex flex-col items-center justify-center gap-4 px-6 text-center">
         {/* Eyebrow pill */}
         <Link
           href="/marketplace"
@@ -220,13 +231,18 @@ const Hero = ({ className }: HeroProps) => {
         </p>
 
         {/* CTAs */}
-        <div className="mt-6 flex items-center gap-3">
-          <Button asChild size="lg" className="rounded-full px-6">
-            <a href="/companies/signup">
-              Start Hiring
-              <ArrowRight className="ml-2 size-4 -rotate-45 transition-transform group-hover:rotate-0" />
-            </a>
+        <div className="mt-6 flex flex-col items-center gap-3">
+          <Button
+            size="lg"
+            onClick={() => openBrief({ sourcePage: "Homepage hero" })}
+            className="h-14 gap-2.5 rounded-full bg-pulse px-8 font-mono text-[15px] uppercase tracking-[0.08em] text-pulse-foreground shadow-[0_12px_32px_-10px_color-mix(in_oklab,var(--pulse)_60%,transparent)] hover:bg-pulse/90"
+          >
+            Start Hiring
+            <ArrowRight className="size-[17px]" />
           </Button>
+          <span className="text-xs text-muted-foreground">
+            Free to start · No JD needed · Matched in 48h
+          </span>
         </div>
 
         {/* Trust badges — ISO / GDPR / CCPA */}

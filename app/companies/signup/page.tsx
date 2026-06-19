@@ -4,7 +4,7 @@ import { SITE_URL } from "@/lib/seo";
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Navbar } from "@/components/marketing/navbar";
-import { CompanySignupForm } from "./_components/company-signup-form";
+import { SignupBriefCta } from "./_components/signup-brief-cta";
 
 export const metadata: Metadata = {
   title: "Sign Up — Start Hiring",
@@ -132,15 +132,7 @@ export default function CompanySignupPage() {
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold">
-                    Create your account
-                  </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Free to sign up · No commitment · Start hiring in 48h
-                  </p>
-                </div>
-                <CompanySignupForm />
+                <SignupBriefCta />
               </div>
 
               {/* Trust row */}

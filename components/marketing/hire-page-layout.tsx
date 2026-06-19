@@ -19,7 +19,8 @@ import {
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
-import { BriefWizard, BRIEF_TECH_NAMES } from "@/components/marketing/brief-wizard";
+import { BRIEF_TECH_NAMES } from "@/components/marketing/brief-wizard";
+import { useBriefWizard } from "@/components/marketing/brief-wizard-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -606,9 +607,8 @@ export function HirePageLayout({
     })),
   ];
 
-  // ── Brief wizard state + prefill derived from the page context ──
-  const [wizardOpen, setWizardOpen] = useState(false);
-  const openBrief = () => setWizardOpen(true);
+  // ── Brief wizard (shared global modal) + prefill from page context ──
+  const { open: openWizard } = useBriefWizard();
 
   const accent = titleAccent?.trim();
   const isTech = !!accent && BRIEF_TECH_NAMES.includes(accent);
@@ -621,6 +621,13 @@ export function HirePageLayout({
         "Backend Engineer",
       ]
     : undefined;
+
+  const openBrief = () =>
+    openWizard({
+      defaultTech: briefTech,
+      roleChips: briefRoleChips,
+      sourcePage: label,
+    });
 
   return (
     <>
@@ -647,7 +654,10 @@ export function HirePageLayout({
               </span>
             </span>
 
-            <h1 className="mt-6 max-w-[880px] font-medium leading-[1.02] tracking-[-0.028em] text-[clamp(42px,6vw,76px)] [text-wrap:balance]">
+            <h1
+              className="mt-6 max-w-[880px] font-medium leading-[1.02] tracking-[-0.028em] [text-wrap:balance]"
+              style={{ fontSize: "clamp(42px, 6vw, 76px)" }}
+            >
               Hire elite{" "}
               {accent && (
                 <>
@@ -1012,14 +1022,6 @@ export function HirePageLayout({
         </section>
       </main>
       <Footer />
-
-      <BriefWizard
-        open={wizardOpen}
-        onClose={() => setWizardOpen(false)}
-        defaultTech={briefTech}
-        roleChips={briefRoleChips}
-        sourcePage={label}
-      />
     </>
   );
 }

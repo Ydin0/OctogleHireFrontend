@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { isWorkEmail, type CompanyBriefPayload } from "@/lib/schemas/company-enquiry";
+import { type CompanyBriefPayload } from "@/lib/schemas/company-enquiry";
 import { trackMetaEvent } from "@/lib/analytics/meta-events";
 import { useCalendlyLead } from "@/lib/analytics/use-calendly-lead";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -23,19 +23,36 @@ const API_BASE_URL =
 const CALENDLY_URL = "https://calendly.com/yaseen-octogle/30min";
 const DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
 
+// Full skill set — mirrors the navbar "Hire Talent" mega-menu (frontend,
+// backend, mobile, devops/cloud) so the brief covers the same options.
 const TECH_OPTIONS: { name: string; icon: string }[] = [
+  // Frontend
   { name: "React", icon: `${DEVICON}/react/react-original.svg` },
-  { name: "TypeScript", icon: `${DEVICON}/typescript/typescript-original.svg` },
   { name: "Next.js", icon: `${DEVICON}/nextjs/nextjs-original.svg` },
-  { name: "Node.js", icon: `${DEVICON}/nodejs/nodejs-original.svg` },
-  { name: "GraphQL", icon: `${DEVICON}/graphql/graphql-plain.svg` },
-  { name: "Redux", icon: `${DEVICON}/redux/redux-original.svg` },
+  { name: "Vue.js", icon: `${DEVICON}/vuejs/vuejs-original.svg` },
+  { name: "Angular", icon: `${DEVICON}/angularjs/angularjs-original.svg` },
+  { name: "TypeScript", icon: `${DEVICON}/typescript/typescript-original.svg` },
+  { name: "JavaScript", icon: `${DEVICON}/javascript/javascript-original.svg` },
   { name: "Tailwind CSS", icon: `${DEVICON}/tailwindcss/tailwindcss-original.svg` },
-  { name: "React Native", icon: `${DEVICON}/react/react-original.svg` },
-  { name: "PostgreSQL", icon: `${DEVICON}/postgresql/postgresql-original.svg` },
+  { name: "Redux", icon: `${DEVICON}/redux/redux-original.svg` },
+  // Backend
+  { name: "Node.js", icon: `${DEVICON}/nodejs/nodejs-original.svg` },
   { name: "Python", icon: `${DEVICON}/python/python-original.svg` },
+  { name: "Go", icon: `${DEVICON}/go/go-original-wordmark.svg` },
+  { name: "Java", icon: `${DEVICON}/java/java-original.svg` },
+  { name: "Rust", icon: `${DEVICON}/rust/rust-original.svg` },
+  { name: "Django", icon: `${DEVICON}/django/django-plain.svg` },
+  { name: "GraphQL", icon: `${DEVICON}/graphql/graphql-plain.svg` },
+  // Mobile
+  { name: "React Native", icon: `${DEVICON}/react/react-original.svg` },
+  { name: "Flutter", icon: `${DEVICON}/flutter/flutter-original.svg` },
+  { name: "Swift", icon: `${DEVICON}/swift/swift-original.svg` },
+  { name: "Kotlin", icon: `${DEVICON}/kotlin/kotlin-original.svg` },
+  // DevOps & Cloud
   { name: "AWS", icon: `${DEVICON}/amazonwebservices/amazonwebservices-plain-wordmark.svg` },
   { name: "Docker", icon: `${DEVICON}/docker/docker-original.svg` },
+  { name: "Kubernetes", icon: `${DEVICON}/kubernetes/kubernetes-original.svg` },
+  { name: "PostgreSQL", icon: `${DEVICON}/postgresql/postgresql-original.svg` },
 ];
 
 export const BRIEF_TECH_NAMES = TECH_OPTIONS.map((t) => t.name);
@@ -195,11 +212,6 @@ export function BriefWizard({
 
   const submit = async () => {
     if (submitting) return;
-    if (!isWorkEmail(email)) {
-      setApiError("Please use your work email address.");
-      setStep(4);
-      return;
-    }
     setSubmitting(true);
     setApiError(null);
     const payload: CompanyBriefPayload = {

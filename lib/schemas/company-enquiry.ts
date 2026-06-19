@@ -11,16 +11,8 @@ const FREE_EMAIL_DOMAINS = new Set([
 export const companyLeadSchema = z.object({
   contactName: z.string().min(2, "Required"),
   companyName: z.string().min(2, "Required"),
-  email: z
-    .string()
-    .email("Valid email required")
-    .refine(
-      (val) => {
-        const domain = val.split("@")[1]?.toLowerCase();
-        return domain ? !FREE_EMAIL_DOMAINS.has(domain) : false;
-      },
-      { message: "Please use your work email" }
-    ),
+  // Any valid email is accepted — personal or work.
+  email: z.string().email("Valid email required"),
   phone: z.string().min(7, "Valid phone required"),
   website: z.string().optional(), // honeypot — must stay empty
 });
