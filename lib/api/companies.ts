@@ -391,6 +391,8 @@ export interface ProposeMatchPayload {
   currency: string;
   hoursPerDay?: number;
   workingDaysPerMonth?: number;
+  /** Place straight to the company, skipping the developer's accept step. */
+  skipDeveloperApproval?: boolean;
 }
 
 // ── Company-side API functions ───────────────────────────────────────────────

@@ -260,11 +260,16 @@ const RequirementDetailPage = ({
     currency: string;
     hoursPerDay: number;
     workingDaysPerMonth: number;
+    skipDeveloperApproval?: boolean;
   }) => {
     const token = await getToken();
     try {
       await proposeMatch(token, id, payload);
-      toast.success("Match proposed");
+      toast.success(
+        payload.skipDeveloperApproval
+          ? "Candidate placed — sent straight to the company"
+          : "Match proposed",
+      );
       await loadRequirement();
     } catch {
       toast.error("Failed to propose match");

@@ -72,6 +72,7 @@ interface DeveloperPoolProps {
     currency: string;
     hoursPerDay: number;
     workingDaysPerMonth: number;
+    skipDeveloperApproval?: boolean;
   }) => Promise<void>;
 }
 
@@ -531,6 +532,7 @@ const DeveloperPool = ({
   const [workingDaysPerMonth, setWorkingDaysPerMonth] = useState("22");
   const [hoursPerDay, setHoursPerDay] = useState("8");
   const [currency, setCurrency] = useState("USD");
+  const [skipApproval, setSkipApproval] = useState(false);
   const [devRates, setDevRates] = useState<
     Record<string, { hourlyRate: string }>
   >({});
@@ -715,11 +717,13 @@ const DeveloperPool = ({
         currency,
         hoursPerDay: hours,
         workingDaysPerMonth: days,
+        skipDeveloperApproval: skipApproval,
       });
     }
 
     setProposing(false);
     setSelectedIds(new Set());
+    setSkipApproval(false);
     setBulkDialogOpen(false);
     setOpen(false);
   };
@@ -1387,6 +1391,22 @@ const DeveloperPool = ({
             </ScrollArea>
           </div>
 
+          <label className="mt-2 flex cursor-pointer items-start gap-2.5 rounded-lg border border-border bg-muted/30 p-3">
+            <Checkbox
+              checked={skipApproval}
+              onCheckedChange={(v) => setSkipApproval(v === true)}
+              className="mt-0.5"
+            />
+            <span className="text-sm">
+              Skip developer approval
+              <span className="mt-0.5 block text-xs text-muted-foreground">
+                Place straight to the company — the candidate appears in their
+                dashboard immediately, without the developer having to log in and
+                accept first.
+              </span>
+            </span>
+          </label>
+
           <DialogFooter>
             <Button
               variant="outline"
@@ -1401,7 +1421,7 @@ const DeveloperPool = ({
               onClick={handleBulkPropose}
             >
               {proposing && <Loader2 className="size-4 animate-spin" />}
-              Confirm Proposals
+              {skipApproval ? "Place with Company" : "Confirm Proposals"}
             </Button>
           </DialogFooter>
         </DialogContent>
