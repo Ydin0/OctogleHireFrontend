@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   ArrowRight,
   BookOpen,
@@ -121,7 +122,7 @@ const companyLinks = [
 
 /* ─── Hire Talent mega menu (desktop) ─────────────────────────────────────── */
 
-function HireTalentMenu() {
+function HireTalentMenu({ active }: { active?: boolean }) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -139,7 +140,10 @@ function HireTalentMenu() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className="inline-flex h-9 items-center gap-1 px-4 text-sm font-medium uppercase tracking-wide text-foreground/80 outline-none transition-colors hover:text-foreground data-[state=open]:text-foreground"
+        className={cn(
+          "inline-flex h-9 items-center gap-1 px-4 text-sm font-medium uppercase tracking-wide outline-none transition-colors hover:text-foreground data-[state=open]:text-foreground",
+          active ? "text-pulse" : "text-foreground/80",
+        )}
         onMouseEnter={openNow}
         onMouseLeave={scheduleClose}
       >
@@ -228,7 +232,7 @@ function HireTalentMenu() {
 
 /* ─── Company dropdown (desktop) ──────────────────────────────────────────── */
 
-function CompanyMenu() {
+function CompanyMenu({ active }: { active?: boolean }) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -246,7 +250,10 @@ function CompanyMenu() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
-        className="inline-flex h-9 items-center gap-1 px-4 text-sm font-medium uppercase tracking-wide text-foreground/80 outline-none transition-colors hover:text-foreground data-[state=open]:text-foreground"
+        className={cn(
+          "inline-flex h-9 items-center gap-1 px-4 text-sm font-medium uppercase tracking-wide outline-none transition-colors hover:text-foreground data-[state=open]:text-foreground",
+          active ? "text-pulse" : "text-foreground/80",
+        )}
         onMouseEnter={openNow}
         onMouseLeave={scheduleClose}
       >
@@ -288,11 +295,22 @@ function CompanyMenu() {
 
 /* ─── Direct top-level link ───────────────────────────────────────────────── */
 
-function DirectNavLink({ href, label }: { href: string; label: string }) {
+function DirectNavLink({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active?: boolean;
+}) {
   return (
     <Link
       href={href}
-      className="inline-flex h-9 items-center px-4 text-sm font-medium uppercase tracking-wide text-foreground/80 transition-colors hover:text-foreground"
+      className={cn(
+        "inline-flex h-9 items-center px-4 text-sm font-medium uppercase tracking-wide transition-colors hover:text-foreground",
+        active ? "text-pulse" : "text-foreground/80",
+      )}
     >
       {label}
     </Link>
@@ -375,7 +393,16 @@ function MobileDirectLink({ href, label }: { href: string; label: string }) {
 const Navbar = ({ className }: NavbarProps) => {
   const { isSignedIn } = useAuth();
   const { open: openBrief } = useBriefWizard();
+  const pathname = usePathname() ?? "";
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Highlight the nav item matching the current route in pulse blue.
+  const isHireActive =
+    pathname.startsWith("/hire") || pathname.startsWith("/marketplace");
+  const isHowActive = pathname.startsWith("/how-we-vet");
+  const isDevActive = pathname.startsWith("/apply");
+  const isCompanyActive =
+    pathname.startsWith("/about") || pathname.startsWith("/blog");
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 24);
@@ -408,11 +435,11 @@ const Navbar = ({ className }: NavbarProps) => {
               </Link>
 
               <div className="flex items-center gap-0.5">
-                <HireTalentMenu />
-                <DirectNavLink href="/how-we-vet" label="How It Works" />
+                <HireTalentMenu active={isHireActive} />
+                <DirectNavLink href="/how-we-vet" label="How It Works" active={isHowActive} />
                 <DirectNavLink href="/#pricing" label="Pricing" />
-                <DirectNavLink href="/apply" label="For Developers" />
-                <CompanyMenu />
+                <DirectNavLink href="/apply" label="For Developers" active={isDevActive} />
+                <CompanyMenu active={isCompanyActive} />
               </div>
             </div>
 
