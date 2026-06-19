@@ -31,11 +31,8 @@ import {
   Chip,
   EmptyState,
   Mono,
-  ProfileOverlay,
   StatusPill,
-  summaryToDeveloper,
 } from "../../_components/console-ui";
-import { useShortlist } from "../../_components/shortlist-context";
 
 function timeAgo(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -163,11 +160,28 @@ function MatchRow({
         </div>
       </button>
       <div className="text-right">
-        <div className="font-mono text-sm font-semibold">
-          {formatRate(match.proposedHourlyRate, match.currency)}
-          <span className="text-[10px] font-normal text-muted-foreground">/hr</span>
+        {match.proposedMonthlyRate > 0 ? (
+          <>
+            <div className="font-mono text-sm font-semibold">
+              {formatRate(match.proposedMonthlyRate, match.currency)}
+              <span className="text-[10px] font-normal text-muted-foreground">/mo</span>
+            </div>
+            <div className="font-mono text-[10.5px] text-muted-foreground">
+              {formatRate(match.proposedHourlyRate, match.currency)}/hr
+              {match.hoursPerDay && match.workingDaysPerMonth
+                ? ` · ${match.hoursPerDay}h × ${match.workingDaysPerMonth}d`
+                : ""}
+            </div>
+          </>
+        ) : (
+          <div className="font-mono text-sm font-semibold">
+            {formatRate(match.proposedHourlyRate, match.currency)}
+            <span className="text-[10px] font-normal text-muted-foreground">/hr</span>
+          </div>
+        )}
+        <div className="mt-1">
+          <StatusPill status={match.status} />
         </div>
-        <StatusPill status={match.status} />
       </div>
       {canRespond ? (
         <div className="flex items-center gap-2">
@@ -194,12 +208,10 @@ export function RolesConsole({
 }) {
   const router = useRouter();
   const { getToken } = useAuth();
-  const { isSaved, toggle } = useShortlist();
   const [selId, setSelId] = useState<string | null>(
     requirements[0]?.id ?? null,
   );
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [overlayMatch, setOverlayMatch] = useState<ProposedMatch | null>(null);
 
   const sel = useMemo(
     () => requirements.find((r) => r.id === selId) ?? requirements[0] ?? null,
@@ -323,7 +335,11 @@ export function RolesConsole({
                     key={m.id}
                     match={m}
                     busy={busyId === m.id}
-                    onOpen={() => setOverlayMatch(m)}
+                    onOpen={() =>
+                      router.push(
+                        `/companies/dashboard/developers/${m.developerId}`,
+                      )
+                    }
                     onAccept={() => handleRespond(m, "accepted")}
                     onReject={() => handleRespond(m, "rejected")}
                   />
@@ -355,15 +371,6 @@ export function RolesConsole({
           </>
         )}
       </div>
-
-      <ProfileOverlay
-        developer={
-          overlayMatch ? summaryToDeveloper(overlayMatch.developer) : null
-        }
-        saved={overlayMatch ? isSaved(overlayMatch.developer.id) : false}
-        onSave={toggle}
-        onClose={() => setOverlayMatch(null)}
-      />
     </div>
   );
 }

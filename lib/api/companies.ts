@@ -1574,6 +1574,8 @@ export interface CompanyDeveloperMatch {
   proposedHourlyRate: number;
   proposedMonthlyRate: number;
   currency: string;
+  hoursPerDay?: number | null;
+  workingDaysPerMonth?: number | null;
   status: string;
   proposedAt: string;
   engagementType: string;

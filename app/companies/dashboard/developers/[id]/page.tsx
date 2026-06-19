@@ -26,7 +26,6 @@ import {
 } from "@/lib/api/companies";
 import { formatDate } from "@/app/admin/dashboard/_components/dashboard-data";
 import { formatRate } from "@/lib/utils/format-rate";
-import { DownloadCVButton } from "./_components/download-cv-button";
 import { RequestInterviewButton } from "./_components/request-interview-button";
 import { DeveloperReviewSection } from "./_components/developer-review-section";
 import { TECH_ICONS } from "@/lib/tech-icons";
@@ -113,7 +112,6 @@ export default async function CompanyDeveloperProfilePage({
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2.5">
-            {developer.hasResume && <DownloadCVButton developerId={developer.id} />}
             <RequestInterviewButton developerId={developer.id} name={developer.name} />
           </div>
         </div>
@@ -142,7 +140,7 @@ export default async function CompanyDeveloperProfilePage({
             </TabsContent>
 
             <TabsContent value="documents" className="mt-6">
-              <DocumentsTab developer={developer} />
+              <DocumentsTab />
             </TabsContent>
 
             {timeEntries.length > 0 && (
@@ -228,6 +226,23 @@ function ProfileCard({
                 {activeMatch.engagementType?.replace(/-/g, " ") || "—"}
               </span>
             </div>
+            {activeMatch.proposedMonthlyRate > 0 && (
+              <div className="mt-2.5 rounded-xl border border-pulse/25 bg-pulse/[0.06] px-3 py-2.5">
+                <div className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+                  Estimated monthly
+                </div>
+                <div className="mt-0.5 font-mono text-[17px] font-bold">
+                  {formatRate(activeMatch.proposedMonthlyRate, activeMatch.currency)}
+                  <span className="text-[11px] font-normal text-muted-foreground">/mo</span>
+                </div>
+                {activeMatch.hoursPerDay && activeMatch.workingDaysPerMonth && (
+                  <div className="mt-1 text-[11.5px] text-muted-foreground">
+                    {formatRate(activeMatch.proposedHourlyRate, activeMatch.currency)}/hr ·{" "}
+                    {activeMatch.hoursPerDay}h/day · {activeMatch.workingDaysPerMonth} days/mo
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </>
       )}
@@ -573,37 +588,16 @@ function ProfileTab({
 
 /* ─── Documents tab ─────────────────────────────────────────────── */
 
-function DocumentsTab({ developer }: { developer: CompanyDeveloperProfile }) {
-  if (!developer.hasResume) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
-        <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-          <FileText className="size-6 text-muted-foreground" />
-        </div>
-        <h3 className="mt-4 text-sm font-semibold">No documents yet</h3>
-        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-          Documents for this candidate will appear here once available.
-        </p>
-      </div>
-    );
-  }
+function DocumentsTab() {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="mb-1 font-mono text-[10px] uppercase tracking-[0.1em] text-pulse">
-        Documents
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border py-16 text-center">
+      <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+        <FileText className="size-6 text-muted-foreground" />
       </div>
-      <div className="flex items-center gap-4 rounded-2xl border border-border bg-card p-[18px]">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-pulse/12 text-pulse">
-          <FileText className="size-[19px]" />
-        </span>
-        <div className="flex-1">
-          <div className="text-[14px] font-semibold">Resume — {developer.name}</div>
-          <div className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.06em] text-muted-foreground">
-            PDF · CV on file
-          </div>
-        </div>
-        <DownloadCVButton developerId={developer.id} />
-      </div>
+      <h3 className="mt-4 text-sm font-semibold">No documents available</h3>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        Documents for this candidate aren&apos;t available to view here.
+      </p>
     </div>
   );
 }
