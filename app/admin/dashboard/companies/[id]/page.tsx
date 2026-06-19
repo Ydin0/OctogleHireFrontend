@@ -554,6 +554,66 @@ const CompanyDetailPage = ({
         </CardContent>
       </Card>
 
+      {/* ── Hiring Brief (lead-gen wizard) ───────────────────────────── */}
+      {company.brief &&
+        (company.brief.role ||
+          (company.brief.techStack?.length ?? 0) > 0 ||
+          company.brief.experienceLevel ||
+          company.brief.timeline) && (
+          <Card className="border-pulse/20 bg-pulse/[0.03]">
+            <CardContent className="p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <FileText className="size-4 text-pulse" />
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Hiring brief
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3 lg:grid-cols-4">
+                {[
+                  ["Role", company.brief.role],
+                  ["Experience", company.brief.experienceLevel],
+                  [
+                    "Team size",
+                    company.brief.teamSize != null
+                      ? String(company.brief.teamSize)
+                      : null,
+                  ],
+                  ["Engagement", company.brief.engagementType],
+                  ["Work mode", company.brief.workMode],
+                  ["Timeline", company.brief.timeline],
+                  ["Source", company.brief.sourcePage],
+                ]
+                  .filter(([, v]) => v)
+                  .map(([k, v]) => (
+                    <div key={k as string}>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        {k}
+                      </p>
+                      <p className="mt-0.5 text-sm font-medium">{v}</p>
+                    </div>
+                  ))}
+              </div>
+              {(company.brief.techStack?.length ?? 0) > 0 && (
+                <div className="mt-4">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Tech stack
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {company.brief.techStack!.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
       {/* ── Quick Stats Row ──────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card>

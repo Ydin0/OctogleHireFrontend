@@ -287,6 +287,18 @@ export interface CompanyProfileSummary {
   createdAt: string;
 }
 
+/** Structured "brief" captured by the hire-page lead-gen wizard (enquiries only). */
+export interface CompanyEnquiryBrief {
+  role?: string | null;
+  techStack?: string[];
+  experienceLevel?: string | null;
+  teamSize?: number | null;
+  engagementType?: string | null;
+  workMode?: string | null;
+  timeline?: string | null;
+  sourcePage?: string | null;
+}
+
 export interface CompanyProfile {
   id: string;
   companyName: string;
@@ -302,6 +314,7 @@ export interface CompanyProfile {
   marketplaceEnabled?: boolean;
   accountManagerId?: string | null;
   accountManager?: AccountManager | null;
+  brief?: CompanyEnquiryBrief | null;
   requirements: JobRequirement[];
   teamMembers: TeamMember[];
   createdAt: string;

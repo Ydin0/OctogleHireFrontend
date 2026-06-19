@@ -26,3 +26,33 @@ export const companyLeadSchema = z.object({
 });
 
 export type CompanyLead = z.infer<typeof companyLeadSchema>;
+
+/**
+ * Full payload posted by the hire-page "Start your brief" wizard.
+ * Extends the basic lead with all the structured brief fields. Every brief
+ * field is optional so the same POST /api/public/company-enquiries endpoint
+ * accepts both the plain lead form and the full wizard.
+ */
+export interface CompanyBriefPayload {
+  contactName: string;
+  companyName: string;
+  email: string;
+  phone: string;
+  website?: string; // honeypot
+  dialCode?: string;
+  role?: string;
+  techStack?: string[];
+  experienceLevel?: string;
+  teamSize?: number;
+  engagementType?: string;
+  workMode?: string;
+  timeline?: string;
+  sourcePage?: string;
+}
+
+export const FREE_EMAIL_DOMAIN_SET = FREE_EMAIL_DOMAINS;
+
+export function isWorkEmail(email: string): boolean {
+  const domain = email.split("@")[1]?.toLowerCase();
+  return domain ? !FREE_EMAIL_DOMAINS.has(domain) : false;
+}

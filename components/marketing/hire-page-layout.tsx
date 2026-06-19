@@ -1,42 +1,31 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import Script from "next/script";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowRight,
-  Check,
   CheckCircle,
   ChevronDown,
   Clock,
   Globe,
   Scale,
   Shield,
+  Star,
   Users,
   Zap,
   type LucideIcon,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { companyLeadSchema, type CompanyLead } from "@/lib/schemas/company-enquiry";
 import { Navbar } from "@/components/marketing/navbar";
 import { Footer } from "@/components/marketing/footer";
+import { BriefWizard, BRIEF_TECH_NAMES } from "@/components/marketing/brief-wizard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Field, FieldLabel, FieldError } from "@/components/ui/field";
-import { PhoneInput } from "@/components/phone-input";
 import { techToSlug, roleToSlug, countryToSlug } from "@/lib/seo-data";
 import { hireFaqs } from "@/lib/data/hire-faqs";
 import { HireComparison } from "@/components/marketing/hire-comparison";
-import { trackMetaEvent } from "@/lib/analytics/meta-events";
-import { useCalendlyLead } from "@/lib/analytics/use-calendly-lead";
-
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -73,13 +62,6 @@ interface HirePageLayoutProps {
 const DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
 
 const BENEFIT_ICONS: LucideIcon[] = [Shield, Zap, Globe, Scale, Users, Clock];
-
-const stats = [
-  { value: 150, suffix: "+", label: "Countries" },
-  { value: 3, suffix: "%", prefix: "Top ", label: "Talent" },
-  { value: 48, suffix: "h", label: "First Match" },
-  { value: 60, suffix: "%", label: "Cost Savings" },
-];
 
 const faqs = hireFaqs;
 
@@ -183,70 +165,6 @@ function renderTitle(title: string, accent?: string) {
       <span className="text-pulse">{match}</span>
       {after}
     </>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Animated stat counter (counts up on scroll)
-// ---------------------------------------------------------------------------
-
-function AnimatedStat({
-  value,
-  prefix,
-  suffix,
-  label,
-}: {
-  value: number;
-  prefix?: string;
-  suffix?: string;
-  label: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [display, setDisplay] = useState(0);
-  const hasAnimated = useRef(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const duration = 1200;
-          const start = performance.now();
-
-          const tick = (now: number) => {
-            const elapsed = now - start;
-            const progress = Math.min(elapsed / duration, 1);
-            // ease-out cubic
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setDisplay(Math.round(eased * value));
-            if (progress < 1) requestAnimationFrame(tick);
-          };
-
-          requestAnimationFrame(tick);
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [value]);
-
-  return (
-    <div
-      ref={ref}
-      className="rounded-2xl border border-border bg-background p-5 text-center"
-    >
-      <span className="text-pulse text-3xl font-semibold tracking-tight font-mono lg:text-4xl">
-        {prefix}
-        {display}
-        {suffix}
-      </span>
-      <span className="mt-2 block text-sm text-muted-foreground">{label}</span>
-    </div>
   );
 }
 
@@ -590,194 +508,52 @@ function FaqAccordion() {
 }
 
 // ---------------------------------------------------------------------------
-// Inline lead capture form
+// Hero profile peek cards
 // ---------------------------------------------------------------------------
 
-const CALENDLY_URL = "https://calendly.com/yaseen-octogle/30min";
-
-function HeroForm() {
-  const [view, setView] = useState<"form" | "calendly">("form");
-  const [contactName, setContactName] = useState("");
-  const [apiError, setApiError] = useState<string | null>(null);
-
-  useCalendlyLead(view === "calendly");
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<CompanyLead>({
-    resolver: zodResolver(companyLeadSchema),
-    mode: "onTouched",
-  });
-
-  const phoneValue = watch("phone") ?? "";
-
-  const onSubmit = async (data: CompanyLead) => {
-    setApiError(null);
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/public/company-enquiries`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { message?: string };
-        setApiError(body.message ?? "Something went wrong. Please try again.");
-        return;
-      }
-
-      trackMetaEvent("Lead", {
-        content_name: "Hire Page",
-        content_category: "hire",
-      });
-
-      setContactName(data.contactName);
-      setView("calendly");
-    } catch {
-      setApiError("Unable to connect. Please check your connection and try again.");
-    }
-  };
-
-  if (view === "calendly") {
-    return (
-      <div className="rounded-2xl border border-border bg-card p-7 lg:p-8 animate-in fade-in duration-500">
-        <div className="mb-4 flex items-center gap-3">
-          <a href="https://www.linkedin.com/in/yaseen-deen-52249219b/" target="_blank" rel="noopener noreferrer" className="shrink-0">
-            <Avatar className="size-14 ring-2 ring-border">
-              <AvatarImage src="/Yaseen Founder.jpg" alt="Yaseen" className="scale-110" />
-              <AvatarFallback>Y</AvatarFallback>
-            </Avatar>
-          </a>
-          <div>
-            <p className="text-sm font-semibold">
-              Thanks {contactName.split(" ")[0]}!
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Yaseen will reach out within 24 hours. Pick a time below.
-            </p>
-          </div>
-        </div>
-        <div
-          className="calendly-inline-widget"
-          data-url={CALENDLY_URL}
-          style={{ minWidth: "100%", height: "650px" }}
-        />
-        <Script
-          src="https://assets.calendly.com/assets/external/widget.js"
-          strategy="lazyOnload"
-        />
-      </div>
-    );
-  }
-
+function ProfilePeekCard({
+  d,
+}: {
+  d: (typeof matchData)[number] & { location?: string };
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-7 lg:p-8">
-      <div className="mb-6 flex items-start gap-3.5">
-        <a href="https://www.linkedin.com/in/yaseen-deen-52249219b/" target="_blank" rel="noopener noreferrer" className="shrink-0">
-          <Avatar className="size-12 ring-2 ring-border">
-            <AvatarImage src="/Yaseen Founder.jpg" alt="Yaseen" className="scale-110" />
-            <AvatarFallback>Y</AvatarFallback>
-          </Avatar>
-        </a>
+    <div className="w-[230px] shrink-0 overflow-hidden rounded-3xl border border-border bg-card text-left shadow-sm transition-transform hover:-translate-y-1">
+      <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-muted to-background">
+        <Avatar className="size-full rounded-none">
+          <AvatarImage src={d.avatar} alt={d.name} className="object-cover" />
+          <AvatarFallback className="rounded-none text-2xl">{d.name[0]}</AvatarFallback>
+        </Avatar>
+        <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-2 py-1 backdrop-blur">
+          <span className="size-1.5 rounded-full bg-emerald-400" />
+          <span className="font-mono text-[9px] uppercase tracking-wider text-white">
+            Available
+          </span>
+        </span>
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-2 py-1 backdrop-blur">
+          <span className="size-1.5 rounded-full bg-pulse" />
+          <span className="font-mono text-[9px] uppercase tracking-wider text-white">
+            AI Native
+          </span>
+        </span>
+      </div>
+      <div className="flex flex-col gap-2.5 p-4">
         <div>
-          <p className="text-sm font-semibold">Yaseen Deen</p>
-          <p className="text-xs text-muted-foreground">Co-Founder at OctogleHire</p>
-          <p className="mt-1.5 text-sm text-muted-foreground italic">
-            &ldquo;I&apos;ll personally match you with the right team.&rdquo;
-          </p>
+          <div className="text-sm font-semibold">{d.name}</div>
+          <div className="mt-0.5 text-xs text-pulse">{d.role}</div>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {d.stack.map((icon, si) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={si} src={icon} alt="" className="size-3.5" />
+          ))}
+        </div>
+        <div className="flex items-center justify-between border-t border-border pt-2.5">
+          <span className="font-mono text-sm font-semibold">{d.rate}</span>
+          <span className="font-mono text-[10px] uppercase tracking-wider text-pulse">
+            {d.score} match
+          </span>
         </div>
       </div>
-
-      <div className="mb-6">
-        <h2 className="text-lg font-semibold">
-          Book a free demo
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          30 minutes · No commitment · Results in 48h
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-        <Field>
-          <FieldLabel htmlFor="hero-contactName">Full Name</FieldLabel>
-          <Input
-            id="hero-contactName"
-            placeholder="Jane Smith"
-            {...register("contactName")}
-          />
-          <div className="min-h-5">
-            {errors.contactName && (
-              <FieldError>{errors.contactName.message}</FieldError>
-            )}
-          </div>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="hero-companyName">Company Name</FieldLabel>
-          <Input
-            id="hero-companyName"
-            placeholder="Acme Labs"
-            {...register("companyName")}
-          />
-          <div className="min-h-5">
-            {errors.companyName && (
-              <FieldError>{errors.companyName.message}</FieldError>
-            )}
-          </div>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="hero-email">Work Email</FieldLabel>
-          <Input
-            id="hero-email"
-            type="email"
-            placeholder="jane@acme.com"
-            {...register("email")}
-          />
-          <div className="min-h-5">
-            {errors.email && (
-              <FieldError>{errors.email.message}</FieldError>
-            )}
-          </div>
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor="hero-phone">Mobile Number</FieldLabel>
-          <input type="hidden" {...register("phone")} />
-          <PhoneInput
-            id="hero-phone"
-            value={phoneValue}
-            onChange={(v) => setValue("phone", v, { shouldValidate: true })}
-          />
-          <div className="min-h-5">
-            {errors.phone && (
-              <FieldError>{errors.phone.message}</FieldError>
-            )}
-          </div>
-        </Field>
-
-        {/* Honeypot — hidden from humans, bots auto-fill it */}
-        <div className="absolute -left-[9999px] -top-[9999px]" aria-hidden="true">
-          <input
-            type="text"
-            tabIndex={-1}
-            autoComplete="off"
-            {...register("website")}
-          />
-        </div>
-
-        {apiError && (
-          <p className="text-sm text-destructive">{apiError}</p>
-        )}
-
-        <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting..." : "Book a Call →"}
-        </Button>
-      </form>
     </div>
   );
 }
@@ -818,91 +594,107 @@ export function HirePageLayout({
     })),
   ];
 
+  // ── Brief wizard state + prefill derived from the page context ──
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const openBrief = () => setWizardOpen(true);
+
+  const accent = titleAccent?.trim();
+  const isTech = !!accent && BRIEF_TECH_NAMES.includes(accent);
+  const briefTech = isTech ? [accent as string] : [];
+  const briefRoleChips = isTech
+    ? [
+        `Senior ${accent} Engineer`,
+        `Full-Stack (${accent}) Engineer`,
+        "Frontend Engineer",
+        "Backend Engineer",
+      ]
+    : undefined;
+
   return (
     <>
       <Navbar />
       <main>
-        {/* ── 1. Hero — split layout with embedded form ────────── */}
-        <section className="container mx-auto px-6">
-          <div className="grid lg:grid-cols-[1fr_460px] gap-12 xl:gap-20 py-16 lg:py-24 lg:items-start">
+        {/* ── 1. Hero — v2 centered brief CTA ──────────────────── */}
+        <section className="relative overflow-hidden">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-[-120px] h-[460px] w-[820px] -translate-x-1/2"
+            style={{
+              background:
+                "radial-gradient(ellipse, color-mix(in oklab, var(--pulse) 13%, transparent), transparent 65%)",
+            }}
+          />
+          <div className="container relative mx-auto flex flex-col items-center px-6 pb-12 pt-14 text-center lg:pt-20">
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-border bg-muted/60 px-4 py-1.5">
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400/70" />
+                <span className="relative size-2 rounded-full bg-emerald-400" />
+              </span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+                {label} · available this week
+              </span>
+            </span>
 
-            {/* Left — value props */}
-            <div className="lg:sticky lg:top-24 space-y-10">
+            <h1 className="mt-7 max-w-3xl text-4xl font-semibold leading-[1.06] tracking-tight sm:text-5xl lg:text-6xl">
+              {renderTitle(title, titleAccent)}
+            </h1>
+            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
+              {description}
+            </p>
 
-              {/* Headline block */}
-              <div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  {label}
-                </span>
-                <h1 className="mt-4 text-4xl font-semibold tracking-tight lg:text-5xl">
-                  {renderTitle(title, titleAccent)}
-                </h1>
-                <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
-                  {description}
-                </p>
-              </div>
-
-              {/* Benefits */}
-              <ul className="space-y-5">
-                {benefits.map((b) => (
-                  <li key={b.title} className="flex gap-3.5 items-start">
-                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-border bg-muted">
-                      <Check className="size-3 text-foreground" strokeWidth={2.5} />
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold">{b.title}</p>
-                      <p className="mt-0.5 text-sm text-muted-foreground">
-                        {b.description}
-                      </p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-6 border-t pt-8">
-                {[
-                  { value: "48h", label: "Avg. time to first match" },
-                  { value: "94%", label: "6-month retention rate" },
-                  { value: "60%", label: "Lower cost vs agencies" },
-                ].map((s) => (
-                  <div key={s.label}>
-                    <p className="font-mono text-2xl font-semibold text-pulse lg:text-3xl">
-                      {s.value}
-                    </p>
-                    <p className="mt-1 text-xs text-muted-foreground">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* CTAs — visible on mobile, hidden on lg (form takes over) */}
-              <div className="flex flex-wrap gap-3 lg:hidden">
-                <Button asChild size="lg" className="rounded-full gap-2">
-                  <Link href="/companies/signup">
-                    Start Hiring
-                    <ArrowRight className="size-4 -rotate-45" />
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  size="lg"
-                  className="rounded-full"
-                >
-                  <Link href="/marketplace">Browse Developers</Link>
-                </Button>
-              </div>
-
+            <div className="mt-8 flex flex-col items-center gap-3.5">
+              <Button
+                size="lg"
+                onClick={openBrief}
+                className="h-14 gap-2.5 rounded-full px-8 text-base"
+              >
+                Start your brief — it takes 60 seconds
+                <ArrowRight className="size-4" />
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Free to start · No JD needed · No recruitment fees
+              </span>
             </div>
 
-            {/* Right — embedded form */}
-            <div className="lg:sticky lg:top-24">
-              <HeroForm />
+            {/* Trust row */}
+            <div className="mt-9 flex items-center gap-4">
+              <div className="flex -space-x-2.5">
+                {matchData.map((d) => (
+                  <Avatar key={d.name} className="size-9 ring-2 ring-background">
+                    <AvatarImage src={d.avatar} alt="" />
+                    <AvatarFallback>{d.name[0]}</AvatarFallback>
+                  </Avatar>
+                ))}
+              </div>
+              <div className="text-left">
+                <div className="flex items-center gap-0.5 text-pulse">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Star key={i} className="size-3.5 fill-current" />
+                  ))}
+                  <span className="ml-1.5 text-sm font-semibold text-foreground">
+                    4.9
+                  </span>
+                </div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  Trusted by 500+ engineering teams
+                </div>
+              </div>
             </div>
+
+            {/* Profile peek cards */}
+            <div className="mt-12 flex flex-wrap justify-center gap-4">
+              {matchData.map((d) => (
+                <ProfilePeekCard key={d.name} d={d} />
+              ))}
+            </div>
+            <button
+              onClick={openBrief}
+              className="mt-5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Start a brief to unlock your full shortlist →
+            </button>
           </div>
         </section>
-
-
 
         {/* ── 3. Features showcase — match + vetting mockups ──── */}
         <section className="container mx-auto px-6 py-24">
@@ -968,11 +760,9 @@ export function HirePageLayout({
                 ))}
               </div>
               <div className="px-2">
-                <Button asChild className="rounded-full gap-2">
-                  <Link href="/companies/signup">
-                    Post a Role Free
-                    <ArrowRight className="size-4" />
-                  </Link>
+                <Button onClick={openBrief} className="rounded-full gap-2">
+                  Start your brief
+                  <ArrowRight className="size-4" />
                 </Button>
               </div>
             </div>
@@ -1116,11 +906,6 @@ export function HirePageLayout({
           </section>
         )}
 
-        {/* ── 8. Mobile form (visible below cross-links on small) */}
-        <section className="container mx-auto px-6 pb-20 lg:hidden">
-          <HeroForm />
-        </section>
-
         {/* ── 9. Bottom CTA — dark section ─────────────────────── */}
         <section className="dark bg-background py-16 text-foreground">
           <div className="container mx-auto px-6">
@@ -1160,13 +945,11 @@ export function HirePageLayout({
                 <div className="flex flex-wrap gap-3">
                   <Button
                     size="lg"
+                    onClick={openBrief}
                     className="rounded-full hover:bg-pulse hover:text-pulse-foreground"
-                    asChild
                   >
-                    <Link href="/companies/signup">
-                      Start Hiring Today
-                      <ArrowRight className="ml-2 size-4 -rotate-45" />
-                    </Link>
+                    Start your brief
+                    <ArrowRight className="ml-2 size-4 -rotate-45" />
                   </Button>
                   <Button
                     asChild
@@ -1207,6 +990,14 @@ export function HirePageLayout({
         </section>
       </main>
       <Footer />
+
+      <BriefWizard
+        open={wizardOpen}
+        onClose={() => setWizardOpen(false)}
+        defaultTech={briefTech}
+        roleChips={briefRoleChips}
+        sourcePage={label}
+      />
     </>
   );
 }
