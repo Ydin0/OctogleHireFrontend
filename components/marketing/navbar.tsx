@@ -159,7 +159,7 @@ function HireTalentMenu({ active }: { active?: boolean }) {
       >
         {/* Featured AI Engineers card */}
         <Link
-          href="/marketplace"
+          href="/hire/ai-engineer"
           onClick={close}
           className="group/featured mb-5 flex flex-row items-center gap-4 rounded-2xl border border-pulse/30 bg-pulse/[0.06] p-5 transition-colors hover:bg-pulse/10"
         >
@@ -492,7 +492,7 @@ const Navbar = ({ className }: NavbarProps) => {
                     {/* Hire Talent */}
                     <MobileGroup label="Hire Talent" defaultOpen>
                       <Link
-                        href="/marketplace"
+                        href="/hire/ai-engineer"
                         className="mb-3 flex items-center gap-3 rounded-xl border border-pulse/30 bg-pulse/[0.06] p-3"
                       >
                         <Sparkles className="size-4 text-pulse" />
