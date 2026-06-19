@@ -2277,13 +2277,18 @@ export async function signAgreement(
 export async function sendCompanyMsa(
   token: string | null,
   companyId: string,
+  content?: string,
 ): Promise<{ success: boolean; agreement?: Agreement; error?: string }> {
   try {
     const res = await fetchWithRetry(
       `${apiBaseUrl}/api/admin/companies/${companyId}/agreements/msa`,
       {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(content ? { content } : {}),
       },
     );
     if (!res.ok) {
@@ -2293,6 +2298,85 @@ export async function sendCompanyMsa(
     return { success: true, agreement: (await res.json()) as Agreement };
   } catch {
     return { success: false, error: "Network error" };
+  }
+}
+
+/** Default MSA body rendered for this company (editor pre-fill). */
+export async function fetchDefaultMsa(
+  token: string | null,
+  companyId: string,
+): Promise<string | null> {
+  if (!token) return null;
+  try {
+    const res = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/agreements/msa/default`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    return ((await res.json()) as { content: string }).content;
+  } catch {
+    return null;
+  }
+}
+
+/** Full agreement incl. contentSnapshot (admin view/edit). */
+export async function fetchAdminAgreement(
+  token: string | null,
+  companyId: string,
+  id: string,
+): Promise<(Agreement & { contentSnapshot: string }) | null> {
+  if (!token) return null;
+  try {
+    const res = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/agreements/${id}`,
+      { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!res.ok) return null;
+    return (await res.json()) as Agreement & { contentSnapshot: string };
+  } catch {
+    return null;
+  }
+}
+
+export async function updateAdminAgreement(
+  token: string | null,
+  companyId: string,
+  id: string,
+  contentSnapshot: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const res = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/agreements/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ contentSnapshot }),
+      },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function resendAgreement(
+  token: string | null,
+  companyId: string,
+  id: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const res = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/companies/${companyId}/agreements/${id}/resend`,
+      { method: "POST", headers: { Authorization: `Bearer ${token}` } },
+    );
+    return res.ok;
+  } catch {
+    return false;
   }
 }
 

@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth, useSignIn } from "@clerk/nextjs";
+import { useAuth, useClerk, useSignIn } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
 
 import { createCompanyImpersonationTicket } from "@/lib/api/companies";
@@ -14,6 +14,7 @@ function ImpersonateInner() {
   const params = useSearchParams();
   const companyId = params.get("companyId");
   const { getToken } = useAuth();
+  const { signOut } = useClerk();
   const { signIn, setActive, isLoaded } = useSignIn();
 
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +41,12 @@ function ImpersonateInner() {
         }
         setCompanyName(data.companyName);
 
+        // Clerk rejects ticket sign-in while a session is active ("You're
+        // already signed in"). Sign out the admin session first — the ticket
+        // is already fetched, and this is a separate tab so the admin's
+        // original tab keeps its session.
+        await signOut();
+
         const { createdSessionId } = await signIn!.create({
           strategy: "ticket",
           ticket: data.ticket,
@@ -55,7 +62,7 @@ function ImpersonateInner() {
         setError(e instanceof Error ? e.message : "Impersonation failed.");
       }
     })();
-  }, [isLoaded, companyId, getToken, signIn, setActive, router]);
+  }, [isLoaded, companyId, getToken, signOut, signIn, setActive, router]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">

@@ -35,9 +35,9 @@ import {
   updateCompanyCurrency,
   updateCompanyMarketplaceAccess,
   fetchAdminCompanyAgreements,
-  sendCompanyMsa,
 } from "@/lib/api/companies";
 import { CompanyInvoices } from "./_components/company-invoices";
+import { MsaEditorDialog } from "./_components/msa-editor-dialog";
 import {
   type CompanyStatus,
   companyStatusBadgeClass,
@@ -129,7 +129,13 @@ const CompanyDetailPage = ({
   });
 
   const [agreements, setAgreements] = useState<Agreement[]>([]);
-  const [sendingMsa, setSendingMsa] = useState(false);
+  const [msaEditorOpen, setMsaEditorOpen] = useState(false);
+
+  const refreshAgreements = async () => {
+    if (!company) return;
+    const token = await getToken();
+    setAgreements(await fetchAdminCompanyAgreements(token, company.id));
+  };
 
   const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -191,22 +197,6 @@ const CompanyDetailPage = ({
     toast.success(
       enabled ? "Marketplace enabled for this company" : "Marketplace disabled for this company",
     );
-  };
-
-  const handleSendMsa = async () => {
-    if (!company) return;
-    setSendingMsa(true);
-    const token = await getToken();
-    const result = await sendCompanyMsa(token, company.id);
-    if (result.success) {
-      toast.success("MSA sent to company");
-      // Refresh agreements
-      const updated = await fetchAdminCompanyAgreements(token, company.id);
-      setAgreements(updated);
-    } else {
-      toast.error(result.error ?? "Failed to send MSA");
-    }
-    setSendingMsa(false);
   };
 
   const handleAssignManager = async (accountManagerId: string) => {
@@ -418,6 +408,14 @@ const CompanyDetailPage = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <MsaEditorDialog
+        companyId={company.id}
+        agreement={agreements.find((a) => a.type === "msa") ?? null}
+        open={msaEditorOpen}
+        onOpenChange={setMsaEditorOpen}
+        onChanged={refreshAgreements}
+      />
 
       {/* ── Header Card ──────────────────────────────────────────────── */}
       <Card>
@@ -803,27 +801,32 @@ const CompanyDetailPage = ({
                           variant="default"
                           size="sm"
                           className="rounded-full"
-                          disabled={sendingMsa}
-                          onClick={handleSendMsa}
+                          onClick={() => setMsaEditorOpen(true)}
                         >
-                          {sendingMsa ? (
-                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                          ) : (
-                            <Mail className="mr-1.5 h-3.5 w-3.5" />
-                          )}
-                          Send MSA
+                          <Mail className="mr-1.5 h-3.5 w-3.5" />
+                          Prepare &amp; send MSA
                         </Button>
                       ) : (
-                        <Badge
-                          variant="outline"
-                          className={
-                            msa.status === "signed"
-                              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
-                              : "border-amber-500/30 bg-amber-500/10 text-amber-700"
-                          }
-                        >
-                          {msa.status === "signed" ? "Signed" : "Pending"}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant="outline"
+                            className={
+                              msa.status === "signed"
+                                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
+                                : "border-amber-500/30 bg-amber-500/10 text-amber-700"
+                            }
+                          >
+                            {msa.status === "signed" ? "Signed" : "Pending"}
+                          </Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full"
+                            onClick={() => setMsaEditorOpen(true)}
+                          >
+                            {msa.status === "signed" ? "View" : "View / Edit"}
+                          </Button>
+                        </div>
                       )}
                     </div>
 
