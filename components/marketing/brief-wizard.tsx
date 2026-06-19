@@ -250,7 +250,10 @@ export function BriefWizard({
   return (
     <div
       className="dark fixed inset-0 z-[120] flex items-center justify-center p-4 sm:p-6"
-      style={{ background: "color-mix(in oklab, #05070d 72%, transparent)", backdropFilter: "blur(6px)" }}
+      style={{
+        background: "color-mix(in oklab, #05070d 72%, transparent)",
+        backdropFilter: "blur(6px)",
+      }}
       onClick={onClose}
     >
       <div

@@ -104,8 +104,7 @@ const matchData = [
     role: "React \u2022 6 yrs exp",
     rate: "$65/hr",
     score: "98%",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+    avatar: "/featured-developers/03.png",
     online: true,
     stack: [
       `${DEVICON}/react/react-original.svg`,
@@ -117,8 +116,7 @@ const matchData = [
     role: "React \u2022 5 yrs exp",
     rate: "$60/hr",
     score: "95%",
-    avatar:
-      "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&crop=face",
+    avatar: "/featured-developers/04.png",
     online: true,
     stack: [
       `${DEVICON}/react/react-original.svg`,
@@ -130,14 +128,50 @@ const matchData = [
     role: "React \u2022 7 yrs exp",
     rate: "$75/hr",
     score: "93%",
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face",
+    avatar: "/featured-developers/05.png",
     online: false,
     stack: [
       `${DEVICON}/react/react-original.svg`,
       `${DEVICON}/tailwindcss/tailwindcss-original.svg`,
     ],
   },
+];
+
+// Hero profile-peek cards \u2014 mirrors the "Hire React Developers v2" design,
+// using our own developer portraits.
+const heroProfiles = [
+  {
+    name: "Priya Sharma",
+    role: "Senior React Engineer",
+    rate: "$65/hr",
+    location: "\ud83c\uddee\ud83c\uddf3 Bengaluru",
+    avatar: "/featured-developers/01.png",
+    tags: ["React", "TypeScript", "Next.js"],
+  },
+  {
+    name: "Arjun Kumar",
+    role: "Full-Stack (React)",
+    rate: "$60/hr",
+    location: "\ud83c\uddee\ud83c\uddf3 Mumbai",
+    avatar: "/featured-developers/02.png",
+    tags: ["React", "Node.js", "GraphQL"],
+  },
+  {
+    name: "Ricardo M.",
+    role: "Frontend Engineer",
+    rate: "$50/hr",
+    location: "\ud83c\uddf5\ud83c\uddf9 Lisbon",
+    avatar: "/Ricardo-Recruitment.jpg",
+    tags: ["React", "Next.js", "Tailwind"],
+  },
+];
+
+// Avatars for the hero trust row (same images, plus Anil).
+const TRUST_AVATARS = [
+  "/featured-developers/01.png",
+  "/featured-developers/02.png",
+  "/Ricardo-Recruitment.jpg",
+  "/Anil-TechLead.jpg",
 ];
 
 const VETTING_STEPS = [
@@ -147,26 +181,6 @@ const VETTING_STEPS = [
   "Background Check",
   "Reference Verification",
 ];
-
-// ---------------------------------------------------------------------------
-// Helper — render title with accent
-// ---------------------------------------------------------------------------
-
-function renderTitle(title: string, accent?: string) {
-  if (!accent) return title;
-  const idx = title.toLowerCase().indexOf(accent.toLowerCase());
-  if (idx === -1) return title;
-  const before = title.slice(0, idx);
-  const match = title.slice(idx, idx + accent.length);
-  const after = title.slice(idx + accent.length);
-  return (
-    <>
-      {before}
-      <span className="text-pulse">{match}</span>
-      {after}
-    </>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Match mockup — shimmer loading → staggered results loop
@@ -511,14 +525,10 @@ function FaqAccordion() {
 // Hero profile peek cards
 // ---------------------------------------------------------------------------
 
-function ProfilePeekCard({
-  d,
-}: {
-  d: (typeof matchData)[number] & { location?: string };
-}) {
+function ProfilePeekCard({ d }: { d: (typeof heroProfiles)[number] }) {
   return (
     <div className="w-[230px] shrink-0 overflow-hidden rounded-3xl border border-border bg-card text-left shadow-sm transition-transform hover:-translate-y-1">
-      <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-muted to-background">
+      <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-[#1b2540] to-[#0c1120]">
         <Avatar className="size-full rounded-none">
           <AvatarImage src={d.avatar} alt={d.name} className="object-cover" />
           <AvatarFallback className="rounded-none text-2xl">{d.name[0]}</AvatarFallback>
@@ -541,16 +551,20 @@ function ProfilePeekCard({
           <div className="text-sm font-semibold">{d.name}</div>
           <div className="mt-0.5 text-xs text-pulse">{d.role}</div>
         </div>
-        <div className="flex items-center gap-1.5">
-          {d.stack.map((icon, si) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={si} src={icon} alt="" className="size-3.5" />
+        <div className="flex flex-wrap gap-1.5">
+          {d.tags.map((t) => (
+            <span
+              key={t}
+              className="rounded-full border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground"
+            >
+              {t}
+            </span>
           ))}
         </div>
         <div className="flex items-center justify-between border-t border-border pt-2.5">
           <span className="font-mono text-sm font-semibold">{d.rate}</span>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-pulse">
-            {d.score} match
+          <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            {d.location}
           </span>
         </div>
       </div>
@@ -564,9 +578,7 @@ function ProfilePeekCard({
 
 export function HirePageLayout({
   label,
-  title,
   titleAccent,
-  description,
   benefits,
   crossLinks,
   techCrossLinks,
@@ -614,42 +626,52 @@ export function HirePageLayout({
     <>
       <Navbar />
       <main>
-        {/* ── 1. Hero — v2 centered brief CTA ──────────────────── */}
-        <section className="relative overflow-hidden">
+        {/* ── 1. Hero — v2 grid background + brief CTA (theme-aware) ── */}
+        <section className="bg-grid-zinc relative overflow-hidden bg-background text-foreground">
           <div
             aria-hidden
-            className="pointer-events-none absolute left-1/2 top-[-120px] h-[460px] w-[820px] -translate-x-1/2"
+            className="pointer-events-none absolute left-1/2 top-[-120px] h-[520px] w-[900px] -translate-x-1/2"
             style={{
               background:
-                "radial-gradient(ellipse, color-mix(in oklab, var(--pulse) 13%, transparent), transparent 65%)",
+                "radial-gradient(ellipse, color-mix(in oklab, var(--pulse) 16%, transparent), transparent 65%)",
             }}
           />
-          <div className="container relative mx-auto flex flex-col items-center px-6 pb-12 pt-14 text-center lg:pt-20">
+          <div className="container relative mx-auto flex flex-col items-center px-6 pb-14 pt-14 text-center lg:pt-20">
             <span className="inline-flex items-center gap-2.5 rounded-full border border-border bg-muted/60 px-4 py-1.5">
               <span className="relative flex size-2">
                 <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400/70" />
                 <span className="relative size-2 rounded-full bg-emerald-400" />
               </span>
               <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-                {label} · available this week
+                {accent ? `${accent} ` : ""}engineers available this week
               </span>
             </span>
 
-            <h1 className="mt-7 max-w-3xl text-4xl font-semibold leading-[1.06] tracking-tight sm:text-5xl lg:text-6xl">
-              {renderTitle(title, titleAccent)}
+            <h1 className="mt-6 max-w-[880px] font-medium leading-[1.02] tracking-[-0.028em] text-[clamp(42px,6vw,76px)] [text-wrap:balance]">
+              Hire elite{" "}
+              {accent && (
+                <>
+                  <span className="text-pulse">{accent}</span>{" "}
+                </>
+              )}
+              engineers, matched in{" "}
+              <span className="font-mono font-normal">48 hours</span>
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
-              {description}
+            <p className="mt-[22px] max-w-[600px] text-[19px] leading-[1.55] text-muted-foreground [text-wrap:pretty]">
+              Tell us what you&apos;re building. Get 3–5 pre-vetted, AI-native{" "}
+              {accent ? `${accent} ` : ""}engineers —{" "}
+              <span className="text-foreground">40–60% below market</span>, with
+              zero recruitment fees and a 14-day replacement guarantee.
             </p>
 
             <div className="mt-8 flex flex-col items-center gap-3.5">
               <Button
                 size="lg"
                 onClick={openBrief}
-                className="h-14 gap-2.5 rounded-full px-8 text-base"
+                className="h-14 gap-2.5 rounded-full bg-pulse px-8 font-mono text-[15px] uppercase tracking-[0.08em] text-pulse-foreground shadow-[0_12px_32px_-10px_color-mix(in_oklab,var(--pulse)_60%,transparent)] hover:bg-pulse/90"
               >
                 Start your brief — it takes 60 seconds
-                <ArrowRight className="size-4" />
+                <ArrowRight className="size-[17px]" />
               </Button>
               <span className="text-sm text-muted-foreground">
                 Free to start · No JD needed · No recruitment fees
@@ -659,10 +681,10 @@ export function HirePageLayout({
             {/* Trust row */}
             <div className="mt-9 flex items-center gap-4">
               <div className="flex -space-x-2.5">
-                {matchData.map((d) => (
-                  <Avatar key={d.name} className="size-9 ring-2 ring-background">
-                    <AvatarImage src={d.avatar} alt="" />
-                    <AvatarFallback>{d.name[0]}</AvatarFallback>
+                {TRUST_AVATARS.map((src, i) => (
+                  <Avatar key={i} className="size-9 ring-2 ring-background">
+                    <AvatarImage src={src} alt="" className="object-cover" />
+                    <AvatarFallback />
                   </Avatar>
                 ))}
               </div>
@@ -683,7 +705,7 @@ export function HirePageLayout({
 
             {/* Profile peek cards */}
             <div className="mt-12 flex flex-wrap justify-center gap-4">
-              {matchData.map((d) => (
+              {heroProfiles.map((d) => (
                 <ProfilePeekCard key={d.name} d={d} />
               ))}
             </div>
