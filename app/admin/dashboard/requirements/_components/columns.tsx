@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import Image from "next/image";
 import Link from "next/link";
-import { Building2, Clock, MoreHorizontal, Pencil, Star, Trash2, User, Users } from "lucide-react";
+import { Building2, Check, ChevronDown, Clock, Loader2, MoreHorizontal, Pencil, Star, Trash2, User, Users } from "lucide-react";
 
 import type { AdminRequirement } from "@/lib/api/admin";
 import { formatBudget } from "@/lib/utils/format-budget";
@@ -28,6 +28,88 @@ import {
 interface GetColumnsOptions {
   onToggleFeatured?: (requirement: AdminRequirement) => void;
   onDelete?: (requirement: AdminRequirement) => void;
+  onStatusChange?: (
+    requirement: AdminRequirement,
+    status: RequirementStatus,
+  ) => void;
+  /** id of the requirement whose status update is in flight */
+  statusUpdatingId?: string | null;
+}
+
+const REQUIREMENT_STATUS_OPTIONS: RequirementStatus[] = [
+  "open",
+  "matching",
+  "partially_filled",
+  "filled",
+  "closed",
+];
+
+// Inline status dropdown — change a requirement's status directly from the table.
+function StatusCell({
+  req,
+  onStatusChange,
+  updating,
+}: {
+  req: AdminRequirement;
+  onStatusChange?: (
+    requirement: AdminRequirement,
+    status: RequirementStatus,
+  ) => void;
+  updating?: boolean;
+}) {
+  const status = req.status as RequirementStatus;
+
+  if (!onStatusChange) {
+    return (
+      <Badge variant="outline" className={requirementStatusBadgeClass(status)}>
+        {requirementStatusLabel[status] ?? status}
+      </Badge>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 rounded-md outline-none transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-ring"
+          title="Change status"
+        >
+          <Badge
+            variant="outline"
+            className={requirementStatusBadgeClass(status)}
+          >
+            {requirementStatusLabel[status] ?? status}
+          </Badge>
+          {updating ? (
+            <Loader2 className="size-3 animate-spin text-muted-foreground" />
+          ) : (
+            <ChevronDown className="size-3 text-muted-foreground" />
+          )}
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {REQUIREMENT_STATUS_OPTIONS.map((s) => (
+          <DropdownMenuItem
+            key={s}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (s !== status) onStatusChange(req, s);
+            }}
+            className="gap-2"
+          >
+            <Badge variant="outline" className={requirementStatusBadgeClass(s)}>
+              {requirementStatusLabel[s]}
+            </Badge>
+            {s === status && <Check className="ml-auto size-3.5" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 const experienceLevelLabel: Record<string, string> = {
@@ -232,19 +314,15 @@ export function getColumns(
     {
       accessorKey: "status",
       header: "Status",
-      size: 100,
+      size: 130,
       meta: { sortKey: "status" },
-      cell: ({ getValue }) => {
-        const status = getValue() as RequirementStatus;
-        return (
-          <Badge
-            variant="outline"
-            className={requirementStatusBadgeClass(status)}
-          >
-            {requirementStatusLabel[status] ?? status}
-          </Badge>
-        );
-      },
+      cell: ({ row }) => (
+        <StatusCell
+          req={row.original}
+          onStatusChange={options.onStatusChange}
+          updating={options.statusUpdatingId === row.original.id}
+        />
+      ),
     },
     {
       accessorKey: "proposedMatchCount",

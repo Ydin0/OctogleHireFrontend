@@ -10,7 +10,10 @@ import type { AdminRequirement, Pagination } from "@/lib/api/admin";
 import {
   toggleRequirementFeatured,
   deleteAdminRequirement,
+  updateAdminRequirement,
 } from "@/lib/api/admin";
+import type { RequirementStatus } from "../../_components/dashboard-data";
+import { requirementStatusLabel } from "../../_components/dashboard-data";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,6 +45,9 @@ function RequirementsClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [, startTransition] = useTransition();
+
+  // Inline status-change state
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
 
   // Delete state
   const [deleteTarget, setDeleteTarget] = useState<AdminRequirement | null>(null);
@@ -98,6 +104,23 @@ function RequirementsClient({
     }
   };
 
+  const handleStatusChange = async (
+    req: AdminRequirement,
+    status: RequirementStatus,
+  ) => {
+    setStatusUpdatingId(req.id);
+    const result = await updateAdminRequirement(token, req.id, { status });
+    setStatusUpdatingId(null);
+    if (result) {
+      toast.success(`Status changed to ${requirementStatusLabel[status]}`);
+      startTransition(() => {
+        router.refresh();
+      });
+    } else {
+      toast.error("Failed to update status");
+    }
+  };
+
   const handleDelete = async (force = false) => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -123,6 +146,8 @@ function RequirementsClient({
 
   const columns = getColumns({
     onToggleFeatured: handleToggleFeatured,
+    onStatusChange: handleStatusChange,
+    statusUpdatingId,
     onDelete: (req) => {
       setDeleteError(null);
       setDeleteRefs(null);

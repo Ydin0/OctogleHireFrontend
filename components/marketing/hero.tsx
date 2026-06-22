@@ -52,22 +52,22 @@ type Profile = {
 };
 
 const profiles: Profile[] = [
-  { image: "/featured-developers/01.png", name: "Priya Sharma",     role: "Senior Full-Stack",  location: "Bengaluru",  flag: "IN", stacks: ["react", "typescript", "ai"],          rate: "$65/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/02.png", name: "Arjun Kumar",      role: "Backend Engineer",   location: "Mumbai",     flag: "IN", stacks: ["python", "postgresql", "ai"],         rate: "$60/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/03.png", name: "Ananya Reddy",     role: "Frontend Engineer",  location: "Hyderabad",  flag: "IN", stacks: ["vuejs", "typescript", "tailwindcss"], rate: "$50/hr", available: false, aiCertified: true },
-  { image: "/featured-developers/04.png", name: "Rohan Mehta",      role: "Platform Engineer",  location: "Pune",       flag: "IN", stacks: ["go", "kubernetes", "aws"],            rate: "$70/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/05.png", name: "Vikram Iyer",      role: "AI / ML Engineer",   location: "Chennai",    flag: "IN", stacks: ["python", "pytorch", "ai"],            rate: "$75/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/06.png", name: "Aryan Gupta",      role: "DevOps Engineer",    location: "New Delhi",  flag: "IN", stacks: ["aws", "docker", "kubernetes"],        rate: "$68/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/07.png", name: "Karthik Nair",     role: "Full-Stack",         location: "Bengaluru",  flag: "IN", stacks: ["nextjs", "typescript", "ai"],         rate: "$58/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/08.png", name: "Ayesha Khan",      role: "Senior Backend",     location: "Lucknow",    flag: "IN", stacks: ["go", "postgresql", "ai"],             rate: "$72/hr", available: false, aiCertified: true },
-  { image: "/featured-developers/09.png", name: "Rahul Joshi",      role: "Mobile Engineer",    location: "Ahmedabad",  flag: "IN", stacks: ["flutter", "typescript"],              rate: "$55/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/10.png", name: "Meera Pillai",     role: "Backend Engineer",   location: "Kochi",      flag: "IN", stacks: ["java", "spring", "aws"],              rate: "$48/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/11.png", name: "Siddharth Rao",    role: "Frontend Engineer",  location: "Hyderabad",  flag: "IN", stacks: ["react", "typescript", "tailwindcss"], rate: "$45/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/12.png", name: "Divya Menon",      role: "Data Engineer",      location: "Chennai",    flag: "IN", stacks: ["python", "ai", "postgresql"],         rate: "$62/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/13.png", name: "Neha Tiwari",      role: "ML Engineer",        location: "New Delhi",  flag: "IN", stacks: ["typescript", "nextjs", "postgresql"], rate: "$78/hr", available: false, aiCertified: true },
-  { image: "/featured-developers/14.png", name: "Kavya Patel",      role: "Product Engineer",   location: "Ahmedabad",  flag: "IN", stacks: ["react", "nodejs", "ai"],              rate: "$52/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/15.png", name: "Aditya Desai",     role: "Staff Engineer",     location: "Mumbai",     flag: "IN", stacks: ["go", "kubernetes", "ai"],             rate: "$85/hr", available: true,  aiCertified: true },
-  { image: "/featured-developers/16.png", name: "Ishaan Verma",     role: "Backend Engineer",   location: "Pune",       flag: "IN", stacks: ["python", "pytorch", "ai"],            rate: "$58/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/01.png", name: "Priya Sharma",     role: "Senior Full-Stack",  location: "Bengaluru",  flag: "IN", stacks: ["react", "typescript", "ai"],          rate: "$34/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/02.png", name: "Arjun Kumar",      role: "Backend Engineer",   location: "Mumbai",     flag: "IN", stacks: ["python", "postgresql", "ai"],         rate: "$32/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/03.png", name: "Ananya Reddy",     role: "Frontend Engineer",  location: "Hyderabad",  flag: "IN", stacks: ["vuejs", "typescript", "tailwindcss"], rate: "$26/hr", available: false, aiCertified: true },
+  { image: "/featured-developers/04.png", name: "Rohan Mehta",      role: "Platform Engineer",  location: "Pune",       flag: "IN", stacks: ["go", "kubernetes", "aws"],            rate: "$36/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/05.png", name: "Vikram Iyer",      role: "AI / ML Engineer",   location: "Chennai",    flag: "IN", stacks: ["python", "pytorch", "ai"],            rate: "$38/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/06.png", name: "Aryan Gupta",      role: "DevOps Engineer",    location: "New Delhi",  flag: "IN", stacks: ["aws", "docker", "kubernetes"],        rate: "$35/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/07.png", name: "Karthik Nair",     role: "Full-Stack",         location: "Bengaluru",  flag: "IN", stacks: ["nextjs", "typescript", "ai"],         rate: "$30/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/08.png", name: "Ayesha Khan",      role: "Senior Backend",     location: "Lucknow",    flag: "IN", stacks: ["go", "postgresql", "ai"],             rate: "$37/hr", available: false, aiCertified: true },
+  { image: "/featured-developers/09.png", name: "Rahul Joshi",      role: "Mobile Engineer",    location: "Ahmedabad",  flag: "IN", stacks: ["flutter", "typescript"],              rate: "$28/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/10.png", name: "Meera Pillai",     role: "Backend Engineer",   location: "Kochi",      flag: "IN", stacks: ["java", "spring", "aws"],              rate: "$25/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/11.png", name: "Siddharth Rao",    role: "Frontend Engineer",  location: "Hyderabad",  flag: "IN", stacks: ["react", "typescript", "tailwindcss"], rate: "$24/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/12.png", name: "Divya Menon",      role: "Data Engineer",      location: "Chennai",    flag: "IN", stacks: ["python", "ai", "postgresql"],         rate: "$33/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/13.png", name: "Neha Tiwari",      role: "ML Engineer",        location: "New Delhi",  flag: "IN", stacks: ["typescript", "nextjs", "postgresql"], rate: "$39/hr", available: false, aiCertified: true },
+  { image: "/featured-developers/14.png", name: "Kavya Patel",      role: "Product Engineer",   location: "Ahmedabad",  flag: "IN", stacks: ["react", "nodejs", "ai"],              rate: "$29/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/15.png", name: "Aditya Desai",     role: "Staff Engineer",     location: "Mumbai",     flag: "IN", stacks: ["go", "kubernetes", "ai"],             rate: "$40/hr", available: true,  aiCertified: true },
+  { image: "/featured-developers/16.png", name: "Ishaan Verma",     role: "Backend Engineer",   location: "Pune",       flag: "IN", stacks: ["python", "pytorch", "ai"],            rate: "$31/hr", available: true,  aiCertified: true },
 ];
 
 const STACK_ICON: Record<string, string> = {
