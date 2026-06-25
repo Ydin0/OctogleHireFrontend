@@ -227,10 +227,10 @@ export function InvoiceSummarySection({ summary }: SummaryProps) {
         <CardContent className="space-y-3 p-4">
           <div>
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Revenue, last 12 months
+              Revenue by billing period
             </p>
             <p className="text-sm font-medium">
-              Issued amounts converted to {displayCurrency}
+              Amounts by billing month, converted to {displayCurrency}
             </p>
           </div>
           <InvoiceMonthlyChart

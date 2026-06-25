@@ -48,9 +48,22 @@ export function InvoiceMonthlyChart({ data, displayCurrency }: ChartProps) {
 
   const series = useMemo(() => {
     const now = new Date();
+    // The 12-month window ends at the later of: this month, or the latest
+    // billing-period month present in the data — so a future period (e.g. an
+    // invoice billed for next month) still appears on the chart.
+    let endY = now.getFullYear();
+    let endM = now.getMonth(); // 0-based
+    for (const p of data) {
+      const [y, m] = p.month.split("-").map(Number);
+      if (!y || !m) continue;
+      if (y > endY || (y === endY && m - 1 > endM)) {
+        endY = y;
+        endM = m - 1;
+      }
+    }
     const months: { month: string; amount: number; label: string; full: string }[] = [];
     for (let i = 11; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const d = new Date(endY, endM - i, 1);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       const match = data.find((p) => p.month === key);
       months.push({
