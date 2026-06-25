@@ -188,8 +188,8 @@ function InvoicesClient({
       toast.error(result.error);
       return;
     }
-    const errSuffix =
-      result.errors.length > 0 ? ` (${result.errors.length} failed to render)` : "";
+    const failed = result.errors?.length ?? 0;
+    const errSuffix = failed > 0 ? ` (${failed} failed to render)` : "";
     toast.success(
       `Emailed ${result.emailed} invoice PDF${result.emailed !== 1 ? "s" : ""} to ${result.recipientEmail}${errSuffix}`,
     );

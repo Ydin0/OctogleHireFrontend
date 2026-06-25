@@ -397,13 +397,26 @@ export async function bulkEmailInvoices(
     if (!response.ok) {
       const body = (await response.json().catch(() => ({}))) as {
         message?: string;
+        error?: string;
       };
-      return { error: body.message ?? "Failed to email invoices" };
+      return {
+        error:
+          body.message ??
+          body.error ??
+          `Failed to email invoices (${response.status})`,
+      };
     }
-    return (await response.json()) as {
-      emailed: number;
-      recipientEmail: string;
-      errors: { id: string; message: string }[];
+    // Normalise — never trust the body to contain every field, so callers can
+    // safely read `.errors.length` without an unhandled rejection.
+    const body = (await response.json().catch(() => ({}))) as {
+      emailed?: number;
+      recipientEmail?: string;
+      errors?: { id: string; message: string }[];
+    };
+    return {
+      emailed: body.emailed ?? 0,
+      recipientEmail: body.recipientEmail ?? recipientEmail,
+      errors: Array.isArray(body.errors) ? body.errors : [],
     };
   } catch {
     return { error: "Network error" };
