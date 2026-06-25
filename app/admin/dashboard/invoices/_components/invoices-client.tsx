@@ -18,6 +18,7 @@ import {
   bulkMarkInvoicesPaid,
   bulkSendInvoices,
   bulkDeleteInvoices,
+  bulkEmailInvoices,
 } from "@/lib/api/invoices";
 import type { AdminEngagement, Pagination } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
@@ -172,6 +173,25 @@ function InvoicesClient({
       result.errors.length > 0 ? `, ${result.errors.length} failed` : "";
     toast.success(
       `Sent ${result.sent}${result.skipped > 0 ? `, skipped ${result.skipped} non-drafts` : ""}${errSuffix}`,
+    );
+    refreshAndClear();
+  };
+
+  const handleBulkEmail = async (recipientEmail: string, note: string) => {
+    const result = await bulkEmailInvoices(
+      token,
+      selectedIds,
+      recipientEmail,
+      note || undefined,
+    );
+    if ("error" in result) {
+      toast.error(result.error);
+      return;
+    }
+    const errSuffix =
+      result.errors.length > 0 ? ` (${result.errors.length} failed to render)` : "";
+    toast.success(
+      `Emailed ${result.emailed} invoice PDF${result.emailed !== 1 ? "s" : ""} to ${result.recipientEmail}${errSuffix}`,
     );
     refreshAndClear();
   };
@@ -379,6 +399,7 @@ function InvoicesClient({
         isSuperAdmin={!!isSuperAdmin}
         onMarkPaid={handleBulkMarkPaid}
         onSend={handleBulkSend}
+        onEmail={handleBulkEmail}
         onDelete={handleBulkDelete}
         onClear={clearSelection}
       />

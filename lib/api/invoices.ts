@@ -367,6 +367,49 @@ export async function bulkDeleteInvoices(
   }
 }
 
+/**
+ * Email the selected invoices' PDFs (bundled into one email) to an arbitrary
+ * address — e.g. a client's accounts department. Does not change invoice state.
+ */
+export async function bulkEmailInvoices(
+  token: string | null,
+  ids: string[],
+  recipientEmail: string,
+  note?: string,
+): Promise<
+  | { emailed: number; recipientEmail: string; errors: { id: string; message: string }[] }
+  | { error: string }
+> {
+  if (!token) return { error: "No token" };
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/invoices/bulk/email`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ids, recipientEmail, note }),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as {
+        message?: string;
+      };
+      return { error: body.message ?? "Failed to email invoices" };
+    }
+    return (await response.json()) as {
+      emailed: number;
+      recipientEmail: string;
+      errors: { id: string; message: string }[];
+    };
+  } catch {
+    return { error: "Network error" };
+  }
+}
+
 /** Builds the CSV-export URL for the Export button (browser navigates to it). */
 export function buildInvoicesCsvUrl(filters: InvoiceFilters): string {
   const qs = buildInvoiceFiltersQuery(filters);

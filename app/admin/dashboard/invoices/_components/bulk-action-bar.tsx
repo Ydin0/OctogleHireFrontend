@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Loader2, Send, Trash2, X } from "lucide-react";
+import { Check, Loader2, Mail, Send, Trash2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -18,11 +21,14 @@ interface InvoiceBulkActionBarProps {
   isSuperAdmin: boolean;
   onMarkPaid: () => Promise<void> | void;
   onSend: () => Promise<void> | void;
+  onEmail: (recipientEmail: string, note: string) => Promise<void> | void;
   onDelete: () => Promise<void> | void;
   onClear: () => void;
 }
 
-type BusyKind = "markPaid" | "send" | "delete" | null;
+type BusyKind = "markPaid" | "send" | "email" | "delete" | null;
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Sticky bottom action bar — slides up when ≥1 invoice is selected.
@@ -36,11 +42,14 @@ export function InvoiceBulkActionBar({
   isSuperAdmin,
   onMarkPaid,
   onSend,
+  onEmail,
   onDelete,
   onClear,
 }: InvoiceBulkActionBarProps) {
   const [busy, setBusy] = useState<BusyKind>(null);
-  const [confirm, setConfirm] = useState<"send" | "delete" | null>(null);
+  const [confirm, setConfirm] = useState<"send" | "email" | "delete" | null>(null);
+  const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
 
   const run = async (kind: BusyKind, fn: () => Promise<void> | void) => {
     setBusy(kind);
@@ -51,6 +60,8 @@ export function InvoiceBulkActionBar({
       setConfirm(null);
     }
   };
+
+  const emailValid = EMAIL_RE.test(email.trim());
 
   if (selectedCount === 0) return null;
 
@@ -84,6 +95,20 @@ export function InvoiceBulkActionBar({
           >
             <Send className="size-3.5" />
             Send drafts
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setEmail("");
+              setNote("");
+              setConfirm("email");
+            }}
+            disabled={busy !== null}
+            className="gap-1.5"
+          >
+            <Mail className="size-3.5" />
+            Email PDFs
           </Button>
           {isSuperAdmin && (
             <Button
@@ -141,6 +166,69 @@ export function InvoiceBulkActionBar({
                 <Send className="size-3.5" />
               )}
               Send
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email PDFs to a custom address */}
+      <Dialog
+        open={confirm === "email"}
+        onOpenChange={(o) => !o && busy !== "email" && setConfirm(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Email {selectedCount} invoice PDF(s)</DialogTitle>
+            <DialogDescription>
+              Send the selected invoices&apos; PDFs as attachments to any email
+              address — e.g. a client&apos;s accounts department. This does not
+              change invoice status.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-1">
+            <div className="space-y-2">
+              <Label htmlFor="bulk-email-to">Recipient email</Label>
+              <Input
+                id="bulk-email-to"
+                type="email"
+                placeholder="accounts@client.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bulk-email-note">
+                Note <span className="text-muted-foreground">(optional)</span>
+              </Label>
+              <Textarea
+                id="bulk-email-note"
+                placeholder="Add a short message to include in the email…"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirm(null)}
+              disabled={busy === "email"}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => run("email", () => onEmail(email.trim(), note.trim()))}
+              disabled={busy === "email" || !emailValid}
+              className="gap-1.5"
+            >
+              {busy === "email" ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Mail className="size-3.5" />
+              )}
+              Send PDFs
             </Button>
           </DialogFooter>
         </DialogContent>
