@@ -71,11 +71,24 @@ export interface TopClientOutstanding {
   outstanding: number;
 }
 
+export interface CurrencyTotal {
+  currency: string;
+  total: number;
+}
+export interface AgingByCurrency extends InvoiceAgingBuckets {
+  currency: string;
+}
 export interface InvoiceSummary {
   totalInvoices: number;
   totalRevenue: number;
   totalPaid: number;
   totalOutstanding: number;
+  /** Per-currency breakdowns — present on newer backends; the client converts
+   *  each to the display currency so KPI cards match the converted chart. */
+  revenueByCurrency?: CurrencyTotal[];
+  paidByCurrency?: CurrencyTotal[];
+  outstandingByCurrency?: CurrencyTotal[];
+  agingByCurrency?: AgingByCurrency[];
   overdueCount: number;
   agingBuckets: InvoiceAgingBuckets;
   monthlyRevenue: MonthlyRevenuePoint[];

@@ -31,25 +31,51 @@ interface SummaryProps {
 export function InvoiceSummarySection({ summary }: SummaryProps) {
   const { displayCurrency, convert } = useAdminCurrency();
 
-  // The summary endpoint sums per-row totals in their stored currency. To show
-  // a single number in the admin's chosen display currency, convert via the
-  // existing useAdminCurrency context. Note: this is an *approximation* for
-  // the headline cards — the server returns per-currency monthly revenue for
-  // accurate charting; KPIs assume the dominant currency.
-  const totalRevenue = formatCurrency(summary.totalRevenue, displayCurrency);
-  const totalPaid = formatCurrency(summary.totalPaid, displayCurrency);
-  const totalOutstanding = formatCurrency(
-    summary.totalOutstanding,
-    displayCurrency,
+  // Convert each currency's subtotal to the display currency and sum — this is
+  // exactly how the chart is computed, so the KPI cards now agree with it.
+  // Falls back to the single mixed-currency number on older backends.
+  const sumConverted = (
+    breakdown: { currency: string; total: number }[] | undefined,
+    fallback: number,
+  ) =>
+    breakdown && breakdown.length > 0
+      ? breakdown.reduce((acc, c) => acc + convert(c.total, c.currency), 0)
+      : convert(fallback, displayCurrency);
+
+  const totalRevenueNum = useMemo(
+    () => sumConverted(summary.revenueByCurrency, summary.totalRevenue),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [summary.revenueByCurrency, summary.totalRevenue, convert, displayCurrency],
+  );
+  const totalPaidNum = useMemo(
+    () => sumConverted(summary.paidByCurrency, summary.totalPaid),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [summary.paidByCurrency, summary.totalPaid, convert, displayCurrency],
+  );
+  const totalOutstandingNum = useMemo(
+    () => sumConverted(summary.outstandingByCurrency, summary.totalOutstanding),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [summary.outstandingByCurrency, summary.totalOutstanding, convert, displayCurrency],
   );
 
-  // Aging buckets and top clients arrive in mixed currencies. Convert each
-  // amount via useAdminCurrency to the display currency on the client.
+  const totalRevenue = formatCurrency(totalRevenueNum, displayCurrency);
+  const totalPaid = formatCurrency(totalPaidNum, displayCurrency);
+  const totalOutstanding = formatCurrency(totalOutstandingNum, displayCurrency);
+
+  // Aging buckets — convert each currency's bucket and sum, matching the cards.
   const agingConverted = useMemo(() => {
-    // The server returns aggregated buckets without per-currency breakdown
-    // (an acceptable simplification — most clients use one currency). We
-    // assume the values are in the admin's display currency for now and
-    // round-trip via convert() so the helper can normalise units.
+    const rows = summary.agingByCurrency;
+    if (rows && rows.length > 0) {
+      const acc = { current: 0, d1to30: 0, d31to60: 0, d61to90: 0, d90plus: 0 };
+      for (const r of rows) {
+        acc.current += convert(r.current, r.currency);
+        acc.d1to30 += convert(r.d1to30, r.currency);
+        acc.d31to60 += convert(r.d31to60, r.currency);
+        acc.d61to90 += convert(r.d61to90, r.currency);
+        acc.d90plus += convert(r.d90plus, r.currency);
+      }
+      return acc;
+    }
     const b = summary.agingBuckets;
     return {
       current: convert(b.current, displayCurrency),
@@ -58,7 +84,7 @@ export function InvoiceSummarySection({ summary }: SummaryProps) {
       d61to90: convert(b.d61to90, displayCurrency),
       d90plus: convert(b.d90plus, displayCurrency),
     };
-  }, [summary.agingBuckets, convert, displayCurrency]);
+  }, [summary.agingByCurrency, summary.agingBuckets, convert, displayCurrency]);
 
   const topClients = useMemo(
     () =>
@@ -134,8 +160,7 @@ export function InvoiceSummarySection({ summary }: SummaryProps) {
                   Outstanding by age
                 </p>
                 <p className="text-sm font-medium">
-                  {formatCurrency(summary.totalOutstanding, displayCurrency)}{" "}
-                  total
+                  {totalOutstanding} total
                 </p>
               </div>
               <Hourglass className="size-4 text-muted-foreground" />
