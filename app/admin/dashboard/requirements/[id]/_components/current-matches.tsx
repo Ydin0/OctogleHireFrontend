@@ -21,6 +21,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// Matches in a terminal state can't have their rate/schedule re-negotiated.
+const TERMINAL_STATUSES = new Set(["rejected", "declined", "ended"]);
 
 const fmt = (amount: number, currency: string) =>
   new Intl.NumberFormat("en-US", {
@@ -80,6 +91,8 @@ function MatchCard({
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const canEdit = !TERMINAL_STATUSES.has(match.status);
   const [hourlyRate, setHourlyRate] = useState(String(match.proposedHourlyRate));
   const [hoursPerDay, setHoursPerDay] = useState(String(derivedHours));
   const [daysPerMonth, setDaysPerMonth] = useState(String(derivedDays));
@@ -195,7 +208,7 @@ function MatchCard({
                   <span className="font-mono">
                     = {displayHours * displayDays}h/mo
                   </span>
-                  {match.status === "proposed" && (
+                  {canEdit && (
                     <button
                       onClick={() => setEditing(true)}
                       className="flex items-center gap-1 text-foreground/60 hover:text-foreground transition-colors"
@@ -284,17 +297,52 @@ function MatchCard({
           </div>
         </div>
 
-        {match.status === "proposed" && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 text-muted-foreground hover:text-red-600"
-            onClick={() => onRemove(match.id)}
-          >
-            <Trash2 className="size-3.5" />
-          </Button>
-        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7 text-muted-foreground hover:text-red-600"
+          onClick={() => setConfirmDelete(true)}
+          title="Remove match"
+        >
+          <Trash2 className="size-3.5" />
+        </Button>
       </div>
+
+      {/* Delete confirmation */}
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove this match?</DialogTitle>
+            <DialogDescription>
+              This removes <strong>{match.developer.name}</strong> (
+              {matchStatusLabel[match.status]}) from this requirement. This
+              can&apos;t be undone.
+              {(match.status === "active" || match.status === "accepted") && (
+                <>
+                  {" "}
+                  Any engagement already created from this match is not deleted
+                  and must be ended separately.
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmDelete(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                setConfirmDelete(false);
+                onRemove(match.id);
+              }}
+            >
+              <Trash2 className="mr-1.5 size-3.5" />
+              Remove
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
