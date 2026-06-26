@@ -489,7 +489,30 @@ function InvoicesClient({
         <RecurringClient token={token} companies={companies} />
       ) : (
         <>
-          <InvoiceSummarySection summary={summary} />
+          <InvoiceSummarySection
+            summary={summary}
+            activeMonth={
+              filters.periodFrom && filters.periodFrom === filters.periodTo
+                ? filters.periodFrom
+                : null
+            }
+            onSelectMonth={(month) => {
+              const alreadyFiltered =
+                filters.periodFrom === month && filters.periodTo === month;
+              const params = new URLSearchParams(searchParams.toString());
+              if (alreadyFiltered) {
+                params.delete("periodFrom");
+                params.delete("periodTo");
+              } else {
+                params.set("periodFrom", month);
+                params.set("periodTo", month);
+              }
+              params.delete("page");
+              startTransition(() => {
+                router.push(`?${params.toString()}`);
+              });
+            }}
+          />
 
           {/* Amount display switcher — Native shows each invoice's own
               currency; the others convert (and drive the KPI/chart currency). */}

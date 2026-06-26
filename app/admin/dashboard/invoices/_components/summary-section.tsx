@@ -21,6 +21,8 @@ import { InvoiceMonthlyChart } from "./monthly-revenue-chart";
 
 interface SummaryProps {
   summary: InvoiceSummary;
+  onSelectMonth?: (month: string) => void;
+  activeMonth?: string | null;
 }
 
 /**
@@ -28,7 +30,11 @@ interface SummaryProps {
  * /invoices/summary endpoint which honours the same filters as the list, so
  * every number agrees with the visible page.
  */
-export function InvoiceSummarySection({ summary }: SummaryProps) {
+export function InvoiceSummarySection({
+  summary,
+  onSelectMonth,
+  activeMonth,
+}: SummaryProps) {
   const { displayCurrency, convert } = useAdminCurrency();
 
   // Convert each currency's subtotal to the display currency and sum — this is
@@ -236,6 +242,8 @@ export function InvoiceSummarySection({ summary }: SummaryProps) {
           <InvoiceMonthlyChart
             data={monthlyRolled}
             displayCurrency={displayCurrency}
+            onSelectMonth={onSelectMonth}
+            activeMonth={activeMonth}
           />
         </CardContent>
       </Card>

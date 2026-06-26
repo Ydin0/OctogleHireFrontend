@@ -15,6 +15,10 @@ interface DataPoint {
 interface ChartProps {
   data: DataPoint[];
   displayCurrency: string;
+  /** Click a month bar to filter the table to that billing period (YYYY-MM). */
+  onSelectMonth?: (month: string) => void;
+  /** The currently-filtered billing month (YYYY-MM), highlighted. */
+  activeMonth?: string | null;
 }
 
 // Compact axis labels — $4.2K, $1.1M — so the y-axis never overflows/clips.
@@ -43,7 +47,12 @@ const TICK_COUNT = 4; // horizontal gridlines (excluding baseline)
  * months with zero so the x-axis is continuous. Hover (or tap) a column to see
  * the exact figure; a header summarises total, average, and month-over-month.
  */
-export function InvoiceMonthlyChart({ data, displayCurrency }: ChartProps) {
+export function InvoiceMonthlyChart({
+  data,
+  displayCurrency,
+  onSelectMonth,
+  activeMonth,
+}: ChartProps) {
   const [active, setActive] = useState<number | null>(null);
 
   const series = useMemo(() => {
@@ -168,6 +177,7 @@ export function InvoiceMonthlyChart({ data, displayCurrency }: ChartProps) {
               const pct = niceMax > 0 ? (s.amount / niceMax) * 100 : 0;
               const isActive = active === i;
               const isLast = i === series.length - 1;
+              const isFiltered = activeMonth === s.month;
               return (
                 <button
                   type="button"
@@ -176,15 +186,23 @@ export function InvoiceMonthlyChart({ data, displayCurrency }: ChartProps) {
                   onMouseLeave={() => setActive(null)}
                   onFocus={() => setActive(i)}
                   onBlur={() => setActive(null)}
-                  onClick={() => setActive((cur) => (cur === i ? null : i))}
-                  className="group relative flex h-full flex-1 items-end justify-center outline-none"
+                  onClick={() => onSelectMonth?.(s.month)}
+                  className={cn(
+                    "group relative flex h-full flex-1 items-end justify-center outline-none",
+                    onSelectMonth && "cursor-pointer",
+                  )}
+                  title={onSelectMonth ? `Filter invoices to ${s.full}` : undefined}
                   aria-label={`${s.full}: ${formatCurrency(s.amount, displayCurrency)}`}
                 >
-                  {/* hover column highlight */}
+                  {/* hover / filtered column highlight */}
                   <span
                     className={cn(
                       "absolute inset-x-0.5 bottom-0 top-0 rounded-md transition-colors",
-                      isActive ? "bg-pulse/8" : "bg-transparent",
+                      isFiltered
+                        ? "bg-pulse/15 ring-1 ring-inset ring-pulse/40"
+                        : isActive
+                          ? "bg-pulse/8"
+                          : "bg-transparent",
                     )}
                   />
 
@@ -227,7 +245,9 @@ export function InvoiceMonthlyChart({ data, displayCurrency }: ChartProps) {
               key={s.month}
               className={cn(
                 "flex-1 text-center text-[11px] transition-colors",
-                active === i ? "font-medium text-foreground" : "text-muted-foreground/70",
+                active === i || activeMonth === s.month
+                  ? "font-medium text-foreground"
+                  : "text-muted-foreground/70",
               )}
             >
               {s.label}
