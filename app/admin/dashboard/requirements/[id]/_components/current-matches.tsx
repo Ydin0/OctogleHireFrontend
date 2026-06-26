@@ -29,6 +29,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CURRENCIES } from "@/lib/data/currencies";
 
 // Matches in a terminal state can't have their rate/schedule re-negotiated.
 const TERMINAL_STATUSES = new Set(["rejected", "declined", "ended"]);
@@ -96,6 +104,7 @@ function MatchCard({
   const [hourlyRate, setHourlyRate] = useState(String(match.proposedHourlyRate));
   const [hoursPerDay, setHoursPerDay] = useState(String(derivedHours));
   const [daysPerMonth, setDaysPerMonth] = useState(String(derivedDays));
+  const [currency, setCurrency] = useState(match.currency);
 
   const hours = Number(hoursPerDay) || 8;
   const days = Number(daysPerMonth) || 22;
@@ -110,6 +119,7 @@ function MatchCard({
       monthlyRate: computedMonthly,
       hoursPerDay: hours,
       workingDaysPerMonth: days,
+      currency,
     });
     if (result) {
       toast.success("Match updated");
@@ -221,7 +231,22 @@ function MatchCard({
               </div>
             ) : (
               <div className="space-y-2 pt-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Currency</p>
+                    <Select value={currency} onValueChange={setCurrency}>
+                      <SelectTrigger className="h-8 w-[88px] font-mono text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-72">
+                        {CURRENCIES.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            {c.code} {c.symbol}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-0.5">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Rate/hr</p>
                     <Input
@@ -257,7 +282,7 @@ function MatchCard({
                   <div className="space-y-0.5">
                     <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Monthly</p>
                     <p className="flex h-8 items-center font-mono text-xs font-semibold">
-                      {fmtWhole(computedMonthly, match.currency)}
+                      {fmtWhole(computedMonthly, currency)}
                     </p>
                   </div>
                 </div>
@@ -280,6 +305,7 @@ function MatchCard({
                       setHourlyRate(String(match.proposedHourlyRate));
                       setHoursPerDay(String(derivedHours));
                       setDaysPerMonth(String(derivedDays));
+                      setCurrency(match.currency);
                     }}
                   >
                     <X className="mr-1 size-3" />
