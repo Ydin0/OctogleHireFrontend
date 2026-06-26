@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, Loader2, Mail, Send, Trash2, X } from "lucide-react";
 
+import type { Invoice } from "@/lib/api/invoices";
+import { formatCurrency } from "../../_components/dashboard-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface InvoiceBulkActionBarProps {
-  selectedCount: number;
+  selectedInvoices: Invoice[];
   isSuperAdmin: boolean;
   onMarkPaid: () => Promise<void> | void;
   onSend: () => Promise<void> | void;
@@ -38,7 +40,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * outward-facing (emails go out) or destructive.
  */
 export function InvoiceBulkActionBar({
-  selectedCount,
+  selectedInvoices,
   isSuperAdmin,
   onMarkPaid,
   onSend,
@@ -50,6 +52,18 @@ export function InvoiceBulkActionBar({
   const [confirm, setConfirm] = useState<"send" | "email" | "delete" | null>(null);
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
+
+  const selectedCount = selectedInvoices.length;
+
+  // Excel-style sum of the selected invoices, grouped by their native currency
+  // (so mixed-currency selections stay accurate — no FX guessing).
+  const totalsByCurrency = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const inv of selectedInvoices) {
+      map.set(inv.currency, (map.get(inv.currency) ?? 0) + inv.total);
+    }
+    return Array.from(map.entries()).map(([currency, total]) => ({ currency, total }));
+  }, [selectedInvoices]);
 
   const run = async (kind: BusyKind, fn: () => Promise<void> | void) => {
     setBusy(kind);
@@ -67,10 +81,19 @@ export function InvoiceBulkActionBar({
 
   return (
     <>
-      <div className="sticky bottom-4 z-30 mx-auto flex w-full max-w-3xl items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-2 shadow-lg backdrop-blur">
-        <span className="ml-1 text-sm font-medium tabular-nums">
-          {selectedCount} selected
-        </span>
+      <div className="fixed bottom-6 left-1/2 z-30 flex w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-border bg-background/95 px-5 py-3 shadow-2xl ring-1 ring-pulse/20 backdrop-blur">
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold tabular-nums">
+            {selectedCount} selected
+          </span>
+          <span className="font-mono text-[13px] font-semibold text-pulse tabular-nums">
+            {totalsByCurrency.length === 0
+              ? "—"
+              : totalsByCurrency
+                  .map((t) => formatCurrency(t.total, t.currency))
+                  .join("  ·  ")}
+          </span>
+        </div>
         <div className="ml-auto flex items-center gap-2">
           <Button
             size="sm"

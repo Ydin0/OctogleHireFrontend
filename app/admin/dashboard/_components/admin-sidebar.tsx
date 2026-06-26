@@ -111,7 +111,7 @@ interface AdminSidebarProps {
   pendingInterviewCount: number;
 }
 
-const currencies = ["USD", "GBP", "AED"] as const;
+const currencies = ["USD", "GBP", "EUR", "AED"] as const;
 
 function CurrencyToggle() {
   const { displayCurrency, setDisplayCurrency } = useAdminCurrency();

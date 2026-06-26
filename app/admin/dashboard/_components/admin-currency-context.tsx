@@ -11,7 +11,7 @@ import {
 import { useExchangeRates } from "@/lib/hooks/use-exchange-rates";
 import { formatCurrency } from "./dashboard-data";
 
-type DisplayCurrency = "USD" | "GBP" | "AED";
+type DisplayCurrency = "USD" | "GBP" | "EUR" | "AED";
 
 interface AdminCurrencyContextValue {
   displayCurrency: DisplayCurrency;

@@ -481,6 +481,212 @@ export async function adminCreateInvoice(
   }
 }
 
+// ── Custom (free-form) invoices ──────────────────────────────────────────────
+
+export interface InvoiceLineItemInput {
+  description?: string;
+  amount?: number;
+  hourlyRate?: number;
+  hours?: number;
+}
+
+export interface AdminCreateCustomInvoicePayload {
+  companyId: string;
+  currency?: string;
+  taxRate?: number;
+  dueInDays?: number;
+  notes?: string;
+  periodLabel?: string; // YYYY-MM
+  lineItems: InvoiceLineItemInput[];
+}
+
+export async function adminCreateCustomInvoice(
+  token: string | null,
+  payload: AdminCreateCustomInvoicePayload,
+): Promise<{ success: true; invoiceId: string } | { success: false; error: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/invoices/custom`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as { message?: string };
+      return { success: false, error: body.message ?? "Failed to create invoice" };
+    }
+    const data = (await response.json()) as { id: string };
+    return { success: true, invoiceId: data.id };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+// ── Recurring retainers ──────────────────────────────────────────────────────
+
+export interface RecurringInvoice {
+  id: string;
+  companyId: string;
+  companyName: string;
+  companyLogoUrl: string | null;
+  title: string;
+  description: string | null;
+  currency: string;
+  frequency: string;
+  intervalCount: number;
+  dayOfMonth: number;
+  startDate: string;
+  endDate: string | null;
+  taxRate: number;
+  dueInDays: number;
+  autoSend: boolean;
+  status: string; // active | paused
+  lastGeneratedPeriod: string | null;
+  subtotal: number;
+  createdAt: string;
+}
+
+export interface RecurringInvoicePayload {
+  companyId: string;
+  title: string;
+  description?: string;
+  currency?: string;
+  frequency?: string;
+  intervalCount?: number;
+  dayOfMonth?: number;
+  startDate: string;
+  endDate?: string | null;
+  taxRate?: number;
+  dueInDays?: number;
+  autoSend?: boolean;
+  notes?: string;
+  lineItems: InvoiceLineItemInput[];
+}
+
+export async function fetchRecurringInvoices(
+  token: string | null,
+): Promise<RecurringInvoice[]> {
+  if (!token) return [];
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/recurring-invoices`,
+      { method: "GET", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!response.ok) return [];
+    return (await response.json()) as RecurringInvoice[];
+  } catch {
+    return [];
+  }
+}
+
+export async function createRecurringInvoice(
+  token: string | null,
+  payload: RecurringInvoicePayload,
+): Promise<{ success: true; id: string } | { success: false; error: string }> {
+  if (!token) return { success: false, error: "No token" };
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/recurring-invoices`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as { message?: string };
+      return { success: false, error: body.message ?? "Failed to create retainer" };
+    }
+    const data = (await response.json()) as { id: string };
+    return { success: true, id: data.id };
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+}
+
+export async function updateRecurringInvoice(
+  token: string | null,
+  id: string,
+  payload: Partial<RecurringInvoicePayload> & { status?: string },
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/recurring-invoices/${id}`,
+      {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        cache: "no-store",
+      },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteRecurringInvoice(
+  token: string | null,
+  id: string,
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/recurring-invoices/${id}`,
+      { method: "DELETE", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function setRecurringInvoiceStatus(
+  token: string | null,
+  id: string,
+  action: "pause" | "resume",
+): Promise<boolean> {
+  if (!token) return false;
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/recurring-invoices/${id}/${action}`,
+      { method: "POST", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function generateRecurringInvoiceNow(
+  token: string | null,
+  id: string,
+): Promise<{ created: boolean; message?: string } | { error: string }> {
+  if (!token) return { error: "No token" };
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/recurring-invoices/${id}/generate-now`,
+      { method: "POST", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as { message?: string };
+      return { error: body.message ?? "Failed to generate" };
+    }
+    return (await response.json()) as { created: boolean; message?: string };
+  } catch {
+    return { error: "Network error" };
+  }
+}
+
 export async function updateInvoice(
   token: string | null,
   invoiceId: string,

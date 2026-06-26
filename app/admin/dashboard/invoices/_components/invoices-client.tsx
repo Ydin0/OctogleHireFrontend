@@ -5,21 +5,31 @@ import type { RowSelectionState } from "@tanstack/react-table";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { toast } from "sonner";
-import { Loader2, Plus } from "lucide-react";
+import { ChevronDown, FileText, Loader2, Plus, Repeat, Trash2 } from "lucide-react";
 import type {
   Invoice,
   InvoiceFilters,
   InvoiceSummary,
+  InvoiceLineItemInput,
 } from "@/lib/api/invoices";
 import {
   updateInvoiceStatus,
   deleteInvoice,
   adminCreateInvoice,
+  adminCreateCustomInvoice,
   bulkMarkInvoicesPaid,
   bulkSendInvoices,
   bulkDeleteInvoices,
   bulkEmailInvoices,
 } from "@/lib/api/invoices";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { RecurringClient } from "./recurring-client";
 import type { AdminEngagement, Pagination } from "@/lib/api/admin";
 import { Button } from "@/components/ui/button";
 import {
@@ -126,9 +136,14 @@ function InvoicesClient({
 
   // Row selection state for bulk actions.
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const selectedIds = useMemo(() => {
-    return invoices.filter((_, idx) => rowSelection[idx]).map((i) => i.id);
-  }, [invoices, rowSelection]);
+  const selectedInvoices = useMemo(
+    () => invoices.filter((_, idx) => rowSelection[idx]),
+    [invoices, rowSelection],
+  );
+  const selectedIds = useMemo(
+    () => selectedInvoices.map((i) => i.id),
+    [selectedInvoices],
+  );
 
   const clearSelection = () => setRowSelection({});
 
@@ -294,6 +309,64 @@ function InvoicesClient({
     setCreateSubmitting(false);
   };
 
+  // Invoices ↔ Recurring tab.
+  const [view, setView] = useState<"invoices" | "recurring">("invoices");
+
+  // Custom (free-form) invoice state.
+  const [customOpen, setCustomOpen] = useState(false);
+  const [customSubmitting, setCustomSubmitting] = useState(false);
+  const [customForm, setCustomForm] = useState({
+    companyId: "",
+    currency: "USD",
+    taxRate: "0",
+    dueInDays: "14",
+    notes: "",
+    lines: [{ description: "", amount: "" }] as { description: string; amount: string }[],
+  });
+  const customSubtotal = customForm.lines.reduce(
+    (s, l) => s + (Number(l.amount) || 0),
+    0,
+  );
+
+  const handleCreateCustom = async () => {
+    if (!customForm.companyId) {
+      toast.error("Select a company");
+      return;
+    }
+    const lineItems: InvoiceLineItemInput[] = customForm.lines
+      .filter((l) => l.description.trim() || Number(l.amount) > 0)
+      .map((l) => ({ description: l.description.trim(), amount: Number(l.amount) || 0 }));
+    if (lineItems.length === 0) {
+      toast.error("Add at least one line item");
+      return;
+    }
+    setCustomSubmitting(true);
+    const result = await adminCreateCustomInvoice(token, {
+      companyId: customForm.companyId,
+      currency: customForm.currency,
+      taxRate: Number(customForm.taxRate || 0),
+      dueInDays: Number(customForm.dueInDays || 14),
+      notes: customForm.notes || undefined,
+      lineItems,
+    });
+    setCustomSubmitting(false);
+    if (result.success) {
+      toast.success("Custom invoice saved as draft");
+      setCustomOpen(false);
+      setCustomForm({
+        companyId: "",
+        currency: "USD",
+        taxRate: "0",
+        dueInDays: "14",
+        notes: "",
+        lines: [{ description: "", amount: "" }],
+      });
+      refreshAndClear();
+    } else {
+      toast.error(result.error);
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -308,11 +381,20 @@ function InvoicesClient({
     setDeleting(false);
   };
 
-  const { formatDisplay } = useAdminCurrency();
+  const { formatDisplay, displayCurrency, setDisplayCurrency } =
+    useAdminCurrency();
+
+  // "Native" shows each invoice in the currency it was raised in; otherwise the
+  // chosen display currency (which also drives the global converted KPIs/chart).
+  const [nativeView, setNativeView] = useState(true);
+  const amountFormatter = nativeView
+    ? (amount: number, currency: string) => formatCurrency(amount, currency)
+    : formatDisplay;
+
   const columns = getColumns({
     onMarkPaid: handleMarkPaid,
     onDelete: isSuperAdmin ? (inv) => setDeleteTarget(inv) : undefined,
-    formatDisplay,
+    formatDisplay: amountFormatter,
   });
 
   // Derive unique developer list from engagements + the visible page so the
@@ -349,60 +431,145 @@ function InvoicesClient({
           </p>
         </div>
         {isSuperAdmin && (
-          <Button onClick={() => setCreateOpen(true)} className="gap-1.5">
-            <Plus className="size-4" />
-            Create Invoice
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="gap-1.5">
+                <Plus className="size-4" />
+                Create
+                <ChevronDown className="size-3.5 opacity-70" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setCreateOpen(true)}>
+                <FileText className="mr-2 size-3.5" />
+                Engagement invoice
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setCustomOpen(true)}>
+                <FileText className="mr-2 size-3.5" />
+                Custom invoice
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setView("recurring")}>
+                <Repeat className="mr-2 size-3.5" />
+                Recurring retainer
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
-      <InvoiceSummarySection summary={summary} />
+      {/* Tabs */}
+      <div className="flex gap-0 border-b border-border">
+        {[
+          { value: "invoices" as const, label: "Invoices" },
+          { value: "recurring" as const, label: "Recurring" },
+        ].map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => setView(tab.value)}
+            className={cn(
+              "relative px-4 py-2.5 text-sm font-medium transition-colors",
+              view === tab.value
+                ? "text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {tab.label}
+            <span
+              className={cn(
+                "absolute bottom-0 left-0 h-0.5 w-full bg-foreground transition-all duration-300",
+                view === tab.value ? "opacity-100" : "opacity-0",
+              )}
+            />
+          </button>
+        ))}
+      </div>
 
-      <InvoiceFiltersBar
-        filters={filters}
-        companies={companies}
-        developers={developerOptions}
-        currencies={currencyOptions}
-      />
+      {view === "recurring" ? (
+        <RecurringClient token={token} companies={companies} />
+      ) : (
+        <>
+          <InvoiceSummarySection summary={summary} />
 
-      <DataTable
-        columns={columns}
-        data={invoices}
-        pagination={pagination}
-        onPageChange={(page) => setParam("page", String(page))}
-        onLimitChange={(limit) => {
-          const params = new URLSearchParams(searchParams.toString());
-          params.set("limit", String(limit));
-          params.delete("page");
-          startTransition(() => {
-            router.push(`?${params.toString()}`);
-          });
-        }}
-        onSortChange={handleSortChange}
-        currentSort={
-          filters.sortBy
-            ? {
-                column: filters.sortBy,
-                order: (filters.sortOrder ?? "desc") as "asc" | "desc",
-              }
-            : undefined
-        }
-        rowSelection={rowSelection}
-        onRowSelectionChange={setRowSelection}
-        onRowClick={(invoice) =>
-          router.push(`/admin/dashboard/invoices/${invoice.id}`)
-        }
-      />
+          {/* Amount display switcher — Native shows each invoice's own
+              currency; the others convert (and drive the KPI/chart currency). */}
+          <div className="flex items-center gap-1.5">
+            <span className="mr-1 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+              Amounts in
+            </span>
+            {(["native", "USD", "GBP", "EUR", "AED"] as const).map((opt) => {
+              const active = opt === "native" ? nativeView : !nativeView && displayCurrency === opt;
+              return (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => {
+                    if (opt === "native") setNativeView(true);
+                    else {
+                      setNativeView(false);
+                      setDisplayCurrency(opt);
+                    }
+                  }}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 text-xs font-mono transition-colors",
+                    active
+                      ? "border-pulse/40 bg-pulse/10 text-pulse"
+                      : "border-border text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {opt === "native" ? "Native" : opt}
+                </button>
+              );
+            })}
+          </div>
 
-      <InvoiceBulkActionBar
-        selectedCount={selectedIds.length}
-        isSuperAdmin={!!isSuperAdmin}
-        onMarkPaid={handleBulkMarkPaid}
-        onSend={handleBulkSend}
-        onEmail={handleBulkEmail}
-        onDelete={handleBulkDelete}
-        onClear={clearSelection}
-      />
+          <InvoiceFiltersBar
+            filters={filters}
+            companies={companies}
+            developers={developerOptions}
+            currencies={currencyOptions}
+          />
+
+          <DataTable
+            columns={columns}
+            data={invoices}
+            pagination={pagination}
+            onPageChange={(page) => setParam("page", String(page))}
+            onLimitChange={(limit) => {
+              const params = new URLSearchParams(searchParams.toString());
+              params.set("limit", String(limit));
+              params.delete("page");
+              startTransition(() => {
+                router.push(`?${params.toString()}`);
+              });
+            }}
+            onSortChange={handleSortChange}
+            currentSort={
+              filters.sortBy
+                ? {
+                    column: filters.sortBy,
+                    order: (filters.sortOrder ?? "desc") as "asc" | "desc",
+                  }
+                : undefined
+            }
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            onRowClick={(invoice) =>
+              router.push(`/admin/dashboard/invoices/${invoice.id}`)
+            }
+          />
+
+          <InvoiceBulkActionBar
+            selectedInvoices={selectedInvoices}
+            isSuperAdmin={!!isSuperAdmin}
+            onMarkPaid={handleBulkMarkPaid}
+            onSend={handleBulkSend}
+            onEmail={handleBulkEmail}
+            onDelete={handleBulkDelete}
+            onClear={clearSelection}
+          />
+        </>
+      )}
 
       {/* Create Invoice Dialog */}
       <Dialog
@@ -605,6 +772,194 @@ function InvoicesClient({
                   <Loader2 className="mr-2 size-4 animate-spin" />
                   Saving…
                 </>
+              ) : (
+                "Save as Draft"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Custom Invoice Dialog */}
+      <Dialog
+        open={customOpen}
+        onOpenChange={(open) => {
+          if (!open && !customSubmitting) setCustomOpen(false);
+        }}
+      >
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Custom invoice</DialogTitle>
+            <DialogDescription>
+              Raise a free-form invoice for a company — retainers, hosting,
+              one-off services. No engagement required. Saved as a{" "}
+              <strong>draft</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="max-h-[65vh] space-y-4 overflow-y-auto pr-1">
+            <div className="space-y-2">
+              <Label>Company</Label>
+              <Select
+                value={customForm.companyId}
+                onValueChange={(v) =>
+                  setCustomForm((f) => ({ ...f, companyId: v }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select company…" />
+                </SelectTrigger>
+                <SelectContent className="max-h-72">
+                  {companies.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Line items</Label>
+              <div className="space-y-2">
+                {customForm.lines.map((line, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Input
+                      placeholder="Description (e.g. Hosting & maintenance — June)"
+                      value={line.description}
+                      onChange={(e) =>
+                        setCustomForm((f) => {
+                          const lines = [...f.lines];
+                          lines[i] = { ...lines[i], description: e.target.value };
+                          return { ...f, lines };
+                        })
+                      }
+                    />
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="0.00"
+                      className="w-28 font-mono"
+                      value={line.amount}
+                      onChange={(e) =>
+                        setCustomForm((f) => {
+                          const lines = [...f.lines];
+                          lines[i] = { ...lines[i], amount: e.target.value };
+                          return { ...f, lines };
+                        })
+                      }
+                    />
+                    {customForm.lines.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 shrink-0 text-muted-foreground"
+                        onClick={() =>
+                          setCustomForm((f) => ({
+                            ...f,
+                            lines: f.lines.filter((_, idx) => idx !== i),
+                          }))
+                        }
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() =>
+                  setCustomForm((f) => ({
+                    ...f,
+                    lines: [...f.lines, { description: "", amount: "" }],
+                  }))
+                }
+              >
+                <Plus className="size-3.5" /> Add line
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-2">
+                <Label>Currency</Label>
+                <Select
+                  value={customForm.currency}
+                  onValueChange={(v) =>
+                    setCustomForm((f) => ({ ...f, currency: v }))
+                  }
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["USD", "GBP", "EUR", "AED"].map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Tax (%)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  value={customForm.taxRate}
+                  onChange={(e) =>
+                    setCustomForm((f) => ({ ...f, taxRate: e.target.value }))
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Due (days)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  value={customForm.dueInDays}
+                  onChange={(e) =>
+                    setCustomForm((f) => ({ ...f, dueInDays: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Notes (optional)</Label>
+              <Textarea
+                rows={2}
+                value={customForm.notes}
+                onChange={(e) =>
+                  setCustomForm((f) => ({ ...f, notes: e.target.value }))
+                }
+              />
+            </div>
+
+            {customSubtotal > 0 && (
+              <div className="rounded-md border border-pulse/20 bg-pulse/5 p-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="font-mono font-semibold">
+                    {formatCurrency(customSubtotal, customForm.currency)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCustomOpen(false)}
+              disabled={customSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateCustom} disabled={customSubmitting}>
+              {customSubmitting ? (
+                <><Loader2 className="mr-2 size-4 animate-spin" />Saving…</>
               ) : (
                 "Save as Draft"
               )}
