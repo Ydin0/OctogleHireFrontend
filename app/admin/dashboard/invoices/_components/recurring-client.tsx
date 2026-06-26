@@ -203,6 +203,9 @@ export function RecurringClient({
     load();
   };
 
+  // Defensive — never let a non-array body crash the render.
+  const list = Array.isArray(items) ? items : [];
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -220,7 +223,7 @@ export function RecurringClient({
         <div className="flex items-center justify-center py-16">
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
         </div>
-      ) : items.length === 0 ? (
+      ) : list.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
           <Repeat className="size-6 text-muted-foreground" />
           <p className="mt-3 text-sm font-medium">No recurring retainers yet</p>
@@ -231,7 +234,7 @@ export function RecurringClient({
         </div>
       ) : (
         <div className="space-y-2.5">
-          {items.map((r) => (
+          {list.map((r) => (
             <div
               key={r.id}
               className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4"

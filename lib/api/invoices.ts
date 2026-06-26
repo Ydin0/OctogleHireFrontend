@@ -580,7 +580,8 @@ export async function fetchRecurringInvoices(
       { method: "GET", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
     );
     if (!response.ok) return [];
-    return (await response.json()) as RecurringInvoice[];
+    const data = await response.json().catch(() => []);
+    return Array.isArray(data) ? (data as RecurringInvoice[]) : [];
   } catch {
     return [];
   }
