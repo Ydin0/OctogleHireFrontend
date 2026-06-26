@@ -587,6 +587,28 @@ export async function fetchRecurringInvoices(
   }
 }
 
+export interface RecurringInvoiceDetail extends Omit<RecurringInvoice, "subtotal" | "companyName" | "companyLogoUrl"> {
+  notes: string | null;
+  lineItems: { id: string; description: string | null; hourlyRate: number; hours: number; amount: number }[];
+}
+
+export async function fetchRecurringInvoice(
+  token: string | null,
+  id: string,
+): Promise<RecurringInvoiceDetail | null> {
+  if (!token) return null;
+  try {
+    const response = await fetchWithRetry(
+      `${apiBaseUrl}/api/admin/recurring-invoices/${id}`,
+      { method: "GET", headers: { Authorization: `Bearer ${token}` }, cache: "no-store" },
+    );
+    if (!response.ok) return null;
+    return (await response.json()) as RecurringInvoiceDetail;
+  } catch {
+    return null;
+  }
+}
+
 export async function createRecurringInvoice(
   token: string | null,
   payload: RecurringInvoicePayload,

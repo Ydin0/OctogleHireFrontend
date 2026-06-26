@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   Loader2,
   Pause,
+  Pencil,
   Play,
   Plus,
   Repeat,
@@ -17,6 +18,7 @@ import {
   type RecurringInvoice,
   type InvoiceLineItemInput,
   fetchRecurringInvoices,
+  fetchRecurringInvoice,
   createRecurringInvoice,
   updateRecurringInvoice,
   deleteRecurringInvoice,
@@ -75,7 +77,6 @@ const blankForm = () => ({
   endDate: "",
   taxRate: "0",
   dueInDays: "14",
-  autoSend: false,
   lines: [{ description: "", amount: "" }] as LineRow[],
 });
 
@@ -119,6 +120,39 @@ export function RecurringClient({
     setOpen(true);
   };
 
+  const openEdit = async (r: RecurringInvoice) => {
+    setEditingId(r.id);
+    // Prefill from the list row immediately, then hydrate line items.
+    setForm({
+      companyId: r.companyId,
+      title: r.title,
+      description: r.description ?? "",
+      currency: r.currency,
+      frequency: r.frequency,
+      dayOfMonth: String(r.dayOfMonth),
+      startDate: r.startDate,
+      endDate: r.endDate ?? "",
+      taxRate: String(r.taxRate),
+      dueInDays: String(r.dueInDays),
+      lines: [{ description: "", amount: "" }],
+    });
+    setOpen(true);
+    const detail = await fetchRecurringInvoice(token, r.id);
+    if (detail) {
+      setForm((f) => ({
+        ...f,
+        description: detail.notes ?? f.description,
+        lines:
+          detail.lineItems.length > 0
+            ? detail.lineItems.map((li) => ({
+                description: li.description ?? "",
+                amount: String(li.amount),
+              }))
+            : f.lines,
+      }));
+    }
+  };
+
   const lineTotal = form.lines.reduce((s, l) => s + (Number(l.amount) || 0), 0);
 
   const submit = async () => {
@@ -145,7 +179,6 @@ export function RecurringClient({
       endDate: form.endDate || null,
       taxRate: Number(form.taxRate) || 0,
       dueInDays: Number(form.dueInDays) || 14,
-      autoSend: form.autoSend,
       lineItems,
     };
     const result = editingId
@@ -195,7 +228,7 @@ export function RecurringClient({
       return;
     }
     if (res.created) {
-      toast.success("Invoice generated — see the Invoices tab");
+      toast.success("Draft invoice created — review it in the Invoices tab");
       router.refresh();
     } else {
       toast.message(res.message ?? "Already generated this period");
@@ -266,9 +299,6 @@ export function RecurringClient({
                     /{r.frequency === "monthly" ? "mo" : r.frequency === "quarterly" ? "qtr" : "yr"}
                   </span>
                 </p>
-                {r.autoSend && (
-                  <p className="text-[10px] text-pulse">auto-send</p>
-                )}
               </div>
               <div className="flex items-center gap-1.5">
                 <Button
@@ -277,13 +307,24 @@ export function RecurringClient({
                   className="gap-1.5"
                   disabled={busyId === r.id || r.status !== "active"}
                   onClick={() => onGenerateNow(r)}
+                  title="Generate this period's invoice as a draft"
                 >
                   {busyId === r.id ? (
                     <Loader2 className="size-3.5 animate-spin" />
                   ) : (
                     <Zap className="size-3.5" />
                   )}
-                  Generate now
+                  Generate draft
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="size-8"
+                  disabled={busyId === r.id}
+                  onClick={() => openEdit(r)}
+                  title="Edit"
+                >
+                  <Pencil className="size-3.5" />
                 </Button>
                 <Button
                   size="sm"
@@ -321,8 +362,9 @@ export function RecurringClient({
           <DialogHeader>
             <DialogTitle>{editingId ? "Edit retainer" : "New recurring retainer"}</DialogTitle>
             <DialogDescription>
-              Auto-generates a draft invoice each period. Turn on auto-send to
-              email it to the client automatically.
+              Auto-generates a <strong>draft</strong> invoice each period into
+              the Invoices tab. Drafts are never emailed automatically — you
+              review and send them yourself.
             </DialogDescription>
           </DialogHeader>
 
@@ -497,16 +539,6 @@ export function RecurringClient({
                 />
               </div>
             </div>
-
-            <label className="flex cursor-pointer items-center gap-2 rounded-md border border-border px-3 py-2.5 text-sm">
-              <input
-                type="checkbox"
-                className="size-4 accent-[var(--pulse)]"
-                checked={form.autoSend}
-                onChange={(e) => setForm((f) => ({ ...f, autoSend: e.target.checked }))}
-              />
-              Auto-send the invoice to the client when generated
-            </label>
 
             {lineTotal > 0 && (
               <div className="rounded-md border border-pulse/20 bg-pulse/5 p-3 text-sm">
